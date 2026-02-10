@@ -362,7 +362,7 @@
             if(s.includes('No Show') || s.includes('Canceled') || s.includes('Pass')) statusColor = 'status-red';
             if(s.includes('2nd Interview') || s.includes('Hired') || s.includes('Offered')) statusColor = 'status-green';
             if(s.includes('Offered') || s.includes('TBD')) statusColor = 'status-orange';
-            if(s.includes('Reschedule')) statusColor = 'status-gray';
+            if(s.includes('Reschedule') || s.includes('Withdrawn')) statusColor = 'status-gray';
 
             let showGmBox = false;
             if (item.gmDate) {
@@ -409,6 +409,7 @@
 </script>
 </body>
 </html>
+
 
 
 
