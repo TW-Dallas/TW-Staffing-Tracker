@@ -356,7 +356,7 @@
         if(filtered.length === 0) { list.innerHTML = '<div class="loader">No interviews scheduled.</div>'; return; }
 
         filtered.forEach(item => {
-            const icon = (item.position && item.position.includes('DE')) ? '🚗' : '🍕';
+            const icon = (item.position && item.position.includes('DE')) ? '🚗' : (item.position && item.position.includes('BIKE')) ? '🚲' : '🍕';
             let statusColor = 'status-blue';
             const s = item.status ? item.status.toString() : '';
             if(s.includes('No Show') || s.includes('Canceled') || s.includes('Pass')) statusColor = 'status-red';
