@@ -30,6 +30,7 @@
         header { background-color: #005c91; color: white; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(71, 43, 16, 0.15); }
         h1 { margin: 0; font-family: 'PizzaPress', serif; font-size: 20px; text-transform: uppercase; }
         .subtitle { font-family: 'OneDotCd', sans-serif; font-size: 12px; opacity: 0.9; }
+        .logo { height: 32px; width: auto; margin-right: 12px; }
         
         /* --- AUTH SCREEN --- */
         .auth-container { max-width: 400px; margin: 80px auto; padding: 24px; background: white; border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-top: 6px solid var(--brand-blue); }
@@ -40,12 +41,23 @@
         .list-panel { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
         .form-panel { flex: 1.2; background: white; padding: 20px; border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-top: 4px solid var(--brand-blue); position: sticky; top: 20px; height: fit-content; }
         
-        /* --- CARDS --- */
+        /* --- SORT CONTROLS --- */
+        .control-row { display: flex; gap: 10px; margin-bottom: 8px; }
+        .control-row select { padding: 8px; border-radius: 6px; border: 1px solid var(--crust-dark); font-family: 'OneDotCd-Bold', sans-serif; font-size: 14px; background: white; flex: 1; }
+        
+        /* --- CARDS WITH COLORS --- */
         .candidate-card { background: white; padding: 12px 16px; border-radius: var(--border-radius); box-shadow: 0 4px 6px rgba(0,0,0,0.02); border-left: 6px solid var(--brand-blue); cursor: pointer; transition: transform 0.15s ease; position: relative; }
         .candidate-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .candidate-card.selected { border-left-color: var(--brand-orange); background: #fffcf9; }
+        .candidate-card.selected { background: #fffcf9; box-shadow: 0 4px 12px rgba(255,143,0,0.15); }
+        
+        /* Status border overrides */
+        .candidate-card.status-blue { border-left-color: var(--brand-blue); }
+        .candidate-card.status-green { border-left-color: var(--brand-green); }
+        .candidate-card.status-red { border-left-color: var(--brand-red); border: 1.5px solid var(--brand-red); }
+        .candidate-card.status-reviewing { border-left-color: var(--brand-orange); box-shadow: 0 0 8px rgba(255,143,0,0.25); }
+
         .card-name { font-family: 'OneDotCd-Bold', sans-serif; font-size: 16px; }
-        .card-sub { font-size: 13px; color: var(--text-light); margin-top: 4px; display: flex; justify-content: space-between; }
+        .card-sub { font-size: 13px; color: var(--text-light); margin-top: 4px; display: flex; justify-content: space-between; align-items: center; }
         
         /* --- FORMS & INPUTS --- */
         .form-group { margin-bottom: 12px; }
@@ -75,30 +87,6 @@
         /* --- BADGES --- */
         .badge-review { background: #e3f2fd; color: #0d47a1; font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #bbdefb; animation: pulse 2s infinite; }
         .badge-incorrect { background: #ffebee; color: var(--brand-red); font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #ffcdd2; }
-
-        /* Style to align copy button inside the input field */
-        .input-group-copy {
-            display: flex;
-            position: relative;
-        }
-        .input-group-copy input {
-            padding-right: 40px; /* Leave space for the copy button */
-        }
-        .copy-btn {
-            position: absolute;
-            right: 5px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: var(--brand-blue);
-            cursor: pointer;
-            font-size: 14px;
-            padding: 4px;
-        }
-        .copy-btn:hover {
-            color: var(--brand-orange);
-        }
         
         @keyframes pulse {
             0% { opacity: 0.7; }
@@ -128,7 +116,7 @@
     <h2>Hiring Manager Login</h2>
     <div class="form-group">
         <label>Username</label>
-        <input type="text" id="loginUser" placeholder="e.g., dallas_admin">
+        <input type="text" id="loginUser" placeholder="e.g., denver_admin">
     </div>
     <div class="form-group">
         <label>Password</label>
@@ -141,9 +129,12 @@
 <!-- Main App Wrapper -->
 <div id="appContainer" class="hidden">
     <header>
-        <div>
-            <h1 id="headerTitle">Hiring Manager Portal</h1>
-            <div id="headerCity" class="subtitle">Checking Location...</div>
+        <div style="display: flex; align-items: center;">
+            <img src="New_Logo_v2.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+            <div>
+                <h1 id="headerTitle">Hiring Manager Portal</h1>
+                <div id="headerCity" class="subtitle">Checking Location...</div>
+            </div>
         </div>
         <button class="secondary" onclick="handleLogout()">Log Out</button>
     </header>
@@ -152,6 +143,19 @@
         <!-- Left Panel: List of Candidates -->
         <div class="list-panel">
             <button class="btn-add" onclick="prepareAddNew()">➕ Add New Candidate</button>
+            
+            <!-- Sorting controls Row -->
+            <div class="control-row">
+                <select id="sortControl" onchange="renderList()">
+                    <option value="updated">⏰ Sort: Last Updated</option>
+                    <option value="name">🔤 Sort: Name (A-Z)</option>
+                    <option value="store">🏬 Sort: Store #</option>
+                    <option value="do">👤 Sort: DO</option>
+                    <option value="status">📊 Sort: Status Stage</option>
+                    <option value="paycard">💳 Sort: Pay Card Status</option>
+                </select>
+            </div>
+
             <div id="candidateList"></div>
         </div>
 
@@ -203,8 +207,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Pay Card (Yes, if no, leave blank)</label>
-                    <input type="text" id="fieldPayCard">
+                    <label>Pay Card Status / ID</label>
+                    <input type="text" id="fieldPayCard" placeholder="Yes, No, or leave blank">
                 </div>
 
                 <div class="form-group">
@@ -241,7 +245,7 @@
     // ==========================================
     // DEPLOYED WEB APP URL (Replace this placeholder)
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbxa1XNdNgwOULiYpeAoBIjTy1wv034pON4-hnR444XB07vegHhoSR56UacR7UaktTaGZg/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbxa1XNdNgwOULiYpeAoBIjTy1wv034pON4-hnR444XB07veghHoSR56UacR7UaktTaGZg/exec"; 
 
     let candidates = [];
     let currentSelectedId = null;
@@ -272,7 +276,6 @@
         showLoader(true);
         errorEl.classList.add('hidden');
 
-        // To test login credentials, make a quick fetch request reading candidate data
         const city = getCityFromUser(u);
         
         fetch(`${API_URL}?city=${city}`)
@@ -282,7 +285,6 @@
                     throw new Error(data.error);
                 }
                 
-                // Login was successful
                 localStorage.setItem('onb_user', u);
                 localStorage.setItem('onb_pass', p);
                 
@@ -315,24 +317,112 @@
         else loader.classList.add('hidden');
     }
 
+    // Determine candidate active status text representation
+    function getActiveStatusText(item) {
+        if (item.incorrectEmail) return "⚠️ Incorrect Email";
+        if (item.hired) return "🎉 Hired";
+        if (item.ntoScheduled) return "📅 NTO Scheduled";
+        if (item.bgcComplete && item.allPayCompleted) return "✓ Paperwork Completed";
+        if (item.bgcComplete) return "🔍 BGC Complete";
+        if (item.allPayCompleted) return "💳 AllPay Complete";
+        if (item.onboardingSent) return "📨 Onboarding Sent";
+        if (item.submissionReceived) return "✓ Submission Rec'd";
+        return "New / Pending";
+    }
+
+    // Determine weight for Sorting by Status Stage (Higher = closer to hired)
+    function getStatusWeight(item) {
+        if (item.hired) return 7;
+        if (item.ntoScheduled) return 6;
+        if (item.bgcComplete && item.allPayCompleted) return 5;
+        if (item.bgcComplete) return 4.5;
+        if (item.allPayCompleted) return 4;
+        if (item.onboardingSent) return 3;
+        if (item.submissionReceived) return 2;
+        if (item.incorrectEmail) return 1;
+        return 0;
+    }
+
     function renderList() {
         const listContainer = document.getElementById('candidateList');
         listContainer.innerHTML = '';
 
-        if (candidates.length === 0) {
+        const sortBy = document.getElementById('sortControl').value;
+
+        // --- FILTER FOR AGE (Auto-archive Hired candidates older than 7 days) ---
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+        let filteredCandidates = candidates.filter(item => {
+            if (item.hired && item.lastUpdated) {
+                const updatedDate = new Date(item.lastUpdated);
+                if (!isNaN(updatedDate.getTime()) && updatedDate < oneWeekAgo) {
+                    return false; // Automatically filter out/archive
+                }
+            }
+            return true; // Keep all others
+        });
+
+        // --- SORT CANDIDATES ---
+        filteredCandidates.sort((a, b) => {
+            if (sortBy === 'name') {
+                return a.name.localeCompare(b.name);
+            }
+            if (sortBy === 'store') {
+                const storeA = parseInt(a.store) || 0;
+                const storeB = parseInt(b.store) || 0;
+                return storeA - storeB;
+            }
+            if (sortBy === 'do') {
+                const doA = a.doName ? a.doName.toString().trim() : '';
+                const doB = b.doName ? b.doName.toString().trim() : '';
+                return doA.localeCompare(doB);
+            }
+            if (sortBy === 'status') {
+                return getStatusWeight(b) - getStatusWeight(a);
+            }
+            if (sortBy === 'paycard') {
+                const payA = a.payCard ? a.payCard.toLowerCase().trim() : '';
+                const payB = b.payCard ? b.payCard.toLowerCase().trim() : '';
+                return payA.localeCompare(payB);
+            }
+            // Default: "updated" (Newest edits first)
+            const dateA = new Date(a.lastUpdated);
+            const dateB = new Date(b.lastUpdated);
+            return dateB - dateA;
+        });
+
+        if (filteredCandidates.length === 0) {
             listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No active candidates in sheet.</div>';
             return;
         }
 
-        candidates.forEach(item => {
+        filteredCandidates.forEach(item => {
             const card = document.createElement('div');
             card.className = 'candidate-card';
             if (item.id === currentSelectedId) card.classList.add('selected');
             
-            // Format phone number
-            const phoneStr = item.phoneNumber ? `📞 ${item.phoneNumber}` : '';
+            // --- COLOR CODING VIA STATUS CLASSES ---
+            if (item.incorrectEmail) {
+                card.classList.add('status-red');
+            } else if (item.currentlyReviewing) {
+                card.classList.add('status-reviewing');
+            } else if (item.hired) {
+                card.classList.add('status-green');
+            } else {
+                card.classList.add('status-blue');
+            }
             
-            // Visual markers
+            // Render active status text in the sub-row dynamically
+            const activeStatusText = getActiveStatusText(item);
+            
+            // Inline status color formatting
+            let statusStyleColor = 'var(--brand-blue)';
+            if (item.hired) statusStyleColor = 'var(--brand-green)';
+            if (item.incorrectEmail) statusStyleColor = 'var(--brand-red)';
+            if (item.currentlyReviewing) statusStyleColor = 'var(--brand-orange)';
+
+            // Visual header badges
             let flags = '';
             if (item.incorrectEmail) flags += '<span class="badge-incorrect">⚠️ Email Error</span> ';
             if (item.currentlyReviewing) flags += '<span class="badge-review">🔍 Reviewing</span> ';
@@ -344,7 +434,7 @@
                 </div>
                 <div class="card-sub">
                     <span>Store #${item.store} (${item.position})</span>
-                    <span>${phoneStr}</span>
+                    <span style="font-family: 'OneDotCd-Bold', sans-serif; color: ${statusStyleColor};">${activeStatusText}</span>
                 </div>
             `;
             
@@ -359,7 +449,6 @@
 
         document.getElementById('formTitle').innerText = `Edit: ${item.name}`;
         
-        // Fill form fields
         document.getElementById('fieldId').value = item.id;
         document.getElementById('fieldName').value = item.name;
         document.getElementById('fieldPosition').value = item.position;
@@ -371,7 +460,6 @@
         document.getElementById('fieldPayCard').value = item.payCard || '';
         document.getElementById('fieldNotes').value = item.notes || '';
 
-        // Checkbox values
         document.getElementById('checkSubmission').checked = item.submissionReceived;
         document.getElementById('checkOnbSent').checked = item.onboardingSent;
         document.getElementById('checkBgc').checked = item.bgcComplete;
@@ -421,7 +509,6 @@
             store: document.getElementById('fieldStore').value.trim(),
             phoneNumber: document.getElementById('fieldPhone').value.trim(),
             email: document.getElementById('fieldEmail').value.trim(),
-            ntoDate: document.getElementById('fieldNto').value.trim(),
             shirtSize: document.getElementById('fieldShirt').value.trim(),
             payCard: document.getElementById('fieldPayCard').value.trim(),
             notes: document.getElementById('fieldNotes').value.trim(),
@@ -445,7 +532,6 @@
                 throw new Error(result.error || "Save failed");
             }
             
-            // Reload candidate data
             const city = getCityFromUser(username);
             return fetch(`${API_URL}?city=${city}`);
         })
@@ -461,18 +547,6 @@
             alert("Error saving data: " + err.message);
         });
     }
-
-    function copyField(fieldId, btnElement) {
-        const val = document.getElementById(fieldId).value.trim();
-        if (!val) return;
-        
-        navigator.clipboard.writeText(val).then(() => {
-            const originalIcon = btnElement.innerText;
-            btnElement.innerText = "✓"; // Show success check
-            setTimeout(() => btnElement.innerText = originalIcon, 1000);
-        });
-    }
-    
 </script>
 </body>
 </html>
