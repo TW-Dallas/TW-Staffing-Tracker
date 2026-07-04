@@ -55,6 +55,7 @@
         .candidate-card.status-green { border-left-color: var(--brand-green); }
         .candidate-card.status-red { border-left-color: var(--brand-red); border: 1.5px solid var(--brand-red); }
         .candidate-card.status-reviewing { border-left-color: var(--brand-orange); box-shadow: 0 0 8px rgba(255,143,0,0.25); }
+        .candidate-card.status-gray { border-left-color: var(--brand-grey); opacity: 0.6; background-color: #fbfbfb; }
 
         .card-name { font-family: 'OneDotCd-Bold', sans-serif; font-size: 16px; }
         .card-sub { font-size: 13px; color: var(--text-light); margin-top: 4px; display: flex; justify-content: space-between; align-items: center; }
@@ -67,15 +68,29 @@
         input[type="text"], input[type="password"], textarea, select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--crust-dark); font-family: 'OneDotCd', sans-serif; box-sizing: border-box; font-size: 14px; }
         textarea { height: 70px; resize: none; }
         
-        /* --- CHECKBOX GRID --- */
+        /* --- CHECKBOX GRID PIPELINE --- */
         .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; background: var(--crust-light); padding: 12px; border-radius: 8px; }
         .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
         .checkbox-item input { width: 16px; height: 16px; cursor: pointer; }
+        
+        /* Pipeline Section Headers */
+        .section-header {
+            grid-column: span 2;
+            font-family: 'OneDotCd-Bold', sans-serif;
+            font-size: 12px;
+            color: #005c91;
+            border-bottom: 2px solid var(--crust-dark);
+            padding-bottom: 4px;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
         
         /* --- ACTION FLAGS --- */
         .flag-box { grid-column: span 2; padding: 6px; border-radius: 4px; display: flex; align-items: center; gap: 8px; margin-top: 4px; }
         .flag-incorrect { background: #ffebee; color: var(--brand-red); font-weight: bold; }
         .flag-reviewing { background: #e3f2fd; color: #0d47a1; font-weight: bold; position: relative; }
+        .flag-inactive { background: #f5f5f5; color: var(--brand-grey); font-weight: bold; }
 
         /* --- BUTTONS --- */
         button { background: #005c91; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-family: 'OneDotCd-Bold', sans-serif; font-size: 15px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
@@ -216,19 +231,36 @@
                     <textarea id="fieldNotes" placeholder="Write any specific candidate notes here..."></textarea>
                 </div>
 
+                <!-- Structured Checklist Grid -->
                 <div class="checkbox-grid">
+                    <div class="section-header">Stage 1: Onboarding Intake</div>
                     <label class="checkbox-item"><input type="checkbox" id="checkSubmission"> Submission Received</label>
                     <label class="checkbox-item"><input type="checkbox" id="checkOnbSent"> Onboarding Sent</label>
+                    
+                    <div class="section-header">Stage 2: Paperwork Processing</div>
                     <label class="checkbox-item"><input type="checkbox" id="checkBgc"> Background Check Done</label>
                     <label class="checkbox-item"><input type="checkbox" id="checkAllPay"> AllPay Done</label>
-                    <label class="checkbox-item"><input type="checkbox" id="checkNto"> NTO Scheduled</label>
-                    <label class="checkbox-item"><input type="checkbox" id="checkHired"> Hired</label>
                     
+                    <div class="section-header">Stage 3: Orientation & Hire</div>
+                    <label class="checkbox-item"><input type="checkbox" id="checkNtoLink"> NTO Signup Link Sent</label>
+                    <label class="checkbox-item"><input type="checkbox" id="checkNto"> NTO Scheduled</label>
+                    <label class="checkbox-item" style="grid-column: span 2;"><input type="checkbox" id="checkHired"> Hired</label>
+                    
+                    <div class="section-header">Active Flags & Blockers</div>
+                    <label class="checkbox-item flag-box flag-reviewing" style="grid-column: span 2;">
+                        <input type="checkbox" id="checkReviewing"> 🔍 Currently Reviewing
+                    </label>
                     <label class="checkbox-item flag-box flag-incorrect">
                         <input type="checkbox" id="checkIncorrect"> ⚠️ Incorrect Email
                     </label>
-                    <label class="checkbox-item flag-box flag-reviewing">
-                        <input type="checkbox" id="checkReviewing"> 🔍 Currently Reviewing
+                    <label class="checkbox-item flag-box flag-incorrect">
+                        <input type="checkbox" id="checkMissingDocs"> ⚠️ Missing/Incorrect Docs
+                    </label>
+                    <label class="checkbox-item flag-box flag-inactive">
+                        <input type="checkbox" id="checkIneligible"> 🚫 Ineligible / Rejected
+                    </label>
+                    <label class="checkbox-item flag-box flag-inactive">
+                        <input type="checkbox" id="checkInactive"> 💤 Inactive
                     </label>
                 </div>
 
@@ -243,9 +275,9 @@
 
 <script>
     // ==========================================
-    // DEPLOYED WEB APP URL (Replace this placeholder)
+    // DEPLOYED WEB APP URL
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbxa1XNdNgwOULiYpeAoBIjTy1wv034pON4-hnR444XB07vegHhoSR56UacR7UaktTaGZg/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbxa1XNdNgwOULiYpeAoBIjTy1wv034pON4-hnR444XB07veghHoSR56UacR7UaktTaGZg/exec"; 
 
     let candidates = [];
     let currentSelectedId = null;
@@ -319,9 +351,18 @@
 
     // Determine candidate active status text representation
     function getActiveStatusText(item) {
+        if (item.ineligible) return "🚫 Ineligible";
+        if (item.inactive) return "💤 Inactive";
         if (item.incorrectEmail) return "⚠️ Incorrect Email";
+        if (item.currentlyReviewing) return "🔍 Reviewing";
         if (item.hired) return "🎉 Hired";
-        if (item.ntoScheduled) return "📅 NTO Scheduled";
+        
+        // Dynamic NTO Scheduled date check (If scheduled, display the date pulled from roster!)
+        if (item.ntoScheduled) {
+            return item.ntoDate ? `📅 NTO: ${item.ntoDate}` : "📅 NTO Scheduled";
+        }
+        if (item.ntoSignupLinkSent) return "📨 Link Sent";
+        
         if (item.bgcComplete && item.allPayCompleted) return "✓ Paperwork Completed";
         if (item.bgcComplete) return "🔍 BGC Complete";
         if (item.allPayCompleted) return "💳 AllPay Complete";
@@ -334,12 +375,15 @@
     function getStatusWeight(item) {
         if (item.hired) return 7;
         if (item.ntoScheduled) return 6;
+        if (item.ntoSignupLinkSent) return 5.5;
         if (item.bgcComplete && item.allPayCompleted) return 5;
         if (item.bgcComplete) return 4.5;
         if (item.allPayCompleted) return 4;
         if (item.onboardingSent) return 3;
         if (item.submissionReceived) return 2;
         if (item.incorrectEmail) return 1;
+        if (item.ineligible) return -1;
+        if (item.inactive) return -2;
         return 0;
     }
 
@@ -349,18 +393,19 @@
 
         const sortBy = document.getElementById('sortControl').value;
 
-        // --- FILTER FOR AGE (Auto-archive Hired candidates older than 7 days) ---
+        // --- FILTER FOR AGE (Auto-archive terminal candidates older than 7 days) ---
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
         let filteredCandidates = candidates.filter(item => {
-            if (item.hired && item.lastUpdated) {
+            const isTerminalState = item.hired || item.ineligible || item.inactive;
+            if (isTerminalState && item.lastUpdated) {
                 const updatedDate = new Date(item.lastUpdated);
                 if (!isNaN(updatedDate.getTime()) && updatedDate < oneWeekAgo) {
-                    return false; // Automatically filter out/archive
+                    return false; // Filter out old terminal entries
                 }
             }
-            return true; // Keep all others
+            return true; // Keep active candidates
         });
 
         // --- SORT CANDIDATES ---
@@ -403,12 +448,14 @@
             if (item.id === currentSelectedId) card.classList.add('selected');
             
             // --- COLOR CODING VIA STATUS CLASSES ---
-            if (item.incorrectEmail) {
+            if (item.incorrectEmail || item.missingDocs) {
                 card.classList.add('status-red');
             } else if (item.currentlyReviewing) {
                 card.classList.add('status-reviewing');
             } else if (item.hired) {
                 card.classList.add('status-green');
+            } else if (item.ineligible || item.inactive) {
+                card.classList.add('status-gray');
             } else {
                 card.classList.add('status-blue');
             }
@@ -419,12 +466,14 @@
             // Inline status color formatting
             let statusStyleColor = 'var(--brand-blue)';
             if (item.hired) statusStyleColor = 'var(--brand-green)';
-            if (item.incorrectEmail) statusStyleColor = 'var(--brand-red)';
+            if (item.incorrectEmail || item.missingDocs) statusStyleColor = 'var(--brand-red)';
             if (item.currentlyReviewing) statusStyleColor = 'var(--brand-orange)';
+            if (item.ineligible || item.inactive) statusStyleColor = 'var(--brand-grey)';
 
             // Visual header badges
             let flags = '';
             if (item.incorrectEmail) flags += '<span class="badge-incorrect">⚠️ Email Error</span> ';
+            if (item.missingDocs) flags += '<span class="badge-incorrect">⚠️ Missing Docs</span> ';
             if (item.currentlyReviewing) flags += '<span class="badge-review">🔍 Reviewing</span> ';
 
             card.innerHTML = `
@@ -460,14 +509,18 @@
         document.getElementById('fieldPayCard').value = item.payCard || '';
         document.getElementById('fieldNotes').value = item.notes || '';
 
-        document.getElementById('checkSubmission').checked = item.submissionReceived;
-        document.getElementById('checkOnbSent').checked = item.onboardingSent;
-        document.getElementById('checkBgc').checked = item.bgcComplete;
-        document.getElementById('checkAllPay').checked = item.allPayCompleted;
-        document.getElementById('checkNto').checked = item.ntoScheduled;
-        document.getElementById('checkHired').checked = item.hired;
-        document.getElementById('checkIncorrect').checked = item.incorrectEmail;
-        document.getElementById('checkReviewing').checked = item.currentlyReviewing;
+        document.getElementById('checkSubmission').checked = item.submissionReceived || false;
+        document.getElementById('checkOnbSent').checked = item.onboardingSent || false;
+        document.getElementById('checkBgc').checked = item.bgcComplete || false;
+        document.getElementById('checkAllPay').checked = item.allPayCompleted || false;
+        document.getElementById('checkNtoLink').checked = item.ntoSignupLinkSent || false;
+        document.getElementById('checkNto').checked = item.ntoScheduled || false;
+        document.getElementById('checkHired').checked = item.hired || false;
+        document.getElementById('checkIncorrect').checked = item.incorrectEmail || false;
+        document.getElementById('checkReviewing').checked = item.currentlyReviewing || false;
+        document.getElementById('checkIneligible').checked = item.ineligible || false;
+        document.getElementById('checkInactive').checked = item.inactive || false;
+        document.getElementById('checkMissingDocs').checked = item.missingDocs || false;
         
         document.getElementById('btnCancel').innerText = "Cancel Edit";
     }
@@ -516,10 +569,14 @@
             onboardingSent: document.getElementById('checkOnbSent').checked,
             bgcComplete: document.getElementById('checkBgc').checked,
             allPayCompleted: document.getElementById('checkAllPay').checked,
+            ntoSignupLinkSent: document.getElementById('checkNtoLink').checked,
             ntoScheduled: document.getElementById('checkNto').checked,
             hired: document.getElementById('checkHired').checked,
             incorrectEmail: document.getElementById('checkIncorrect').checked,
-            currentlyReviewing: document.getElementById('checkReviewing').checked
+            currentlyReviewing: document.getElementById('checkReviewing').checked,
+            ineligible: document.getElementById('checkIneligible').checked,
+            inactive: document.getElementById('checkInactive').checked,
+            missingDocs: document.getElementById('checkMissingDocs').checked
         };
 
         fetch(API_URL, {
