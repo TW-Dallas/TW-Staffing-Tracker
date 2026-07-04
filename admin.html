@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M & R Dashboard</title>
+    <title>Hiring Manager Portal</title>
     <link rel="icon" type="image/png" href="tile_blue.png">
     <style>
         @font-face { font-family: 'PizzaPress'; src: url('fonts/Dominos Sans Header 1.ttf') format('truetype'); font-weight: bold; }
@@ -65,6 +65,12 @@
         .form-group label { display: block; font-family: 'OneDotCd-Bold', sans-serif; font-size: 14px; margin-bottom: 4px; }
         .form-row { display: flex; gap: 12px; }
         .form-row .form-group { flex: 1; }
+        
+        /* Form Row - Three Column variation */
+        .form-row.flex-three { display: flex; gap: 12px; }
+        .form-row.flex-three .form-group { flex: 1; }
+        .form-row.flex-three .flex-two-weight { flex: 1.5; } /* Give slightly more width to Pay Card */
+
         input[type="text"], input[type="password"], textarea, select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--crust-dark); font-family: 'OneDotCd', sans-serif; box-sizing: border-box; font-size: 14px; }
         textarea { height: 70px; resize: none; }
         
@@ -118,6 +124,7 @@
         @media (max-width: 768px) {
             .dashboard { flex-direction: column; }
             .form-panel { position: static; }
+            .form-row.flex-three { flex-direction: column; gap: 8px; }
         }
     </style>
 </head>
@@ -178,7 +185,9 @@
         <div class="form-panel" id="formPanel">
             <h2 id="formTitle" style="margin-top: 0; font-family: 'OneDotCd-Bold', sans-serif;">Candidate details</h2>
             <form id="candidateForm" onsubmit="saveCandidate(event)">
+                <!-- Hidden inputs for ID and NTO Date (keeps JS mapping alive without taking screen space) -->
                 <input type="hidden" id="fieldId">
+                <input type="hidden" id="fieldNto">
                 
                 <div class="form-group">
                     <label>Full Name</label>
@@ -210,20 +219,36 @@
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>NTO Date</label>
-                        <input type="text" id="fieldNto" placeholder="Auto-populated from Roster" readonly style="background-color: var(--crust-light); cursor: not-allowed;">
+                <!-- Consolidated Row: Pay Card, Shirt Dropdown, Hat Dropdown -->
+                <div class="form-row flex-three">
+                    <div class="form-group flex-two-weight">
+                        <label>Pay Card Status / ID</label>
+                        <input type="text" id="fieldPayCard" placeholder="Yes, No, or ID">
                     </div>
                     <div class="form-group">
                         <label>Shirt Size</label>
-                        <input type="text" id="fieldShirt" placeholder="e.g., Medium">
+                        <select id="fieldShirt">
+                            <option value="">None</option>
+                            <option value="Small">Small</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Large">Large</option>
+                            <option value="XL">XL</option>
+                            <option value="XXL">XXL</option>
+                            <option value="Women's Small">Women's Small</option>
+                            <option value="Women's Medium">Women's Medium</option>
+                            <option value="Women's Large">Women's Large</option>
+                            <option value="Women's XL">Women's XL</option>
+                        </select>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Pay Card Status / ID</label>
-                    <input type="text" id="fieldPayCard" placeholder="Yes, No, or leave blank">
+                    <div class="form-group">
+                        <label>Hat Style</label>
+                        <select id="fieldHat">
+                            <option value="">None</option>
+                            <option value="Cap">Cap</option>
+                            <option value="Visor">Visor</option>
+                            <option value="Beanie">Beanie</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -381,7 +406,7 @@
         if (item.allPayCompleted) return 4;
         if (item.onboardingSent) return 3;
         if (item.submissionReceived) return 2;
-        if (item.incorrectEmail) return 1;
+        if (item.incorrectEmail || item.missingDocs) return 1;
         if (item.ineligible) return -1;
         if (item.inactive) return -2;
         return 0;
@@ -505,9 +530,20 @@
         document.getElementById('fieldPhone').value = item.phoneNumber || '';
         document.getElementById('fieldEmail').value = item.email || '';
         document.getElementById('fieldNto').value = item.ntoDate || '';
-        document.getElementById('fieldShirt').value = item.shirtSize || '';
         document.getElementById('fieldPayCard').value = item.payCard || '';
         document.getElementById('fieldNotes').value = item.notes || '';
+
+        // --- SPLIT COMBINED SHIRT & HAT VALUES ON LOAD ---
+        const shirtVal = item.shirtSize || "";
+        let shirt = shirtVal;
+        let hat = "";
+        if (shirtVal.includes(",")) {
+            const parts = shirtVal.split(",");
+            shirt = parts[0].trim();
+            hat = parts[1].trim();
+        }
+        document.getElementById('fieldShirt').value = shirt;
+        document.getElementById('fieldHat').value = hat;
 
         document.getElementById('checkSubmission').checked = item.submissionReceived || false;
         document.getElementById('checkOnbSent').checked = item.onboardingSent || false;
@@ -536,6 +572,7 @@
     function clearForm() {
         document.getElementById('candidateForm').reset();
         document.getElementById('fieldId').value = '';
+        document.getElementById('fieldNto').value = '';
         document.getElementById('formTitle').innerText = "Candidate details";
         document.getElementById('btnCancel').innerText = "Clear / Deselect";
         currentSelectedId = null;
@@ -552,6 +589,11 @@
 
         showLoader(true, "Saving candidate data...");
 
+        // --- COMBINE SHIRT & HAT VALUES ON SAVE ---
+        const shirt = document.getElementById('fieldShirt').value;
+        const hat = document.getElementById('fieldHat').value;
+        const combinedShirt = (hat && hat !== "") ? `${shirt}, ${hat}` : shirt;
+
         const payload = {
             username: username,
             password: password,
@@ -562,7 +604,7 @@
             store: document.getElementById('fieldStore').value.trim(),
             phoneNumber: document.getElementById('fieldPhone').value.trim(),
             email: document.getElementById('fieldEmail').value.trim(),
-            shirtSize: document.getElementById('fieldShirt').value.trim(),
+            shirtSize: combinedShirt,
             payCard: document.getElementById('fieldPayCard').value.trim(),
             notes: document.getElementById('fieldNotes').value.trim(),
             submissionReceived: document.getElementById('checkSubmission').checked,
