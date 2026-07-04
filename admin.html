@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiring Manager Portal</title>
+    <link rel="icon" type="image/png" href="tile_blue.png">
+    <style>
+        @font-face { font-family: 'PizzaPress'; src: url('fonts/Dominos Sans Header 1.ttf') format('truetype'); font-weight: bold; }
+        @font-face { font-family: 'OneDotCd-Bold'; src: url('fonts/Dominos Sans Bold.ttf') format('truetype'); font-weight: bold; }
+        @font-face { font-family: 'OneDotCd'; src: url('fonts/Dominos Sans Body Compact.ttf') format('truetype'); font-weight: normal; }
+
+        :root {
+            --brand-red: #ff0000;
+            --brand-blue: #0090e2;
+            --brand-green: #28a745;
+            --brand-orange: #ff8f00;
+            --brand-grey: #6c757d;
+            --crust-light: #faf2e9;
+            --crust-med: #f0decc;
+            --crust-dark: #c0a588;
+            --bg-color: var(--crust-light);
+            --card-bg: #FFFFFF;
+            --text-dark: #472b10;
+            --text-light: #603913;
+            --border-radius: 12px;
+        }
+
+        body { font-family: 'OneDotCd', sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-dark); }
+        header { background-color: #005c91; color: white; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(71, 43, 16, 0.15); }
+        h1 { margin: 0; font-family: 'PizzaPress', serif; font-size: 20px; text-transform: uppercase; }
+        .subtitle { font-family: 'OneDotCd', sans-serif; font-size: 12px; opacity: 0.9; }
+        
+        /* --- AUTH SCREEN --- */
+        .auth-container { max-width: 400px; margin: 80px auto; padding: 24px; background: white; border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-top: 6px solid var(--brand-blue); }
+        .auth-container h2 { margin-top: 0; font-family: 'OneDotCd-Bold', sans-serif; }
+        
+        /* --- DASHBOARD LAYOUT --- */
+        .dashboard { display: flex; max-width: 1200px; margin: 20px auto; padding: 0 16px; gap: 20px; }
+        .list-panel { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+        .form-panel { flex: 1.2; background: white; padding: 20px; border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-top: 4px solid var(--brand-blue); position: sticky; top: 20px; height: fit-content; }
+        
+        /* --- CARDS --- */
+        .candidate-card { background: white; padding: 12px 16px; border-radius: var(--border-radius); box-shadow: 0 4px 6px rgba(0,0,0,0.02); border-left: 6px solid var(--brand-blue); cursor: pointer; transition: transform 0.15s ease; position: relative; }
+        .candidate-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .candidate-card.selected { border-left-color: var(--brand-orange); background: #fffcf9; }
+        .card-name { font-family: 'OneDotCd-Bold', sans-serif; font-size: 16px; }
+        .card-sub { font-size: 13px; color: var(--text-light); margin-top: 4px; display: flex; justify-content: space-between; }
+        
+        /* --- FORMS & INPUTS --- */
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-family: 'OneDotCd-Bold', sans-serif; font-size: 14px; margin-bottom: 4px; }
+        .form-row { display: flex; gap: 12px; }
+        .form-row .form-group { flex: 1; }
+        input[type="text"], input[type="password"], textarea, select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--crust-dark); font-family: 'OneDotCd', sans-serif; box-sizing: border-box; font-size: 14px; }
+        textarea { height: 70px; resize: none; }
+        
+        /* --- CHECKBOX GRID --- */
+        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; background: var(--crust-light); padding: 12px; border-radius: 8px; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+        .checkbox-item input { width: 16px; height: 16px; cursor: pointer; }
+        
+        /* --- ACTION FLAGS --- */
+        .flag-box { grid-column: span 2; padding: 6px; border-radius: 4px; display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+        .flag-incorrect { background: #ffebee; color: var(--brand-red); font-weight: bold; }
+        .flag-reviewing { background: #e3f2fd; color: #0d47a1; font-weight: bold; position: relative; }
+
+        /* --- BUTTONS --- */
+        button { background: #005c91; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-family: 'OneDotCd-Bold', sans-serif; font-size: 15px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        button:hover { opacity: 0.9; }
+        button.secondary { background: var(--brand-grey); }
+        button.btn-add { margin-bottom: 12px; background: var(--brand-green); width: 100%; }
+        .form-actions { display: flex; gap: 12px; margin-top: 16px; }
+        
+        /* --- BADGES --- */
+        .badge-review { background: #e3f2fd; color: #0d47a1; font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #bbdefb; animation: pulse 2s infinite; }
+        .badge-incorrect { background: #ffebee; color: var(--brand-red); font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #ffcdd2; }
+
+        /* Style to align copy button inside the input field */
+        .input-group-copy {
+            display: flex;
+            position: relative;
+        }
+        .input-group-copy input {
+            padding-right: 40px; /* Leave space for the copy button */
+        }
+        .copy-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--brand-blue);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px;
+        }
+        .copy-btn:hover {
+            color: var(--brand-orange);
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+
+        /* --- LOADING OVERLAY --- */
+        .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(250, 242, 233, 0.8); display: flex; align-items: center; justify-content: center; font-family: 'PizzaPress', sans-serif; font-size: 20px; z-index: 1000; }
+        
+        .hidden { display: none !important; }
+
+        /* --- MOBILE STYLES --- */
+        @media (max-width: 768px) {
+            .dashboard { flex-direction: column; }
+            .form-panel { position: static; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Loader Overlay -->
+<div id="loadingOverlay" class="overlay hidden">Saving Database...</div>
+
+<!-- Login Container -->
+<div id="authContainer" class="auth-container">
+    <h2>Hiring Manager Login</h2>
+    <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="loginUser" placeholder="e.g., dallas_admin">
+    </div>
+    <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPass">
+    </div>
+    <div id="loginError" style="color: var(--brand-red); font-size: 14px; margin-bottom: 12px;" class="hidden"></div>
+    <button onclick="handleLogin()">Login</button>
+</div>
+
+<!-- Main App Wrapper -->
+<div id="appContainer" class="hidden">
+    <header>
+        <div>
+            <h1 id="headerTitle">Hiring Manager Portal</h1>
+            <div id="headerCity" class="subtitle">Checking Location...</div>
+        </div>
+        <button class="secondary" onclick="handleLogout()">Log Out</button>
+    </header>
+
+    <div class="dashboard">
+        <!-- Left Panel: List of Candidates -->
+        <div class="list-panel">
+            <button class="btn-add" onclick="prepareAddNew()">➕ Add New Candidate</button>
+            <div id="candidateList"></div>
+        </div>
+
+        <!-- Right Panel: Form Area -->
+        <div class="form-panel" id="formPanel">
+            <h2 id="formTitle" style="margin-top: 0; font-family: 'OneDotCd-Bold', sans-serif;">Candidate details</h2>
+            <form id="candidateForm" onsubmit="saveCandidate(event)">
+                <input type="hidden" id="fieldId">
+                
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="fieldName" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Position</label>
+                        <select id="fieldPosition">
+                            <option value="CSR">🍕 CSR</option>
+                            <option value="DE">🚗 DE</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Store #</label>
+                        <input type="text" id="fieldStore" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="text" id="fieldPhone" placeholder="(xxx) xxx-xxxx">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="text" id="fieldEmail">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>NTO Date</label>
+                        <input type="text" id="fieldNto" placeholder="e.g., 7/14/2026">
+                    </div>
+                    <div class="form-group">
+                        <label>Shirt Size</label>
+                        <input type="text" id="fieldShirt" placeholder="e.g., Medium">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Pay Card Status / ID</label>
+                    <input type="text" id="fieldPayCard">
+                </div>
+
+                <div class="form-group">
+                    <label>Internal Notes</label>
+                    <textarea id="fieldNotes" placeholder="Write any specific candidate notes here..."></textarea>
+                </div>
+
+                <div class="checkbox-grid">
+                    <label class="checkbox-item"><input type="checkbox" id="checkSubmission"> Submission Received</label>
+                    <label class="checkbox-item"><input type="checkbox" id="checkOnbSent"> Onboarding Sent</label>
+                    <label class="checkbox-item"><input type="checkbox" id="checkBgc"> Background Check Done</label>
+                    <label class="checkbox-item"><input type="checkbox" id="checkAllPay"> AllPay Done</label>
+                    <label class="checkbox-item"><input type="checkbox" id="checkNto"> NTO Scheduled</label>
+                    <label class="checkbox-item"><input type="checkbox" id="checkHired"> Hired</label>
+                    
+                    <label class="checkbox-item flag-box flag-incorrect">
+                        <input type="checkbox" id="checkIncorrect"> ⚠️ Incorrect Email
+                    </label>
+                    <label class="checkbox-item flag-box flag-reviewing">
+                        <input type="checkbox" id="checkReviewing"> 🔍 Currently Reviewing
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" style="flex: 1; background: var(--brand-blue);">Save Details</button>
+                    <button type="button" class="secondary" id="btnCancel" onclick="clearForm()">Clear / Deselect</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // DEPLOYED WEB APP URL (Replace this placeholder)
+    // ==========================================
+    const API_URL = "https://script.google.com/macros/s/AKfycbxiA123_YOUR_URL_HERE/exec"; 
+
+    let candidates = [];
+    let currentSelectedId = null;
+
+    // Run when page loads
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedUser = localStorage.getItem('onb_user');
+        const savedPass = localStorage.getItem('onb_pass');
+        
+        if (savedUser && savedPass) {
+            handleLogin(savedUser, savedPass);
+        }
+    });
+
+    function getCityFromUser(username) {
+        if (username.startsWith('denver')) return 'Denver';
+        if (username.startsWith('dallas')) return 'Dallas';
+        return 'System';
+    }
+
+    function handleLogin(savedUser, savedPass) {
+        const u = savedUser || document.getElementById('loginUser').value.trim();
+        const p = savedPass || document.getElementById('loginPass').value;
+        const errorEl = document.getElementById('loginError');
+
+        if (!u || !p) return;
+
+        showLoader(true);
+        errorEl.classList.add('hidden');
+
+        // To test login credentials, make a quick fetch request reading candidate data
+        const city = getCityFromUser(u);
+        
+        fetch(`${API_URL}?city=${city}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Login was successful
+                localStorage.setItem('onb_user', u);
+                localStorage.setItem('onb_pass', p);
+                
+                document.getElementById('authContainer').classList.add('hidden');
+                document.getElementById('appContainer').classList.remove('hidden');
+                
+                document.getElementById('headerCity').innerText = `${city} Manager Workspace`;
+                
+                candidates = data.onboarding || [];
+                renderList();
+                showLoader(false);
+            })
+            .catch(err => {
+                showLoader(false);
+                errorEl.innerText = "Invalid login credentials or Sheet configuration error.";
+                errorEl.classList.remove('hidden');
+                localStorage.clear();
+            });
+    }
+
+    function handleLogout() {
+        localStorage.clear();
+        location.reload();
+    }
+
+    function showLoader(show, text = "Accessing Database...") {
+        const loader = document.getElementById('loadingOverlay');
+        loader.innerText = text;
+        if (show) loader.classList.remove('hidden');
+        else loader.classList.add('hidden');
+    }
+
+    function renderList() {
+        const listContainer = document.getElementById('candidateList');
+        listContainer.innerHTML = '';
+
+        if (candidates.length === 0) {
+            listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No active candidates in sheet.</div>';
+            return;
+        }
+
+        candidates.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'candidate-card';
+            if (item.id === currentSelectedId) card.classList.add('selected');
+            
+            // Format phone number
+            const phoneStr = item.phoneNumber ? `📞 ${item.phoneNumber}` : '';
+            
+            // Visual markers
+            let flags = '';
+            if (item.incorrectEmail) flags += '<span class="badge-incorrect">⚠️ Email Error</span> ';
+            if (item.currentlyReviewing) flags += '<span class="badge-review">🔍 Reviewing</span> ';
+
+            card.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div class="card-name">${item.name}</div>
+                    <div style="display: flex; gap: 4px;">${flags}</div>
+                </div>
+                <div class="card-sub">
+                    <span>Store #${item.store} (${item.position})</span>
+                    <span>${phoneStr}</span>
+                </div>
+            `;
+            
+            card.onclick = () => selectCandidate(item);
+            listContainer.appendChild(card);
+        });
+    }
+
+    function selectCandidate(item) {
+        currentSelectedId = item.id;
+        renderList();
+
+        document.getElementById('formTitle').innerText = `Edit: ${item.name}`;
+        
+        // Fill form fields
+        document.getElementById('fieldId').value = item.id;
+        document.getElementById('fieldName').value = item.name;
+        document.getElementById('fieldPosition').value = item.position;
+        document.getElementById('fieldStore').value = item.store;
+        document.getElementById('fieldPhone').value = item.phoneNumber || '';
+        document.getElementById('fieldEmail').value = item.email || '';
+        document.getElementById('fieldNto').value = item.ntoDate || '';
+        document.getElementById('fieldShirt').value = item.shirtSize || '';
+        document.getElementById('fieldPayCard').value = item.payCard || '';
+        document.getElementById('fieldNotes').value = item.notes || '';
+
+        // Checkbox values
+        document.getElementById('checkSubmission').checked = item.submissionReceived;
+        document.getElementById('checkOnbSent').checked = item.onboardingSent;
+        document.getElementById('checkBgc').checked = item.bgcComplete;
+        document.getElementById('checkAllPay').checked = item.allPayCompleted;
+        document.getElementById('checkNto').checked = item.ntoScheduled;
+        document.getElementById('checkHired').checked = item.hired;
+        document.getElementById('checkIncorrect').checked = item.incorrectEmail;
+        document.getElementById('checkReviewing').checked = item.currentlyReviewing;
+        
+        document.getElementById('btnCancel').innerText = "Cancel Edit";
+    }
+
+    function prepareAddNew() {
+        clearForm();
+        currentSelectedId = null;
+        renderList();
+        document.getElementById('formTitle').innerText = "Add New Candidate";
+        document.getElementById('fieldName').focus();
+    }
+
+    function clearForm() {
+        document.getElementById('candidateForm').reset();
+        document.getElementById('fieldId').value = '';
+        document.getElementById('formTitle').innerText = "Candidate details";
+        document.getElementById('btnCancel').innerText = "Clear / Deselect";
+        currentSelectedId = null;
+        renderList();
+    }
+
+    function saveCandidate(e) {
+        e.preventDefault();
+
+        const username = localStorage.getItem('onb_user');
+        const password = localStorage.getItem('onb_pass');
+        const id = document.getElementById('fieldId').value;
+        const action = id ? 'update' : 'add';
+
+        showLoader(true, "Saving candidate data...");
+
+        const payload = {
+            username: username,
+            password: password,
+            action: action,
+            id: id,
+            name: document.getElementById('fieldName').value.trim(),
+            position: document.getElementById('fieldPosition').value,
+            store: document.getElementById('fieldStore').value.trim(),
+            phoneNumber: document.getElementById('fieldPhone').value.trim(),
+            email: document.getElementById('fieldEmail').value.trim(),
+            ntoDate: document.getElementById('fieldNto').value.trim(),
+            shirtSize: document.getElementById('fieldShirt').value.trim(),
+            payCard: document.getElementById('fieldPayCard').value.trim(),
+            notes: document.getElementById('fieldNotes').value.trim(),
+            submissionReceived: document.getElementById('checkSubmission').checked,
+            onboardingSent: document.getElementById('checkOnbSent').checked,
+            bgcComplete: document.getElementById('checkBgc').checked,
+            allPayCompleted: document.getElementById('checkAllPay').checked,
+            ntoScheduled: document.getElementById('checkNto').checked,
+            hired: document.getElementById('checkHired').checked,
+            incorrectEmail: document.getElementById('checkIncorrect').checked,
+            currentlyReviewing: document.getElementById('checkReviewing').checked
+        };
+
+        fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (!result.success) {
+                throw new Error(result.error || "Save failed");
+            }
+            
+            // Reload candidate data
+            const city = getCityFromUser(username);
+            return fetch(`${API_URL}?city=${city}`);
+        })
+        .then(res => res.json())
+        .then(data => {
+            candidates = data.onboarding || [];
+            renderList();
+            clearForm();
+            showLoader(false);
+        })
+        .catch(err => {
+            showLoader(false);
+            alert("Error saving data: " + err.message);
+        });
+    }
+
+    function copyField(fieldId, btnElement) {
+        const val = document.getElementById(fieldId).value.trim();
+        if (!val) return;
+        
+        navigator.clipboard.writeText(val).then(() => {
+            const originalIcon = btnElement.innerText;
+            btnElement.innerText = "✓"; // Show success check
+            setTimeout(() => btnElement.innerText = originalIcon, 1000);
+        });
+    }
+    
+</script>
+</body>
+</html>
