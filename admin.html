@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M & R Portal</title>
-    <link rel="icon" type="image/png" href="tile_blue.png">
+    <title>Hiring Manager Portal</title>
+    <link class="favicon" rel="icon" type="image/png" href="tile_blue.png">
     <style>
         @font-face { font-family: 'PizzaPress'; src: url('fonts/Dominos Sans Header 1.ttf') format('truetype'); font-weight: bold; }
         @font-face { font-family: 'OneDotCd-Bold'; src: url('fonts/Dominos Sans Bold.ttf') format('truetype'); font-weight: bold; }
@@ -26,8 +26,11 @@
             --border-radius: 12px;
         }
 
-        body { font-family: 'OneDotCd', sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-dark); }
-        header { background-color: #005c91; color: white; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(71, 43, 16, 0.15); }
+        /* Lock the body to prevent page-wide scrolling */
+        html, body { height: 100%; overflow: hidden; margin: 0; padding: 0; }
+        body { font-family: 'OneDotCd', sans-serif; background-color: var(--bg-color); color: var(--text-dark); display: flex; flex-direction: column; }
+        
+        header { background-color: #005c91; color: white; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(71, 43, 16, 0.15); flex: 0 0 auto; }
         h1 { margin: 0; font-family: 'PizzaPress', serif; font-size: 20px; text-transform: uppercase; }
         .subtitle { font-family: 'OneDotCd', sans-serif; font-size: 12px; opacity: 0.9; }
         .logo { height: 32px; width: auto; margin-right: 12px; }
@@ -36,78 +39,142 @@
         .auth-container { max-width: 400px; margin: 80px auto; padding: 24px; background: white; border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-top: 6px solid var(--brand-blue); }
         .auth-container h2 { margin-top: 0; font-family: 'OneDotCd-Bold', sans-serif; }
         
-        /* --- DASHBOARD LAYOUT --- */
-        .dashboard { display: flex; max-width: 1200px; margin: 20px auto; padding: 0 16px; gap: 20px; }
-        .list-panel { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
-        .form-panel { flex: 1.2; background: white; padding: 20px; border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-top: 4px solid var(--brand-blue); position: sticky; top: 20px; height: fit-content; }
+        /* --- DASHBOARD VIEWPORT LOCK LAYOUT --- */
+        .dashboard { 
+            display: flex; 
+            max-width: 1400px; 
+            width: 100%;
+            margin: 12px auto; 
+            padding: 0 16px; 
+            gap: 16px; 
+            flex: 1; /* Fills remaining height below the header */
+            height: calc(100vh - 75px); /* Forces fit inside viewport */
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        /* Left Panel: Fixed Narrow Width, Scrollable inside */
+        .list-panel { 
+            flex: 0 0 350px; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+            overflow: hidden;
+        }
+        #candidateList { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding-right: 4px; 
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Right Panel: Widescreen expanded, flexible height with locked footer buttons */
+        .form-panel { 
+            flex: 1.5; 
+            background: white; 
+            padding: 16px; 
+            border-radius: var(--border-radius); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+            border-top: 4px solid var(--brand-blue); 
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        #candidateForm {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        /* Inner scrollable area for inputs (excluding footer action buttons) */
+        .form-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 8px;
+            margin-bottom: 8px;
+        }
+        
+        /* Pinned bottom action buttons */
+        .form-actions { 
+            flex: 0 0 auto;
+            display: flex; 
+            gap: 12px; 
+            background: white;
+            padding-top: 10px;
+            border-top: 1px solid var(--crust-med);
+        }
         
         /* --- SORT CONTROLS --- */
         .control-row { display: flex; gap: 10px; margin-bottom: 8px; }
-        .control-row select { padding: 8px; border-radius: 6px; border: 1px solid var(--crust-dark); font-family: 'OneDotCd-Bold', sans-serif; font-size: 14px; background: white; flex: 1; }
+        .control-row select { padding: 6px; border-radius: 6px; border: 1px solid var(--crust-dark); font-family: 'OneDotCd-Bold', sans-serif; font-size: 14px; background: white; flex: 1; }
         
         /* --- CARDS WITH COLORS --- */
-        .candidate-card { background: white; padding: 12px 16px; border-radius: var(--border-radius); box-shadow: 0 4px 6px rgba(0,0,0,0.02); border-left: 6px solid var(--brand-blue); cursor: pointer; transition: transform 0.15s ease; position: relative; }
-        .candidate-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .candidate-card.selected { background: #fffcf9; box-shadow: 0 4px 12px rgba(255,143,0,0.15); }
+        .candidate-card { background: white; padding: 10px 14px; border-radius: var(--border-radius); box-shadow: 0 3px 5px rgba(0,0,0,0.02); border-left: 6px solid var(--brand-blue); cursor: pointer; transition: transform 0.15s ease; position: relative; }
+        .candidate-card:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.04); }
+        .candidate-card.selected { background: #fffcf9; box-shadow: 0 4px 12px rgba(255,143,0,0.12); }
         
         /* Status border overrides */
         .candidate-card.status-blue { border-left-color: var(--brand-blue); }
         .candidate-card.status-green { border-left-color: var(--brand-green); }
         .candidate-card.status-red { border-left-color: var(--brand-red); border: 1.5px solid var(--brand-red); }
-        .candidate-card.status-reviewing { border-left-color: var(--brand-orange); box-shadow: 0 0 8px rgba(255,143,0,0.25); }
+        .candidate-card.status-reviewing { border-left-color: var(--brand-orange); box-shadow: 0 0 8px rgba(255,143,0,0.2); }
         .candidate-card.status-gray { border-left-color: var(--brand-grey); opacity: 0.6; background-color: #fbfbfb; }
 
-        .card-name { font-family: 'OneDotCd-Bold', sans-serif; font-size: 16px; }
-        .card-sub { font-size: 13px; color: var(--text-light); margin-top: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .card-name { font-family: 'OneDotCd-Bold', sans-serif; font-size: 15px; }
+        .card-sub { font-size: 12px; color: var(--text-light); margin-top: 4px; display: flex; justify-content: space-between; align-items: center; }
         
         /* --- FORMS & INPUTS --- */
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-family: 'OneDotCd-Bold', sans-serif; font-size: 14px; margin-bottom: 4px; }
-        .form-row { display: flex; gap: 12px; }
+        .form-group { margin-bottom: 8px; }
+        .form-group label { display: block; font-family: 'OneDotCd-Bold', sans-serif; font-size: 13px; margin-bottom: 3px; }
+        .form-row { display: flex; gap: 10px; }
         .form-row .form-group { flex: 1; }
         
-        /* Form Row - Three Column variation */
-        .form-row.flex-three { display: flex; gap: 12px; }
+        /* Widescreen 3-Column horizontal row mapping */
+        .form-row.flex-three { display: flex; gap: 10px; }
         .form-row.flex-three .form-group { flex: 1; }
-        .form-row.flex-three .flex-two-weight { flex: 1.5; } /* Give slightly more width to Pay Card */
+        .form-row.flex-three .flex-two-weight { flex: 1.5; } 
 
-        input[type="text"], input[type="password"], textarea, select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--crust-dark); font-family: 'OneDotCd', sans-serif; box-sizing: border-box; font-size: 14px; }
-        textarea { height: 70px; resize: none; }
+        input[type="text"], input[type="password"], textarea, select { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid var(--crust-dark); font-family: 'OneDotCd', sans-serif; box-sizing: border-box; font-size: 13px; }
+        textarea { height: 45px; resize: none; }
         
-        /* --- CHECKBOX GRID PIPELINE --- */
-        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; background: var(--crust-light); padding: 12px; border-radius: 8px; }
-        .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
-        .checkbox-item input { width: 16px; height: 16px; cursor: pointer; }
+        /* --- COMPACT 3-COLUMN CHECKBOX GRID --- */
+        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; background: var(--crust-light); padding: 10px; border-radius: 8px; }
+        .checkbox-item { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+        .checkbox-item input { width: 14px; height: 14px; cursor: pointer; }
         
-        /* Pipeline Section Headers */
+        /* Pipeline Section Headers spanning 3 columns */
         .section-header {
-            grid-column: span 2;
+            grid-column: span 3;
             font-family: 'OneDotCd-Bold', sans-serif;
-            font-size: 12px;
+            font-size: 11px;
             color: #005c91;
             border-bottom: 2px solid var(--crust-dark);
-            padding-bottom: 4px;
-            margin-top: 10px;
+            padding-bottom: 2px;
+            margin-top: 6px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         
         /* --- ACTION FLAGS --- */
-        .flag-box { grid-column: span 2; padding: 6px; border-radius: 4px; display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+        .flag-box { padding: 4px 6px; border-radius: 4px; display: flex; align-items: center; gap: 6px; }
         .flag-incorrect { background: #ffebee; color: var(--brand-red); font-weight: bold; }
         .flag-reviewing { background: #e3f2fd; color: #0d47a1; font-weight: bold; position: relative; }
         .flag-inactive { background: #f5f5f5; color: var(--brand-grey); font-weight: bold; }
 
         /* --- BUTTONS --- */
-        button { background: #005c91; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-family: 'OneDotCd-Bold', sans-serif; font-size: 15px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        button { background: #005c91; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-family: 'OneDotCd-Bold', sans-serif; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
         button:hover { opacity: 0.9; }
         button.secondary { background: var(--brand-grey); }
-        button.btn-add { margin-bottom: 12px; background: var(--brand-green); width: 100%; }
-        .form-actions { display: flex; gap: 12px; margin-top: 16px; }
+        button.btn-add { margin-bottom: 8px; background: var(--brand-green); width: 100%; flex: 0 0 auto; }
         
         /* --- BADGES --- */
-        .badge-review { background: #e3f2fd; color: #0d47a1; font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #bbdefb; animation: pulse 2s infinite; }
-        .badge-incorrect { background: #ffebee; color: var(--brand-red); font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #ffcdd2; }
+        .badge-review { background: #e3f2fd; color: #0d47a1; font-size: 10px; padding: 1px 5px; border-radius: 4px; font-weight: bold; border: 1px solid #bbdefb; animation: pulse 2s infinite; }
+        .badge-incorrect { background: #ffebee; color: var(--brand-red); font-size: 10px; padding: 1px 5px; border-radius: 4px; font-weight: bold; border: 1px solid #ffcdd2; }
         
         @keyframes pulse {
             0% { opacity: 0.7; }
@@ -122,8 +189,12 @@
 
         /* --- MOBILE STYLES --- */
         @media (max-width: 768px) {
-            .dashboard { flex-direction: column; }
-            .form-panel { position: static; }
+            html, body { overflow: auto; height: auto; }
+            .dashboard { flex-direction: column; height: auto; overflow: visible; }
+            .list-panel { flex: none; height: auto; overflow: visible; }
+            .form-panel { position: static; height: auto; overflow: visible; }
+            #candidateForm { height: auto; overflow: visible; }
+            .form-scroll-area { overflow-y: visible; height: auto; }
             .form-row.flex-three { flex-direction: column; gap: 8px; }
         }
     </style>
@@ -166,7 +237,6 @@
         <div class="list-panel">
             <button class="btn-add" onclick="prepareAddNew()">➕ Add New Candidate</button>
             
-            <!-- Sorting controls Row -->
             <div class="control-row">
                 <select id="sortControl" onchange="renderList()">
                     <option value="updated">⏰ Sort: Last Updated</option>
@@ -183,113 +253,117 @@
 
         <!-- Right Panel: Form Area -->
         <div class="form-panel" id="formPanel">
-            <h2 id="formTitle" style="margin-top: 0; font-family: 'OneDotCd-Bold', sans-serif;">Candidate details</h2>
+            <h2 id="formTitle" style="margin-top: 0; font-family: 'OneDotCd-Bold', sans-serif; font-size: 18px; margin-bottom: 8px;">Candidate details</h2>
             <form id="candidateForm" onsubmit="saveCandidate(event)">
-                <!-- Hidden inputs for ID and NTO Date (keeps JS mapping alive without taking screen space) -->
+                <!-- Hidden inputs for ID and NTO Date -->
                 <input type="hidden" id="fieldId">
                 <input type="hidden" id="fieldNto">
                 
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" id="fieldName" required>
-                </div>
-                
-                <div class="form-row">
+                <!-- Scrollable Input Fields Container -->
+                <div class="form-scroll-area">
                     <div class="form-group">
-                        <label>Position</label>
-                        <select id="fieldPosition">
-                            <option value="CSR">🍕 CSR</option>
-                            <option value="DE">🚗 DE</option>
-                        </select>
+                        <label>Full Name</label>
+                        <input type="text" id="fieldName" required>
                     </div>
-                    <div class="form-group">
-                        <label>Store #</label>
-                        <input type="text" id="fieldStore" required>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Phone Number</label>
-                        <input type="text" id="fieldPhone" placeholder="(xxx) xxx-xxxx">
-                    </div>
-                    <div class="form-group">
-                        <label>Email Address</label>
-                        <input type="text" id="fieldEmail">
-                    </div>
-                </div>
-
-                <!-- Consolidated Row: Pay Card, Shirt Dropdown, Hat Dropdown -->
-                <div class="form-row flex-three">
-                    <div class="form-group flex-two-weight">
-                        <label>Pay Card Status</label>
-                        <input type="text" id="fieldPayCard" placeholder="Yes or leave blank">
-                    </div>
-                    <div class="form-group">
-                        <label>Shirt Size</label>
-                        <select id="fieldShirt">
-                            <option value="">None</option>
-                            <option value="Small">Small</option>
-                            <option value="Medium">Medium</option>
-                            <option value="Large">Large</option>
-                            <option value="XL">XL</option>
-                            <option value="2XL">2XL</option>
-                            <option value="4XL">4XL</option>
-                            <option value="6XL">6XL</option>
-                            <option value="Women's Small">Women's Small</option>
-                            <option value="Women's Medium">Women's Medium</option>
-                            <option value="Women's Large">Women's Large</option>
-                            <option value="Women's XL">Women's XL</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Hat Style</label>
-                        <select id="fieldHat">
-                            <option value="">None</option>
-                            <option value="Cap">Cap</option>
-                            <option value="Visor">Visor</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Internal Notes</label>
-                    <textarea id="fieldNotes" placeholder="Write any specific candidate notes here..."></textarea>
-                </div>
-
-                <!-- Structured Checklist Grid -->
-                <div class="checkbox-grid">
-                    <div class="section-header">Stage 1: Onboarding Intake</div>
-                    <label class="checkbox-item"><input type="checkbox" id="checkSubmission"> Submission Received</label>
-                    <label class="checkbox-item"><input type="checkbox" id="checkOnbSent"> Onboarding Sent</label>
                     
-                    <div class="section-header">Stage 2: Paperwork Processing</div>
-                    <label class="checkbox-item"><input type="checkbox" id="checkBgc"> Background Check Done</label>
-                    <label class="checkbox-item"><input type="checkbox" id="checkAllPay"> AllPay Done</label>
-                    
-                    <div class="section-header">Stage 3: Orientation & Hire</div>
-                    <label class="checkbox-item"><input type="checkbox" id="checkNtoLink"> NTO Signup Link Sent</label>
-                    <label class="checkbox-item"><input type="checkbox" id="checkNto"> NTO Scheduled</label>
-                    <label class="checkbox-item" style="grid-column: span 2;"><input type="checkbox" id="checkHired"> Hired</label>
-                    
-                    <div class="section-header">Active Flags & Blockers</div>
-                    <label class="checkbox-item flag-box flag-reviewing" style="grid-column: span 2;">
-                        <input type="checkbox" id="checkReviewing"> 🔍 Currently Reviewing
-                    </label>
-                    <label class="checkbox-item flag-box flag-incorrect">
-                        <input type="checkbox" id="checkIncorrect"> ⚠️ Incorrect Email
-                    </label>
-                    <label class="checkbox-item flag-box flag-incorrect">
-                        <input type="checkbox" id="checkMissingDocs"> ⚠️ Missing/Incorrect Docs
-                    </label>
-                    <label class="checkbox-item flag-box flag-inactive">
-                        <input type="checkbox" id="checkIneligible"> 🚫 Ineligible / Rejected
-                    </label>
-                    <label class="checkbox-item flag-box flag-inactive">
-                        <input type="checkbox" id="checkInactive"> 💤 Inactive
-                    </label>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Position</label>
+                            <select id="fieldPosition">
+                                <option value="CSR">🍕 CSR</option>
+                                <option value="DE">🚗 DE</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Store #</label>
+                            <input type="text" id="fieldStore" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="text" id="fieldPhone" placeholder="(xxx) xxx-xxxx">
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="text" id="fieldEmail">
+                        </div>
+                    </div>
+
+                    <!-- Consolidated 3-Column Row -->
+                    <div class="form-row flex-three">
+                        <div class="form-group flex-two-weight">
+                            <label>Pay Card Status</label>
+                            <input type="text" id="fieldPayCard" placeholder="Yes or leave blank">
+                        </div>
+                        <div class="form-group">
+                            <label>Shirt Size</label>
+                            <select id="fieldShirt">
+                                <option value="">None</option>
+                                <option value="Small">Small</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Large">Large</option>
+                                <option value="XL">XL</option>
+                                <option value="2XL">2XL</option>
+                                <option value="4XL">4XL</option>
+                                <option value="6XL">6XL</option>
+                                <option value="Women's Small">Women's Small</option>
+                                <option value="Women's Medium">Women's Medium</option>
+                                <option value="Women's Large">Women's Large</option>
+                                <option value="Women's XL">Women's XL</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Hat Style</label>
+                            <select id="fieldHat">
+                                <option value="">None</option>
+                                <option value="Cap">Cap</option>
+                                <option value="Visor">Visor</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Internal Notes</label>
+                        <textarea id="fieldNotes" placeholder="Write any specific candidate notes here..."></textarea>
+                    </div>
+
+                    <!-- 3-Column Structured Checklist Grid -->
+                    <div class="checkbox-grid">
+                        <div class="section-header">Stage 1: Onboarding Intake</div>
+                        <label class="checkbox-item"><input type="checkbox" id="checkSubmission"> Submission Received</label>
+                        <label class="checkbox-item"><input type="checkbox" id="checkOnbSent"> Onboarding Sent</label>
+                        
+                        <div class="section-header">Stage 2: Paperwork Processing</div>
+                        <label class="checkbox-item"><input type="checkbox" id="checkBgc"> Background Check Done</label>
+                        <label class="checkbox-item"><input type="checkbox" id="checkAllPay"> AllPay Done</label>
+                        
+                        <div class="section-header">Stage 3: Orientation & Hire</div>
+                        <label class="checkbox-item"><input type="checkbox" id="checkNtoLink"> NTO Signup Link Sent</label>
+                        <label class="checkbox-item"><input type="checkbox" id="checkNto"> NTO Scheduled</label>
+                        <label class="checkbox-item" style="grid-column: span 3;"><input type="checkbox" id="checkHired"> Hired</label>
+                        
+                        <div class="section-header">Active Flags & Blockers</div>
+                        <label class="checkbox-item flag-box flag-reviewing" style="grid-column: span 3;">
+                            <input type="checkbox" id="checkReviewing"> 🔍 Currently Reviewing
+                        </label>
+                        <label class="checkbox-item flag-box flag-incorrect">
+                            <input type="checkbox" id="checkIncorrect"> ⚠️ Incorrect Email
+                        </label>
+                        <label class="checkbox-item flag-box flag-incorrect">
+                            <input type="checkbox" id="checkMissingDocs"> ⚠️ Missing/Incorrect Docs
+                        </label>
+                        <label class="checkbox-item flag-box flag-inactive">
+                            <input type="checkbox" id="checkIneligible"> 🚫 Ineligible / Rejected
+                        </label>
+                        <label class="checkbox-item flag-box flag-inactive" style="grid-column: span 2;">
+                            <input type="checkbox" id="checkInactive"> 💤 Inactive
+                        </label>
+                    </div>
                 </div>
 
+                <!-- Fixed Footer Action Buttons -->
                 <div class="form-actions">
                     <button type="submit" style="flex: 1; background: var(--brand-blue);">Save Details</button>
                     <button type="button" class="secondary" id="btnCancel" onclick="clearForm()">Clear / Deselect</button>
@@ -407,7 +481,7 @@
         if (item.allPayCompleted) return 4;
         if (item.onboardingSent) return 3;
         if (item.submissionReceived) return 2;
-        if (item.incorrectEmail || item.missingDocs) return 1;
+        if (item.incorrectEmail) return 1;
         if (item.ineligible) return -1;
         if (item.inactive) return -2;
         return 0;
