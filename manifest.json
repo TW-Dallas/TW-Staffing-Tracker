@@ -1,0 +1,22 @@
+{
+  "name": "Staffing Command Center",
+  "short_name": "Staffing",
+  "description": "Team Wow Hiring Tracker",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fefaf6",
+  "theme_color": "#005c91",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./tile_blue.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./tile_blue.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
