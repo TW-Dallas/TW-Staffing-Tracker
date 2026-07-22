@@ -6,6 +6,8 @@
     <link rel="icon" href="data:,">
     <title>Staffing Command Center</title>
     <link rel="icon" type="image/png" href="tile_blue.png">
+    <meta name="theme-color" content="#005c91">
+    <link rel="manifest" href="manifest.json">
         <style>
         @font-face { font-family: 'ExtraBlack'; src: url('fonts/Dominos Sans Header 1.ttf') format('truetype'); font-weight: bold; }
         @font-face { font-family: 'ExtraBold'; src: url('fonts/Dominos Sans Header 2.ttf') format('truetype'); font-weight: normal; }
@@ -412,11 +414,14 @@
             document.getElementById('interviewList').classList.remove('hidden');
         }
     }
-    
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./service-worker.js')
+                .then(reg => console.log('Staffing App Service Worker registered!'))
+                .catch(err => console.error('Service Worker registration failed:', err));
+        });
+    }
 </script>
 </body>
 </html>
-
-
-
-
