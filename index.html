@@ -7,37 +7,43 @@
     <title>Staffing Command Center</title>
     <link rel="icon" type="image/png" href="image/tile_blue.png">
         <style>
-        @font-face { font-family: 'PizzaPress'; src: url('fonts/Dominos Sans Header 1.ttf') format('truetype'); font-weight: bold; }
-        @font-face { font-family: 'OneDotCd-Bold'; src: url('fonts/Dominos Sans Bold.ttf') format('truetype'); font-weight: bold; }
-        @font-face { font-family: 'OneDotCd'; src: url('fonts/Dominos Sans Body Compact.ttf') format('truetype'); font-weight: normal; }
+        @font-face { font-family: 'ExtraBlack'; src: url('fonts/Dominos Sans Header 1.ttf') format('truetype'); font-weight: bold; }
+        @font-face { font-family: 'ExtraBold'; src: url('fonts/Dominos Sans Header 2.ttf') format('truetype'); font-weight: normal; }
+        @font-face { font-family: 'Subhead1'; src: url('fonts/Dominos Sans Subhead 1.ttf') format('truetype'); font-weight: normal; }
+        @font-face { font-family: 'Subhead2'; src: url('fonts/Dominos Sans Subhead 2.ttf') format('truetype'); font-weight: normal; }
+        @font-face { font-family: 'Body-Bold'; src: url('fonts/Dominos Sans Bold.ttf') format('truetype'); font-weight: bold; }
+        @font-face { font-family: 'Body'; src: url('fonts/Dominos Sans Body.ttf') format('truetype'); font-weight: normal; }
+        @font-face { font-family: 'Condensed'; src: url('fonts/Dominos Sans Body Condensed.ttf') format('truetype'); font-weight: normal; }
+        @font-face { font-family: 'Compact'; src: url('fonts/Dominos Sans Body Compact.ttf') format('truetype'); font-weight: normal; }
 
         :root {
             --brand-red: #ff0000;
+            --dark-red: #910000;
             --brand-blue: #0090e2;
-            --brand-green: #28a745;
-            --brand-orange: #ff8f00;
-            --brand-grey: #6c757d;
+            --med-blue: #0077bd;
+            --dark-blue: #005c91;
+            --crust-base: #fefaf6;
             --crust-light: #faf2e9;
             --crust-med: #f0decc;
             --crust-dark: #c0a588;
+            --crust-deep: #603913;
+            --crust-burnt: #472b10;
             --bg-color: var(--crust-light);
             --card-bg: #FFFFFF;
-            --text-dark: #472b10;
-            --text-light: #603913;
             --border-radius: 12px;
         }
 
-        body { font-family: 'OneDotCd', sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-dark); }
+        body { font-family: 'Compact', sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; color: var(--crust-burnt); }
         header { background-color: #005c91; color: white; padding: 12px 16px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 12px rgba(71, 43, 16, 0.15); display: flex; align-items: center; gap: 12px; }
         .logo { height: 32px; width: auto; }
-        h1 { margin: 0; font-family: 'PizzaPress', serif; font-size: 20px; text-transform: uppercase; }
-        .subtitle { font-family: 'OneDotCd', sans-serif; font-size: 12px; opacity: 0.9; }
+        h1 { margin: 0; font-family: 'ExtraBlack', serif; font-size: 20px; text-transform: uppercase; }
+        .subtitle { font-family: 'Compact', sans-serif; font-size: 12px; opacity: 0.9; }
 
         /* --- CONTROLS --- */
         .controls { padding: 12px 16px; background: white; border-bottom: 2px solid var(--crust-med); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
-        select { padding: 8px; border-radius: 8px; border: 1px solid var(--crust-dark); background: var(--crust-light); font-family: 'OneDotCd-Bold', sans-serif; font-size: 16px; color: var(--text-dark); width: 250px; }
+        select { padding: 8px; border-radius: 8px; border: 1px solid var(--crust-dark); background: var(--crust-light); font-family: 'Body-Bold', sans-serif; font-size: 16px; color: var(--crust-burnt); width: 250px; }
         .view-toggle { display: flex; background: var(--crust-med); border-radius: 8px; padding: 4px; margin-left: auto; }
-        .view-btn { padding: 8px 16px; border: none; background: none; font-family: 'OneDotCd-Bold', sans-serif; font-size: 14px; color: #472b10; cursor: pointer; border-radius: 6px; text-transform: uppercase; }
+        .view-btn { padding: 8px 16px; border: none; background: none; font-family: 'Body-Bold', sans-serif; font-size: 14px; color: #472b10; cursor: pointer; border-radius: 6px; text-transform: uppercase; }
         .view-btn.active { background: white; color: var(--brand-blue); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
         @media (max-width: 600px) {
@@ -62,10 +68,10 @@
         .card.status-green .notes-section { border-left-color: var(--brand-green); }
 
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .name { font-family: 'OneDotCd-Bold', sans-serif; font-size: 18px; color: var(--text-dark); }
-        .position-badge { font-family: 'OneDotCd-Bold', sans-serif; font-size: 12px; padding: 4px 8px; border-radius: 12px; background: var(--crust-light); color: #005c91; border: 1px solid var(--crust-med); }
+        .name { font-family: 'Body-Bold', sans-serif; font-size: 18px; color: var(--crust-burnt); }
+        .position-badge { font-family: 'Body-Bold', sans-serif; font-size: 12px; padding: 4px 8px; border-radius: 12px; background: var(--crust-light); color: #005c91; border: 1px solid var(--crust-med); }
         
-        .meta-row { display: flex; justify-content: space-between; font-family: 'OneDotCd', sans-serif; font-size: 14px; color: var(--text-light); margin-bottom: 8px; }
+        .meta-row { display: flex; justify-content: space-between; font-family: 'Compact', sans-serif; font-size: 14px; color: var(--crust-deep); margin-bottom: 8px; }
 
         /* --- PIPELINE VISUALS --- */
         .pipeline-container { margin-top: 10px; margin-bottom: 6px; }
@@ -75,7 +81,7 @@
         .pipeline-fill.red { background: var(--brand-red); }
         .pipeline-fill.grey { background: #6c757d; }
 
-        .status-text { font-family: 'OneDotCd-Bold', sans-serif; font-size: 14px; color: var(--brand-blue); display: flex; justify-content: space-between; align-items: center; }
+        .status-text { font-family: 'Body-Bold', sans-serif; font-size: 14px; color: var(--brand-blue); display: flex; justify-content: space-between; align-items: center; }
         .status-text.red { color: var(--brand-red); }
         .status-text.green { color: var(--brand-green); }
         .status-text.grey { color: #6c757d; }
@@ -88,14 +94,14 @@
         /* --- GM APPOINTMENT BOX (Restored!) --- */
         .gm-appt-box { background-color: #e8f5e9; border: 1px solid #28a745; color: #1b5e20; padding: 10px; border-radius: 8px; margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
         .gm-appt-label { font-size: 11px; text-transform: uppercase; opacity: 0.8; font-weight: bold; }
-        .gm-appt-time { font-family: 'OneDotCd-Bold', sans-serif; font-size: 16px; }
+        .gm-appt-time { font-family: 'Body-Bold', sans-serif; font-size: 16px; }
 
         /* --- NOTES --- */
-        .notes-section { font-size: 14px; margin-top: 10px; color: var(--text-light); background: #f9f9f9; padding: 8px; border-radius: 6px; border-left: 3px solid #ccc; }
+        .notes-section { font-size: 14px; margin-top: 10px; color: var(--crust-deep); background: #f9f9f9; padding: 8px; border-radius: 6px; border-left: 3px solid #ccc; }
         .notes-section.hold-notes { background: #ffebee; border-left-color: var(--brand-red); color: #b71c1c; }
 
         .updated-text { font-size: 11px; color: #999; text-align: right; margin-top: 8px; font-style: italic; }
-        .loader { text-align: center; padding: 40px; color: var(--crust-dark); font-family: 'PizzaPress', serif; font-size: 18px; }
+        .loader { text-align: center; padding: 40px; color: var(--crust-dark); font-family: 'ExtraBlack', serif; font-size: 18px; }
         .hidden { display: none; }
     </style>
 </head>
