@@ -141,9 +141,11 @@
             box-shadow: none;
         }
 
-        /* --- SORT CONTROLS --- */
+        /* --- SORT & SEARCH CONTROLS --- */
         .control-row { display: flex; gap: 10px; margin-bottom: 8px; }
         .control-row select { padding: 6px; border-radius: 6px; border: 1px solid var(--crust-dark); font-family: 'Condensed', sans-serif; font-size: 14px; background: white; flex: 1; }
+        .search-container { margin-bottom: 8px; }
+        .search-container input { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--crust-dark); font-family: 'Condensed', sans-serif; font-size: 14px; box-sizing: border-box; }
         
         /* --- CARDS WITH COLORS --- */
         .candidate-card { background: white; padding: 10px 14px; border-radius: var(--border-radius); box-shadow: 0 3px 5px rgba(0,0,0,0.02); border-left: 6px solid var(--brand-blue); cursor: pointer; transition: transform 0.15s ease; position: relative; }
@@ -269,6 +271,11 @@
         <!-- Left Panel: List of Candidates -->
         <div class="list-panel">
             <button class="btn-add" id="btnAddMain" onclick="prepareAddNew()">📋 Add New Candidate</button>
+            
+            <!-- Quick Search Input -->
+            <div class="search-container">
+                <input type="text" id="searchControl" placeholder="🔍 Search name..." oninput="renderList()">
+            </div>
             
             <!-- Dallas Only Toggle -->
             <div id="dallasToggleContainer" class="hidden" style="margin-bottom: 8px;">
@@ -690,6 +697,9 @@
         
         const onbFormFields = document.getElementById('onboardingFormFields');
         const intFormFields = document.getElementById('interviewFormFields');
+
+        // Reset search field when switching contexts
+        document.getElementById('searchControl').value = '';
         
         if (view === 'interviews') {
             btnInt.style.background = 'var(--dark-blue)';
@@ -763,6 +773,7 @@
         listContainer.innerHTML = '';
 
         const sortBy = document.getElementById('sortControl').value;
+        const searchQuery = document.getElementById('searchControl').value.toLowerCase().trim();
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
@@ -770,9 +781,21 @@
             // ==========================================
             // RENDER INTERVIEW LIST (Weekly Interviews)
             // ==========================================
-            let filteredInterviews = [...interviews];
+            let filteredInterviews = interviews.filter(item => {
+                if (searchQuery) {
+                    return item.name && item.name.toLowerCase().includes(searchQuery);
+                }
+                return true;
+            });
 
             filteredInterviews.sort((a, b) => {
+                // Rule: Hired status always goes to the bottom
+                const isHiredA = (a.status === 'Hired');
+                const isHiredB = (b.status === 'Hired');
+                if (isHiredA !== isHiredB) {
+                    return isHiredA ? 1 : -1; // 1 pushes 'a' down
+                }
+
                 if (sortBy === 'name') {
                     return a.name.localeCompare(b.name);
                 }
@@ -795,7 +818,7 @@
             });
 
             if (filteredInterviews.length === 0) {
-                listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No active interviews in sheet.</div>';
+                listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No matches found.</div>';
                 return;
             }
 
@@ -844,6 +867,10 @@
             // RENDER ONBOARDING LIST (Weekly Onboarding)
             // ==========================================
             let filteredCandidates = candidates.filter(item => {
+                if (searchQuery && (!item.name || !item.name.toLowerCase().includes(searchQuery))) {
+                    return false;
+                }
+
                 const isTerminalState = item.hired || item.ineligible || item.inactive;
                 if (isTerminalState && item.lastUpdated) {
                     const updatedDate = new Date(item.lastUpdated);
@@ -855,6 +882,13 @@
             });
 
             filteredCandidates.sort((a, b) => {
+                // Rule: Hired candidates always go to the bottom
+                const isHiredA = !!a.hired;
+                const isHiredB = !!b.hired;
+                if (isHiredA !== isHiredB) {
+                    return isHiredA ? 1 : -1; // 1 pushes 'a' down
+                }
+
                 if (sortBy === 'name') {
                     return a.name.localeCompare(b.name);
                 }
@@ -882,7 +916,7 @@
             });
 
             if (filteredCandidates.length === 0) {
-                listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No active candidates in sheet.</div>';
+                listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No matches found.</div>';
                 return;
             }
 
@@ -970,16 +1004,9 @@
             document.getElementById('fieldPayCard').value = item.payCard || '';
             document.getElementById('fieldNotes').value = item.notes || '';
 
-            const shirtVal = item.shirtSize || "";
-            let shirt = shirtVal;
-            let hat = "";
-            if (shirtVal.includes(",")) {
-                const parts = shirtVal.split(",");
-                shirt = parts[0].trim();
-                hat = parts[1].trim();
-            }
-            document.getElementById('fieldShirt').value = shirt;
-            document.getElementById('fieldHat').value = hat;
+            // Using distinct Column Z hat mapping
+            document.getElementById('fieldShirt').value = item.shirtSize || '';
+            document.getElementById('fieldHat').value = item.hatStyle || '';
 
             document.getElementById('checkSubmission').checked = item.submissionReceived || false;
             document.getElementById('checkOnbSent').checked = item.onboardingSent || false;
@@ -1028,8 +1055,8 @@
         renderList();
     }
 
-    function saveCandidate(e) {
-        e.preventDefault();
+    function saveCandidate(event) {
+        event.preventDefault();
 
         const username = localStorage.getItem('onb_user');
         const password = localStorage.getItem('onb_pass');
@@ -1063,16 +1090,13 @@
             payload.availability = document.getElementById('intAvailability').value.trim();
             payload.notes = document.getElementById('intNotes').value.trim();
         } else {
-            const shirt = document.getElementById('fieldShirt').value;
-            const hat = document.getElementById('fieldHat').value;
-            const combinedShirt = (hat && hat !== "") ? `${shirt}, ${hat}` : shirt;
-
             payload.name = document.getElementById('fieldName').value.trim();
             payload.position = document.getElementById('fieldPosition').value;
             payload.store = document.getElementById('fieldStore').value.trim();
             payload.phoneNumber = document.getElementById('fieldPhone').value.trim();
             payload.email = document.getElementById('fieldEmail').value.trim();
-            payload.shirtSize = combinedShirt;
+            payload.shirtSize = document.getElementById('fieldShirt').value; 
+            payload.hatStyle = document.getElementById('fieldHat').value; 
             payload.payCard = document.getElementById('fieldPayCard').value.trim();
             payload.notes = document.getElementById('fieldNotes').value.trim();
             payload.submissionReceived = document.getElementById('checkSubmission').checked;
@@ -1442,7 +1466,6 @@
         renderChecklist();
     }
 
-    // Fixed typo in name for deletion
     function deleteChecklistItem(id) {
         checklistItemsData = checklistItemsData.filter(item => item.id !== id);
         saveChecklist();
