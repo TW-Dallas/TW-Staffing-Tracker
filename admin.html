@@ -6,43 +6,51 @@
     <title>M & R Portal</title>
     <link class="favicon" rel="icon" type="image/png" href="tile_blue.png">
     <style>
-        @font-face { font-family: 'PizzaPress'; src: url('fonts/Dominos Sans Header 1.ttf') format('truetype'); font-weight: bold; }
-        @font-face { font-family: 'OneDotCd-Bold'; src: url('fonts/Dominos Sans Bold.ttf') format('truetype'); font-weight: bold; }
-        @font-face { font-family: 'OneDotCd'; src: url('fonts/Dominos Sans Body Compact.ttf') format('truetype'); font-weight: normal; }
+        @font-face { font-family: 'ExtraBlack'; src: url('fonts/Dominos Sans Header 1.ttf') format('truetype'); font-weight: normal; }
+        @font-face { font-family: 'ExtraBold'; src: url('fonts/Dominos Sans Header 2.ttf') format('truetype'); font-weight: normal; }
+        @font-face { font-family: 'Subhead1'; src: url('fonts/Dominos Sans Subhead 1.ttf') format('truetype'); font-weight: normal; }
+        @font-face { font-family: 'Subhead2'; src: url('fonts/Dominos Sans Subhead 2.ttf') format('truetype'); font-weight: normal; }
+        @font-face { font-family: 'Condensed'; src: url('fonts/Dominos Sans Body Condensed.ttf') format('truetype'); font-weight: normal; }
+        @font-face { font-family: 'Compact'; src: url('fonts/Dominos Sans Body Compact.ttf') format('truetype'); font-weight: normal; }
 
         :root {
             --brand-red: #ff0000;
+            --dark-red: #910000;
             --brand-blue: #0090e2;
-            --brand-green: #28a745;
-            --brand-orange: #ff8f00;
-            --brand-grey: #6c757d;
+            --med-blue: #0077bd;
+            --dark-blue: #005c91;
+            --crust-base: #fefaf6;
             --crust-light: #faf2e9;
             --crust-med: #f0decc;
             --crust-dark: #c0a588;
-            --bg-color: var(--crust-light);
+            --crust-deep: #603913;
+            --crust-burnt: #472b10;
+            --brand-grey: #6c757d;
             --card-bg: #FFFFFF;
-            --text-dark: #472b10;
-            --text-light: #603913;
             --border-radius: 12px;
+            --success-green: #117a30; 
+            --bg-color: var(--crust-light);
+            --text-dark: var(--crust-burnt);
+            --text-light: var(--crust-deep);
         }
 
         /* Lock the body to prevent page-wide scrolling */
         html, body { height: 100%; overflow: hidden; margin: 0; padding: 0; }
-        body { font-family: 'OneDotCd', sans-serif; background-color: var(--bg-color); color: var(--text-dark); display: flex; flex-direction: column; }
+        body { font-family: 'Condensed', sans-serif; background-color: var(--bg-color); color: var(--text-dark); display: flex; flex-direction: column; }
         
-        header { background-color: #005c91; color: white; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(71, 43, 16, 0.15); flex: 0 0 auto; }
-        h1 { margin: 0; font-family: 'PizzaPress', serif; font-size: 20px; text-transform: uppercase; }
-        .subtitle { font-family: 'OneDotCd', sans-serif; font-size: 12px; opacity: 0.9; }
+        header { background-color: var(--dark-blue); color: white; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(71, 43, 16, 0.15); flex: 0 0 auto; }
+        h1 { margin: 0; font-family: 'ExtraBlack', sans-serif; font-size: 20px; text-transform: uppercase; }
+        .subtitle { font-family: 'Condensed', sans-serif; font-size: 12px; opacity: 0.9; }
         .logo { height: 32px; width: auto; margin-right: 12px; }
         
         /* --- AUTH SCREEN --- */
         .auth-container { max-width: 400px; margin: 80px auto; padding: 24px; background: white; border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-top: 6px solid var(--brand-blue); }
-        .auth-container h2 { margin-top: 0; font-family: 'OneDotCd-Bold', sans-serif; }
+        .auth-container h2 { margin-top: 0; font-family: 'ExtraBold', sans-serif; }
         
         /* --- DASHBOARD VIEWPORT LOCK LAYOUT --- */
         .dashboard { 
             display: flex; 
-            max-width: 1400px; 
+            max-width: 1650px; 
             width: 100%;
             margin: 12px auto; 
             padding: 0 16px; 
@@ -55,7 +63,7 @@
 
         /* Left Panel: Fixed Narrow Width, Scrollable inside */
         .list-panel { 
-            flex: 0 0 350px; 
+            flex: 0 0 320px; 
             display: flex; 
             flex-direction: column; 
             height: 100%; 
@@ -70,9 +78,9 @@
             gap: 10px;
         }
 
-        /* Right Panel: Widescreen expanded, flexible height with locked footer buttons */
+        /* Middle Panel: Widescreen expanded, flexible height with locked footer buttons */
         .form-panel { 
-            flex: 1.5; 
+            flex: 1; 
             background: white; 
             padding: 16px; 
             border-radius: var(--border-radius); 
@@ -109,28 +117,38 @@
             border-top: 1px solid var(--crust-med);
         }
         
+        /* Right Panel: Activity Audits & Synchronized Scratchpad */
+        .notes-panel { 
+            flex: 0 0 340px; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+            overflow: hidden; 
+            gap: 16px; 
+        }
+
         /* --- SORT CONTROLS --- */
         .control-row { display: flex; gap: 10px; margin-bottom: 8px; }
-        .control-row select { padding: 6px; border-radius: 6px; border: 1px solid var(--crust-dark); font-family: 'OneDotCd-Bold', sans-serif; font-size: 14px; background: white; flex: 1; }
+        .control-row select { padding: 6px; border-radius: 6px; border: 1px solid var(--crust-dark); font-family: 'Condensed', sans-serif; font-size: 14px; background: white; flex: 1; }
         
         /* --- CARDS WITH COLORS --- */
         .candidate-card { background: white; padding: 10px 14px; border-radius: var(--border-radius); box-shadow: 0 3px 5px rgba(0,0,0,0.02); border-left: 6px solid var(--brand-blue); cursor: pointer; transition: transform 0.15s ease; position: relative; }
         .candidate-card:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.04); }
-        .candidate-card.selected { background: #fffcf9; box-shadow: 0 4px 12px rgba(255,143,0,0.12); }
+        .candidate-card.selected { background: var(--crust-light); box-shadow: 0 4px 12px rgba(0, 144, 226, 0.15); border: 1.5px solid var(--brand-blue); }
         
         /* Status border overrides */
         .candidate-card.status-blue { border-left-color: var(--brand-blue); }
-        .candidate-card.status-green { border-left-color: var(--brand-green); }
+        .candidate-card.status-green { border-left-color: var(--success-green); }
         .candidate-card.status-red { border-left-color: var(--brand-red); border: 1.5px solid var(--brand-red); }
-        .candidate-card.status-reviewing { border-left-color: var(--brand-orange); box-shadow: 0 0 8px rgba(255,143,0,0.2); }
+        .candidate-card.status-reviewing { border-left-color: var(--med-blue); box-shadow: 0 0 8px rgba(0, 119, 189, 0.2); }
         .candidate-card.status-gray { border-left-color: var(--brand-grey); opacity: 0.6; background-color: #fbfbfb; }
 
-        .card-name { font-family: 'OneDotCd-Bold', sans-serif; font-size: 15px; }
-        .card-sub { font-size: 12px; color: var(--text-light); margin-top: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .card-name { font-family: 'Subhead2', sans-serif; font-size: 17px; }
+        .card-sub { font-family: 'Subhead2', sans-serif; font-size: 14px; color: var(--text-light); margin-top: 4px; display: flex; justify-content: space-between; align-items: center; }
         
         /* --- FORMS & INPUTS --- */
         .form-group { margin-bottom: 8px; }
-        .form-group label { display: block; font-family: 'OneDotCd-Bold', sans-serif; font-size: 13px; margin-bottom: 3px; }
+        .form-group label { display: block; font-family: 'Subhead2', sans-serif; font-size: 15px; margin-bottom: 3px; }
         .form-row { display: flex; gap: 10px; }
         .form-row .form-group { flex: 1; }
         
@@ -139,20 +157,20 @@
         .form-row.flex-three .form-group { flex: 1; }
         .form-row.flex-three .flex-two-weight { flex: 1.5; } 
 
-        input[type="text"], input[type="password"], textarea, select { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid var(--crust-dark); font-family: 'OneDotCd', sans-serif; box-sizing: border-box; font-size: 13px; }
+        input[type="text"], input[type="password"], textarea, select { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid var(--crust-dark); font-family: 'Condensed', sans-serif; box-sizing: border-box; font-size: 15px; }
         textarea { height: 45px; resize: none; }
         
         /* --- COMPACT 3-COLUMN CHECKBOX GRID --- */
         .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; background: var(--crust-light); padding: 10px; border-radius: 8px; }
-        .checkbox-item { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
-        .checkbox-item input { width: 14px; height: 14px; cursor: pointer; }
+        .checkbox-item { display: flex; align-items: center; gap: 6px; font-family: 'Condensed', sans-serif; font-size: 14px; cursor: pointer; }
+        .checkbox-item input { width: 16px; height: 16px; cursor: pointer; }
         
         /* Pipeline Section Headers spanning 3 columns */
         .section-header {
             grid-column: span 3;
-            font-family: 'OneDotCd-Bold', sans-serif;
-            font-size: 11px;
-            color: #005c91;
+            font-family: 'ExtraBold', sans-serif;
+            font-size: 13px;
+            color: var(--dark-blue);
             border-bottom: 2px solid var(--crust-dark);
             padding-bottom: 2px;
             margin-top: 6px;
@@ -163,17 +181,17 @@
         /* --- ACTION FLAGS --- */
         .flag-box { padding: 4px 6px; border-radius: 4px; display: flex; align-items: center; gap: 6px; }
         .flag-incorrect { background: #ffebee; color: var(--brand-red); font-weight: bold; }
-        .flag-reviewing { background: #e3f2fd; color: #0d47a1; font-weight: bold; position: relative; }
+        .flag-reviewing { background: #e3f2fd; color: var(--med-blue); font-weight: bold; position: relative; }
         .flag-inactive { background: #f5f5f5; color: var(--brand-grey); font-weight: bold; }
 
         /* --- BUTTONS --- */
-        button { background: #005c91; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-family: 'OneDotCd-Bold', sans-serif; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        button { background: var(--dark-blue); color: white; border: none; padding: 8px 14px; border-radius: 6px; font-family: 'Subhead1', sans-serif; font-size: 15px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
         button:hover { opacity: 0.9; }
         button.secondary { background: var(--brand-grey); }
-        button.btn-add { margin-bottom: 8px; background: var(--brand-green); width: 100%; flex: 0 0 auto; }
+        button.btn-add { margin-bottom: 8px; background: var(--brand-blue); width: 100%; flex: 0 0 auto; }
         
         /* --- BADGES --- */
-        .badge-review { background: #e3f2fd; color: #0d47a1; font-size: 10px; padding: 1px 5px; border-radius: 4px; font-weight: bold; border: 1px solid #bbdefb; animation: pulse 2s infinite; }
+        .badge-review { background: #e3f2fd; color: var(--dark-blue); font-size: 10px; padding: 1px 5px; border-radius: 4px; font-weight: bold; border: 1px solid #bbdefb; animation: pulse 2s infinite; }
         .badge-incorrect { background: #ffebee; color: var(--brand-red); font-size: 10px; padding: 1px 5px; border-radius: 4px; font-weight: bold; border: 1px solid #ffcdd2; }
         
         @keyframes pulse {
@@ -183,34 +201,21 @@
         }
 
         /* --- LOADING OVERLAY --- */
-        .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(250, 242, 233, 0.8); display: flex; align-items: center; justify-content: center; font-family: 'PizzaPress', sans-serif; font-size: 20px; z-index: 1000; }
+        .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(250, 242, 233, 0.8); display: flex; align-items: center; justify-content: center; font-family: 'ExtraBlack', sans-serif; font-size: 20px; z-index: 1000; }
         
         .hidden { display: none !important; }
 
         /* --- MOBILE STYLES --- */
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             html, body { overflow: auto; height: auto; }
             .dashboard { flex-direction: column; height: auto; overflow: visible; }
-            .list-panel { flex: none; height: auto; overflow: visible; }
-            .form-panel { position: static; height: auto; overflow: visible; }
+            .list-panel { flex: none; height: auto; overflow: visible; width: 100% !important; }
+            .form-panel { position: static; height: auto; overflow: visible; width: 100% !important; }
+            .notes-panel { flex: none; height: auto; overflow: visible; width: 100% !important; margin-top: 16px; }
             #candidateForm { height: auto; overflow: visible; }
             .form-scroll-area { overflow-y: visible; height: auto; }
             .form-row.flex-three { flex-direction: column; gap: 8px; }
         }
-
-            /* --- READABILITY FONT-SIZE UPGRADES --- */
-            .card-name { font-size: 17px; } /* Candidate names on the left */
-            .card-sub { font-size: 14px; }  /* Card status and store details */
-            
-            .form-group label { font-size: 15px; } /* Input labels (e.g., "Full Name") */
-            input[type="text"], input[type="password"], textarea, select { font-size: 15px; } /* Input boxes & dropdowns */
-            
-            .section-header { font-size: 13px; } /* Group headers (e.g., "Stage 1", "Stage 2") */
-            .checkbox-item { font-size: 14px; }  /* Checklist item labels */
-            .checkbox-item input { width: 16px; height: 16px; } /* Slightly larger checkbox boxes to match */
-            
-            button { font-size: 15px; } /* Save and Cancel buttons */
-            
     </style>
 </head>
 <body>
@@ -249,7 +254,7 @@
     <div class="dashboard">
         <!-- Left Panel: List of Candidates -->
         <div class="list-panel">
-            <button class="btn-add" onclick="prepareAddNew()">➕ Add New Candidate</button>
+            <button class="btn-add" onclick="prepareAddNew()">📋 Add New Candidate</button>
             
             <div class="control-row">
                 <select id="sortControl" onchange="renderList()">
@@ -265,9 +270,9 @@
             <div id="candidateList"></div>
         </div>
 
-        <!-- Right Panel: Form Area -->
+        <!-- Middle Panel: Form Area -->
         <div class="form-panel" id="formPanel">
-            <h2 id="formTitle" style="margin-top: 0; font-family: 'OneDotCd-Bold', sans-serif; font-size: 18px; margin-bottom: 8px;">Candidate details</h2>
+            <h2 id="formTitle" style="margin-top: 0; font-family: 'ExtraBold', sans-serif; font-size: 18px; color: var(--dark-blue); margin-bottom: 8px;">Candidate details</h2>
             <form id="candidateForm" onsubmit="saveCandidate(event)">
                 <!-- Hidden inputs for ID and NTO Date -->
                 <input type="hidden" id="fieldId">
@@ -359,25 +364,25 @@
                         <label class="checkbox-item" style="grid-column: span 3;"><input type="checkbox" id="checkHired"> Hired</label>
                         
                         <div class="section-header">Active Flags & Blockers</div>
-                    <label class="checkbox-item flag-box flag-reviewing" style="grid-column: span 3;">
-                        <input type="checkbox" id="checkReviewing"> 🔍 Currently Reviewing
-                    </label>
-                    <label class="checkbox-item flag-box flag-incorrect">
-                        <input type="checkbox" id="checkIncorrect"> ⚠️ Incorrect Email
-                    </label>
-                    <label class="checkbox-item flag-box flag-incorrect">
-                        <input type="checkbox" id="checkMissingDocs"> ⚠️ Missing/Incorrect Docs
-                    </label>
-                    
-                    <!-- Blank spacer to cleanly push the gray terminal flags to the next row -->
-                    <div></div> 
-                    
-                    <label class="checkbox-item flag-box flag-inactive">
-                        <input type="checkbox" id="checkIneligible"> 🚫 Ineligible / Rejected
-                    </label>
-                    <label class="checkbox-item flag-box flag-inactive">
-                        <input type="checkbox" id="checkInactive"> 💤 Inactive
-                    </label>
+                        <label class="checkbox-item flag-box flag-reviewing" style="grid-column: span 3;">
+                            <input type="checkbox" id="checkReviewing"> 🔍 Currently Reviewing
+                        </label>
+                        <label class="checkbox-item flag-box flag-incorrect">
+                            <input type="checkbox" id="checkIncorrect"> ⚠️ Incorrect Email
+                        </label>
+                        <label class="checkbox-item flag-box flag-incorrect">
+                            <input type="checkbox" id="checkMissingDocs"> ⚠️ Missing/Incorrect Docs
+                        </label>
+                        
+                        <!-- Blank spacer to cleanly push the gray terminal flags to the next row -->
+                        <div></div> 
+                        
+                        <label class="checkbox-item flag-box flag-inactive">
+                            <input type="checkbox" id="checkIneligible"> 🚫 Ineligible / Rejected
+                        </label>
+                        <label class="checkbox-item flag-box flag-inactive">
+                            <input type="checkbox" id="checkInactive"> 💤 Inactive
+                        </label>
                     </div>
                 </div>
 
@@ -387,6 +392,50 @@
                     <button type="button" class="secondary" id="btnCancel" onclick="clearForm()">Clear / Deselect</button>
                 </div>
             </form>
+        </div>
+
+        <!-- Right Panel: Activity Audits & Synchronized Scratchpad -->
+        <div class="notes-panel">
+            <div id="metricsBox" style="background: var(--crust-light); border: 2px solid var(--crust-dark); border-radius: var(--border-radius); padding: 14px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); color: var(--crust-burnt);">
+                <div style="display: flex; justify-content: space-between; border-bottom: 2px solid var(--crust-med); padding-bottom: 8px; align-items: center;">
+                    <span style="font-family: 'ExtraBold', sans-serif; font-size: 18px; color: var(--dark-blue); text-transform: uppercase; letter-spacing: 0.5px;">Weekly Activity Audit</span>
+                    <span id="metricsWeekRange" style="font-size: 13px; font-family: 'Compact'; color: var(--crust-deep); font-weight: bold;"></span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 17px;">
+                    <span>Interviews:</span>
+                    <span style="font-family: 'Compact'; font-size: 17px;">
+                        This Week: <strong id="metricsQuotesThisWeek" style="color: var(--med-blue); font-family: 'Subhead2', sans-serif; font-size: 17px;" onclick="editLocalMetric('interviews_this_week', 'metricsQuotesThisWeek')">0</strong> | 
+                        Last Week: <strong id="metricsQuotesLastWeek" style="font-family: 'Subhead2', sans-serif; font-size: 17px;" onclick="editLocalMetric('interviews_last_week', 'metricsQuotesLastWeek')">0</strong>
+                    </span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 17px;">
+                    <span>Hires:</span>
+                    <span style="font-family: 'Compact'; font-size: 17px;">
+                        This Week: <strong id="metricsOrdersThisWeek" style="color: var(--med-blue); font-family: 'Subhead2', sans-serif; font-size: 16px;" onclick="editLocalMetric('hires_this_week', 'metricsOrdersThisWeek')">0</strong> | 
+                        Last Week: <strong id="metricsOrdersLastWeek" style="font-family: 'Subhead2', sans-serif; font-size: 16px;" onclick="editLocalMetric('hires_last_week', 'metricsOrdersLastWeek')">0</strong>
+                    </span>
+                </div>
+            </div>
+            
+            <div style="flex: 1; display: flex; flex-direction: column; background: var(--crust-base); border: 2px solid var(--crust-dark); border-radius: var(--border-radius); padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); position: relative; overflow: hidden;">
+                <div style="font-family: 'ExtraBold', sans-serif; font-size: 18px; color: var(--dark-blue); border-bottom: 2px solid var(--crust-med); padding-bottom: 6px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; text-transform: uppercase; letter-spacing: 0.5px; flex: 0 0 auto;" id="scratchpadTitleHeader">
+                    <span>📋 Sync Scratchpad</span>
+                    <div style="display: flex; gap: 4px; align-items: center;">
+                        <button type="button" id="btnModeText" onclick="setScratchpadMode('text')" style="font-size: 11px; padding: 2px 6px; background: var(--dark-blue); color: white; border-radius: 4px; font-family: 'Compact'; min-width: 40px; text-transform: uppercase;">Text</button>
+                        <button type="button" id="btnModeList" onclick="setScratchpadMode('list')" style="font-size: 11px; padding: 2px 6px; background: var(--crust-med); color: var(--crust-burnt); border-radius: 4px; font-family: 'Compact'; min-width: 40px; text-transform: uppercase;">List</button>
+                    </div>
+                </div>
+                
+                <textarea id="scratchpad" placeholder="• Scratchpad text is saved continuously..." style="flex: 1; width: 100%; border: none; background: transparent; font-family: 'Condensed', sans-serif; font-size: 17px; line-height: 1.5; outline: none; padding: 0; color: var(--crust-burnt); resize: none;" oninput="triggerNotesCloudSync()"></textarea>
+
+                <div id="scratchpadChecklist" class="hidden" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+                    <div id="checklistInputRow" style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; border-bottom: 1.5px solid var(--crust-med); padding-bottom: 8px; flex-shrink: 0;">
+                        <span style="font-size: 20px; color: var(--brand-grey); line-height: 1; font-weight: bold;">+</span>
+                        <input type="text" id="newChecklistItem" placeholder="Add checklist task..." style="flex: 1; border: none; background: transparent; font-family: 'Condensed', sans-serif; font-size: 17px; outline: none; padding: 0;" onkeydown="handleChecklistKeydown(event)">
+                    </div>
+                    <div id="checklistItems" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 2px;"></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -399,6 +448,12 @@
 
     let candidates = [];
     let currentSelectedId = null;
+    
+    // Scratchpad & metric variables
+    let scratchpadMode = 'text';
+    let checklistItemsData = [];
+    let scratchpadTimeout = null;
+    window.hasApiMetrics = false;
 
     // Run when page loads
     window.addEventListener('DOMContentLoaded', () => {
@@ -441,10 +496,21 @@
                 document.getElementById('authContainer').classList.add('hidden');
                 document.getElementById('appContainer').classList.remove('hidden');
                 
-                document.getElementById('headerCity').innerText = `${city} Manager Workspace`;
+                document.getElementById('headerCity').innerText = `${city} Workspace`;
                 
                 candidates = data.onboarding || [];
                 renderList();
+                initScratchpad();
+                
+                // Read metrics from sheet database if provided
+                if (data.metrics) {
+                    window.hasApiMetrics = true;
+                    updateMetricsAndWeekRange(data.metrics);
+                } else {
+                    window.hasApiMetrics = false;
+                    updateMetricsAndWeekRange(null);
+                }
+                
                 showLoader(false);
             })
             .catch(err => {
@@ -475,7 +541,7 @@
         if (item.currentlyReviewing) return "🔍 Reviewing";
         if (item.hired) return "🎉 Hired";
         
-        // Dynamic NTO Scheduled date check (If scheduled, display the date pulled from roster!)
+        // Dynamic NTO Scheduled date check (Display orientation date from roster)
         if (item.ntoScheduled) {
             return item.ntoDate ? `📅 NTO: ${item.ntoDate}` : "📅 NTO Scheduled";
         }
@@ -583,9 +649,9 @@
             
             // Inline status color formatting
             let statusStyleColor = 'var(--brand-blue)';
-            if (item.hired) statusStyleColor = 'var(--brand-green)';
+            if (item.hired) statusStyleColor = 'var(--success-green)';
             if (item.incorrectEmail || item.missingDocs) statusStyleColor = 'var(--brand-red)';
-            if (item.currentlyReviewing) statusStyleColor = 'var(--brand-orange)';
+            if (item.currentlyReviewing) statusStyleColor = 'var(--med-blue)';
             if (item.ineligible || item.inactive) statusStyleColor = 'var(--brand-grey)';
 
             // Visual header badges
@@ -601,7 +667,7 @@
                 </div>
                 <div class="card-sub">
                     <span>Store #${item.store} (${item.position})</span>
-                    <span style="font-family: 'OneDotCd-Bold', sans-serif; color: ${statusStyleColor};">${activeStatusText}</span>
+                    <span style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: ${statusStyleColor};">${activeStatusText}</span>
                 </div>
             `;
             
@@ -731,6 +797,16 @@
         .then(data => {
             candidates = data.onboarding || [];
             renderList();
+            
+            // Re-render and parse metrics
+            if (data.metrics) {
+                window.hasApiMetrics = true;
+                updateMetricsAndWeekRange(data.metrics);
+            } else {
+                window.hasApiMetrics = false;
+                updateMetricsAndWeekRange(null);
+            }
+
             clearForm();
             showLoader(false);
         })
@@ -738,6 +814,335 @@
             showLoader(false);
             alert("Error saving data: " + err.message);
         });
+    }
+
+    // ==========================================
+    // SCRATCHPAD & WEEKLY AUDIT INTEGRATION
+    // ==========================================
+    function initScratchpad() {
+        const username = localStorage.getItem('onb_user') || 'default';
+        
+        // Load Scratchpad Mode
+        scratchpadMode = localStorage.getItem(`scratchpad_mode_${username}`) || 'text';
+        
+        // Load Text Value
+        const savedText = localStorage.getItem(`scratchpad_text_${username}`) || '';
+        document.getElementById('scratchpad').value = savedText;
+        
+        // Load Checklist Value
+        const savedChecklist = localStorage.getItem(`scratchpad_checklist_${username}`);
+        if (savedChecklist) {
+            try {
+                checklistItemsData = JSON.parse(savedChecklist);
+            } catch (e) {
+                checklistItemsData = [];
+            }
+        } else {
+            checklistItemsData = [];
+        }
+        
+        setScratchpadMode(scratchpadMode);
+    }
+
+    function setScratchpadMode(mode) {
+        scratchpadMode = mode;
+        const username = localStorage.getItem('onb_user') || 'default';
+        localStorage.setItem(`scratchpad_mode_${username}`, mode);
+
+        const btnText = document.getElementById('btnModeText');
+        const btnList = document.getElementById('btnModeList');
+        const areaText = document.getElementById('scratchpad');
+        const areaList = document.getElementById('scratchpadChecklist');
+
+        if (!btnText || !btnList || !areaText || !areaList) return;
+
+        if (mode === 'list') {
+            btnList.style.background = 'var(--dark-blue)';
+            btnList.style.color = 'white';
+            btnText.style.background = 'var(--crust-med)';
+            btnText.style.color = 'var(--crust-burnt)';
+
+            areaText.classList.add('hidden');
+            areaList.classList.remove('hidden');
+            renderChecklist();
+        } else {
+            btnText.style.background = 'var(--dark-blue)';
+            btnText.style.color = 'white';
+            btnList.style.background = 'var(--crust-med)';
+            btnList.style.color = 'var(--crust-burnt)';
+
+            areaList.classList.add('hidden');
+            areaText.classList.remove('hidden');
+        }
+    }
+
+    function triggerNotesCloudSync() {
+        const username = localStorage.getItem('onb_user') || 'default';
+        const textVal = document.getElementById('scratchpad').value;
+        localStorage.setItem(`scratchpad_text_${username}`, textVal);
+        
+        // Debounce database sync
+        clearTimeout(scratchpadTimeout);
+        scratchpadTimeout = setTimeout(() => {
+            syncNotesToBackend(username, textVal, 'text');
+        }, 1500);
+    }
+
+    function saveChecklist() {
+        const username = localStorage.getItem('onb_user') || 'default';
+        localStorage.setItem(`scratchpad_checklist_${username}`, JSON.stringify(checklistItemsData));
+        
+        clearTimeout(scratchpadTimeout);
+        scratchpadTimeout = setTimeout(() => {
+            syncNotesToBackend(username, JSON.stringify(checklistItemsData), 'list');
+        }, 1500);
+    }
+
+    function syncNotesToBackend(username, content, mode) {
+        if (!API_URL) return;
+        const password = localStorage.getItem('onb_pass');
+        
+        const payload = {
+            username: username,
+            password: password,
+            action: 'saveScratchpad',
+            scratchpadMode: mode,
+            scratchpadContent: content
+        };
+
+        fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (result.success) {
+                console.log("Database notes successfully synced.");
+            }
+        })
+        .catch(err => {
+            console.warn("Notes locally saved. Cloud sync offline:", err.message);
+        });
+    }
+
+    function renderChecklist() {
+        const container = document.getElementById('checklistItems');
+        if (!container) return;
+        container.innerHTML = '';
+        
+        checklistItemsData.forEach(item => {
+            const row = document.createElement('div');
+            row.style.display = 'flex';
+            row.style.alignItems = 'center';
+            row.style.justifyContent = 'space-between';
+            row.style.gap = '8px';
+            row.style.padding = '4px 0';
+            
+            const leftPart = document.createElement('label');
+            leftPart.style.display = 'flex';
+            leftPart.style.alignItems = 'center';
+            leftPart.style.gap = '8px';
+            leftPart.style.cursor = 'pointer';
+            leftPart.style.flex = '1';
+            leftPart.style.fontSize = '15px';
+            
+            const chk = document.createElement('input');
+            chk.type = 'checkbox';
+            chk.checked = item.done;
+            chk.style.width = '16px';
+            chk.style.height = '16px';
+            chk.style.cursor = 'pointer';
+            chk.onclick = (e) => {
+                e.stopPropagation();
+                toggleChecklistItem(item.id);
+            };
+            
+            const labelText = document.createElement('span');
+            labelText.innerText = item.text;
+            if (item.done) {
+                labelText.style.textDecoration = 'line-through';
+                labelText.style.color = 'var(--brand-grey)';
+            } else {
+                labelText.style.color = 'var(--crust-burnt)';
+            }
+            
+            leftPart.appendChild(chk);
+            leftPart.appendChild(labelText);
+            
+            const delBtn = document.createElement('button');
+            delBtn.type = 'button';
+            delBtn.innerHTML = '×';
+            delBtn.style.background = 'transparent';
+            delBtn.style.color = 'var(--brand-grey)';
+            delBtn.style.border = 'none';
+            delBtn.style.fontSize = '18px';
+            delBtn.style.padding = '0 6px';
+            delBtn.style.cursor = 'pointer';
+            delBtn.style.display = 'inline-flex';
+            delBtn.style.alignItems = 'center';
+            delBtn.style.justifyContent = 'center';
+            delBtn.onclick = (e) => {
+                e.stopPropagation();
+                deleteChecklistItem(item.id);
+            };
+            
+            row.appendChild(leftPart);
+            row.appendChild(delBtn);
+            container.appendChild(row);
+        });
+    }
+
+    function handleChecklistKeydown(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const input = document.getElementById('newChecklistItem');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            const newItem = {
+                id: Date.now(),
+                text: text,
+                done: false
+            };
+            
+            checklistItemsData.push(newItem);
+            input.value = '';
+            saveChecklist();
+            renderChecklist();
+        }
+    }
+
+    function toggleChecklistItem(id) {
+        checklistItemsData = checklistItemsData.map(item => {
+            if (item.id === id) {
+                return { ...item, done: !item.done };
+            }
+            return item;
+        });
+        saveChecklist();
+        renderChecklist();
+    }
+
+    function deleteChecklistItem(id) {
+        checklistItemsData = checklistItemsData.filter(item => item.id !== id);
+        saveChecklist();
+        renderChecklist();
+    }
+
+    // Dynamic Weekly Activity Audit Calculations
+    function updateMetricsAndWeekRange(apiMetrics) {
+        const now = new Date();
+        const currentDay = now.getDay();
+        const distanceToMonday = (currentDay === 0 ? -6 : 1) - currentDay; // Monday is day 1
+        
+        const startOfThisWeek = new Date(now);
+        startOfThisWeek.setDate(now.getDate() + distanceToMonday);
+        startOfThisWeek.setHours(0,0,0,0);
+        
+        const endOfThisWeek = new Date(startOfThisWeek);
+        endOfThisWeek.setDate(startOfThisWeek.getDate() + 6);
+        endOfThisWeek.setHours(23,59,59,999);
+        
+        const startOfLastWeek = new Date(startOfThisWeek);
+        startOfLastWeek.setDate(startOfThisWeek.getDate() - 7);
+        
+        const endOfLastWeek = new Date(startOfLastWeek);
+        endOfLastWeek.setDate(startOfLastWeek.getDate() + 6);
+        endOfLastWeek.setHours(23,59,59,999);
+        
+        const formatDate = (d) => `${d.getMonth() + 1}/${d.getDate()}`;
+        const rangeText = `${formatDate(startOfThisWeek)} - ${formatDate(endOfThisWeek)}`;
+        
+        const metricsWeekRangeEl = document.getElementById('metricsWeekRange');
+        if (metricsWeekRangeEl) {
+            metricsWeekRangeEl.innerText = rangeText;
+        }
+
+        let interviewsThisWeek = 0;
+        let interviewsLastWeek = 0;
+        let hiresThisWeek = 0;
+        let hiresLastWeek = 0;
+
+        const username = localStorage.getItem('onb_user') || 'default';
+
+        if (apiMetrics && typeof apiMetrics === 'object') {
+            // Populate metrics directly from Google Sheet JSON response
+            interviewsThisWeek = apiMetrics.interviewsThisWeek !== undefined ? apiMetrics.interviewsThisWeek : 0;
+            interviewsLastWeek = apiMetrics.interviewsLastWeek !== undefined ? apiMetrics.interviewsLastWeek : 0;
+            hiresThisWeek = apiMetrics.hiresThisWeek !== undefined ? apiMetrics.hiresThisWeek : 0;
+            hiresLastWeek = apiMetrics.hiresLastWeek !== undefined ? apiMetrics.hiresLastWeek : 0;
+        } else {
+            // Fallback: Compute Hires locally from candidate roster updates
+            candidates.forEach(item => {
+                if (!item.lastUpdated || !item.hired) return;
+                const updatedDate = new Date(item.lastUpdated);
+                if (isNaN(updatedDate.getTime())) return;
+                
+                const isThisWeek = (updatedDate >= startOfThisWeek && updatedDate <= endOfThisWeek);
+                const isLastWeek = (updatedDate >= startOfLastWeek && updatedDate <= endOfLastWeek);
+                
+                if (isThisWeek) {
+                    hiresThisWeek++;
+                } else if (isLastWeek) {
+                    hiresLastWeek++;
+                }
+            });
+
+            // Since interviews are tracked separately from onboarding, read manual overrides until API sheet is built
+            interviewsThisWeek = Number(localStorage.getItem(`metric_interviews_this_week_${username}`)) || 0;
+            interviewsLastWeek = Number(localStorage.getItem(`metric_interviews_last_week_${username}`)) || 0;
+            
+            // Allow manual overrides of hires if no API metric exists
+            const localHiresThis = localStorage.getItem(`metric_hires_this_week_${username}`);
+            const localHiresLast = localStorage.getItem(`metric_hires_last_week_${username}`);
+            if (localHiresThis !== null) hiresThisWeek = Number(localHiresThis);
+            if (localHiresLast !== null) hiresLastWeek = Number(localHiresLast);
+        }
+        
+        const quotesThisWeekEl = document.getElementById('metricsQuotesThisWeek');
+        const quotesLastWeekEl = document.getElementById('metricsQuotesLastWeek');
+        const ordersThisWeekEl = document.getElementById('metricsOrdersThisWeek');
+        const ordersLastWeekEl = document.getElementById('metricsOrdersLastWeek');
+        
+        if (quotesThisWeekEl) quotesThisWeekEl.innerText = interviewsThisWeek;
+        if (quotesLastWeekEl) quotesLastWeekEl.innerText = interviewsLastWeek;
+        if (ordersThisWeekEl) ordersThisWeekEl.innerText = hiresThisWeek;
+        if (ordersLastWeekEl) ordersLastWeekEl.innerText = hiresLastWeek;
+
+        // Toggle edit metadata displays
+        const listElements = [quotesThisWeekEl, quotesLastWeekEl, ordersThisWeekEl, ordersLastWeekEl];
+        listElements.forEach(el => {
+            if (!el) return;
+            if (window.hasApiMetrics) {
+                el.style.cursor = 'default';
+                el.title = 'Live sync data from sheet database';
+            } else {
+                el.style.cursor = 'pointer';
+                el.title = 'Click to edit locally (separate from onboarding candidates)';
+            }
+        });
+    }
+
+    function editLocalMetric(key, elementId) {
+        if (window.hasApiMetrics) return; // Prevent prompt edits when API values are running
+        
+        const currentVal = document.getElementById(elementId).innerText;
+        const readableLabel = key.replace(/_/g, ' ');
+        const newVal = prompt(`Enter count for ${readableLabel}:`, currentVal);
+        if (newVal === null) return;
+        
+        const parsed = parseInt(newVal, 10);
+        if (isNaN(parsed) || parsed < 0) {
+            alert("Please enter a valid non-negative number.");
+            return;
+        }
+        
+        const username = localStorage.getItem('onb_user') || 'default';
+        localStorage.setItem(`metric_${key}_${username}`, parsed);
+        
+        // Re-calculate visual metrics and queue sync to backend if desired
+        updateMetricsAndWeekRange(null);
+        syncNotesToBackend(username, parsed, `metric_${key}`);
     }
 </script>
 </body>
