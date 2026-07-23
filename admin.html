@@ -43,10 +43,6 @@
         .subtitle { font-family: 'Condensed', sans-serif; font-size: 12px; opacity: 0.9; }
         .logo { height: 32px; width: auto; margin-right: 12px; }
         
-        /* --- AUTH SCREEN --- */
-        .auth-container { max-width: 400px; margin: 80px auto; padding: 24px; background: white; border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-top: 6px solid var(--brand-blue); }
-        .auth-container h2 { margin-top: 0; font-family: 'ExtraBold', sans-serif; }
-        
         /* --- DASHBOARD VIEWPORT LOCK LAYOUT --- */
         .dashboard { 
             display: flex; 
@@ -293,6 +289,18 @@
         }
         .brand-modal-actions button {
             min-width: 100px;
+        }
+        
+        /* Reminder Popup styling */
+        #brandModalReminderForm input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid var(--crust-dark);
+            font-family: 'Condensed', sans-serif;
+            font-size: 14px;
+            box-sizing: border-box;
+            margin-top: 4px;
         }
 
         .hidden { display: none !important; }
@@ -683,10 +691,29 @@
         <div class="brand-modal-brand-stripe"></div>
         <div class="brand-modal-content">
             <h3 id="brandModalTitle">Notice</h3>
-            <p id="brandModalMessage">Message goes here.</p>
+            <p id="brandModalMessage" style="margin-bottom: 12px;">Message goes here.</p>
+            
+            <!-- Standard Single Input (Wages/Prompts) -->
             <div id="brandModalInputContainer" class="form-group hidden" style="margin-top: 12px;">
                 <input type="text" id="brandModalInput" style="width: 100%;">
             </div>
+            
+            <!-- Specialized Multi-Input Form for Reminders -->
+            <div id="brandModalReminderForm" class="hidden" style="margin-top: 12px; display: flex; flex-direction: column; gap: 10px; text-align: left;">
+                <div id="reminderAllPayGroup" class="form-group hidden">
+                    <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; font-weight: bold; color: var(--dark-blue);">AllPay Onboarding Link / PDF URL:</label>
+                    <input type="text" id="reminderAllPayInput" placeholder="Paste AllPay link or PDF URL here...">
+                </div>
+                <div id="reminderCheckrGroup" class="form-group hidden">
+                    <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; font-weight: bold; color: var(--dark-blue);">Checkr Invitation Link:</label>
+                    <input type="text" id="reminderCheckrInput" placeholder="Paste Checkr background check link here...">
+                </div>
+                <div id="reminderStoreSetupGroup" class="form-group hidden">
+                    <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; font-weight: bold; color: var(--dark-blue);">SmartRecruiters Setup Link:</label>
+                    <input type="text" id="reminderStoreSetupInput" placeholder="Paste system setup link here...">
+                </div>
+            </div>
+
             <div class="brand-modal-actions" style="margin-top: 20px;">
                 <button type="button" id="brandModalCancelBtn" class="secondary">Cancel</button>
                 <button type="button" id="brandModalConfirmBtn">OK</button>
@@ -747,10 +774,12 @@
             const confirmBtn = document.getElementById('brandModalConfirmBtn');
             const cancelBtn = document.getElementById('brandModalCancelBtn');
             const inputContainer = document.getElementById('brandModalInputContainer');
+            const reminderForm = document.getElementById('brandModalReminderForm');
             
             titleEl.innerText = title;
             msgEl.innerText = message;
             
+            reminderForm.classList.add('hidden');
             inputContainer.classList.add('hidden');
             cancelBtn.classList.add('hidden'); 
             confirmBtn.innerText = "OK";
@@ -775,10 +804,12 @@
             const confirmBtn = document.getElementById('brandModalConfirmBtn');
             const cancelBtn = document.getElementById('brandModalCancelBtn');
             const inputContainer = document.getElementById('brandModalInputContainer');
+            const reminderForm = document.getElementById('brandModalReminderForm');
             
             titleEl.innerText = title;
             msgEl.innerText = message;
             
+            reminderForm.classList.add('hidden');
             inputContainer.classList.add('hidden');
             cancelBtn.classList.remove('hidden');
             confirmBtn.innerText = "Yes";
@@ -817,10 +848,12 @@
             const cancelBtn = document.getElementById('brandModalCancelBtn');
             const inputContainer = document.getElementById('brandModalInputContainer');
             const inputEl = document.getElementById('brandModalInput');
+            const reminderForm = document.getElementById('brandModalReminderForm');
             
             titleEl.innerText = title;
             msgEl.innerText = message;
             
+            reminderForm.classList.add('hidden');
             inputEl.value = defaultValue;
             inputContainer.classList.remove('hidden');
             cancelBtn.classList.remove('hidden');
@@ -860,6 +893,88 @@
                     handleConfirm();
                 }
             };
+        });
+    }
+
+    // Specialized Reminder prompt rendering dynamic conditional links
+    function showBrandReminderPrompt(missingFormsArray) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('brandModal');
+            const titleEl = document.getElementById('brandModalTitle');
+            const msgEl = document.getElementById('brandModalMessage');
+            const confirmBtn = document.getElementById('brandModalConfirmBtn');
+            const cancelBtn = document.getElementById('brandModalCancelBtn');
+            const inputContainer = document.getElementById('brandModalInputContainer');
+            const reminderForm = document.getElementById('brandModalReminderForm');
+
+            // Form inputs
+            const allPayGroup = document.getElementById('reminderAllPayGroup');
+            const checkrGroup = document.getElementById('reminderCheckrGroup');
+            const storeGroup = document.getElementById('reminderStoreSetupGroup');
+            
+            // Reset input fields
+            document.getElementById('reminderAllPayInput').value = "";
+            document.getElementById('reminderCheckrInput').value = "";
+            document.getElementById('reminderStoreSetupInput').value = "";
+
+            titleEl.innerText = "Send Reminder Links";
+            msgEl.innerText = "Paste direct urls below (optional). Blank entries will display standard default help instructions.";
+            
+            inputContainer.classList.add('hidden');
+            reminderForm.classList.remove('hidden');
+            cancelBtn.classList.remove('hidden');
+
+            confirmBtn.innerText = "Send Email";
+            cancelBtn.innerText = "Cancel";
+
+            // Map missing forms arrays to verify which fields should render
+            const normalizedItems = missingFormsArray.map(item => item.toLowerCase());
+            
+            if (normalizedItems.includes("onboarding documents (allpay/hr alliance)")) {
+                allPayGroup.classList.remove('hidden');
+            } else {
+                allPayGroup.classList.add('hidden');
+            }
+
+            if (normalizedItems.includes("background check (checkr)")) {
+                checkrGroup.classList.remove('hidden');
+            } else {
+                checkrGroup.classList.add('hidden');
+            }
+
+            if (normalizedItems.includes("store system setup form (smartrecruiters)")) {
+                storeGroup.classList.remove('hidden');
+            } else {
+                storeGroup.classList.add('hidden');
+            }
+
+            modal.classList.remove('hidden');
+
+            const handleConfirm = () => {
+                const links = {
+                    allPayLink: document.getElementById('reminderAllPayInput').value.trim(),
+                    checkrLink: document.getElementById('reminderCheckrInput').value.trim(),
+                    storeSetupLink: document.getElementById('reminderStoreSetupInput').value.trim()
+                };
+                modal.classList.add('hidden');
+                cleanup();
+                resolve(links);
+            };
+
+            const handleCancel = () => {
+                modal.classList.add('hidden');
+                cleanup();
+                resolve(null);
+            };
+
+            const cleanup = () => {
+                confirmBtn.removeEventListener('click', handleConfirm);
+                cancelBtn.removeEventListener('click', handleCancel);
+                reminderForm.classList.add('hidden');
+            };
+
+            confirmBtn.addEventListener('click', handleConfirm);
+            cancelBtn.addEventListener('click', handleCancel);
         });
     }
 
@@ -1442,6 +1557,10 @@
         let confirmationMessage = `Are you sure you want to send the Welcome Email to ${name} (${email})?`;
         let payloadMissing = "";
         let payRateInput = "";
+        
+        let payloadAllPayLink = "";
+        let payloadCheckrLink = "";
+        let payloadStoreSetupLink = "";
 
         if (emailType === "welcome") {
             // Prompt only for starting hourly rate using the new dynamic prompt modal
@@ -1454,7 +1573,16 @@
                 showBrandAlert("All onboarding forms are currently marked as completed. No reminder email is necessary.", "Reminder Cancelled");
                 return;
             }
+            
+            // Trigger specialized multi-input modal showing only fields for forms that are actually missing
+            const links = await showBrandReminderPrompt(missing);
+            if (links === null) return; // Cancelled
+            
             payloadMissing = missing.join(", ");
+            payloadAllPayLink = links.allPayLink;
+            payloadCheckrLink = links.checkrLink;
+            payloadStoreSetupLink = links.storeSetupLink;
+            
             confirmationMessage = `Are you sure you want to send the Onboarding Reminder to ${name} (${email}) for:\n\n• ${missing.join("\n• ")}\n\n(This will automatically CC the store and BCC the DO)`;
         } else if (emailType === "orientation") {
             confirmationMessage = `Are you sure you want to send the Orientation Registration Link to ${name} (${email})?\n\n(This will NOT CC the store or BCC the DO)`;
@@ -1475,7 +1603,10 @@
             id: id,
             emailType: emailType,
             missingForms: payloadMissing,
-            payRate: payRateInput
+            payRate: payRateInput,
+            allPayLink: payloadAllPayLink,
+            checkrLink: payloadCheckrLink,
+            storeSetupLink: payloadStoreSetupLink
         };
 
         fetch(API_URL, {
