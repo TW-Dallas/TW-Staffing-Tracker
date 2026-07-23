@@ -783,45 +783,49 @@
         <div class="notes-panel">
             <div id="metricsBox" style="background: var(--crust-light); border: 2px solid var(--crust-dark); border-radius: var(--border-radius); padding: 14px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); color: var(--crust-burnt);">
                 <div style="display: flex; justify-content: space-between; border-bottom: 2px solid var(--crust-med); padding-bottom: 8px; align-items: center;">
-                    <span id="auditTitleHeader" style="font-family: 'ExtraBold', sans-serif; font-size: 16px; color: var(--dark-blue); text-transform: uppercase;">Weekly Activity Audit</span>
-                    <span id="metricsWeekRange" style="font-size: 12px; font-family: 'Compact'; color: var(--crust-deep); font-weight: bold;"></span>
+                    <span id="auditTitleHeader" style="font-family: 'ExtraBold', sans-serif; font-size: 18px; color: var(--dark-blue); text-transform: uppercase; letter-spacing: 0.5px;">Weekly Activity Audit</span>
+                    <span id="metricsWeekRange" style="font-size: 13px; font-family: 'Compact'; color: var(--crust-deep); font-weight: bold;"></span>
                 </div>
                 
-                <div id="auditWeeklyContent">
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 16px; margin-bottom: 6px;">
+                <!-- Weekly View Content (Onboarding & Interviews) -->
+                <div id="auditWeeklyContent" style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 17px;">
                         <span>Interviews:</span>
-                        <span style="font-family: 'Compact'; font-size: 16px;">
-                            This Week: <strong id="metricsQuotesThisWeek" style="color: var(--med-blue); font-family: 'Subhead2', sans-serif;" onclick="editLocalMetric('interviews_this_week', 'metricsQuotesThisWeek')">0</strong> | 
-                            Last Week: <strong id="metricsQuotesLastWeek" style="font-family: 'Subhead2', sans-serif;" onclick="editLocalMetric('interviews_last_week', 'metricsQuotesLastWeek')">0</strong>
+                        <span style="font-family: 'Compact'; font-size: 17px;">
+                            This Week: <strong id="metricsQuotesThisWeek" style="color: var(--med-blue); font-family: 'Subhead2', sans-serif; font-size: 17px;" onclick="editLocalMetric('interviews_this_week', 'metricsQuotesThisWeek')">0</strong> | 
+                            Last Week: <strong id="metricsQuotesLastWeek" style="font-family: 'Subhead2', sans-serif; font-size: 17px;" onclick="editLocalMetric('interviews_last_week', 'metricsQuotesLastWeek')">0</strong>
                         </span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 17px;">
                         <span>Hires:</span>
-                        <span style="font-family: 'Compact'; font-size: 16px;">
-                            This Week: <strong id="metricsOrdersThisWeek" style="color: var(--med-blue); font-family: 'Subhead2', sans-serif;" onclick="editLocalMetric('hires_this_week', 'metricsOrdersThisWeek')">0</strong> | 
-                            Last Week: <strong id="metricsOrdersLastWeek" style="font-family: 'Subhead2', sans-serif;" onclick="editLocalMetric('hires_last_week', 'metricsOrdersLastWeek')">0</strong>
+                        <span style="font-family: 'Compact'; font-size: 17px;">
+                            This Week: <strong id="metricsOrdersThisWeek" style="color: var(--med-blue); font-family: 'Subhead2', sans-serif; font-size: 17px;" onclick="editLocalMetric('hires_this_week', 'metricsOrdersThisWeek')">0</strong> | 
+                            Last Week: <strong id="metricsOrdersLastWeek" style="font-family: 'Subhead2', sans-serif; font-size: 17px;" onclick="editLocalMetric('hires_last_week', 'metricsOrdersLastWeek')">0</strong>
                         </span>
                     </div>
                 </div>
 
-                <div id="auditPeriodContent" class="hidden">
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 15px; margin-bottom: 6px;">
+                <!-- Fiscal Period Staffing Content (Hires & Terminations) -->
+                <div id="auditPeriodContent" class="hidden" style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 17px;">
                         <span>This Week:</span>
-                        <span style="font-family: 'Compact'; font-size: 15px;">
-                            Hires: <strong id="stfWeekHires" style="color: var(--success-green);">0</strong> | 
-                            Terms: <strong id="stfWeekTerms" style="color: var(--brand-red);">0</strong>
+                        <span style="font-family: 'Compact'; font-size: 17px;">
+                            Hires: <strong id="stfWeekHires" style="color: var(--med-blue); font-family: 'Subhead2', sans-serif; font-size: 17px;">0</strong> | 
+                            Terms: <strong id="stfWeekTerms" style="color: var(--brand-red); font-family: 'Subhead2', sans-serif; font-size: 17px;">0</strong>
                         </span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 15px; margin-bottom: 6px;">
-                        <span>Current Period (<span id="stfCurrentPeriodName">P08</span>):</span>
-                        <span style="font-family: 'Compact'; font-size: 15px;">
-                            Hires: <strong id="stfPeriodHires" style="color: var(--success-green);">0</strong> | 
-                            Terms: <strong id="stfPeriodTerms" style="color: var(--brand-red);">0</strong>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 17px;">
+                        <span>Period (<span id="stfCurrentPeriodName">P08</span>):</span>
+                        <span style="font-family: 'Compact'; font-size: 17px;">
+                            Hires: <strong id="stfPeriodHires" style="color: var(--med-blue); font-family: 'Subhead2', sans-serif; font-size: 17px;">0</strong> | 
+                            Terms: <strong id="stfPeriodTerms" style="color: var(--brand-red); font-family: 'Subhead2', sans-serif; font-size: 17px;">0</strong>
                         </span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 15px; border-top: 1px dashed var(--crust-dark); padding-top: 6px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 17px; border-top: 1.5px dashed var(--crust-dark); padding-top: 6px;">
                         <span>Bonus Net Gain:</span>
-                        <strong id="stfPeriodNet" style="font-family: 'ExtraBold'; font-size: 16px; color: var(--dark-blue);">+0</strong>
+                        <span style="font-family: 'Compact'; font-size: 17px;">
+                            Net: <strong id="stfPeriodNet" style="color: var(--dark-blue); font-family: 'Subhead2', sans-serif; font-size: 17px;">+0</strong>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -2023,14 +2027,38 @@
         const currentPeriod = getDominosFiscalPeriod(new Date());
         document.getElementById('stfCurrentPeriodName').innerText = currentPeriod;
 
+        const now = new Date();
+        const currentDay = now.getDay();
+        const distanceToMonday = (currentDay === 0 ? -6 : 1) - currentDay; 
+        
+        const startOfThisWeek = new Date(now);
+        startOfThisWeek.setDate(now.getDate() + distanceToMonday);
+        startOfThisWeek.setHours(0,0,0,0);
+        
+        const endOfThisWeek = new Date(startOfThisWeek);
+        endOfThisWeek.setDate(startOfThisWeek.getDate() + 6);
+        endOfThisWeek.setHours(23,59,59,999);
+
+        let weekHires = 0, weekTerms = 0;
         let periodHires = 0, periodTerms = 0;
+
         staffing.forEach(item => {
+            // Calculate Period metrics
             if (item.period === currentPeriod) {
                 if (item.termDate) periodTerms++;
                 else periodHires++;
             }
+
+            // Calculate Weekly metrics for Staffing
+            const checkDate = item.termDate ? new Date(item.termDate) : (item.hireDate ? new Date(item.hireDate) : null);
+            if (checkDate && !isNaN(checkDate.getTime()) && checkDate >= startOfThisWeek && checkDate <= endOfThisWeek) {
+                if (item.termDate) weekTerms++;
+                else weekHires++;
+            }
         });
 
+        document.getElementById('stfWeekHires').innerText = weekHires;
+        document.getElementById('stfWeekTerms').innerText = weekTerms;
         document.getElementById('stfPeriodHires').innerText = periodHires;
         document.getElementById('stfPeriodTerms').innerText = periodTerms;
         const net = periodHires - periodTerms;
