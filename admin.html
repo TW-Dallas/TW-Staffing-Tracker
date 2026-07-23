@@ -356,6 +356,16 @@
                 grid-column: 1 / -1 !important;
             }
         }
+
+        /* Status border overrides using Domino's Brand Kit Palette */
+        .candidate-card.status-blue { border-left-color: var(--brand-blue); }
+        .candidate-card.status-subrec { border-left-color: var(--brand-blue); border-left-width: 8px; background-color: #f4f9fd; } /* Highlight for New Submissions */
+        .candidate-card.status-processing { border-left-color: var(--med-blue); } /* Medium Blue for Paperwork Processing */
+        .candidate-card.status-nto { border-left-color: var(--dark-blue); } /* Dark Blue for NTO/Orientation */
+        .candidate-card.status-green { border-left-color: var(--success-green); border-left-width: 8px; }
+        .candidate-card.status-red { border-left-color: var(--brand-red); border: 1.5px solid var(--brand-red); }
+        .candidate-card.status-reviewing { border-left-color: var(--crust-dark); box-shadow: 0 0 8px rgba(192, 165, 136, 0.3); }
+        .candidate-card.status-gray { border-left-color: var(--brand-grey); opacity: 0.6; background-color: #fbfbfb; }
     </style>
 </head>
 <body>
@@ -1182,17 +1192,21 @@
     }
 
     function getStatusWeight(item) {
-        if (item.hired) return 7;
-        if (item.ntoScheduled) return 6;
-        if (item.ntoSignupLinkSent) return 5.5;
-        if (item.bgcComplete && item.allPayCompleted) return 5;
-        if (item.bgcComplete) return 4.5;
-        if (item.allPayCompleted) return 4;
-        if (item.onboardingSent) return 3;
-        if (item.submissionReceived) return 2;
-        if (item.incorrectEmail) return 1;
+        // 1. New Submissions FIRST at the absolute top of your list!
+        if (item.submissionReceived && !item.onboardingSent) return 10;
+        
+        // 2. Pipeline stages in natural progression order
+        if (item.ntoScheduled) return 8;
+        if (item.ntoSignupLinkSent) return 7;
+        if (item.bgcComplete && item.allPayCompleted) return 6;
+        if (item.bgcComplete || item.allPayCompleted) return 5;
+        if (item.onboardingSent) return 4;
+        
+        // 3. Completed / Inactive candidates at the bottom
+        if (item.hired) return 1;
         if (item.ineligible) return -1;
         if (item.inactive) return -2;
+        
         return 0;
     }
 
@@ -1348,6 +1362,7 @@
                 const rawMissingDocs = item.missingDocs || "";
                 const isBlockedByDocs = rawMissingDocs !== "" && rawMissingDocs.toString().toUpperCase() !== "FALSE";
 
+                // Stage-based brand border differentiation
                 if (item.incorrectEmail || isBlockedByDocs) {
                     card.classList.add('status-red');
                 } else if (item.currentlyReviewing) {
@@ -1356,22 +1371,35 @@
                     card.classList.add('status-green');
                 } else if (item.ineligible || item.inactive) {
                     card.classList.add('status-gray');
+                } else if (item.ntoScheduled || item.ntoSignupLinkSent) {
+                    card.classList.add('status-nto'); // Dark Blue border for NTO / Orientation
+                } else if (item.bgcComplete || item.allPayCompleted) {
+                    card.classList.add('status-processing'); // Medium Blue border for Paperwork
+                } else if (item.submissionReceived && !item.onboardingSent) {
+                    card.classList.add('status-subrec'); // Thicker Brand Blue + soft tint for New Submissions!
                 } else {
-                    card.classList.add('status-blue');
+                    card.classList.add('status-blue'); // Standard Brand Blue
                 }
                 
                 const activeStatusText = getActiveStatusText(item);
                 
+                // Color mapping using official Domino's Brand Palette
                 let statusStyleColor = 'var(--brand-blue)';
                 if (item.hired) statusStyleColor = 'var(--success-green)';
                 if (item.incorrectEmail || isBlockedByDocs) statusStyleColor = 'var(--brand-red)';
                 if (item.currentlyReviewing) statusStyleColor = 'var(--med-blue)';
+                if (item.ntoScheduled || item.ntoSignupLinkSent) statusStyleColor = 'var(--dark-blue)';
+                if (item.bgcComplete || item.allPayCompleted) statusStyleColor = 'var(--med-blue)';
                 if (item.ineligible || item.inactive) statusStyleColor = 'var(--brand-grey)';
 
                 let flags = '';
                 if (item.incorrectEmail) flags += '<span class="badge-incorrect">⚠️ Email Error</span> ';
                 if (isBlockedByDocs) flags += '<span class="badge-incorrect">⚠️ Missing Docs</span> ';
-                if (item.currentlyReviewing) flags += '<span class="badge-review">🔍 Reviewing</span> ';
+                
+                // FIX: Prevents "Double Reviewing" by checking if not already in main status text
+                if (item.currentlyReviewing && activeStatusText !== "🔍 Reviewing") {
+                    flags += '<span class="badge-review">🔍 Reviewing</span> ';
+                }
 
                 card.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
