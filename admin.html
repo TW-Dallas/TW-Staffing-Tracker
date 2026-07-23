@@ -486,12 +486,11 @@
                             <textarea id="fieldNotes" placeholder="Write any specific candidate notes here..."></textarea>
                         </div>
 
-                        <!-- 3-Column Structured Checklist Grid (Completely Restored & Balanced) -->
+                        <!-- 3-Column Structured Checklist Grid -->
                         <div class="checkbox-grid">
                             <div class="section-header">Stage 1: Onboarding Intake</div>
                             <label class="checkbox-item"><input type="checkbox" id="checkSubmission"> Submission Received</label>
                             <label class="checkbox-item"><input type="checkbox" id="checkOnbSent"> Onboarding Sent</label>
-                            <!-- Row 1 Spacer -->
                             <div></div>
                             
                             <div class="section-header">Stage 2: Paperwork Processing</div>
@@ -515,11 +514,9 @@
                             <label class="checkbox-item flag-box flag-incorrect">
                                 <input type="checkbox" id="checkMissingDocs" onchange="toggleMissingDocsSelector()"> ⚠️ Missing/Incorrect Docs
                             </label>
-                            
-                            <!-- Closes Blocker Row 1 Spacer -->
                             <div></div> 
                             
-                            <!-- SMART EXPANDABLE MISSING DOCUMENTS CHECKLIST (Spans all 3 columns!) -->
+                            <!-- SMART EXPANDABLE MISSING DOCUMENTS CHECKLIST -->
                             <div id="missingDocsContainer" class="hidden" style="grid-column: span 3; background: white; padding: 12px; border-radius: 8px; border: 1.5px solid var(--brand-red); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; box-sizing: border-box; font-family: 'Condensed', sans-serif;">
                                 <div style="grid-column: span 2; font-family: 'Subhead2'; font-size: 11px; color: var(--dark-red); text-transform: uppercase; font-weight: bold; border-bottom: 1px solid var(--crust-med); padding-bottom: 2px; margin-bottom: 4px;">Select Missing Documents</div>
                                 <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="List A ID (Passport, I-551 Permanent Resident Card, or I-766 Employment Authorization Card)"> ✈️ List A ID (Passport, I-551, I-766)</label>
@@ -542,8 +539,6 @@
                             <label class="checkbox-item flag-box flag-inactive">
                                 <input type="checkbox" id="checkInactive"> 💤 Inactive
                             </label>
-                            
-                            <!-- Closes Blocker Row 2 Spacer -->
                             <div></div>
                         </div>
 
@@ -675,7 +670,7 @@
                     <button type="button" class="secondary" id="btnCancel" onclick="clearForm()">Clear / Deselect</button>
                 </div>
             </form>
-        </div>
+        </div> <!-- Middle Panel Closes Here -->
 
         <!-- Right Panel: Activity Audits & Synchronized Scratchpad -->
         <div class="notes-panel">
@@ -719,7 +714,7 @@
                     <div id="checklistItems" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 2px;"></div>
                 </div>
             </div>
-        </div>
+        </div> <!-- Right Panel Closes Here -->
     </div>
 </div>
 
@@ -731,12 +726,10 @@
             <h3 id="brandModalTitle">Notice</h3>
             <p id="brandModalMessage" style="margin-bottom: 12px;">Message goes here.</p>
             
-            <!-- Standard Single Input (Wages/Prompts) -->
             <div id="brandModalInputContainer" class="form-group hidden" style="margin-top: 12px;">
                 <input type="text" id="brandModalInput" style="width: 100%;">
             </div>
             
-            <!-- Specialized Multi-Input Form for Reminders -->
             <div id="brandModalReminderForm" class="hidden" style="margin-top: 12px; display: flex; flex-direction: column; gap: 10px; text-align: left;">
                 <div id="reminderAllPayGroup" class="form-group hidden">
                     <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; font-weight: bold; color: var(--dark-blue);">AllPay Onboarding Link / PDF URL:</label>
@@ -761,24 +754,19 @@
 </div>
 
 <script>
-    // ==========================================
-    // DEPLOYED WEB APP URL
-    // ==========================================
     const API_URL = "https://script.google.com/macros/s/AKfycbxa1XNdNgwOULiYpeAoBIjTy1wv034pON4-hnR444XB07vegHhoSR56UacR7UaktTaGZg/exec"; 
 
     let candidates = [];
     let interviews = [];
     let currentSelectedId = null;
-    let currentView = 'onboarding'; // 'onboarding' or 'interviews'
+    let currentView = 'onboarding'; 
     
-    // Scratchpad & metric variables
     let scratchpadMode = 'text';
     let checklistItemsData = [];
     let scratchpadTimeout = null;
     window.hasApiMetrics = false;
-    window.currentSelectedInterview = null; // Safety reference for Column N data
+    window.currentSelectedInterview = null;
 
-    // Run when page loads
     window.addEventListener('DOMContentLoaded', () => {
         const savedUser = localStorage.getItem('onb_user');
         const savedPass = localStorage.getItem('onb_pass');
@@ -788,7 +776,6 @@
         }
     });
 
-    // Toggle custom missing documents dropdown visibility
     function toggleMissingDocsSelector() {
         const container = document.getElementById('missingDocsContainer');
         const isChecked = document.getElementById('checkMissingDocs').checked;
@@ -796,13 +783,11 @@
             container.classList.remove('hidden');
         } else {
             container.classList.add('hidden');
-            // Clear checked sub-options on uncheck
             document.querySelectorAll('.doc-chk').forEach(c => c.checked = false);
             document.getElementById('customMissingDoc').value = '';
         }
     }
 
-    // Utility helper to match select options case-insensitively
     function setSelectValueCaseInsensitive(selectId, value) {
         const select = document.getElementById(selectId);
         if (!select) return;
@@ -814,10 +799,9 @@
                 return;
             }
         }
-        select.value = ''; // Fallback if no match
+        select.value = '';
     }
 
-    /* --- BRANDED MODAL PROMISE WRAPPERS --- */
     function showBrandAlert(message, title = "System Notification") {
         return new Promise((resolve) => {
             const modal = document.getElementById('brandModal');
@@ -914,7 +898,7 @@
             cancelBtn.innerText = "Cancel";
             
             modal.classList.remove('hidden');
-            setTimeout(() => inputEl.focus(), 50); // Set focus to input dynamically
+            setTimeout(() => inputEl.focus(), 50);
             
             const handleConfirm = () => {
                 const val = inputEl.value;
@@ -938,7 +922,6 @@
             confirmBtn.addEventListener('click', handleConfirm);
             cancelBtn.addEventListener('click', handleCancel);
             
-            // Handle 'Enter' key inside prompt input
             inputEl.onkeydown = (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -948,7 +931,6 @@
         });
     }
 
-    // Specialized Reminder prompt rendering dynamic conditional links
     function showBrandReminderPrompt(missingFormsArray) {
         return new Promise((resolve) => {
             const modal = document.getElementById('brandModal');
@@ -959,12 +941,10 @@
             const inputContainer = document.getElementById('brandModalInputContainer');
             const reminderForm = document.getElementById('brandModalReminderForm');
 
-            // Form inputs
             const allPayGroup = document.getElementById('reminderAllPayGroup');
             const checkrGroup = document.getElementById('reminderCheckrGroup');
             const storeGroup = document.getElementById('reminderStoreSetupGroup');
             
-            // Reset input fields
             document.getElementById('reminderAllPayInput').value = "";
             document.getElementById('reminderCheckrInput').value = "";
             document.getElementById('reminderStoreSetupInput').value = "";
@@ -979,7 +959,6 @@
             confirmBtn.innerText = "Send Email";
             cancelBtn.innerText = "Cancel";
 
-            // Map missing forms arrays to verify which fields should render
             const normalizedItems = missingFormsArray.map(item => item.toLowerCase());
             
             if (normalizedItems.includes("onboarding documents (allpay/hr alliance)")) {
@@ -1066,7 +1045,6 @@
                 candidates = data.onboarding || [];
                 interviews = data.interviews || [];
                 
-                // Toggle display depending on Dallas login configuration
                 const isDallas = city.toLowerCase() === 'dallas';
                 const dallasToggle = document.getElementById('dallasToggleContainer');
                 if (isDallas) {
@@ -1079,7 +1057,6 @@
 
                 initScratchpad();
                 
-                // Read metrics from sheet database if provided
                 if (data.metrics) {
                     window.hasApiMetrics = true;
                     updateMetricsAndWeekRange(data.metrics);
@@ -1090,7 +1067,6 @@
                 
                 showLoader(false);
                 
-                // Start the 30-second silent background sync loop
                 if (!window.syncInterval) {
                     window.syncInterval = setInterval(silentSync, 30000);
                 }
@@ -1116,7 +1092,6 @@
         else loader.classList.add('hidden');
     }
 
-    // Toggle workspaces for Dallas markets
     function switchView(view) {
         currentView = view;
         
@@ -1127,7 +1102,6 @@
         const onbFormFields = document.getElementById('onboardingFormFields');
         const intFormFields = document.getElementById('interviewFormFields');
 
-        // Reset search field when switching contexts
         document.getElementById('searchControl').value = '';
         
         if (view === 'interviews') {
@@ -1160,7 +1134,6 @@
         renderList();
     }
 
-    // Determine candidate active status text representation
     function getActiveStatusText(item) {
         if (item.ineligible) return "🚫 Ineligible";
         if (item.inactive) return "💤 Inactive";
@@ -1181,7 +1154,6 @@
         return "New / Pending";
     }
 
-    // Determine weight for Sorting by Status Stage (Higher = closer to hired)
     function getStatusWeight(item) {
         if (item.hired) return 7;
         if (item.ntoScheduled) return 6;
@@ -1207,9 +1179,6 @@
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
         if (currentView === 'interviews') {
-            // ==========================================
-            // RENDER INTERVIEW LIST (Weekly Interviews)
-            // ==========================================
             let filteredInterviews = interviews.filter(item => {
                 if (searchQuery) {
                     return item.name && item.name.toLowerCase().includes(searchQuery);
@@ -1218,11 +1187,10 @@
             });
 
             filteredInterviews.sort((a, b) => {
-                // Rule: Hired status always goes to the bottom
                 const isHiredA = (a.status === 'Hired');
                 const isHiredB = (b.status === 'Hired');
                 if (isHiredA !== isHiredB) {
-                    return isHiredA ? 1 : -1; // 1 pushes 'a' down
+                    return isHiredA ? 1 : -1; 
                 }
 
                 if (sortBy === 'name') {
@@ -1292,9 +1260,6 @@
             });
 
         } else {
-            // ==========================================
-            // RENDER ONBOARDING LIST (Weekly Onboarding)
-            // ==========================================
             let filteredCandidates = candidates.filter(item => {
                 if (searchQuery && (!item.name || !item.name.toLowerCase().includes(searchQuery))) {
                     return false;
@@ -1311,11 +1276,10 @@
             });
 
             filteredCandidates.sort((a, b) => {
-                // Rule: Hired candidates always go to the bottom
                 const isHiredA = !!a.hired;
                 const isHiredB = !!b.hired;
                 if (isHiredA !== isHiredB) {
-                    return isHiredA ? 1 : -1; // 1 pushes 'a' down
+                    return isHiredA ? 1 : -1;
                 }
 
                 if (sortBy === 'name') {
@@ -1354,7 +1318,6 @@
                 card.className = 'candidate-card';
                 if (item.id === currentSelectedId) card.classList.add('selected');
                 
-                // Treat missingDocs as active blocker if it has content/true
                 const rawMissingDocs = item.missingDocs || "";
                 const isBlockedByDocs = rawMissingDocs !== "" && rawMissingDocs.toString().toUpperCase() !== "FALSE";
 
@@ -1408,7 +1371,7 @@
         document.getElementById('btnCancel').innerText = "Cancel Edit";
 
         if (currentView === 'interviews') {
-            window.currentSelectedInterview = interviews.find(i => i.id === item.id); // Hold references to prevent Column N overrides
+            window.currentSelectedInterview = interviews.find(i => i.id === item.id);
 
             document.getElementById('fieldId').value = item.id;
             document.getElementById('intName').value = item.name || '';
@@ -1427,7 +1390,7 @@
             document.getElementById('intAvailability').value = item.availability || '';
             document.getElementById('intNotes').value = item.notes || '';
             
-            document.getElementById('emailQuickActions').classList.add('hidden'); // Hide emails for interviews
+            document.getElementById('emailQuickActions').classList.add('hidden');
         } else {
             document.getElementById('fieldId').value = item.id;
             document.getElementById('fieldName').value = item.name;
@@ -1439,7 +1402,6 @@
             document.getElementById('fieldPayCard').value = item.payCard || '';
             document.getElementById('fieldNotes').value = item.notes || '';
 
-            // Using distinct Column Z hat mapping & case-insensitive matching
             setSelectValueCaseInsensitive('fieldShirt', item.shirtSize);
             setSelectValueCaseInsensitive('fieldHat', item.hatStyle);
 
@@ -1454,9 +1416,8 @@
             document.getElementById('checkReviewing').checked = item.currentlyReviewing || false;
             document.getElementById('checkIneligible').checked = item.ineligible || false;
             document.getElementById('checkInactive').checked = item.inactive || false;
-            document.getElementById('checkPulseForm').checked = item.pulseFormComplete || false; // Column Y
+            document.getElementById('checkPulseForm').checked = item.pulseFormComplete || false;
             
-            // --- POPULATE MULTI-SELECT CHECKBOXES FOR MISSING DOCUMENTS ---
             const rawMissingDocs = item.missingDocs || "";
             if (rawMissingDocs && rawMissingDocs.toString().toUpperCase() !== "FALSE") {
                 document.getElementById('checkMissingDocs').checked = true;
@@ -1465,7 +1426,6 @@
                 const docString = rawMissingDocs.toString();
                 const parts = docString.split(',').map(p => p.trim());
                 
-                // Reset doc checkboxes and custom input
                 document.querySelectorAll('.doc-chk').forEach(c => c.checked = false);
                 document.getElementById('customMissingDoc').value = '';
                 
@@ -1493,7 +1453,7 @@
                 document.getElementById('customMissingDoc').value = '';
             }
             
-            document.getElementById('emailQuickActions').classList.remove('hidden'); // Show emails for selected onboarding candidates
+            document.getElementById('emailQuickActions').classList.remove('hidden');
         }
     }
 
@@ -1515,7 +1475,7 @@
         document.getElementById('candidateForm').reset();
         document.getElementById('fieldId').value = '';
         document.getElementById('fieldNto').value = '';
-        window.currentSelectedInterview = null; // Clear active safety variable
+        window.currentSelectedInterview = null;
         
         if (currentView === 'interviews') {
             document.getElementById('formTitle').innerText = "Interview details";
@@ -1524,8 +1484,8 @@
         }
         
         document.getElementById('btnCancel').innerText = "Clear / Deselect";
-        document.getElementById('emailQuickActions').classList.add('hidden'); // Hide email panel on reset
-        document.getElementById('missingDocsContainer').classList.add('hidden'); // Collapse missing docs
+        document.getElementById('emailQuickActions').classList.add('hidden');
+        document.getElementById('missingDocsContainer').classList.add('hidden');
         currentSelectedId = null;
         renderList();
     }
@@ -1585,9 +1545,8 @@
             payload.currentlyReviewing = document.getElementById('checkReviewing').checked;
             payload.ineligible = document.getElementById('checkIneligible').checked;
             payload.inactive = document.getElementById('checkInactive').checked;
-            payload.pulseFormComplete = document.getElementById('checkPulseForm').checked; // Column Y
+            payload.pulseFormComplete = document.getElementById('checkPulseForm').checked;
             
-            // --- CONSOLIDATE MULTI-SELECT CHECKBOXES FOR MISSING DOCUMENTS ---
             let missingDocsValue = "FALSE";
             if (document.getElementById('checkMissingDocs').checked) {
                 const checkedDocs = [];
@@ -1595,7 +1554,6 @@
                 const customVal = document.getElementById('customMissingDoc').value.trim();
                 if (customVal) checkedDocs.push(customVal);
                 
-                // Fallback to "TRUE" if checked but no sub-checkbox is checked
                 missingDocsValue = checkedDocs.length > 0 ? checkedDocs.join(', ') : "TRUE";
             }
             payload.missingDocs = missingDocsValue;
@@ -1638,7 +1596,6 @@
         });
     }
 
-    // Dynamic verification helper to calculate missing pre-orientation forms
     function getMissingOnboardingForms() {
         let missing = [];
         if (!document.getElementById('checkAllPay').checked) {
@@ -1653,7 +1610,6 @@
         return missing;
     }
 
-    // Trigger manual Gmail fires via Sheets POST API (Now Async with Custom Brand Modals)
     async function triggerCandidateEmail(emailType) {
         const id = document.getElementById('fieldId').value;
         const name = document.getElementById('fieldName').value.trim();
@@ -1674,9 +1630,8 @@
         let payloadStoreSetupLink = "";
 
         if (emailType === "welcome") {
-            // Prompt only for starting hourly rate using the new dynamic prompt modal
             payRateInput = await showBrandPrompt(`Enter starting hourly rate for ${name} (e.g., 14.50):`, "15.00", "Starting Hourly Wage");
-            if (payRateInput === null) return; // User cancelled
+            if (payRateInput === null) return;
             confirmationMessage = `Send Dynamic Welcome Email & Offer to ${name} at $${payRateInput}/hr?\n\n(This will automatically CC the store and BCC the DO)`;
         } else if (emailType === "reminder") {
             const missing = getMissingOnboardingForms();
@@ -1685,9 +1640,8 @@
                 return;
             }
             
-            // Trigger specialized multi-input modal showing only fields for forms that are actually missing
             const links = await showBrandReminderPrompt(missing);
-            if (links === null) return; // Cancelled
+            if (links === null) return;
             
             payloadMissing = missing.join(", ");
             payloadAllPayLink = links.allPayLink;
@@ -1739,7 +1693,6 @@
             candidates = data.onboarding || [];
             interviews = data.interviews || [];
             
-            // Re-render and select the candidate to show updated checkbox states
             renderList();
             const reselected = candidates.find(c => c.id === id);
             if (reselected) {
@@ -1755,9 +1708,6 @@
         });
     }
 
-    // ==========================================
-    // SCRATCHPAD & WEEKLY AUDIT INTEGRATION
-    // ==========================================
     function initScratchpad() {
         const username = localStorage.getItem('onb_user');
         
@@ -1927,11 +1877,10 @@
         });
     }
 
-    // Dynamic Weekly Activity Audit Calculations
     function updateMetricsAndWeekRange(apiMetrics) {
         const now = new Date();
         const currentDay = now.getDay();
-        const distanceToMonday = (currentDay === 0 ? -6 : 1) - currentDay; // Monday is day 1
+        const distanceToMonday = (currentDay === 0 ? -6 : 1) - currentDay; 
         
         const startOfThisWeek = new Date(now);
         startOfThisWeek.setDate(now.getDate() + distanceToMonday);
@@ -1969,7 +1918,6 @@
             hiresThisWeek = apiMetrics.hiresThisWeek !== undefined ? apiMetrics.hiresThisWeek : 0;
             hiresLastWeek = apiMetrics.hiresLastWeek !== undefined ? apiMetrics.hiresLastWeek : 0;
         } else {
-            // Compute Hires locally from candidate roster updates
             candidates.forEach(item => {
                 if (!item.lastUpdated || !item.hired) return;
                 const updatedDate = new Date(item.lastUpdated);
@@ -1985,7 +1933,6 @@
                 }
             });
 
-            // Fallback: load manual metrics from localStorage
             interviewsThisWeek = Number(localStorage.getItem(`metric_interviews_this_week_${username}`)) || 0;
             interviewsLastWeek = Number(localStorage.getItem(`metric_interviews_last_week_${username}`)) || 0;
             
@@ -2076,26 +2023,21 @@
         renderChecklist();
     }
 
-    // Silent background sync (no overlays, zero screen-freezes)
     function silentSync() {
         const u = localStorage.getItem('onb_user');
-        if (!u) return; // Exit if not logged in
+        if (!u) return;
         
         const city = getCityFromUser(u);
         
         fetch(`${API_URL}?city=${city}`)
             .then(res => res.json())
             .then(data => {
-                if (data.error) return; // Quietly ignore errors in the background
+                if (data.error) return;
                 
                 candidates = data.onboarding || [];
                 interviews = data.interviews || [];
                 
-                // Quietly re-render only the left candidate list!
                 renderList();
-                
-                // If a candidate is selected, we keep their form fields exactly as is 
-                // so we never overwrite what you are typing or editing.
                 
                 if (data.metrics) {
                     window.hasApiMetrics = true;
