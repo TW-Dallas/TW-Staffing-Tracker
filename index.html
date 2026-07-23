@@ -113,7 +113,7 @@
 
         /* --- ALERT BANNER --- */
         .alert-banner { background-color: #ffebee; border: 1px solid var(--brand-red); color: var(--dark-red); padding: 8px; border-radius: 6px; font-size: 13px; margin-top: 8px; font-family: 'Subhead2', sans-serif; display: flex; align-items: center; gap: 6px; }
-        .alert-banner.warning { background-color: #fff3e0; border: 1px solid var(--warning-orange); color: #e65100; }
+        .alert-banner.warning { background-color: #ffebee; border: 1px solid var(--brand-red); color: var(--dark-red); }
 
         /* --- EXPANDABLE SECTIONS --- */
         .card-details { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
@@ -359,14 +359,12 @@ fetch(API_URL)
         filtered.forEach(item => {
             const icon = getPositionIcon(item.position);
             
-            // Card Color Logic
+            // Card Color Logic (Orange completely removed!)
             let cardClass = 'status-blue';
             if (item.inactive || item.ineligible) {
                 cardClass = 'status-gray';
-            } else if (item.incorrectEmail) {
+            } else if (item.incorrectEmail || item.hasMissingDocs) { // <-- BOTH trigger Red now!
                 cardClass = 'status-red';
-            } else if (item.hasMissingDocs) {
-                cardClass = 'status-orange';
             } else if (item.hired) {
                 cardClass = 'status-green';
             }
@@ -507,7 +505,7 @@ fetch(API_URL)
             const s = item.status ? item.status.toString() : '';
             if(s.includes('No Show') || s.includes('Canceled') || s.includes('Pass')) statusColor = 'status-red';
             if(s.includes('2nd Interview') || s.includes('Hired') || s.includes('Offered')) statusColor = 'status-green';
-            if(s.includes('Offered') || s.includes('TBD')) statusColor = 'status-orange';
+            if(s.includes('Offered') || s.includes('TBD')) statusColor = 'status-blue';
             if(s.includes('Reschedule') || s.includes('Withdrawn')) statusColor = 'status-gray';
 
             let showGmBox = false;
