@@ -151,6 +151,38 @@
         .updated-text { font-size: 11px; color: #999; text-align: right; margin-top: 8px; font-style: italic; }
         .loader { text-align: center; padding: 40px; color: var(--crust-dark); font-family: 'ExtraBlack', serif; font-size: 18px; }
         .hidden { display: none; }
+
+        /* --- BRAND DIALOG MODAL CSS --- */
+        .brand-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(71, 43, 16, 0.4);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .brand-modal-card {
+            background: var(--card-bg);
+            width: 90%;
+            max-width: 440px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 16px 48px rgba(71, 43, 16, 0.25);
+            border: 2px solid var(--crust-dark);
+            overflow: hidden;
+            animation: fadeIn 0.15s ease-out;
+        }
+        .brand-modal-brand-stripe {
+            background: linear-gradient(90deg, var(--brand-red) 50%, var(--brand-blue) 50%);
+            height: 8px;
+            width: 100%;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -178,10 +210,57 @@
     <div id="interviewList" class="hidden"></div>
 </div>
 
+<!-- What's New Welcome Modal -->
+<div id="updateModal" class="brand-modal-overlay hidden">
+    <div class="brand-modal-card">
+        <div class="brand-modal-brand-stripe"></div>
+        <div class="brand-modal-content" style="padding: 24px;">
+            <h3 style="margin-top: 0; margin-bottom: 12px; color: var(--dark-blue); font-family: 'Subhead1', sans-serif; font-size: 20px; text-transform: uppercase; letter-spacing: 0.5px;">Tracker Updates! 🍕</h3>
+            <p style="font-size: 15px; line-height: 1.45; color: var(--crust-burnt); margin-top: 0; margin-bottom: 16px; font-family: 'Condensed';">
+                We upgraded your Hiring Tracker to make onboarding new team members even smoother! Here is what's new:
+            </p>
+            <ul style="font-size: 14px; line-height: 1.5; color: var(--crust-deep); padding-left: 20px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px; font-family: 'Condensed';">
+                <li>📱 <strong>Tap to Expand:</strong> Tap any candidate's card to view their onboarding checklist, assets, and action items [0].</li>
+                <li>💬 <strong>Smart Nudge Texts:</strong> Tapping "Nudge SMS" now automatically drafts a text based on exactly what they are missing [0].</li>
+                <li>🔄 <strong>Real-Time Sync:</strong> The tracker quietly refreshes itself in the background every 30 seconds [0].</li>
+                <li>🎨 <strong>Clean Design:</strong> Cleaned up fonts and layouts for faster mobile reading [0].</li>
+            </ul>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1.5px solid var(--crust-med); padding-top: 14px;">
+                <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-family: 'Condensed'; color: var(--crust-deep); cursor: pointer;">
+                    <input type="checkbox" id="hideUpdateCheckbox" style="width: 16px; height: 16px; cursor: pointer;"> Don't show this again
+                </label>
+                <button type="button" onclick="closeUpdateModal()" style="background: var(--brand-blue); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-family: 'Subhead2'; font-size: 13px; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">Got It!</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbxa1XNdNgwOULiYpeAoBIjTy1wv034pON4-hnR444XB07vegHhoSR56UacR7UaktTaGZg/exec?city=Dallas";
+    const API_URL = "https://script.google.com/macros/s/AKfycbxa1XNdNgwOULiYpeAoBIjTy1wv034pON4-hnR444XB07vegHhoSR56UacR7UaktTaGZg/exec?city=Dallas";
     let rawData = { onboarding: [], interviews: [] };
-    let expandedCardIds = new Set(); // Track expanded cards across background refreshes
+    let expandedCardIds = new Set(); // Track expanded cards across...
+
+    // Check if we should display the welcome modal (runs safely in private windows too) [0]
+    (function() {
+        try {
+            const hideModal = localStorage.getItem('hideTrackerUpdate_v1');
+            if (hideModal !== 'true') {
+                document.getElementById('updateModal').classList.remove('hidden');
+            }
+        } catch (e) {
+            document.getElementById('updateModal').classList.remove('hidden');
+        }
+    })();
+
+    function closeUpdateModal() {
+        const dontShowAgain = document.getElementById('hideUpdateCheckbox').checked;
+        if (dontShowAgain) {
+            try {
+                localStorage.setItem('hideTrackerUpdate_v1', 'true');
+            } catch (e) {}
+        }
+        document.getElementById('updateModal').classList.add('hidden');
+    }
 
     // Perform initial loading with full-screen indicator
     fetchData(true);
