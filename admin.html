@@ -1922,7 +1922,7 @@
         endOfLastWeek.setHours(23,59,59,999);
         
         const formatDate = (d) => `${d.getMonth() + 1}/${d.getDate()}`;
-        const rangeText = `${formatDate(startOfThisWeek)} - ${formatDate(endOfThisWeek)}`;
+        const rangeText = `${formatDate(startOfThisWeek)} - ${formatDate(endOfLastWeek)}`;
         
         const metricsWeekRangeEl = document.getElementById('metricsWeekRange');
         if (metricsWeekRangeEl) {
@@ -1934,38 +1934,51 @@
         let hiresThisWeek = 0;
         let hiresLastWeek = 0;
 
-        const username = localStorage.getItem('onb_user');
+        // Helper: Cleans timezone suffixes (" CT", " MT") so JS can parse dates cleanly
+        function parseCleanDate(dateStr) {
+            if (!dateStr) return null;
+            const cleanStr = dateStr.toString().replace(/\s+(CT|MT|ET|PT)/gi, '').trim();
+            const d = new Date(cleanStr);
+            return isNaN(d.getTime()) ? null : d;
+        }
 
-        if (apiMetrics && typeof apiMetrics === 'object') {
-            interviewsThisWeek = apiMetrics.interviewsThisWeek !== undefined ? apiMetrics.interviewsThisWeek : 0;
-            interviewsLastWeek = apiMetrics.interviewsLastWeek !== undefined ? apiMetrics.interviewsLastWeek : 0;
-            hiresThisWeek = apiMetrics.hiresThisWeek !== undefined ? apiMetrics.hiresThisWeek : 0;
-            hiresLastWeek = apiMetrics.hiresLastWeek !== undefined ? apiMetrics.hiresLastWeek : 0;
-        } else {
+        // 1. Calculate Interviews from active interview list
+        if (Array.isArray(interviews)) {
+            interviews.forEach(item => {
+                if (!item.date) return;
+                const intDate = parseCleanDate(item.date);
+                if (!intDate) return;
+
+                if (intDate >= startOfThisWeek && intDate <= endOfThisWeek) {
+                    interviewsThisWeek++;
+                } else if (intDate >= startOfLastWeek && intDate <= endOfLastWeek) {
+                    interviewsLastWeek++;
+                }
+            });
+        }
+
+        // 2. Calculate Hires from active candidates list
+        if (Array.isArray(candidates)) {
             candidates.forEach(item => {
-                if (!item.lastUpdated || !item.hired) return;
-                const updatedDate = new Date(item.lastUpdated);
-                if (isNaN(updatedDate.getTime())) return;
-                
-                const isThisWeek = (updatedDate >= startOfThisWeek && updatedDate <= endOfThisWeek);
-                const isLastWeek = (updatedDate >= startOfLastWeek && updatedDate <= endOfLastWeek);
-                
-                if (isThisWeek) {
+                if (!item.hired || !item.lastUpdated) return;
+                const updateDate = parseCleanDate(item.lastUpdated);
+                if (!updateDate) return;
+
+                if (updateDate >= startOfThisWeek && updateDate <= endOfThisWeek) {
                     hiresThisWeek++;
-                } else if (isLastWeek) {
+                } else if (updateDate >= startOfLastWeek && updateDate <= endOfLastWeek) {
                     hiresLastWeek++;
                 }
             });
-
-            interviewsThisWeek = Number(localStorage.getItem(`metric_interviews_this_week_${username}`)) || 0;
-            interviewsLastWeek = Number(localStorage.getItem(`metric_interviews_last_week_${username}`)) || 0;
-            
-            const localHiresThis = localStorage.getItem(`metric_hires_this_week_${username}`);
-            const localHiresLast = localStorage.getItem(`metric_hires_last_week_${username}`);
-            if (localHiresThis !== null) hiresThisWeek = Number(localHiresThis);
-            if (localHiresLast !== null) hiresLastWeek = Number(localHiresLast);
         }
-        
+
+        // Manual override fallback if locally saved
+        const username = localStorage.getItem('onb_user');
+        const manualIntThis = localStorage.getItem(`metric_interviews_this_week_${username}`);
+        const manualIntLast = localStorage.getItem(`metric_interviews_last_week_${username}`);
+        if (manualIntThis !== null && manualIntThis !== '') interviewsThisWeek = Number(manualIntThis);
+        if (manualIntLast !== null && manualIntLast !== '') interviewsLastWeek = Number(manualIntLast);
+
         const quotesThisWeekEl = document.getElementById('metricsQuotesThisWeek');
         const quotesLastWeekEl = document.getElementById('metricsQuotesLastWeek');
         const ordersThisWeekEl = document.getElementById('metricsOrdersThisWeek');
@@ -1975,18 +1988,6 @@
         if (quotesLastWeekEl) quotesLastWeekEl.innerText = interviewsLastWeek;
         if (ordersThisWeekEl) ordersThisWeekEl.innerText = hiresThisWeek;
         if (ordersLastWeekEl) ordersLastWeekEl.innerText = hiresLastWeek;
-
-        const listElements = [quotesThisWeekEl, quotesLastWeekEl, ordersThisWeekEl, ordersLastWeekEl];
-        listElements.forEach(el => {
-            if (!el) return;
-            if (window.hasApiMetrics) {
-                el.style.cursor = 'default';
-                el.title = 'Live sync data from sheet database';
-            } else {
-                el.style.cursor = 'pointer';
-                el.title = 'Click to edit locally (separate from onboarding candidates)';
-            }
-        });
     }
 
     function editLocalMetric(key, elementId) {
