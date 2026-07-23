@@ -324,8 +324,8 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        /* --- MOBILE STYLES --- */
-        @media (max-width: 1024px) {
+        /* --- MOBILE STYLES (2-COLUMN GRID) --- */
+        @media (max-width: 768px) {
             html, body { overflow: auto; height: auto; }
             .dashboard { flex-direction: column; height: auto; overflow: visible; }
             .list-panel { flex: none; height: auto; overflow: visible; width: 100% !important; }
@@ -334,6 +334,27 @@
             #candidateForm { height: auto; overflow: visible; }
             .form-scroll-area { overflow-y: visible; height: auto; }
             .form-row.flex-three { flex-direction: column; gap: 8px; }
+
+            /* --- RESPONSIVE 2-COLUMN CHECKBOX GRID FOR PHONES --- */
+            .checkbox-grid { 
+                grid-template-columns: 1fr 1fr !important; /* 2 side-by-side columns on mobile */
+                gap: 8px;
+                padding: 10px;
+            }
+            .checkbox-grid > div:empty { 
+                display: none; /* Removes empty spacers so items flow seamlessly in 2 columns */
+            }
+            .checkbox-item {
+                font-size: 14px; /* Slightly tighter font for 2-column fit */
+                word-break: break-word; /* Allows long text to wrap cleanly */
+            }
+            .checkbox-item input {
+                flex-shrink: 0; /* Keeps checkbox squares from squishing when text wraps */
+            }
+            #missingDocsContainer {
+                grid-template-columns: 1fr !important; /* Keep expandable missing docs list 1 column */
+                grid-column: 1 / -1 !important;
+            }
         }
     </style>
 </head>
