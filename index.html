@@ -186,13 +186,27 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbyH-CITcN3UqGRPmxkhHFMdC-0YDnaPssEhGH__GxybYQKJymeQUWHtcUjhtNe5cyOHlw/exec";
     let rawData = { onboarding: [], interviews: [] };
 
-    fetch(API_URL)
+fetch(API_URL)
         .then(response => response.json())
         .then(data => {
+            // Check if Google Apps Script returned an error
+            if (data.error) {
+                document.getElementById('loader').innerHTML = `
+                    <div style="color: var(--brand-red); font-family: 'Subhead2';">
+                        ⚠️ Database Error:<br>
+                        <span style="font-family: monospace; font-size: 14px; color: #444; display: block; margin-top: 10px;">
+                            ${data.error}
+                        </span>
+                    </div>`;
+                console.error("Google Sheets API Error:", data.error);
+                return;
+            }
+
             rawData = data;
             populateFilters();
             renderOnboarding();
             renderInterviews();
+            // Ensure loader is hidden ONLY after success
             document.getElementById('loader').classList.add('hidden');
         })
         .catch(err => {
