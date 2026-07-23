@@ -10,15 +10,13 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
-    <style>
+<style>
         @font-face { font-family: 'ExtraBlack'; src: url('fonts/Dominos Sans Header 1.ttf') format('truetype'); font-weight: bold; }
         @font-face { font-family: 'ExtraBold'; src: url('fonts/Dominos Sans Header 2.ttf') format('truetype'); font-weight: normal; }
         @font-face { font-family: 'Subhead1'; src: url('fonts/Dominos Sans Subhead 1.ttf') format('truetype'); font-weight: normal; }
         @font-face { font-family: 'Subhead2'; src: url('fonts/Dominos Sans Subhead 2.ttf') format('truetype'); font-weight: normal; }
-        @font-face { font-family: 'Body-Bold'; src: url('fonts/Dominos Sans Bold.ttf') format('truetype'); font-weight: bold; }
         @font-face { font-family: 'Body'; src: url('fonts/Dominos Sans Body.ttf') format('truetype'); font-weight: normal; }
         @font-face { font-family: 'Condensed'; src: url('fonts/Dominos Sans Body Condensed.ttf') format('truetype'); font-weight: normal; }
-        @font-face { font-family: 'Compact'; src: url('fonts/Dominos Sans Body Compact.ttf') format('truetype'); font-weight: normal; }
 
         :root {
             --brand-red: #ff0000;
@@ -55,13 +53,13 @@
         }        
         .logo { height: 32px; width: auto; }
         h1 { margin: 0; font-family: 'ExtraBlack', serif; font-size: 20px; text-transform: uppercase; line-height: 1.1; }
-        .subtitle { font-family: 'Compact', sans-serif; font-size: 12px; opacity: 0.9; line-height: 1.2; }
+        .subtitle { font-family: 'Condensed', sans-serif; font-size: 12px; opacity: 0.9; line-height: 1.2; }
 
         /* --- CONTROLS --- */
         .controls { padding: 12px 16px; background: white; border-bottom: 2px solid var(--crust-med); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
-        select { padding: 8px; border-radius: 8px; border: 1px solid var(--crust-dark); background: var(--crust-light); font-family: 'Body-Bold', sans-serif; font-size: 16px; color: var(--crust-burnt); width: 250px; }
+        select { padding: 8px; border-radius: 8px; border: 1px solid var(--crust-dark); background: var(--crust-light); font-family: 'Subhead2', sans-serif; font-size: 16px; color: var(--crust-burnt); width: 250px; }
         .view-toggle { display: flex; background: var(--crust-med); border-radius: 8px; padding: 4px; margin-left: auto; }
-        .view-btn { padding: 8px 16px; border: none; background: none; font-family: 'Body-Bold', sans-serif; font-size: 14px; color: #472b10; cursor: pointer; border-radius: 6px; text-transform: uppercase; }
+        .view-btn { padding: 8px 16px; border: none; background: none; font-family: 'Subhead2', sans-serif; font-size: 14px; color: #472b10; cursor: pointer; border-radius: 6px; text-transform: uppercase; }
         .view-btn.active { background: white; color: var(--brand-blue); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
         @media (max-width: 600px) {
@@ -95,10 +93,10 @@
         .card.status-gray { border-left-color: #6c757d; opacity: 0.8; background-color: #f8f9fa; }
 
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .name { font-family: 'ExtraBold', sans-serif; font-size: 18px; color: var(--crust-burnt); }
-        .position-badge { font-family: 'Body-Bold', sans-serif; font-size: 12px; padding: 4px 8px; border-radius: 12px; background: var(--crust-light); color: #005c91; border: 1px solid var(--crust-med); display: flex; align-items: center; gap: 4px; }
+        .name { font-family: 'Subhead2', sans-serif; font-size: 18px; color: var(--crust-burnt); }
+        .position-badge { font-family: 'Subhead2', sans-serif; font-size: 12px; padding: 4px 8px; border-radius: 12px; background: var(--crust-light); color: #005c91; border: 1px solid var(--crust-med); display: flex; align-items: center; gap: 4px; }
         
-        .meta-row { display: flex; justify-content: space-between; font-family: 'Compact', sans-serif; font-size: 14px; color: var(--crust-deep); margin-bottom: 8px; }
+        .meta-row { display: flex; justify-content: space-between; font-family: 'Condensed', sans-serif; font-size: 14px; color: var(--crust-deep); margin-bottom: 8px; }
 
         /* --- PIPELINE VISUALS --- */
         .pipeline-container { margin-top: 10px; margin-bottom: 6px; }
@@ -108,13 +106,13 @@
         .pipeline-fill.red { background: var(--brand-red); }
         .pipeline-fill.grey { background: #6c757d; }
 
-        .status-text { font-family: 'Body-Bold', sans-serif; font-size: 14px; color: var(--brand-blue); display: flex; justify-content: space-between; align-items: center; }
+        .status-text { font-family: 'Subhead2', sans-serif; font-size: 14px; color: var(--brand-blue); display: flex; justify-content: space-between; align-items: center; }
         .status-text.red { color: var(--brand-red); }
         .status-text.green { color: var(--brand-green); }
         .status-text.grey { color: #6c757d; }
 
         /* --- ALERT BANNER --- */
-        .alert-banner { background-color: #ffebee; border: 1px solid var(--brand-red); color: var(--dark-red); padding: 8px; border-radius: 6px; font-size: 13px; margin-top: 8px; font-family: 'Body-Bold', sans-serif; display: flex; align-items: center; gap: 6px; }
+        .alert-banner { background-color: #ffebee; border: 1px solid var(--brand-red); color: var(--dark-red); padding: 8px; border-radius: 6px; font-size: 13px; margin-top: 8px; font-family: 'Subhead2', sans-serif; display: flex; align-items: center; gap: 6px; }
         .alert-banner.warning { background-color: #fff3e0; border: 1px solid var(--warning-orange); color: #e65100; }
 
         /* --- EXPANDABLE SECTIONS --- */
@@ -125,12 +123,12 @@
 
         /* --- CHECKLIST STYLE --- */
         .onboarding-checklist { background: var(--crust-light); border: 1px solid var(--crust-med); border-radius: 8px; padding: 12px; margin-top: 12px; }
-        .checklist-title { font-family: 'Body-Bold', sans-serif; font-size: 14px; margin-bottom: 8px; color: var(--crust-burnt); text-transform: uppercase; letter-spacing: 0.5px; }
-        .checklist-item { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 6px; font-family: 'Body', sans-serif; color: var(--crust-deep); }
+        .checklist-title { font-family: 'Subhead2', sans-serif; font-size: 14px; margin-bottom: 8px; color: var(--crust-burnt); text-transform: uppercase; letter-spacing: 0.5px; }
+        .checklist-item { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 6px; font-family: 'Condensed', sans-serif; color: var(--crust-deep); }
         .checklist-item:last-child { margin-bottom: 0; }
         .chk-icon { font-size: 14px; font-weight: bold; }
         .chk-done { color: var(--brand-green); }
-        .chk-missing { color: var(--brand-red); font-family: 'Body-Bold', sans-serif; }
+        .chk-missing { color: var(--brand-red); font-family: 'Subhead2', sans-serif; }
         .chk-pending { color: #888; }
 
         /* --- DATA CHIPS --- */
@@ -140,7 +138,7 @@
 
         /* --- NUDGE & ACTION BUTTONS --- */
         .action-container { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-        .action-btn { flex: 1; min-width: 120px; padding: 10px; border-radius: 8px; border: none; font-family: 'Body-Bold', sans-serif; font-size: 13px; text-transform: uppercase; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .action-btn { flex: 1; min-width: 120px; padding: 10px; border-radius: 8px; border: none; font-family: 'Subhead2', sans-serif; font-size: 13px; text-transform: uppercase; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .btn-call { background-color: var(--dark-blue); color: white; }
         .btn-nudge { background-color: var(--brand-red); color: white; }
         .action-btn:active { transform: scale(0.98); }
@@ -148,7 +146,7 @@
         /* --- GM APPOINTMENT BOX --- */
         .gm-appt-box { background-color: #e8f5e9; border: 1px solid #28a745; color: #1b5e20; padding: 10px; border-radius: 8px; margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
         .gm-appt-label { font-size: 11px; text-transform: uppercase; opacity: 0.8; font-weight: bold; }
-        .gm-appt-time { font-family: 'Body-Bold', sans-serif; font-size: 16px; }
+        .gm-appt-time { font-family: 'Subhead2', sans-serif; font-size: 16px; }
 
         /* --- NOTES --- */
         .notes-section { font-size: 14px; margin-top: 12px; color: var(--crust-deep); background: #f9f9f9; padding: 8px; border-radius: 6px; border-left: 3px solid #ccc; }
