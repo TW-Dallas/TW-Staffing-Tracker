@@ -127,6 +127,20 @@
             gap: 16px; 
         }
 
+        /* --- DALLAS SPECIFIC VIEW TOGGLE BUTTONS --- */
+        #dallasToggleContainer button {
+            font-family: 'Subhead1', sans-serif;
+            font-size: 13px;
+            padding: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none;
+        }
+
         /* --- SORT CONTROLS --- */
         .control-row { display: flex; gap: 10px; margin-bottom: 8px; }
         .control-row select { padding: 6px; border-radius: 6px; border: 1px solid var(--crust-dark); font-family: 'Condensed', sans-serif; font-size: 14px; background: white; flex: 1; }
@@ -254,8 +268,16 @@
     <div class="dashboard">
         <!-- Left Panel: List of Candidates -->
         <div class="list-panel">
-            <button class="btn-add" onclick="prepareAddNew()">📋 Add New Candidate</button>
+            <button class="btn-add" id="btnAddMain" onclick="prepareAddNew()">📋 Add New Candidate</button>
             
+            <!-- Dallas Only Toggle -->
+            <div id="dallasToggleContainer" class="hidden" style="margin-bottom: 8px;">
+                <div style="display: flex; background: var(--crust-med); border-radius: 8px; padding: 2px; gap: 4px;">
+                    <button type="button" id="toggleOnb" onclick="switchView('onboarding')" style="flex: 1; font-size: 13px; padding: 6px; border-radius: 6px; background: var(--dark-blue); color: white; border: none; cursor: pointer;">Onboarding</button>
+                    <button type="button" id="toggleInt" onclick="switchView('interviews')" style="flex: 1; font-size: 13px; padding: 6px; border-radius: 6px; background: transparent; color: var(--crust-burnt); border: none; cursor: pointer;">Interviews</button>
+                </div>
+            </div>
+
             <div class="control-row">
                 <select id="sortControl" onchange="renderList()">
                     <option value="updated">⏰ Sort: Last Updated</option>
@@ -280,110 +302,214 @@
                 
                 <!-- Scrollable Input Fields Container -->
                 <div class="form-scroll-area">
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" id="fieldName" required>
-                    </div>
                     
-                    <div class="form-row">
+                    <!-- ONBOARDING FORM TEMPLATE -->
+                    <div id="onboardingFormFields">
                         <div class="form-group">
-                            <label>Position</label>
-                            <select id="fieldPosition">
-                                <option value="CSR">🍕 CSR</option>
-                                <option value="DE">🚗 DE</option>
-                            </select>
+                            <label>Full Name</label>
+                            <input type="text" id="fieldName">
                         </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Position</label>
+                                <select id="fieldPosition">
+                                    <option value="CSR">🍕 CSR</option>
+                                    <option value="DE">🚗 DE</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Store #</label>
+                                <input type="text" id="fieldStore">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="text" id="fieldPhone" placeholder="(xxx) xxx-xxxx">
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="text" id="fieldEmail">
+                            </div>
+                        </div>
+
+                        <!-- Consolidated 3-Column Row -->
+                        <div class="form-row flex-three">
+                            <div class="form-group flex-two-weight">
+                                <label>Pay Card Status</label>
+                                <input type="text" id="fieldPayCard" placeholder="Yes or leave blank">
+                            </div>
+                            <div class="form-group">
+                                <label>Shirt Size</label>
+                                <select id="fieldShirt">
+                                    <option value="">None</option>
+                                    <option value="Small">Small</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Large">Large</option>
+                                    <option value="XL">XL</option>
+                                    <option value="2XL">2XL</option>
+                                    <option value="4XL">4XL</option>
+                                    <option value="6XL">6XL</option>
+                                    <option value="Women's Small">Women's Small</option>
+                                    <option value="Women's Medium">Women's Medium</option>
+                                    <option value="Women's Large">Women's Large</option>
+                                    <option value="Women's XL">Women's XL</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Hat Style</label>
+                                <select id="fieldHat">
+                                    <option value="">None</option>
+                                    <option value="Cap">Cap</option>
+                                    <option value="Visor">Visor</option>
+                                </select>
+                            </div>
+                        </div>
+
                         <div class="form-group">
-                            <label>Store #</label>
-                            <input type="text" id="fieldStore" required>
+                            <label>Internal Notes</label>
+                            <textarea id="fieldNotes" placeholder="Write any specific candidate notes here..."></textarea>
+                        </div>
+
+                        <!-- 3-Column Structured Checklist Grid -->
+                        <div class="checkbox-grid">
+                            <div class="section-header">Stage 1: Onboarding Intake</div>
+                            <label class="checkbox-item"><input type="checkbox" id="checkSubmission"> Submission Received</label>
+                            <label class="checkbox-item"><input type="checkbox" id="checkOnbSent"> Onboarding Sent</label>
+                            
+                            <div class="section-header">Stage 2: Paperwork Processing</div>
+                            <label class="checkbox-item"><input type="checkbox" id="checkBgc"> Background Check Done</label>
+                            <label class="checkbox-item"><input type="checkbox" id="checkAllPay"> AllPay Done</label>
+                            
+                            <div class="section-header">Stage 3: Orientation & Hire</div>
+                            <label class="checkbox-item"><input type="checkbox" id="checkNtoLink"> NTO Signup Link Sent</label>
+                            <label class="checkbox-item"><input type="checkbox" id="checkNto"> NTO Scheduled</label>
+                            <label class="checkbox-item" style="grid-column: span 3;"><input type="checkbox" id="checkHired"> Hired</label>
+                            
+                            <div class="section-header">Active Flags & Blockers</div>
+                            <label class="checkbox-item flag-box flag-reviewing" style="grid-column: span 3;">
+                                <input type="checkbox" id="checkReviewing"> 🔍 Currently Reviewing
+                            </label>
+                            <label class="checkbox-item flag-box flag-incorrect">
+                                <input type="checkbox" id="checkIncorrect"> ⚠️ Incorrect Email
+                            </label>
+                            <label class="checkbox-item flag-box flag-incorrect">
+                                <input type="checkbox" id="checkMissingDocs"> ⚠️ Missing/Incorrect Docs
+                            </label>
+                            
+                            <!-- Blank spacer to cleanly push the gray terminal flags to the next row -->
+                            <div></div> 
+                            
+                            <label class="checkbox-item flag-box flag-inactive">
+                                <input type="checkbox" id="checkIneligible"> 🚫 Ineligible / Rejected
+                            </label>
+                            <label class="checkbox-item flag-box flag-inactive">
+                                <input type="checkbox" id="checkInactive"> 💤 Inactive
+                            </label>
                         </div>
                     </div>
 
-                    <div class="form-row">
+                    <!-- INTERVIEWS FORM TEMPLATE -->
+                    <div id="interviewFormFields" class="hidden">
                         <div class="form-group">
-                            <label>Phone Number</label>
-                            <input type="text" id="fieldPhone" placeholder="(xxx) xxx-xxxx">
+                            <label>Candidate Name</label>
+                            <input type="text" id="intName">
                         </div>
+                        
+                        <div class="form-row flex-three">
+                            <div class="form-group">
+                                <label>Position</label>
+                                <select id="intPosition">
+                                    <option value="CSR">🍕 CSR</option>
+                                    <option value="DE">🚗 DE</option>
+                                    <option value="AM">👔 AM</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Store #</label>
+                                <input type="text" id="intStore">
+                            </div>
+                            <div class="form-group">
+                                <label>DO Name</label>
+                                <input type="text" id="intDo">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="text" id="intPhone" placeholder="(xxx) xxx-xxxx">
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="text" id="intEmail">
+                            </div>
+                        </div>
+
+                        <div class="section-header">Phone Interview Progression</div>
+                        
+                        <div class="form-row flex-three">
+                            <div class="form-group">
+                                <label>Interview Date</label>
+                                <input type="text" id="intDate" placeholder="MM/DD/YYYY">
+                            </div>
+                            <div class="form-group">
+                                <label>Day of Week</label>
+                                <select id="intDay">
+                                    <option value="">Select Day</option>
+                                    <option value="Monday">Monday</option>
+                                    <option value="Tuesday">Tuesday</option>
+                                    <option value="Wednesday">Wednesday</option>
+                                    <option value="Thursday">Thursday</option>
+                                    <option value="Friday">Friday</option>
+                                    <option value="Saturday">Saturday</option>
+                                    <option value="Sunday">Sunday</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Time</label>
+                                <input type="text" id="intTime" placeholder="e.g., 10:00 AM">
+                            </div>
+                        </div>
+
+                        <div class="section-header">GM Interview & Final Progression</div>
+
+                        <div class="form-row flex-three">
+                            <div class="form-group flex-two-weight">
+                                <label>Interview Status</label>
+                                <select id="intStatus">
+                                    <option value="Scheduled">📞 Scheduled</option>
+                                    <option value="Completed">✓ Completed</option>
+                                    <option value="Passed to GM">👔 Passed to GM</option>
+                                    <option value="Hired">🎉 Hired</option>
+                                    <option value="No Show">❌ No Show</option>
+                                    <option value="Declined">🚫 Declined</option>
+                                    <option value="Hold">⏸ Hold</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>GM Date</label>
+                                <input type="text" id="intGmDate" placeholder="MM/DD/YYYY">
+                            </div>
+                            <div class="form-group">
+                                <label>GM Time</label>
+                                <input type="text" id="intGmTime" placeholder="e.g., 2:00 PM">
+                            </div>
+                        </div>
+
                         <div class="form-group">
-                            <label>Email Address</label>
-                            <input type="text" id="fieldEmail">
+                            <label>Status Updates</label>
+                            <textarea id="intStatusUpdates" placeholder="Recent updates on interview progression..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Feedback & Notes</label>
+                            <textarea id="intNotes" placeholder="Write any specific interview notes here..."></textarea>
                         </div>
                     </div>
 
-                    <!-- Consolidated 3-Column Row -->
-                    <div class="form-row flex-three">
-                        <div class="form-group flex-two-weight">
-                            <label>Pay Card Status</label>
-                            <input type="text" id="fieldPayCard" placeholder="Yes or leave blank">
-                        </div>
-                        <div class="form-group">
-                            <label>Shirt Size</label>
-                            <select id="fieldShirt">
-                                <option value="">None</option>
-                                <option value="Small">Small</option>
-                                <option value="Medium">Medium</option>
-                                <option value="Large">Large</option>
-                                <option value="XL">XL</option>
-                                <option value="2XL">2XL</option>
-                                <option value="4XL">4XL</option>
-                                <option value="6XL">6XL</option>
-                                <option value="Women's Small">Women's Small</option>
-                                <option value="Women's Medium">Women's Medium</option>
-                                <option value="Women's Large">Women's Large</option>
-                                <option value="Women's XL">Women's XL</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Hat Style</label>
-                            <select id="fieldHat">
-                                <option value="">None</option>
-                                <option value="Cap">Cap</option>
-                                <option value="Visor">Visor</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Internal Notes</label>
-                        <textarea id="fieldNotes" placeholder="Write any specific candidate notes here..."></textarea>
-                    </div>
-
-                    <!-- 3-Column Structured Checklist Grid -->
-                    <div class="checkbox-grid">
-                        <div class="section-header">Stage 1: Onboarding Intake</div>
-                        <label class="checkbox-item"><input type="checkbox" id="checkSubmission"> Submission Received</label>
-                        <label class="checkbox-item"><input type="checkbox" id="checkOnbSent"> Onboarding Sent</label>
-                        
-                        <div class="section-header">Stage 2: Paperwork Processing</div>
-                        <label class="checkbox-item"><input type="checkbox" id="checkBgc"> Background Check Done</label>
-                        <label class="checkbox-item"><input type="checkbox" id="checkAllPay"> AllPay Done</label>
-                        
-                        <div class="section-header">Stage 3: Orientation & Hire</div>
-                        <label class="checkbox-item"><input type="checkbox" id="checkNtoLink"> NTO Signup Link Sent</label>
-                        <label class="checkbox-item"><input type="checkbox" id="checkNto"> NTO Scheduled</label>
-                        <label class="checkbox-item" style="grid-column: span 3;"><input type="checkbox" id="checkHired"> Hired</label>
-                        
-                        <div class="section-header">Active Flags & Blockers</div>
-                        <label class="checkbox-item flag-box flag-reviewing" style="grid-column: span 3;">
-                            <input type="checkbox" id="checkReviewing"> 🔍 Currently Reviewing
-                        </label>
-                        <label class="checkbox-item flag-box flag-incorrect">
-                            <input type="checkbox" id="checkIncorrect"> ⚠️ Incorrect Email
-                        </label>
-                        <label class="checkbox-item flag-box flag-incorrect">
-                            <input type="checkbox" id="checkMissingDocs"> ⚠️ Missing/Incorrect Docs
-                        </label>
-                        
-                        <!-- Blank spacer to cleanly push the gray terminal flags to the next row -->
-                        <div></div> 
-                        
-                        <label class="checkbox-item flag-box flag-inactive">
-                            <input type="checkbox" id="checkIneligible"> 🚫 Ineligible / Rejected
-                        </label>
-                        <label class="checkbox-item flag-box flag-inactive">
-                            <input type="checkbox" id="checkInactive"> 💤 Inactive
-                        </label>
-                    </div>
                 </div>
 
                 <!-- Fixed Footer Action Buttons -->
@@ -447,7 +573,9 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbxa1XNdNgwOULiYpeAoBIjTy1wv034pON4-hnR444XB07vegHhoSR56UacR7UaktTaGZg/exec"; 
 
     let candidates = [];
+    let interviews = [];
     let currentSelectedId = null;
+    let currentView = 'onboarding'; // 'onboarding' or 'interviews'
     
     // Scratchpad & metric variables
     let scratchpadMode = 'text';
@@ -499,7 +627,19 @@
                 document.getElementById('headerCity').innerText = `${city} Workspace`;
                 
                 candidates = data.onboarding || [];
-                renderList();
+                interviews = data.interviews || [];
+                
+                // Toggle display depending on Dallas login configuration
+                const isDallas = city.toLowerCase() === 'dallas';
+                const dallasToggle = document.getElementById('dallasToggleContainer');
+                if (isDallas) {
+                    dallasToggle.classList.remove('hidden');
+                    switchView('onboarding');
+                } else {
+                    dallasToggle.classList.add('hidden');
+                    switchView('onboarding');
+                }
+
                 initScratchpad();
                 
                 // Read metrics from sheet database if provided
@@ -533,6 +673,47 @@
         else loader.classList.add('hidden');
     }
 
+    // Toggle workspaces for Dallas markets
+    function switchView(view) {
+        currentView = view;
+        
+        const btnOnb = document.getElementById('toggleOnb');
+        const btnInt = document.getElementById('toggleInt');
+        const btnAddMain = document.getElementById('btnAddMain');
+        
+        const onbFormFields = document.getElementById('onboardingFormFields');
+        const intFormFields = document.getElementById('interviewFormFields');
+        
+        if (view === 'interviews') {
+            btnInt.style.background = 'var(--dark-blue)';
+            btnInt.style.color = 'white';
+            btnOnb.style.background = 'transparent';
+            btnOnb.style.color = 'var(--crust-burnt)';
+            
+            btnAddMain.innerText = "👥 Add New Interview";
+            
+            onbFormFields.classList.add('hidden');
+            intFormFields.classList.remove('hidden');
+            
+            document.getElementById('formTitle').innerText = "Interview details";
+        } else {
+            btnOnb.style.background = 'var(--dark-blue)';
+            btnOnb.style.color = 'white';
+            btnInt.style.background = 'transparent';
+            btnInt.style.color = 'var(--crust-burnt)';
+            
+            btnAddMain.innerText = "📋 Add New Candidate";
+            
+            intFormFields.classList.add('hidden');
+            onbFormFields.classList.remove('hidden');
+            
+            document.getElementById('formTitle').innerText = "Candidate details";
+        }
+        
+        clearForm();
+        renderList();
+    }
+
     // Determine candidate active status text representation
     function getActiveStatusText(item) {
         if (item.ineligible) return "🚫 Ineligible";
@@ -541,7 +722,6 @@
         if (item.currentlyReviewing) return "🔍 Reviewing";
         if (item.hired) return "🎉 Hired";
         
-        // Dynamic NTO Scheduled date check (Display orientation date from roster)
         if (item.ntoScheduled) {
             return item.ntoDate ? `📅 NTO: ${item.ntoDate}` : "📅 NTO Scheduled";
         }
@@ -576,104 +756,174 @@
         listContainer.innerHTML = '';
 
         const sortBy = document.getElementById('sortControl').value;
-
-        // --- FILTER FOR AGE (Auto-archive terminal candidates older than 7 days) ---
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-        let filteredCandidates = candidates.filter(item => {
-            const isTerminalState = item.hired || item.ineligible || item.inactive;
-            if (isTerminalState && item.lastUpdated) {
-                const updatedDate = new Date(item.lastUpdated);
-                if (!isNaN(updatedDate.getTime()) && updatedDate < oneWeekAgo) {
-                    return false; // Filter out old terminal entries
+        if (currentView === 'interviews') {
+            // ==========================================
+            // RENDER INTERVIEW LIST (Weekly Interviews)
+            // ==========================================
+            let filteredInterviews = [...interviews];
+
+            filteredInterviews.sort((a, b) => {
+                if (sortBy === 'name') {
+                    return a.name.localeCompare(b.name);
                 }
-            }
-            return true; // Keep active candidates
-        });
+                if (sortBy === 'store') {
+                    const storeA = parseInt(a.store) || 0;
+                    const storeB = parseInt(b.store) || 0;
+                    return storeA - storeB;
+                }
+                if (sortBy === 'do') {
+                    const doA = a.doName ? a.doName.toString().trim() : '';
+                    const doB = b.doName ? b.doName.toString().trim() : '';
+                    return doA.localeCompare(doB);
+                }
+                if (sortBy === 'status') {
+                    const statusA = a.status ? a.status.toString().trim() : '';
+                    const statusB = b.status ? b.status.toString().trim() : '';
+                    return statusA.localeCompare(statusB);
+                }
+                return 0;
+            });
 
-        // --- SORT CANDIDATES ---
-        filteredCandidates.sort((a, b) => {
-            if (sortBy === 'name') {
-                return a.name.localeCompare(b.name);
+            if (filteredInterviews.length === 0) {
+                listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No active interviews in sheet.</div>';
+                return;
             }
-            if (sortBy === 'store') {
-                const storeA = parseInt(a.store) || 0;
-                const storeB = parseInt(b.store) || 0;
-                return storeA - storeB;
-            }
-            if (sortBy === 'do') {
-                const doA = a.doName ? a.doName.toString().trim() : '';
-                const doB = b.doName ? b.doName.toString().trim() : '';
-                return doA.localeCompare(doB);
-            }
-            if (sortBy === 'status') {
-                return getStatusWeight(b) - getStatusWeight(a);
-            }
-            if (sortBy === 'paycard') {
-                const payA = a.payCard ? a.payCard.toLowerCase().trim() : '';
-                const payB = b.payCard ? b.payCard.toLowerCase().trim() : '';
-                return payA.localeCompare(payB);
-            }
-            // Default: "updated" (Newest edits first)
-            const dateA = new Date(a.lastUpdated);
-            const dateB = new Date(b.lastUpdated);
-            return dateB - dateA;
-        });
 
-        if (filteredCandidates.length === 0) {
-            listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No active candidates in sheet.</div>';
-            return;
+            filteredInterviews.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'candidate-card';
+                if (item.id === currentSelectedId) card.classList.add('selected');
+
+                if (item.status === 'No Show' || item.status === 'Declined') {
+                    card.classList.add('status-red');
+                } else if (item.status === 'Hired' || item.status === 'Completed') {
+                    card.classList.add('status-green');
+                } else if (item.status === 'Hold') {
+                    card.classList.add('status-reviewing');
+                } else {
+                    card.classList.add('status-blue');
+                }
+
+                let statusStyleColor = 'var(--brand-blue)';
+                if (item.status === 'Hired' || item.status === 'Completed') statusStyleColor = 'var(--success-green)';
+                if (item.status === 'No Show' || item.status === 'Declined') statusStyleColor = 'var(--brand-red)';
+                if (item.status === 'Hold') statusStyleColor = 'var(--med-blue)';
+                if (item.status === 'Passed to GM') statusStyleColor = 'var(--dark-blue)';
+
+                let flags = '';
+                if (item.status === 'Passed to GM') flags += '<span class="badge-review">👔 GM Route</span> ';
+                if (item.status === 'No Show') flags += '<span class="badge-incorrect">⚠️ No Show</span> ';
+
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div class="card-name">${item.name}</div>
+                        <div style="display: flex; gap: 4px;">${flags}</div>
+                    </div>
+                    <div class="card-sub">
+                        <span>Store #${item.store} (${item.position})</span>
+                        <span style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: ${statusStyleColor};">${item.status || 'Scheduled'}</span>
+                    </div>
+                `;
+                
+                card.onclick = () => selectCandidate(item);
+                listContainer.appendChild(card);
+            });
+
+        } else {
+            // ==========================================
+            // RENDER ONBOARDING LIST (Weekly Onboarding)
+            // ==========================================
+            let filteredCandidates = candidates.filter(item => {
+                const isTerminalState = item.hired || item.ineligible || item.inactive;
+                if (isTerminalState && item.lastUpdated) {
+                    const updatedDate = new Date(item.lastUpdated);
+                    if (!isNaN(updatedDate.getTime()) && updatedDate < oneWeekAgo) {
+                        return false; 
+                    }
+                }
+                return true; 
+            });
+
+            filteredCandidates.sort((a, b) => {
+                if (sortBy === 'name') {
+                    return a.name.localeCompare(b.name);
+                }
+                if (sortBy === 'store') {
+                    const storeA = parseInt(a.store) || 0;
+                    const storeB = parseInt(b.store) || 0;
+                    return storeA - storeB;
+                }
+                if (sortBy === 'do') {
+                    const doA = a.doName ? a.doName.toString().trim() : '';
+                    const doB = b.doName ? b.doName.toString().trim() : '';
+                    return doA.localeCompare(doB);
+                }
+                if (sortBy === 'status') {
+                    return getStatusWeight(b) - getStatusWeight(a);
+                }
+                if (sortBy === 'paycard') {
+                    const payA = a.payCard ? a.payCard.toLowerCase().trim() : '';
+                    const payB = b.payCard ? b.payCard.toLowerCase().trim() : '';
+                    return payA.localeCompare(payB);
+                }
+                const dateA = new Date(a.lastUpdated);
+                const dateB = new Date(b.lastUpdated);
+                return dateB - dateA;
+            });
+
+            if (filteredCandidates.length === 0) {
+                listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No active candidates in sheet.</div>';
+                return;
+            }
+
+            filteredCandidates.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'candidate-card';
+                if (item.id === currentSelectedId) card.classList.add('selected');
+                
+                if (item.incorrectEmail || item.missingDocs) {
+                    card.classList.add('status-red');
+                } else if (item.currentlyReviewing) {
+                    card.classList.add('status-reviewing');
+                } else if (item.hired) {
+                    card.classList.add('status-green');
+                } else if (item.ineligible || item.inactive) {
+                    card.classList.add('status-gray');
+                } else {
+                    card.classList.add('status-blue');
+                }
+                
+                const activeStatusText = getActiveStatusText(item);
+                
+                let statusStyleColor = 'var(--brand-blue)';
+                if (item.hired) statusStyleColor = 'var(--success-green)';
+                if (item.incorrectEmail || item.missingDocs) statusStyleColor = 'var(--brand-red)';
+                if (item.currentlyReviewing) statusStyleColor = 'var(--med-blue)';
+                if (item.ineligible || item.inactive) statusStyleColor = 'var(--brand-grey)';
+
+                let flags = '';
+                if (item.incorrectEmail) flags += '<span class="badge-incorrect">⚠️ Email Error</span> ';
+                if (item.missingDocs) flags += '<span class="badge-incorrect">⚠️ Missing Docs</span> ';
+                if (item.currentlyReviewing) flags += '<span class="badge-review">🔍 Reviewing</span> ';
+
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div class="card-name">${item.name}</div>
+                        <div style="display: flex; gap: 4px;">${flags}</div>
+                    </div>
+                    <div class="card-sub">
+                        <span>Store #${item.store} (${item.position})</span>
+                        <span style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: ${statusStyleColor};">${activeStatusText}</span>
+                    </div>
+                `;
+                
+                card.onclick = () => selectCandidate(item);
+                listContainer.appendChild(card);
+            });
         }
-
-        filteredCandidates.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'candidate-card';
-            if (item.id === currentSelectedId) card.classList.add('selected');
-            
-            // --- COLOR CODING VIA STATUS CLASSES ---
-            if (item.incorrectEmail || item.missingDocs) {
-                card.classList.add('status-red');
-            } else if (item.currentlyReviewing) {
-                card.classList.add('status-reviewing');
-            } else if (item.hired) {
-                card.classList.add('status-green');
-            } else if (item.ineligible || item.inactive) {
-                card.classList.add('status-gray');
-            } else {
-                card.classList.add('status-blue');
-            }
-            
-            // Render active status text in the sub-row dynamically
-            const activeStatusText = getActiveStatusText(item);
-            
-            // Inline status color formatting
-            let statusStyleColor = 'var(--brand-blue)';
-            if (item.hired) statusStyleColor = 'var(--success-green)';
-            if (item.incorrectEmail || item.missingDocs) statusStyleColor = 'var(--brand-red)';
-            if (item.currentlyReviewing) statusStyleColor = 'var(--med-blue)';
-            if (item.ineligible || item.inactive) statusStyleColor = 'var(--brand-grey)';
-
-            // Visual header badges
-            let flags = '';
-            if (item.incorrectEmail) flags += '<span class="badge-incorrect">⚠️ Email Error</span> ';
-            if (item.missingDocs) flags += '<span class="badge-incorrect">⚠️ Missing Docs</span> ';
-            if (item.currentlyReviewing) flags += '<span class="badge-review">🔍 Reviewing</span> ';
-
-            card.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div class="card-name">${item.name}</div>
-                    <div style="display: flex; gap: 4px;">${flags}</div>
-                </div>
-                <div class="card-sub">
-                    <span>Store #${item.store} (${item.position})</span>
-                    <span style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: ${statusStyleColor};">${activeStatusText}</span>
-                </div>
-            `;
-            
-            card.onclick = () => selectCandidate(item);
-            listContainer.appendChild(card);
-        });
     }
 
     function selectCandidate(item) {
@@ -681,58 +931,86 @@
         renderList();
 
         document.getElementById('formTitle').innerText = `Edit: ${item.name}`;
-        
-        document.getElementById('fieldId').value = item.id;
-        document.getElementById('fieldName').value = item.name;
-        document.getElementById('fieldPosition').value = item.position;
-        document.getElementById('fieldStore').value = item.store;
-        document.getElementById('fieldPhone').value = item.phoneNumber || '';
-        document.getElementById('fieldEmail').value = item.email || '';
-        document.getElementById('fieldNto').value = item.ntoDate || '';
-        document.getElementById('fieldPayCard').value = item.payCard || '';
-        document.getElementById('fieldNotes').value = item.notes || '';
-
-        // --- SPLIT COMBINED SHIRT & HAT VALUES ON LOAD ---
-        const shirtVal = item.shirtSize || "";
-        let shirt = shirtVal;
-        let hat = "";
-        if (shirtVal.includes(",")) {
-            const parts = shirtVal.split(",");
-            shirt = parts[0].trim();
-            hat = parts[1].trim();
-        }
-        document.getElementById('fieldShirt').value = shirt;
-        document.getElementById('fieldHat').value = hat;
-
-        document.getElementById('checkSubmission').checked = item.submissionReceived || false;
-        document.getElementById('checkOnbSent').checked = item.onboardingSent || false;
-        document.getElementById('checkBgc').checked = item.bgcComplete || false;
-        document.getElementById('checkAllPay').checked = item.allPayCompleted || false;
-        document.getElementById('checkNtoLink').checked = item.ntoSignupLinkSent || false;
-        document.getElementById('checkNto').checked = item.ntoScheduled || false;
-        document.getElementById('checkHired').checked = item.hired || false;
-        document.getElementById('checkIncorrect').checked = item.incorrectEmail || false;
-        document.getElementById('checkReviewing').checked = item.currentlyReviewing || false;
-        document.getElementById('checkIneligible').checked = item.ineligible || false;
-        document.getElementById('checkInactive').checked = item.inactive || false;
-        document.getElementById('checkMissingDocs').checked = item.missingDocs || false;
-        
         document.getElementById('btnCancel').innerText = "Cancel Edit";
+
+        if (currentView === 'interviews') {
+            document.getElementById('fieldId').value = item.id;
+            document.getElementById('intName').value = item.name || '';
+            document.getElementById('intPosition').value = item.position || 'CSR';
+            document.getElementById('intStore').value = item.store || '';
+            document.getElementById('intDo').value = item.doName || '';
+            document.getElementById('intPhone').value = item.phoneNumber || '';
+            document.getElementById('intEmail').value = item.email || '';
+            document.getElementById('intDate').value = item.date || '';
+            document.getElementById('intDay').value = item.day || '';
+            document.getElementById('intTime').value = item.time || '';
+            document.getElementById('intStatus').value = item.status || 'Scheduled';
+            document.getElementById('intGmDate').value = item.gmDate || '';
+            document.getElementById('intGmTime').value = item.gmTime || '';
+            document.getElementById('intStatusUpdates').value = item.statusUpdates || '';
+            document.getElementById('intNotes').value = item.notes || '';
+        } else {
+            document.getElementById('fieldId').value = item.id;
+            document.getElementById('fieldName').value = item.name;
+            document.getElementById('fieldPosition').value = item.position;
+            document.getElementById('fieldStore').value = item.store;
+            document.getElementById('fieldPhone').value = item.phoneNumber || '';
+            document.getElementById('fieldEmail').value = item.email || '';
+            document.getElementById('fieldNto').value = item.ntoDate || '';
+            document.getElementById('fieldPayCard').value = item.payCard || '';
+            document.getElementById('fieldNotes').value = item.notes || '';
+
+            const shirtVal = item.shirtSize || "";
+            let shirt = shirtVal;
+            let hat = "";
+            if (shirtVal.includes(",")) {
+                const parts = shirtVal.split(",");
+                shirt = parts[0].trim();
+                hat = parts[1].trim();
+            }
+            document.getElementById('fieldShirt').value = shirt;
+            document.getElementById('fieldHat').value = hat;
+
+            document.getElementById('checkSubmission').checked = item.submissionReceived || false;
+            document.getElementById('checkOnbSent').checked = item.onboardingSent || false;
+            document.getElementById('checkBgc').checked = item.bgcComplete || false;
+            document.getElementById('checkAllPay').checked = item.allPayCompleted || false;
+            document.getElementById('checkNtoLink').checked = item.ntoSignupLinkSent || false;
+            document.getElementById('checkNto').checked = item.ntoScheduled || false;
+            document.getElementById('checkHired').checked = item.hired || false;
+            document.getElementById('checkIncorrect').checked = item.incorrectEmail || false;
+            document.getElementById('checkReviewing').checked = item.currentlyReviewing || false;
+            document.getElementById('checkIneligible').checked = item.ineligible || false;
+            document.getElementById('checkInactive').checked = item.inactive || false;
+            document.getElementById('checkMissingDocs').checked = item.missingDocs || false;
+        }
     }
 
     function prepareAddNew() {
         clearForm();
         currentSelectedId = null;
         renderList();
-        document.getElementById('formTitle').innerText = "Add New Candidate";
-        document.getElementById('fieldName').focus();
+        
+        if (currentView === 'interviews') {
+            document.getElementById('formTitle').innerText = "Add New Interview";
+            document.getElementById('intName').focus();
+        } else {
+            document.getElementById('formTitle').innerText = "Add New Candidate";
+            document.getElementById('fieldName').focus();
+        }
     }
 
     function clearForm() {
         document.getElementById('candidateForm').reset();
         document.getElementById('fieldId').value = '';
         document.getElementById('fieldNto').value = '';
-        document.getElementById('formTitle').innerText = "Candidate details";
+        
+        if (currentView === 'interviews') {
+            document.getElementById('formTitle').innerText = "Interview details";
+        } else {
+            document.getElementById('formTitle').innerText = "Candidate details";
+        }
+        
         document.getElementById('btnCancel').innerText = "Clear / Deselect";
         currentSelectedId = null;
         renderList();
@@ -746,39 +1024,57 @@
         const id = document.getElementById('fieldId').value;
         const action = id ? 'update' : 'add';
 
-        showLoader(true, "Saving candidate data...");
+        showLoader(true, `Saving ${currentView} data...`);
 
-        // --- COMBINE SHIRT & HAT VALUES ON SAVE ---
-        const shirt = document.getElementById('fieldShirt').value;
-        const hat = document.getElementById('fieldHat').value;
-        const combinedShirt = (hat && hat !== "") ? `${shirt}, ${hat}` : shirt;
-
-        const payload = {
+        let payload = {
             username: username,
             password: password,
             action: action,
-            id: id,
-            name: document.getElementById('fieldName').value.trim(),
-            position: document.getElementById('fieldPosition').value,
-            store: document.getElementById('fieldStore').value.trim(),
-            phoneNumber: document.getElementById('fieldPhone').value.trim(),
-            email: document.getElementById('fieldEmail').value.trim(),
-            shirtSize: combinedShirt,
-            payCard: document.getElementById('fieldPayCard').value.trim(),
-            notes: document.getElementById('fieldNotes').value.trim(),
-            submissionReceived: document.getElementById('checkSubmission').checked,
-            onboardingSent: document.getElementById('checkOnbSent').checked,
-            bgcComplete: document.getElementById('checkBgc').checked,
-            allPayCompleted: document.getElementById('checkAllPay').checked,
-            ntoSignupLinkSent: document.getElementById('checkNtoLink').checked,
-            ntoScheduled: document.getElementById('checkNto').checked,
-            hired: document.getElementById('checkHired').checked,
-            incorrectEmail: document.getElementById('checkIncorrect').checked,
-            currentlyReviewing: document.getElementById('checkReviewing').checked,
-            ineligible: document.getElementById('checkIneligible').checked,
-            inactive: document.getElementById('checkInactive').checked,
-            missingDocs: document.getElementById('checkMissingDocs').checked
+            target: currentView, 
+            id: id
         };
+
+        if (currentView === 'interviews') {
+            payload.name = document.getElementById('intName').value.trim();
+            payload.position = document.getElementById('intPosition').value;
+            payload.store = document.getElementById('intStore').value.trim();
+            payload.doName = document.getElementById('intDo').value.trim();
+            payload.phoneNumber = document.getElementById('intPhone').value.trim();
+            payload.email = document.getElementById('intEmail').value.trim();
+            payload.date = document.getElementById('intDate').value.trim();
+            payload.day = document.getElementById('intDay').value;
+            payload.time = document.getElementById('intTime').value.trim();
+            payload.status = document.getElementById('intStatus').value;
+            payload.gmDate = document.getElementById('intGmDate').value.trim();
+            payload.gmTime = document.getElementById('intGmTime').value.trim();
+            payload.statusUpdates = document.getElementById('intStatusUpdates').value.trim();
+            payload.notes = document.getElementById('intNotes').value.trim();
+        } else {
+            const shirt = document.getElementById('fieldShirt').value;
+            const hat = document.getElementById('fieldHat').value;
+            const combinedShirt = (hat && hat !== "") ? `${shirt}, ${hat}` : shirt;
+
+            payload.name = document.getElementById('fieldName').value.trim();
+            payload.position = document.getElementById('fieldPosition').value;
+            payload.store = document.getElementById('fieldStore').value.trim();
+            payload.phoneNumber = document.getElementById('fieldPhone').value.trim();
+            payload.email = document.getElementById('fieldEmail').value.trim();
+            payload.shirtSize = combinedShirt;
+            payload.payCard = document.getElementById('fieldPayCard').value.trim();
+            payload.notes = document.getElementById('fieldNotes').value.trim();
+            payload.submissionReceived = document.getElementById('checkSubmission').checked;
+            payload.onboardingSent = document.getElementById('checkOnbSent').checked;
+            payload.bgcComplete = document.getElementById('checkBgc').checked;
+            payload.allPayCompleted = document.getElementById('checkAllPay').checked;
+            payload.ntoSignupLinkSent = document.getElementById('checkNtoLink').checked;
+            payload.ntoScheduled = document.getElementById('checkNto').checked;
+            payload.hired = document.getElementById('checkHired').checked;
+            payload.incorrectEmail = document.getElementById('checkIncorrect').checked;
+            payload.currentlyReviewing = document.getElementById('checkReviewing').checked;
+            payload.ineligible = document.getElementById('checkIneligible').checked;
+            payload.inactive = document.getElementById('checkInactive').checked;
+            payload.missingDocs = document.getElementById('checkMissingDocs').checked;
+        }
 
         fetch(API_URL, {
             method: 'POST',
@@ -796,9 +1092,10 @@
         .then(res => res.json())
         .then(data => {
             candidates = data.onboarding || [];
+            interviews = data.interviews || [];
+
             renderList();
             
-            // Re-render and parse metrics
             if (data.metrics) {
                 window.hasApiMetrics = true;
                 updateMetricsAndWeekRange(data.metrics);
@@ -822,14 +1119,11 @@
     function initScratchpad() {
         const username = localStorage.getItem('onb_user') || 'default';
         
-        // Load Scratchpad Mode
         scratchpadMode = localStorage.getItem(`scratchpad_mode_${username}`) || 'text';
         
-        // Load Text Value
         const savedText = localStorage.getItem(`scratchpad_text_${username}`) || '';
         document.getElementById('scratchpad').value = savedText;
         
-        // Load Checklist Value
         const savedChecklist = localStorage.getItem(`scratchpad_checklist_${username}`);
         if (savedChecklist) {
             try {
@@ -881,7 +1175,6 @@
         const textVal = document.getElementById('scratchpad').value;
         localStorage.setItem(`scratchpad_text_${username}`, textVal);
         
-        // Debounce database sync
         clearTimeout(scratchpadTimeout);
         scratchpadTimeout = setTimeout(() => {
             syncNotesToBackend(username, textVal, 'text');
@@ -992,43 +1285,6 @@
         });
     }
 
-    function handleChecklistKeydown(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            const input = document.getElementById('newChecklistItem');
-            const text = input.value.trim();
-            if (!text) return;
-            
-            const newItem = {
-                id: Date.now(),
-                text: text,
-                done: false
-            };
-            
-            checklistItemsData.push(newItem);
-            input.value = '';
-            saveChecklist();
-            renderChecklist();
-        }
-    }
-
-    function toggleChecklistItem(id) {
-        checklistItemsData = checklistItemsData.map(item => {
-            if (item.id === id) {
-                return { ...item, done: !item.done };
-            }
-            return item;
-        });
-        saveChecklist();
-        renderChecklist();
-    }
-
-    function deleteChecklistItem(id) {
-        checklistItemsData = checklistItemsData.filter(item => item.id !== id);
-        saveChecklist();
-        renderChecklist();
-    }
-
     // Dynamic Weekly Activity Audit Calculations
     function updateMetricsAndWeekRange(apiMetrics) {
         const now = new Date();
@@ -1066,13 +1322,12 @@
         const username = localStorage.getItem('onb_user') || 'default';
 
         if (apiMetrics && typeof apiMetrics === 'object') {
-            // Populate metrics directly from Google Sheet JSON response
             interviewsThisWeek = apiMetrics.interviewsThisWeek !== undefined ? apiMetrics.interviewsThisWeek : 0;
             interviewsLastWeek = apiMetrics.interviewsLastWeek !== undefined ? apiMetrics.interviewsLastWeek : 0;
             hiresThisWeek = apiMetrics.hiresThisWeek !== undefined ? apiMetrics.hiresThisWeek : 0;
             hiresLastWeek = apiMetrics.hiresLastWeek !== undefined ? apiMetrics.hiresLastWeek : 0;
         } else {
-            // Fallback: Compute Hires locally from candidate roster updates
+            // Compute Hires locally from candidate roster updates
             candidates.forEach(item => {
                 if (!item.lastUpdated || !item.hired) return;
                 const updatedDate = new Date(item.lastUpdated);
@@ -1088,11 +1343,10 @@
                 }
             });
 
-            // Since interviews are tracked separately from onboarding, read manual overrides until API sheet is built
+            // Fallback: load manual metrics from localStorage
             interviewsThisWeek = Number(localStorage.getItem(`metric_interviews_this_week_${username}`)) || 0;
             interviewsLastWeek = Number(localStorage.getItem(`metric_interviews_last_week_${username}`)) || 0;
             
-            // Allow manual overrides of hires if no API metric exists
             const localHiresThis = localStorage.getItem(`metric_hires_this_week_${username}`);
             const localHiresLast = localStorage.getItem(`metric_hires_last_week_${username}`);
             if (localHiresThis !== null) hiresThisWeek = Number(localHiresThis);
@@ -1109,7 +1363,6 @@
         if (ordersThisWeekEl) ordersThisWeekEl.innerText = hiresThisWeek;
         if (ordersLastWeekEl) ordersLastWeekEl.innerText = hiresLastWeek;
 
-        // Toggle edit metadata displays
         const listElements = [quotesThisWeekEl, quotesLastWeekEl, ordersThisWeekEl, ordersLastWeekEl];
         listElements.forEach(el => {
             if (!el) return;
@@ -1124,7 +1377,7 @@
     }
 
     function editLocalMetric(key, elementId) {
-        if (window.hasApiMetrics) return; // Prevent prompt edits when API values are running
+        if (window.hasApiMetrics) return; 
         
         const currentVal = document.getElementById(elementId).innerText;
         const readableLabel = key.replace(/_/g, ' ');
@@ -1140,9 +1393,45 @@
         const username = localStorage.getItem('onb_user') || 'default';
         localStorage.setItem(`metric_${key}_${username}`, parsed);
         
-        // Re-calculate visual metrics and queue sync to backend if desired
         updateMetricsAndWeekRange(null);
         syncNotesToBackend(username, parsed, `metric_${key}`);
+    }
+
+    function handleChecklistKeydown(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const input = document.getElementById('newChecklistItem');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            const newItem = {
+                id: Date.now(),
+                text: text,
+                done: false
+            };
+            
+            checklistItemsData.push(newItem);
+            input.value = '';
+            saveChecklist();
+            renderChecklist();
+        }
+    }
+
+    function toggleChecklistItem(id) {
+        checklistItemsData = checklistItemsData.map(item => {
+            if (item.id === id) {
+                return { ...item, done: !item.done };
+            }
+            return item;
+        });
+        saveChecklist();
+        renderChecklist();
+    }
+
+    function deleteChecklistItem(id) {
+        checklistItemsData = checklistItemsData.filter(item => item.id !== id);
+        saveChecklist();
+        renderChecklist();
     }
 </script>
 </body>
