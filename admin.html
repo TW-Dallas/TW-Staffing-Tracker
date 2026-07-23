@@ -382,6 +382,12 @@
                             <div class="section-header">Stage 2: Paperwork Processing</div>
                             <label class="checkbox-item"><input type="checkbox" id="checkBgc"> Background Check Done</label>
                             <label class="checkbox-item"><input type="checkbox" id="checkAllPay"> AllPay Done</label>
+                            <div class="checkbox-item" style="grid-column: span 3; display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                                <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; margin: 0; cursor: pointer;">
+                                    <input type="checkbox" id="checkPulseForm"> Pulse Form Complete
+                                </label>
+                                <button type="button" id="btnCheckPulse" onclick="checkPulseStatus()" style="font-size: 11px; padding: 2px 8px; background: var(--brand-blue); border-radius: 4px; line-height: 1; height: 22px;">Check Status</button>
+                            </div>
                             
                             <div class="section-header">Stage 3: Orientation & Hire</div>
                             <label class="checkbox-item"><input type="checkbox" id="checkNtoLink"> NTO Signup Link Sent</label>
@@ -992,6 +998,7 @@
             document.getElementById('checkIneligible').checked = item.ineligible || false;
             document.getElementById('checkInactive').checked = item.inactive || false;
             document.getElementById('checkMissingDocs').checked = item.missingDocs || false;
+            document.getElementById('checkPulseForm').checked = item.pulseFormComplete || false; // Column Y
         }
     }
 
@@ -1085,6 +1092,7 @@
             payload.ineligible = document.getElementById('checkIneligible').checked;
             payload.inactive = document.getElementById('checkInactive').checked;
             payload.missingDocs = document.getElementById('checkMissingDocs').checked;
+            payload.pulseFormComplete = document.getElementById('checkPulseForm').checked; // Column Y
         }
 
         fetch(API_URL, {
@@ -1121,6 +1129,50 @@
         .catch(err => {
             showLoader(false);
             alert("Error saving data: " + err.message);
+        });
+    }
+
+    // Dynamic verification of Pulse Form complete
+    function checkPulseStatus() {
+        const id = document.getElementById('fieldId').value;
+        if (!id) {
+            alert("Please select a candidate first before checking Pulse status.");
+            return;
+        }
+        
+        const username = localStorage.getItem('onb_user');
+        const password = localStorage.getItem('onb_pass');
+        
+        showLoader(true, "Checking Pulse form completion...");
+        
+        const payload = {
+            username: username,
+            password: password,
+            action: "checkPulse",
+            id: id
+        };
+        
+        fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(result => {
+            showLoader(false);
+            if (result.success) {
+                document.getElementById('checkPulseForm').checked = result.completed;
+                if (result.completed) {
+                    alert("Pulse Form status check completed: SUCCESS! Form is verified.");
+                } else {
+                    alert("Pulse Form status check completed: NOT COMPLETED. Candidate not found in roster.");
+                }
+            } else {
+                throw new Error(result.error || "Pulse check failed");
+            }
+        })
+        .catch(err => {
+            showLoader(false);
+            alert("Error checking Pulse status: " + err.message);
         });
     }
 
