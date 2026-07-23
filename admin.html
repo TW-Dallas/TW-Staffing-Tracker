@@ -486,11 +486,13 @@
                             <textarea id="fieldNotes" placeholder="Write any specific candidate notes here..."></textarea>
                         </div>
 
-                        <!-- 3-Column Structured Checklist Grid -->
+                        <!-- 3-Column Structured Checklist Grid (Completely Restored & Balanced) -->
                         <div class="checkbox-grid">
                             <div class="section-header">Stage 1: Onboarding Intake</div>
                             <label class="checkbox-item"><input type="checkbox" id="checkSubmission"> Submission Received</label>
                             <label class="checkbox-item"><input type="checkbox" id="checkOnbSent"> Onboarding Sent</label>
+                            <!-- Row 1 Spacer -->
+                            <div></div>
                             
                             <div class="section-header">Stage 2: Paperwork Processing</div>
                             <label class="checkbox-item"><input type="checkbox" id="checkBgc"> Background Check Done</label>
@@ -514,7 +516,7 @@
                                 <input type="checkbox" id="checkMissingDocs" onchange="toggleMissingDocsSelector()"> ⚠️ Missing/Incorrect Docs
                             </label>
                             
-                            <!-- Closes Row 2 (Spacer) -->
+                            <!-- Closes Blocker Row 1 Spacer -->
                             <div></div> 
                             
                             <!-- SMART EXPANDABLE MISSING DOCUMENTS CHECKLIST (Spans all 3 columns!) -->
@@ -534,14 +536,16 @@
                                 </div>
                             </div>
                             
-                            <!-- No spacer here! The grid-placement auto-calculates perfectly now. -->
-                            
                             <label class="checkbox-item flag-box flag-inactive">
                                 <input type="checkbox" id="checkIneligible"> 🚫 Ineligible / Rejected
                             </label>
                             <label class="checkbox-item flag-box flag-inactive">
                                 <input type="checkbox" id="checkInactive"> 💤 Inactive
                             </label>
+                            
+                            <!-- Closes Blocker Row 2 Spacer -->
+                            <div></div>
+                        </div>
 
                         <!-- MANUAL EMAIL QUICK ACTIONS -->
                         <div id="emailQuickActions" class="email-actions-container hidden">
