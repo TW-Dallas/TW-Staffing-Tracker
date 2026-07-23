@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Onboarder Portal</title>
     <link class="favicon" rel="icon" type="image/png" href="Domino's Hiring Manager Favicon Ideas (3).png">
-<style>
+    <style>
         @font-face { font-family: 'ExtraBlack'; src: url('fonts/Dominos Sans Header 1.ttf') format('truetype'); font-weight: normal; }
         @font-face { font-family: 'ExtraBold'; src: url('fonts/Dominos Sans Header 2.ttf') format('truetype'); font-weight: normal; }
         @font-face { font-family: 'Subhead1'; src: url('fonts/Dominos Sans Subhead 1.ttf') format('truetype'); font-weight: normal; }
@@ -140,8 +140,8 @@
         /* --- DALLAS SPECIFIC VIEW TOGGLE BUTTONS --- */
         #dallasToggleContainer button {
             font-family: 'Subhead1', sans-serif;
-            font-size: 15px;
-            padding: 8px;
+            font-size: 13px;
+            padding: 6px;
             border-radius: 6px;
             cursor: pointer;
             border: none;
@@ -162,11 +162,14 @@
         .candidate-card:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.04); }
         .candidate-card.selected { background: var(--crust-light); box-shadow: 0 4px 12px rgba(0, 144, 226, 0.15); border: 1.5px solid var(--brand-blue); }
         
-        /* Status border overrides */
+        /* Status border overrides using Domino's Brand Kit Palette */
         .candidate-card.status-blue { border-left-color: var(--brand-blue); }
-        .candidate-card.status-green { border-left-color: var(--success-green); }
+        .candidate-card.status-subrec { border-left-color: var(--brand-blue); border-left-width: 8px; background-color: #f4f9fd; } /* Highlight for New Submissions */
+        .candidate-card.status-processing { border-left-color: var(--med-blue); } /* Medium Blue for Paperwork Processing */
+        .candidate-card.status-nto { border-left-color: var(--dark-blue); } /* Dark Blue for NTO/Orientation */
+        .candidate-card.status-green { border-left-color: var(--success-green); border-left-width: 8px; }
         .candidate-card.status-red { border-left-color: var(--brand-red); border: 1.5px solid var(--brand-red); }
-        .candidate-card.status-reviewing { border-left-color: var(--med-blue); box-shadow: 0 0 8px rgba(0, 119, 189, 0.2); }
+        .candidate-card.status-reviewing { border-left-color: var(--crust-dark); box-shadow: 0 0 8px rgba(192, 165, 136, 0.3); }
         .candidate-card.status-gray { border-left-color: var(--brand-grey); opacity: 0.6; background-color: #fbfbfb; }
 
         .card-name { font-family: 'Subhead2', sans-serif; font-size: 19px; }
@@ -183,7 +186,7 @@
         .form-row.flex-three .form-group { flex: 1; }
         .form-row.flex-three .flex-two-weight { flex: 1.5; } 
 
-        input[type="text"], input[type="password"], textarea, select { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--crust-dark); font-family: 'Condensed', sans-serif; box-sizing: border-box; font-size: 17px; }
+        input[type="text"], input[type="password"], input[type="date"], textarea, select { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--crust-dark); font-family: 'Condensed', sans-serif; box-sizing: border-box; font-size: 17px; }
         textarea { height: 55px; resize: none; }
         
         /* --- COMPACT 3-COLUMN CHECKBOX GRID --- */
@@ -335,37 +338,26 @@
             .form-scroll-area { overflow-y: visible; height: auto; }
             .form-row.flex-three { flex-direction: column; gap: 8px; }
 
-            /* --- RESPONSIVE 2-COLUMN CHECKBOX GRID FOR PHONES --- */
             .checkbox-grid { 
-                grid-template-columns: 1fr 1fr !important; /* 2 side-by-side columns on mobile */
+                grid-template-columns: 1fr 1fr !important;
                 gap: 8px;
                 padding: 10px;
             }
             .checkbox-grid > div:empty { 
-                display: none; /* Removes empty spacers so items flow seamlessly in 2 columns */
+                display: none;
             }
             .checkbox-item {
-                font-size: 14px; /* Slightly tighter font for 2-column fit */
-                word-break: break-word; /* Allows long text to wrap cleanly */
+                font-size: 14px;
+                word-break: break-word;
             }
             .checkbox-item input {
-                flex-shrink: 0; /* Keeps checkbox squares from squishing when text wraps */
+                flex-shrink: 0;
             }
             #missingDocsContainer {
-                grid-template-columns: 1fr !important; /* Keep expandable missing docs list 1 column */
+                grid-template-columns: 1fr !important;
                 grid-column: 1 / -1 !important;
             }
         }
-
-        /* Status border overrides using Domino's Brand Kit Palette */
-        .candidate-card.status-blue { border-left-color: var(--brand-blue); }
-        .candidate-card.status-subrec { border-left-color: var(--brand-blue); border-left-width: 8px; background-color: #f4f9fd; } /* Highlight for New Submissions */
-        .candidate-card.status-processing { border-left-color: var(--med-blue); } /* Medium Blue for Paperwork Processing */
-        .candidate-card.status-nto { border-left-color: var(--dark-blue); } /* Dark Blue for NTO/Orientation */
-        .candidate-card.status-green { border-left-color: var(--success-green); border-left-width: 8px; }
-        .candidate-card.status-red { border-left-color: var(--brand-red); border: 1.5px solid var(--brand-red); }
-        .candidate-card.status-reviewing { border-left-color: var(--crust-dark); box-shadow: 0 0 8px rgba(192, 165, 136, 0.3); }
-        .candidate-card.status-gray { border-left-color: var(--brand-grey); opacity: 0.6; background-color: #fbfbfb; }
     </style>
 </head>
 <body>
@@ -411,11 +403,12 @@
                 <input type="text" id="searchControl" placeholder="🔍 Search name..." oninput="renderList()">
             </div>
             
-            <!-- Dallas Only Toggle -->
-            <div id="dallasToggleContainer" class="hidden" style="margin-bottom: 8px;">
-                <div style="display: flex; background: var(--crust-med); border-radius: 8px; padding: 2px; gap: 4px;">
-                    <button type="button" id="toggleOnb" onclick="switchView('onboarding')" style="flex: 1; font-size: 13px; padding: 6px; border-radius: 6px; background: var(--dark-blue); color: white; border: none; cursor: pointer;">Onboarding</button>
-                    <button type="button" id="toggleInt" onclick="switchView('interviews')" style="flex: 1; font-size: 13px; padding: 6px; border-radius: 6px; background: transparent; color: var(--crust-burnt); border: none; cursor: pointer;">Interviews</button>
+            <!-- Workspace Switcher Toggles -->
+            <div id="dallasToggleContainer" style="margin-bottom: 8px;">
+                <div style="display: flex; background: var(--crust-med); border-radius: 8px; padding: 2px; gap: 2px;">
+                    <button type="button" id="toggleOnb" onclick="switchView('onboarding')" style="flex: 1; font-size: 12px; padding: 6px; border-radius: 6px; background: var(--dark-blue); color: white; border: none; cursor: pointer;">Onboarding</button>
+                    <button type="button" id="toggleInt" onclick="switchView('interviews')" style="flex: 1; font-size: 12px; padding: 6px; border-radius: 6px; background: transparent; color: var(--crust-burnt); border: none; cursor: pointer;">Interviews</button>
+                    <button type="button" id="toggleStf" onclick="switchView('staffing')" style="flex: 1; font-size: 12px; padding: 6px; border-radius: 6px; background: transparent; color: var(--crust-burnt); border: none; cursor: pointer;">Hires & Terms</button>
                 </div>
             </div>
 
@@ -425,7 +418,7 @@
                     <option value="name">🔤 Sort: Name (A-Z)</option>
                     <option value="store">🏬 Sort: Store #</option>
                     <option value="do">👤 Sort: DO</option>
-                    <option value="status">📊 Sort: Status Stage</option>
+                    <option value="status">📊 Sort: Status / Stage</option>
                     <option value="paycard">💳 Sort: Pay Card Status</option>
                 </select>
             </div>
@@ -446,6 +439,10 @@
                     
                     <!-- ONBOARDING FORM TEMPLATE -->
                     <div id="onboardingFormFields">
+                        <button type="button" onclick="portCandidateToStaffing('onboarding')" style="background: var(--dark-blue); width: 100%; margin-bottom: 10px; font-size: 14px;">
+                            📊 Port to Hires & Terminations
+                        </button>
+
                         <div class="form-group">
                             <label>Full Name</label>
                             <input type="text" id="fieldName">
@@ -479,7 +476,6 @@
                             </div>
                         </div>
 
-                        <!-- Consolidated 3-Column Row -->
                         <div class="form-row flex-three">
                             <div class="form-group flex-two-weight">
                                 <label>Pay Card Status</label>
@@ -588,8 +584,6 @@
 
                     <!-- INTERVIEWS FORM TEMPLATE -->
                     <div id="interviewFormFields" class="hidden">
-                        
-                        <!-- ADD THIS BUTTON AT THE TOP OF THE INTERVIEW FORM -->
                         <button type="button" id="btnPortToOnboarding" onclick="portCandidateToOnboarding()" style="background: var(--success-green); width: 100%; margin-bottom: 12px; font-size: 16px;">
                             🚀 Port Candidate to Onboarding
                         </button>
@@ -632,7 +626,6 @@
                         </div>
 
                         <div class="section-header">Phone Interview Progression</div>
-                        
                         <div class="form-row flex-three">
                             <div class="form-group">
                                 <label>Interview Date</label>
@@ -658,7 +651,6 @@
                         </div>
 
                         <div class="section-header">GM Interview & Final Progression</div>
-
                         <div class="form-row flex-three">
                             <div class="form-group flex-two-weight">
                                 <label>Interview Status</label>
@@ -687,15 +679,93 @@
                             <label>Status Updates</label>
                             <textarea id="intStatusUpdates" placeholder="Recent updates on interview progression..."></textarea>
                         </div>
-
                         <div class="form-group">
                             <label>Availability</label>
                             <textarea id="intAvailability" placeholder="Enter availability details here..."></textarea>
                         </div>
-
                         <div class="form-group">
                             <label>Feedback & Notes</label>
                             <textarea id="intNotes" placeholder="Write any specific interview notes here..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- HIRES & TERMINATIONS FORM TEMPLATE -->
+                    <div id="staffingFormFields" class="hidden">
+                        <div class="form-group">
+                            <label>Employee Full Name</label>
+                            <input type="text" id="stfName" placeholder="e.g. John Smith">
+                        </div>
+
+                        <div class="form-row flex-three">
+                            <div class="form-group">
+                                <label>Position</label>
+                                <select id="stfPosition">
+                                    <option value="">Select Position</option>
+                                    <option value="CSR">🍕 CSR</option>
+                                    <option value="BIKE">🚲 BIKE</option>
+                                    <option value="DE">🚗 DE</option>
+                                    <option value="MIT">🎓 MIT</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Store #</label>
+                                <input type="text" id="stfStore">
+                            </div>
+                            <div class="form-group">
+                                <label>DO Name</label>
+                                <input type="text" id="stfDo">
+                            </div>
+                        </div>
+
+                        <div class="form-row flex-three">
+                            <div class="form-group">
+                                <label>Hire Date (NTO)</label>
+                                <input type="date" id="stfHireDate" onchange="autoCalculatePeriodFromDates()">
+                            </div>
+                            <div class="form-group">
+                                <label>Termination Date</label>
+                                <input type="date" id="stfTermDate" onchange="autoCalculatePeriodFromDates()">
+                            </div>
+                            <div class="form-group">
+                                <label>Domino's Period</label>
+                                <input type="text" id="stfPeriod" placeholder="P08" readonly style="background: var(--crust-light); font-weight: bold; color: var(--dark-blue);">
+                            </div>
+                        </div>
+
+                        <div class="section-header">Termination & Bonus Eligibility Audit</div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Re-Hire Eligible?</label>
+                                <select id="stfRehire">
+                                    <option value="Yes">✅ Yes - Eligible for Re-Hire</option>
+                                    <option value="No">🚫 No - Ineligible / Do Not Rehire</option>
+                                    <option value="Review Required">⚠️ Review Required</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Cause of Action</label>
+                                <select id="stfCause">
+                                    <option value="">Select Action Cause</option>
+                                    <option value="Voluntary - Personal">Voluntary - Personal Reasons</option>
+                                    <option value="Voluntary - Resigned">Voluntary - Resigned with Notice</option>
+                                    <option value="Voluntary - Better Opportunity">Voluntary - Better Opportunity</option>
+                                    <option value="Involuntary - Attendance">Involuntary - Attendance / No-Show</option>
+                                    <option value="Involuntary - Policy Violation">Involuntary - Policy Violation</option>
+                                    <option value="Involuntary - Performance">Involuntary - Performance</option>
+                                    <option value="Job Abandonment">Job Abandonment (Walk-out / NCNS)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Reason of Action (Detailed)</label>
+                            <textarea id="stfReason" placeholder="Specify exact reason for termination / exit..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>General Staffing Notes</label>
+                            <textarea id="stfNotes" placeholder="Additional notes or bonus log context..."></textarea>
                         </div>
                     </div>
 
@@ -713,27 +783,51 @@
         <div class="notes-panel">
             <div id="metricsBox" style="background: var(--crust-light); border: 2px solid var(--crust-dark); border-radius: var(--border-radius); padding: 14px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); color: var(--crust-burnt);">
                 <div style="display: flex; justify-content: space-between; border-bottom: 2px solid var(--crust-med); padding-bottom: 8px; align-items: center;">
-                    <span style="font-family: 'ExtraBold', sans-serif; font-size: 18px; color: var(--dark-blue); text-transform: uppercase; letter-spacing: 0.5px;">Weekly Activity Audit</span>
-                    <span id="metricsWeekRange" style="font-size: 13px; font-family: 'Compact'; color: var(--crust-deep); font-weight: bold;"></span>
+                    <span id="auditTitleHeader" style="font-family: 'ExtraBold', sans-serif; font-size: 16px; color: var(--dark-blue); text-transform: uppercase;">Weekly Activity Audit</span>
+                    <span id="metricsWeekRange" style="font-size: 12px; font-family: 'Compact'; color: var(--crust-deep); font-weight: bold;"></span>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 17px;">
-                    <span>Interviews:</span>
-                    <span style="font-family: 'Compact'; font-size: 17px;">
-                        This Week: <strong id="metricsQuotesThisWeek" style="color: var(--med-blue); font-family: 'Subhead2', sans-serif; font-size: 17px;" onclick="editLocalMetric('interviews_this_week', 'metricsQuotesThisWeek')">0</strong> | 
-                        Last Week: <strong id="metricsQuotesLastWeek" style="font-family: 'Subhead2', sans-serif; font-size: 17px;" onclick="editLocalMetric('interviews_last_week', 'metricsQuotesLastWeek')">0</strong>
-                    </span>
+                
+                <div id="auditWeeklyContent">
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 16px; margin-bottom: 6px;">
+                        <span>Interviews:</span>
+                        <span style="font-family: 'Compact'; font-size: 16px;">
+                            This Week: <strong id="metricsQuotesThisWeek" style="color: var(--med-blue); font-family: 'Subhead2', sans-serif;" onclick="editLocalMetric('interviews_this_week', 'metricsQuotesThisWeek')">0</strong> | 
+                            Last Week: <strong id="metricsQuotesLastWeek" style="font-family: 'Subhead2', sans-serif;" onclick="editLocalMetric('interviews_last_week', 'metricsQuotesLastWeek')">0</strong>
+                        </span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 16px;">
+                        <span>Hires:</span>
+                        <span style="font-family: 'Compact'; font-size: 16px;">
+                            This Week: <strong id="metricsOrdersThisWeek" style="color: var(--med-blue); font-family: 'Subhead2', sans-serif;" onclick="editLocalMetric('hires_this_week', 'metricsOrdersThisWeek')">0</strong> | 
+                            Last Week: <strong id="metricsOrdersLastWeek" style="font-family: 'Subhead2', sans-serif;" onclick="editLocalMetric('hires_last_week', 'metricsOrdersLastWeek')">0</strong>
+                        </span>
+                    </div>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 17px;">
-                    <span>Hires:</span>
-                    <span style="font-family: 'Compact'; font-size: 17px;">
-                        This Week: <strong id="metricsOrdersThisWeek" style="color: var(--med-blue); font-family: 'Subhead2', sans-serif; font-size: 16px;" onclick="editLocalMetric('hires_this_week', 'metricsOrdersThisWeek')">0</strong> | 
-                        Last Week: <strong id="metricsOrdersLastWeek" style="font-family: 'Subhead2', sans-serif; font-size: 16px;" onclick="editLocalMetric('hires_last_week', 'metricsOrdersLastWeek')">0</strong>
-                    </span>
+
+                <div id="auditPeriodContent" class="hidden">
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 15px; margin-bottom: 6px;">
+                        <span>This Week:</span>
+                        <span style="font-family: 'Compact'; font-size: 15px;">
+                            Hires: <strong id="stfWeekHires" style="color: var(--success-green);">0</strong> | 
+                            Terms: <strong id="stfWeekTerms" style="color: var(--brand-red);">0</strong>
+                        </span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 15px; margin-bottom: 6px;">
+                        <span>Current Period (<span id="stfCurrentPeriodName">P08</span>):</span>
+                        <span style="font-family: 'Compact'; font-size: 15px;">
+                            Hires: <strong id="stfPeriodHires" style="color: var(--success-green);">0</strong> | 
+                            Terms: <strong id="stfPeriodTerms" style="color: var(--brand-red);">0</strong>
+                        </span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 15px; border-top: 1px dashed var(--crust-dark); padding-top: 6px;">
+                        <span>Bonus Net Gain:</span>
+                        <strong id="stfPeriodNet" style="font-family: 'ExtraBold'; font-size: 16px; color: var(--dark-blue);">+0</strong>
+                    </div>
                 </div>
             </div>
             
             <div style="flex: 1; display: flex; flex-direction: column; background: var(--crust-base); border: 2px solid var(--crust-dark); border-radius: var(--border-radius); padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); position: relative; overflow: hidden;">
-                <div style="font-family: 'ExtraBold', sans-serif; font-size: 18px; color: var(--dark-blue); border-bottom: 2px solid var(--crust-med); padding-bottom: 6px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; text-transform: uppercase; letter-spacing: 0.5px; flex: 0 0 auto;" id="scratchpadTitleHeader">
+                <div style="font-family: 'ExtraBold', sans-serif; font-size: 18px; color: var(--dark-blue); border-bottom: 2px solid var(--crust-med); padding-bottom: 6px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; text-transform: uppercase;" id="scratchpadTitleHeader">
                     <span>📋 Sync Scratchpad</span>
                     <div style="display: flex; gap: 4px; align-items: center;">
                         <button type="button" id="btnModeText" onclick="setScratchpadMode('text')" style="font-size: 11px; padding: 2px 6px; background: var(--dark-blue); color: white; border-radius: 4px; font-family: 'Compact'; min-width: 40px; text-transform: uppercase;">Text</button>
@@ -793,8 +887,44 @@
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxa1XNdNgwOULiYpeAoBIjTy1wv034pON4-hnR444XB07vegHhoSR56UacR7UaktTaGZg/exec"; 
 
+    // OFFICIAL DOMINO'S 2026 FISCAL PERIOD BOUNDARIES
+    const DOMINOS_FISCAL_2026 = [
+      { period: "P01", start: "2025-12-29", end: "2026-01-25" },
+      { period: "P02", start: "2026-01-26", end: "2026-02-22" },
+      { period: "P03", start: "2026-02-23", end: "2026-03-22" },
+      { period: "P04", start: "2026-03-23", end: "2026-04-19" },
+      { period: "P05", start: "2026-04-20", end: "2026-05-17" },
+      { period: "P06", start: "2026-05-18", end: "2026-06-14" },
+      { period: "P07", start: "2026-06-15", end: "2026-07-12" },
+      { period: "P08", start: "2026-07-13", end: "2026-08-09" },
+      { period: "P09", start: "2026-08-10", end: "2026-09-06" },
+      { period: "P10", start: "2026-09-07", end: "2026-10-04" },
+      { period: "P11", start: "2026-10-05", end: "2026-11-01" },
+      { period: "P12", start: "2026-11-02", end: "2026-11-29" },
+      { period: "P13", start: "2026-11-30", end: "2026-12-27" }
+    ];
+
+    function getDominosFiscalPeriod(dateInput) {
+        if (!dateInput) return "P08";
+        let d = new Date(dateInput);
+        if (isNaN(d.getTime())) return "P08";
+        
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const dateStr = `${yyyy}-${mm}-${dd}`;
+        
+        for (let i = 0; i < DOMINOS_FISCAL_2026.length; i++) {
+            if (dateStr >= DOMINOS_FISCAL_2026[i].start && dateStr <= DOMINOS_FISCAL_2026[i].end) {
+                return DOMINOS_FISCAL_2026[i].period;
+            }
+        }
+        return "P08";
+    }
+
     let candidates = [];
     let interviews = [];
+    let staffing = [];
     let currentSelectedId = null;
     let currentView = 'onboarding'; 
     
@@ -802,7 +932,6 @@
     let checklistItemsData = [];
     let scratchpadTimeout = null;
     window.hasApiMetrics = false;
-    window.currentSelectedInterview = null;
 
     window.addEventListener('DOMContentLoaded', () => {
         const savedUser = localStorage.getItem('onb_user');
@@ -839,6 +968,7 @@
         select.value = '';
     }
 
+    /* --- BRAND DIALOG MODAL HELPERS --- */
     function showBrandAlert(message, title = "System Notification") {
         return new Promise((resolve) => {
             const modal = document.getElementById('brandModal');
@@ -1076,38 +1206,19 @@
                 
                 document.getElementById('authContainer').classList.add('hidden');
                 document.getElementById('appContainer').classList.remove('hidden');
-                
                 document.getElementById('headerCity').innerText = `${city} Workspace`;
                 
                 candidates = data.onboarding || [];
                 interviews = data.interviews || [];
+                staffing = data.staffing || [];
                 
-                const isDallas = city.toLowerCase() === 'dallas';
-                const dallasToggle = document.getElementById('dallasToggleContainer');
-                if (isDallas) {
-                    dallasToggle.classList.remove('hidden');
-                    switchView('onboarding');
-                } else {
-                    dallasToggle.classList.add('hidden');
-                    switchView('onboarding');
-                }
-
+                switchView('onboarding');
                 initScratchpad();
-                
-                if (data.metrics) {
-                    window.hasApiMetrics = true;
-                    updateMetricsAndWeekRange(data.metrics);
-                } else {
-                    window.hasApiMetrics = false;
-                    updateMetricsAndWeekRange(null);
-                }
-                
                 showLoader(false);
                 
                 if (!window.syncInterval) {
                     window.syncInterval = setInterval(silentSync, 30000);
                 }
-                
             })
             .catch(err => {
                 showLoader(false);
@@ -1134,41 +1245,70 @@
         
         const btnOnb = document.getElementById('toggleOnb');
         const btnInt = document.getElementById('toggleInt');
+        const btnStf = document.getElementById('toggleStf');
         const btnAddMain = document.getElementById('btnAddMain');
         
         const onbFormFields = document.getElementById('onboardingFormFields');
         const intFormFields = document.getElementById('interviewFormFields');
+        const stfFormFields = document.getElementById('staffingFormFields');
+
+        const auditWeekly = document.getElementById('auditWeeklyContent');
+        const auditPeriod = document.getElementById('auditPeriodContent');
+        const auditTitle = document.getElementById('auditTitleHeader');
 
         document.getElementById('searchControl').value = '';
+
+        [btnOnb, btnInt, btnStf].forEach(b => {
+            b.style.background = 'transparent';
+            b.style.color = 'var(--crust-burnt)';
+        });
         
-        if (view === 'interviews') {
+        [onbFormFields, intFormFields, stfFormFields].forEach(f => f.classList.add('hidden'));
+
+        if (view === 'staffing') {
+            btnStf.style.background = 'var(--dark-blue)';
+            btnStf.style.color = 'white';
+            btnAddMain.innerText = "📊 Add Staffing Record";
+            stfFormFields.classList.remove('hidden');
+            document.getElementById('formTitle').innerText = "Hires & Terminations Details";
+            
+            auditWeekly.classList.add('hidden');
+            auditPeriod.classList.remove('hidden');
+            auditTitle.innerText = "Period Staffing Audit";
+            autoCalculatePeriodFromDates();
+        } else if (view === 'interviews') {
             btnInt.style.background = 'var(--dark-blue)';
             btnInt.style.color = 'white';
-            btnOnb.style.background = 'transparent';
-            btnOnb.style.color = 'var(--crust-burnt)';
-            
             btnAddMain.innerText = "👥 Add New Interview";
-            
-            onbFormFields.classList.add('hidden');
             intFormFields.classList.remove('hidden');
-            
             document.getElementById('formTitle').innerText = "Interview details";
+            
+            auditWeekly.classList.remove('hidden');
+            auditPeriod.classList.add('hidden');
+            auditTitle.innerText = "Weekly Activity Audit";
         } else {
             btnOnb.style.background = 'var(--dark-blue)';
             btnOnb.style.color = 'white';
-            btnInt.style.background = 'transparent';
-            btnInt.style.color = 'var(--crust-burnt)';
-            
             btnAddMain.innerText = "📋 Add New Candidate";
-            
-            intFormFields.classList.add('hidden');
             onbFormFields.classList.remove('hidden');
-            
             document.getElementById('formTitle').innerText = "Candidate details";
+            
+            auditWeekly.classList.remove('hidden');
+            auditPeriod.classList.add('hidden');
+            auditTitle.innerText = "Weekly Activity Audit";
         }
         
         clearForm();
         renderList();
+        updateAuditMetrics();
+    }
+
+    function autoCalculatePeriodFromDates() {
+        const hireD = document.getElementById('stfHireDate').value;
+        const termD = document.getElementById('stfTermDate').value;
+        const targetDate = termD || hireD || new Date();
+        const p = getDominosFiscalPeriod(targetDate);
+        document.getElementById('stfPeriod').value = p;
     }
 
     function getActiveStatusText(item) {
@@ -1192,21 +1332,15 @@
     }
 
     function getStatusWeight(item) {
-        // 1. New Submissions FIRST at the absolute top of your list!
         if (item.submissionReceived && !item.onboardingSent) return 10;
-        
-        // 2. Pipeline stages in natural progression order
         if (item.ntoScheduled) return 8;
         if (item.ntoSignupLinkSent) return 7;
         if (item.bgcComplete && item.allPayCompleted) return 6;
         if (item.bgcComplete || item.allPayCompleted) return 5;
         if (item.onboardingSent) return 4;
-        
-        // 3. Completed / Inactive candidates at the bottom
         if (item.hired) return 1;
         if (item.ineligible) return -1;
         if (item.inactive) return -2;
-        
         return 0;
     }
 
@@ -1219,44 +1353,49 @@
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-        if (currentView === 'interviews') {
-            let filteredInterviews = interviews.filter(item => {
-                if (searchQuery) {
-                    return item.name && item.name.toLowerCase().includes(searchQuery);
+        if (currentView === 'staffing') {
+            let filtered = staffing.filter(item => !searchQuery || (item.name && item.name.toLowerCase().includes(searchQuery)));
+            if (filtered.length === 0) {
+                listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No staffing records found.</div>';
+                return;
+            }
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'candidate-card';
+                if (item.id === currentSelectedId) card.classList.add('selected');
+
+                const isTerm = !!item.termDate;
+                if (isTerm) {
+                    card.classList.add('status-red');
+                } else {
+                    card.classList.add('status-green');
                 }
-                return true;
+
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div class="card-name">${item.name}</div>
+                        <span class="badge-review" style="background:${isTerm ? '#ffebee' : '#e8f5e9'}; color:${isTerm ? 'var(--brand-red)' : 'var(--success-green)'};">${item.period}</span>
+                    </div>
+                    <div class="card-sub">
+                        <span>Store #${item.store} (${item.position})</span>
+                        <span style="font-weight: bold; color: ${isTerm ? 'var(--brand-red)' : 'var(--success-green)'};">${isTerm ? 'Terminated' : 'Active Hire'}</span>
+                    </div>
+                `;
+                card.onclick = () => selectCandidate(item);
+                listContainer.appendChild(card);
             });
 
-            filteredInterviews.sort((a, b) => {
-                const isHiredA = (a.status === 'Hired');
-                const isHiredB = (b.status === 'Hired');
-                if (isHiredA !== isHiredB) {
-                    return isHiredA ? 1 : -1; 
-                }
+        } else if (currentView === 'interviews') {
+            let filteredInterviews = interviews.filter(item => !searchQuery || (item.name && item.name.toLowerCase().includes(searchQuery)));
 
-                if (sortBy === 'name') {
-                    return a.name.localeCompare(b.name);
-                }
-                if (sortBy === 'store') {
-                    const storeA = parseInt(a.store) || 0;
-                    const storeB = parseInt(b.store) || 0;
-                    return storeA - storeB;
-                }
-                if (sortBy === 'do') {
-                    const doA = a.doName ? a.doName.toString().trim() : '';
-                    const doB = b.doName ? b.doName.toString().trim() : '';
-                    return doA.localeCompare(doB);
-                }
-                if (sortBy === 'status') {
-                    const statusA = a.status ? a.status.toString().trim() : '';
-                    const statusB = b.status ? b.status.toString().trim() : '';
-                    return statusA.localeCompare(statusB);
-                }
+            filteredInterviews.sort((a, b) => {
+                if (sortBy === 'name') return a.name.localeCompare(b.name);
+                if (sortBy === 'store') return (parseInt(a.store)||0) - (parseInt(b.store)||0);
                 return 0;
             });
 
             if (filteredInterviews.length === 0) {
-                listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No matches found.</div>';
+                listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No interview matches found.</div>';
                 return;
             }
 
@@ -1265,47 +1404,25 @@
                 card.className = 'candidate-card';
                 if (item.id === currentSelectedId) card.classList.add('selected');
 
-                if (item.status === 'No Show' || item.status === 'Declined') {
-                    card.classList.add('status-red');
-                } else if (item.status === 'Hired' || item.status === 'Completed') {
-                    card.classList.add('status-green');
-                } else if (item.status === 'Hold') {
-                    card.classList.add('status-reviewing');
-                } else {
-                    card.classList.add('status-blue');
-                }
-
-                let statusStyleColor = 'var(--brand-blue)';
-                if (item.status === 'Hired' || item.status === 'Completed') statusStyleColor = 'var(--success-green)';
-                if (item.status === 'No Show' || item.status === 'Declined') statusStyleColor = 'var(--brand-red)';
-                if (item.status === 'Hold') statusStyleColor = 'var(--med-blue)';
-                if (item.status === 'Passed to GM') statusStyleColor = 'var(--dark-blue)';
-
-                let flags = '';
-                if (item.status === 'Passed to GM') flags += '<span class="badge-review">👔 GM Route</span> ';
-                if (item.status === 'No Show') flags += '<span class="badge-incorrect">⚠️ No Show</span> ';
+                if (item.status === 'No Show' || item.status === 'Declined') card.classList.add('status-red');
+                else if (item.status === 'Hired' || item.status === 'Completed') card.classList.add('status-green');
+                else card.classList.add('status-blue');
 
                 card.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div class="card-name">${item.name}</div>
-                        <div style="display: flex; gap: 4px;">${flags}</div>
-                    </div>
+                    <div class="card-name">${item.name}</div>
                     <div class="card-sub">
                         <span>Store #${item.store} (${item.position})</span>
-                        <span style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: ${statusStyleColor};">${item.status || 'Scheduled'}</span>
+                        <span style="font-weight: bold; color: var(--dark-blue);">${item.status || 'Scheduled'}</span>
                     </div>
                 `;
-                
                 card.onclick = () => selectCandidate(item);
                 listContainer.appendChild(card);
             });
 
         } else {
             let filteredCandidates = candidates.filter(item => {
-                if (searchQuery && (!item.name || !item.name.toLowerCase().includes(searchQuery))) {
-                    return false;
-                }
-
+                if (searchQuery && (!item.name || !item.name.toLowerCase().includes(searchQuery))) return false;
+                
                 const isTerminalState = item.hired || item.ineligible || item.inactive;
                 if (isTerminalState && item.lastUpdated) {
                     const updatedDate = new Date(item.lastUpdated);
@@ -1317,40 +1434,16 @@
             });
 
             filteredCandidates.sort((a, b) => {
-                const isHiredA = !!a.hired;
-                const isHiredB = !!b.hired;
-                if (isHiredA !== isHiredB) {
-                    return isHiredA ? 1 : -1;
-                }
-
-                if (sortBy === 'name') {
-                    return a.name.localeCompare(b.name);
-                }
-                if (sortBy === 'store') {
-                    const storeA = parseInt(a.store) || 0;
-                    const storeB = parseInt(b.store) || 0;
-                    return storeA - storeB;
-                }
-                if (sortBy === 'do') {
-                    const doA = a.doName ? a.doName.toString().trim() : '';
-                    const doB = b.doName ? b.doName.toString().trim() : '';
-                    return doA.localeCompare(doB);
-                }
-                if (sortBy === 'status') {
-                    return getStatusWeight(b) - getStatusWeight(a);
-                }
-                if (sortBy === 'paycard') {
-                    const payA = a.payCard ? a.payCard.toLowerCase().trim() : '';
-                    const payB = b.payCard ? b.payCard.toLowerCase().trim() : '';
-                    return payA.localeCompare(payB);
-                }
+                if (sortBy === 'name') return a.name.localeCompare(b.name);
+                if (sortBy === 'store') return (parseInt(a.store)||0) - (parseInt(b.store)||0);
+                if (sortBy === 'status') return getStatusWeight(b) - getStatusWeight(a);
                 const dateA = new Date(a.lastUpdated);
                 const dateB = new Date(b.lastUpdated);
                 return dateB - dateA;
             });
 
             if (filteredCandidates.length === 0) {
-                listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No matches found.</div>';
+                listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No candidate matches found.</div>';
                 return;
             }
 
@@ -1362,56 +1455,25 @@
                 const rawMissingDocs = item.missingDocs || "";
                 const isBlockedByDocs = rawMissingDocs !== "" && rawMissingDocs.toString().toUpperCase() !== "FALSE";
 
-                // Stage-based brand border differentiation
-                if (item.incorrectEmail || isBlockedByDocs) {
-                    card.classList.add('status-red');
-                } else if (item.currentlyReviewing) {
-                    card.classList.add('status-reviewing');
-                } else if (item.hired) {
-                    card.classList.add('status-green');
-                } else if (item.ineligible || item.inactive) {
-                    card.classList.add('status-gray');
-                } else if (item.ntoScheduled || item.ntoSignupLinkSent) {
-                    card.classList.add('status-nto'); // Dark Blue border for NTO / Orientation
-                } else if (item.bgcComplete || item.allPayCompleted) {
-                    card.classList.add('status-processing'); // Medium Blue border for Paperwork
-                } else if (item.submissionReceived && !item.onboardingSent) {
-                    card.classList.add('status-subrec'); // Thicker Brand Blue + soft tint for New Submissions!
-                } else {
-                    card.classList.add('status-blue'); // Standard Brand Blue
-                }
+                if (item.incorrectEmail || isBlockedByDocs) card.classList.add('status-red');
+                else if (item.currentlyReviewing) card.classList.add('status-reviewing');
+                else if (item.hired) card.classList.add('status-green');
+                else if (item.ntoScheduled || item.ntoSignupLinkSent) card.classList.add('status-nto');
+                else if (item.bgcComplete || item.allPayCompleted) card.classList.add('status-processing');
+                else if (item.submissionReceived && !item.onboardingSent) card.classList.add('status-subrec');
+                else card.classList.add('status-blue');
                 
                 const activeStatusText = getActiveStatusText(item);
-                
-                // Color mapping using official Domino's Brand Palette
-                let statusStyleColor = 'var(--brand-blue)';
-                if (item.hired) statusStyleColor = 'var(--success-green)';
-                if (item.incorrectEmail || isBlockedByDocs) statusStyleColor = 'var(--brand-red)';
-                if (item.currentlyReviewing) statusStyleColor = 'var(--med-blue)';
-                if (item.ntoScheduled || item.ntoSignupLinkSent) statusStyleColor = 'var(--dark-blue)';
-                if (item.bgcComplete || item.allPayCompleted) statusStyleColor = 'var(--med-blue)';
-                if (item.ineligible || item.inactive) statusStyleColor = 'var(--brand-grey)';
-
-                let flags = '';
-                if (item.incorrectEmail) flags += '<span class="badge-incorrect">⚠️ Email Error</span> ';
-                if (isBlockedByDocs) flags += '<span class="badge-incorrect">⚠️ Missing Docs</span> ';
-                
-                // FIX: Prevents "Double Reviewing" by checking if not already in main status text
-                if (item.currentlyReviewing && activeStatusText !== "🔍 Reviewing") {
-                    flags += '<span class="badge-review">🔍 Reviewing</span> ';
-                }
 
                 card.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div class="card-name">${item.name}</div>
-                        <div style="display: flex; gap: 4px;">${flags}</div>
                     </div>
                     <div class="card-sub">
                         <span>Store #${item.store} (${item.position})</span>
-                        <span style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: ${statusStyleColor};">${activeStatusText}</span>
+                        <span style="font-weight: bold; color: var(--brand-blue);">${activeStatusText}</span>
                     </div>
                 `;
-                
                 card.onclick = () => selectCandidate(item);
                 listContainer.appendChild(card);
             });
@@ -1425,9 +1487,21 @@
         document.getElementById('formTitle').innerText = `Edit: ${item.name}`;
         document.getElementById('btnCancel').innerText = "Cancel Edit";
 
-        if (currentView === 'interviews') {
-            window.currentSelectedInterview = interviews.find(i => i.id === item.id);
-        
+        if (currentView === 'staffing') {
+            document.getElementById('fieldId').value = item.id;
+            document.getElementById('stfName').value = item.name || '';
+            document.getElementById('stfPosition').value = item.position || '';
+            document.getElementById('stfStore').value = item.store || '';
+            document.getElementById('stfDo').value = item.doName || '';
+            document.getElementById('stfHireDate').value = item.hireDate || '';
+            document.getElementById('stfTermDate').value = item.termDate || '';
+            document.getElementById('stfPeriod').value = item.period || getDominosFiscalPeriod(item.termDate || item.hireDate);
+            document.getElementById('stfRehire').value = item.rehireEligible || 'Yes';
+            document.getElementById('stfCause').value = item.causeOfAction || '';
+            document.getElementById('stfReason').value = item.reasonOfAction || '';
+            document.getElementById('stfNotes').value = item.notes || '';
+
+        } else if (currentView === 'interviews') {
             document.getElementById('fieldId').value = item.id;
             document.getElementById('intName').value = item.name || '';
             document.getElementById('intPosition').value = item.position || 'CSR';
@@ -1438,22 +1512,19 @@
             document.getElementById('intDate').value = item.date || '';
             document.getElementById('intDay').value = item.day || '';
             document.getElementById('intTime').value = item.time || '';
-            
-            // Case-insensitive status selector with fallback to 'Phone Interview'
             setSelectValueCaseInsensitive('intStatus', item.status || 'Phone Interview');
-            
             document.getElementById('intGmDate').value = item.gmDate || '';
             document.getElementById('intGmTime').value = item.gmTime || '';
             document.getElementById('intStatusUpdates').value = item.statusUpdates || '';
             document.getElementById('intAvailability').value = item.availability || '';
             document.getElementById('intNotes').value = item.notes || '';
-            
             document.getElementById('emailQuickActions').classList.add('hidden');
+
         } else {
             document.getElementById('fieldId').value = item.id;
-            document.getElementById('fieldName').value = item.name;
-            document.getElementById('fieldPosition').value = item.position;
-            document.getElementById('fieldStore').value = item.store;
+            document.getElementById('fieldName').value = item.name || '';
+            document.getElementById('fieldPosition').value = item.position || '';
+            document.getElementById('fieldStore').value = item.store || '';
             document.getElementById('fieldPhone').value = item.phoneNumber || '';
             document.getElementById('fieldEmail').value = item.email || '';
             document.getElementById('fieldNto').value = item.ntoDate || '';
@@ -1481,9 +1552,7 @@
                 document.getElementById('checkMissingDocs').checked = true;
                 document.getElementById('missingDocsContainer').classList.remove('hidden');
                 
-                const docString = rawMissingDocs.toString();
-                const parts = docString.split(',').map(p => p.trim());
-                
+                const parts = rawMissingDocs.toString().split(',').map(p => p.trim());
                 document.querySelectorAll('.doc-chk').forEach(c => c.checked = false);
                 document.getElementById('customMissingDoc').value = '';
                 
@@ -1500,15 +1569,12 @@
                         customParts.push(part);
                     }
                 });
-                
                 if (customParts.length > 0) {
                     document.getElementById('customMissingDoc').value = customParts.join(', ');
                 }
             } else {
                 document.getElementById('checkMissingDocs').checked = false;
                 document.getElementById('missingDocsContainer').classList.add('hidden');
-                document.querySelectorAll('.doc-chk').forEach(c => c.checked = false);
-                document.getElementById('customMissingDoc').value = '';
             }
             
             document.getElementById('emailQuickActions').classList.remove('hidden');
@@ -1520,12 +1586,16 @@
         currentSelectedId = null;
         renderList();
         
-        if (currentView === 'interviews') {
+        if (currentView === 'staffing') {
+            document.getElementById('formTitle').innerText = "Add Staffing Entry";
+            autoCalculatePeriodFromDates();
+            document.getElementById('stfName').focus();
+        } else if (currentView === 'interviews') {
             document.getElementById('formTitle').innerText = "Add New Interview";
             document.getElementById('intName').focus();
         } else {
             document.getElementById('formTitle').innerText = "Add New Candidate";
-            document.getElementById('checkSubmission').checked = true; // Pre-check on UI
+            document.getElementById('checkSubmission').checked = true;
             document.getElementById('fieldName').focus();
         }
     }
@@ -1534,9 +1604,11 @@
         document.getElementById('candidateForm').reset();
         document.getElementById('fieldId').value = '';
         document.getElementById('fieldNto').value = '';
-        window.currentSelectedInterview = null;
         
-        if (currentView === 'interviews') {
+        if (currentView === 'staffing') {
+            document.getElementById('formTitle').innerText = "Hires & Terminations Details";
+            autoCalculatePeriodFromDates();
+        } else if (currentView === 'interviews') {
             document.getElementById('formTitle').innerText = "Interview details";
         } else {
             document.getElementById('formTitle').innerText = "Candidate details";
@@ -1567,7 +1639,20 @@
             id: id
         };
 
-        if (currentView === 'interviews') {
+        if (currentView === 'staffing') {
+            payload.name = document.getElementById('stfName').value.trim();
+            payload.position = document.getElementById('stfPosition').value;
+            payload.store = document.getElementById('stfStore').value.trim();
+            payload.doName = document.getElementById('stfDo').value.trim();
+            payload.hireDate = document.getElementById('stfHireDate').value;
+            payload.termDate = document.getElementById('stfTermDate').value;
+            payload.period = document.getElementById('stfPeriod').value;
+            payload.rehireEligible = document.getElementById('stfRehire').value;
+            payload.causeOfAction = document.getElementById('stfCause').value;
+            payload.reasonOfAction = document.getElementById('stfReason').value.trim();
+            payload.notes = document.getElementById('stfNotes').value.trim();
+
+        } else if (currentView === 'interviews') {
             payload.name = document.getElementById('intName').value.trim();
             payload.position = document.getElementById('intPosition').value;
             payload.store = document.getElementById('intStore').value.trim();
@@ -1583,6 +1668,7 @@
             payload.statusUpdates = document.getElementById('intStatusUpdates').value.trim();
             payload.availability = document.getElementById('intAvailability').value.trim();
             payload.notes = document.getElementById('intNotes').value.trim();
+
         } else {
             payload.name = document.getElementById('fieldName').value.trim();
             payload.position = document.getElementById('fieldPosition').value;
@@ -1612,22 +1698,15 @@
                 document.querySelectorAll('.doc-chk:checked').forEach(c => checkedDocs.push(c.value));
                 const customVal = document.getElementById('customMissingDoc').value.trim();
                 if (customVal) checkedDocs.push(customVal);
-                
                 missingDocsValue = checkedDocs.length > 0 ? checkedDocs.join(', ') : "TRUE";
             }
             payload.missingDocs = missingDocsValue;
         }
 
-        fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        })
+        fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
         .then(res => res.json())
         .then(result => {
-            if (!result.success) {
-                throw new Error(result.error || "Save failed");
-            }
-            
+            if (!result.success) throw new Error(result.error || "Save failed");
             const city = getCityFromUser(username);
             return fetch(`${API_URL}?city=${city}`);
         })
@@ -1635,17 +1714,10 @@
         .then(data => {
             candidates = data.onboarding || [];
             interviews = data.interviews || [];
+            staffing = data.staffing || [];
 
             renderList();
-            
-            if (data.metrics) {
-                window.hasApiMetrics = true;
-                updateMetricsAndWeekRange(data.metrics);
-            } else {
-                window.hasApiMetrics = false;
-                updateMetricsAndWeekRange(null);
-            }
-
+            updateAuditMetrics();
             clearForm();
             showLoader(false);
         })
@@ -1657,15 +1729,9 @@
 
     function getMissingOnboardingForms() {
         let missing = [];
-        if (!document.getElementById('checkAllPay').checked) {
-            missing.push("Onboarding Documents (AllPay/HR Alliance)");
-        }
-        if (!document.getElementById('checkBgc').checked) {
-            missing.push("Background Check (Checkr)");
-        }
-        if (!document.getElementById('checkPulseForm').checked) {
-            missing.push("Store System Setup Form (SmartRecruiters)");
-        }
+        if (!document.getElementById('checkAllPay').checked) missing.push("Onboarding Documents (AllPay/HR Alliance)");
+        if (!document.getElementById('checkBgc').checked) missing.push("Background Check (Checkr)");
+        if (!document.getElementById('checkPulseForm').checked) missing.push("Store System Setup Form (SmartRecruiters)");
         return missing;
     }
 
@@ -1685,7 +1751,6 @@
         let payloadMissing = "";
         let payRateInput = "";
         let roadPayInput = "";
-        
         let payloadAllPayLink = "";
         let payloadCheckrLink = "";
         let payloadStoreSetupLink = "";
@@ -1693,10 +1758,10 @@
         if (emailType === "welcome") {
             if (position === "DE") {
                 payRateInput = await showBrandPrompt(`Enter IN-STORE starting rate for ${name} (e.g., 9.00):`, "9.00", "In-Store Hourly Wage");
-                if (payRateInput === null) return; // User cancelled
+                if (payRateInput === null) return;
                 
                 roadPayInput = await showBrandPrompt(`Enter ON-THE-ROAD rate for ${name} (e.g., 4.45):`, "4.35", "On-the-Road Hourly Wage");
-                if (roadPayInput === null) return; // User cancelled
+                if (roadPayInput === null) return;
                 
                 confirmationMessage = `Send Dynamic Welcome Email & Offer to ${name}?\n\n• In-Store Wage: $${payRateInput}/hr\n• On-The-Road Wage: $${roadPayInput}/hr + Mileage\n\n(This will automatically CC the store and BCC the DO)`;
             } else {
@@ -1708,7 +1773,7 @@
         } else if (emailType === "reminder") {
             const missing = getMissingOnboardingForms();
             if (missing.length === 0) {
-                showBrandAlert("All onboarding forms are currently marked as completed. No reminder email is necessary.", "Reminder Cancelled");
+                showBrandAlert("All onboarding forms are currently marked as completed.", "Reminder Cancelled");
                 return;
             }
             
@@ -1720,9 +1785,9 @@
             payloadCheckrLink = links.checkrLink;
             payloadStoreSetupLink = links.storeSetupLink;
             
-            confirmationMessage = `Are you sure you want to send the Onboarding Reminder to ${name} (${email}) for:\n\n• ${missing.join("\n• ")}\n\n(This will automatically CC the store and BCC the DO)`;
+            confirmationMessage = `Are you sure you want to send the Onboarding Reminder to ${name} (${email}) for:\n\n• ${missing.join("\n• ")}`;
         } else if (emailType === "orientation") {
-            confirmationMessage = `Are you sure you want to send the Orientation Registration Link to ${name} (${email})?\n\n(This will NOT CC the store or BCC the DO)`;
+            confirmationMessage = `Are you sure you want to send the Orientation Registration Link to ${name} (${email})?`;
         }
 
         const confirmed = await showBrandConfirm(confirmationMessage, "Confirm Email Delivery");
@@ -1747,17 +1812,11 @@
             storeSetupLink: payloadStoreSetupLink
         };
 
-        fetch(API_URL, {
-            method: "POST",
-            body: JSON.stringify(payload)
-        })
+        fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
         .then(res => res.json())
         .then(result => {
-            if (!result.success) {
-                throw new Error(result.error || "Email delivery failed");
-            }
-            
-            showBrandAlert(`Email successfully delivered! The spreadsheet has been updated.`, "Email Delivered");
+            if (!result.success) throw new Error(result.error || "Email delivery failed");
+            showBrandAlert(`Email successfully delivered!`, "Email Delivered");
             const city = getCityFromUser(username);
             return fetch(`${API_URL}?city=${city}`);
         })
@@ -1765,14 +1824,8 @@
         .then(data => {
             candidates = data.onboarding || [];
             interviews = data.interviews || [];
-            
+            staffing = data.staffing || [];
             renderList();
-            const reselected = candidates.find(c => c.id === id);
-            if (reselected) {
-                selectCandidate(reselected);
-            } else {
-                clearForm();
-            }
             showLoader(false);
         })
         .catch(err => {
@@ -1781,9 +1834,51 @@
         });
     }
 
+    function portCandidateToOnboarding() {
+        const name = document.getElementById('intName').value.trim();
+        const position = document.getElementById('intPosition').value;
+        const store = document.getElementById('intStore').value.trim();
+        const phone = document.getElementById('intPhone').value.trim();
+        const email = document.getElementById('intEmail').value.trim();
+        const notes = document.getElementById('intNotes').value.trim();
+
+        if (!name) {
+            showBrandAlert("Please select or fill out an interview candidate first.", "No Candidate Selected");
+            return;
+        }
+
+        switchView('onboarding');
+        document.getElementById('fieldId').value = '';
+        document.getElementById('fieldName').value = name;
+        document.getElementById('fieldPosition').value = position;
+        document.getElementById('fieldStore').value = store;
+        document.getElementById('fieldPhone').value = phone;
+        document.getElementById('fieldEmail').value = email;
+        document.getElementById('fieldNotes').value = notes;
+        document.getElementById('checkSubmission').checked = true;
+
+        showBrandAlert(`Successfully ported details for ${name}!`, "Candidate Ported");
+    }
+
+    function portCandidateToStaffing(source) {
+        let name = "", store = "", position = "", doName = "";
+        if (source === 'onboarding') {
+            name = document.getElementById('fieldName').value.trim();
+            store = document.getElementById('fieldStore').value.trim();
+            position = document.getElementById('fieldPosition').value;
+        }
+        
+        switchView('staffing');
+        document.getElementById('stfName').value = name;
+        document.getElementById('stfStore').value = store;
+        document.getElementById('stfPosition').value = position;
+        document.getElementById('stfHireDate').value = new Date().toISOString().split('T')[0];
+        autoCalculatePeriodFromDates();
+    }
+
+    /* --- SCRATCHPAD ENGINE --- */
     function initScratchpad() {
         const username = localStorage.getItem('onb_user');
-        
         scratchpadMode = localStorage.getItem(`scratchpad_mode_${username}`) || 'text';
         
         const savedText = localStorage.getItem(`scratchpad_text_${username}`) || '';
@@ -1791,15 +1886,10 @@
         
         const savedChecklist = localStorage.getItem(`scratchpad_checklist_${username}`);
         if (savedChecklist) {
-            try {
-                checklistItemsData = JSON.parse(savedChecklist);
-            } catch (e) {
-                checklistItemsData = [];
-            }
+            try { checklistItemsData = JSON.parse(savedChecklist); } catch (e) { checklistItemsData = []; }
         } else {
             checklistItemsData = [];
         }
-        
         setScratchpadMode(scratchpadMode);
     }
 
@@ -1813,14 +1903,11 @@
         const areaText = document.getElementById('scratchpad');
         const areaList = document.getElementById('scratchpadChecklist');
 
-        if (!btnText || !btnList || !areaText || !areaList) return;
-
         if (mode === 'list') {
             btnList.style.background = 'var(--dark-blue)';
             btnList.style.color = 'white';
             btnText.style.background = 'var(--crust-med)';
             btnText.style.color = 'var(--crust-burnt)';
-
             areaText.classList.add('hidden');
             areaList.classList.remove('hidden');
             renderChecklist();
@@ -1829,7 +1916,6 @@
             btnText.style.color = 'white';
             btnList.style.background = 'var(--crust-med)';
             btnList.style.color = 'var(--crust-burnt)';
-
             areaList.classList.add('hidden');
             areaText.classList.remove('hidden');
         }
@@ -1839,48 +1925,29 @@
         const username = localStorage.getItem('onb_user');
         const textVal = document.getElementById('scratchpad').value;
         localStorage.setItem(`scratchpad_text_${username}`, textVal);
-        
         clearTimeout(scratchpadTimeout);
-        scratchpadTimeout = setTimeout(() => {
-            syncNotesToBackend(username, textVal, 'text');
-        }, 1500);
+        scratchpadTimeout = setTimeout(() => syncNotesToBackend(username, textVal, 'text'), 1500);
     }
 
     function saveChecklist() {
         const username = localStorage.getItem('onb_user');
         localStorage.setItem(`scratchpad_checklist_${username}`, JSON.stringify(checklistItemsData));
-        
         clearTimeout(scratchpadTimeout);
-        scratchpadTimeout = setTimeout(() => {
-            syncNotesToBackend(username, JSON.stringify(checklistItemsData), 'list');
-        }, 1500);
+        scratchpadTimeout = setTimeout(() => syncNotesToBackend(username, JSON.stringify(checklistItemsData), 'list'), 1500);
     }
 
     function syncNotesToBackend(username, content, mode) {
-        if (!API_URL) return;
         const password = localStorage.getItem('onb_pass');
-        
-        const payload = {
-            username: username,
-            password: password,
-            action: 'saveScratchpad',
-            scratchpadMode: mode,
-            scratchpadContent: content
-        };
-
         fetch(API_URL, {
             method: 'POST',
-            body: JSON.stringify(payload)
-        })
-        .then(res => res.json())
-        .then(result => {
-            if (result.success) {
-                console.log("Database notes successfully synced.");
-            }
-        })
-        .catch(err => {
-            console.warn("Notes locally saved. Cloud sync offline:", err.message);
-        });
+            body: JSON.stringify({
+                username: username,
+                password: password,
+                action: 'saveScratchpad',
+                scratchpadMode: mode,
+                scratchpadContent: content
+            })
+        }).catch(err => console.warn("Notes offline save active"));
     }
 
     function renderChecklist() {
@@ -1894,35 +1961,21 @@
             row.style.alignItems = 'center';
             row.style.justifyContent = 'space-between';
             row.style.gap = '8px';
-            row.style.padding = '4px 0';
             
             const leftPart = document.createElement('label');
             leftPart.style.display = 'flex';
             leftPart.style.alignItems = 'center';
             leftPart.style.gap = '8px';
             leftPart.style.cursor = 'pointer';
-            leftPart.style.flex = '1';
-            leftPart.style.fontSize = '15px';
             
             const chk = document.createElement('input');
             chk.type = 'checkbox';
             chk.checked = item.done;
-            chk.style.width = '16px';
-            chk.style.height = '16px';
-            chk.style.cursor = 'pointer';
-            chk.onclick = (e) => {
-                e.stopPropagation();
-                toggleChecklistItem(item.id);
-            };
+            chk.onclick = (e) => { e.stopPropagation(); toggleChecklistItem(item.id); };
             
             const labelText = document.createElement('span');
             labelText.innerText = item.text;
-            if (item.done) {
-                labelText.style.textDecoration = 'line-through';
-                labelText.style.color = 'var(--brand-grey)';
-            } else {
-                labelText.style.color = 'var(--crust-burnt)';
-            }
+            if (item.done) labelText.style.textDecoration = 'line-through';
             
             leftPart.appendChild(chk);
             leftPart.appendChild(labelText);
@@ -1933,131 +1986,12 @@
             delBtn.style.background = 'transparent';
             delBtn.style.color = 'var(--brand-grey)';
             delBtn.style.border = 'none';
-            delBtn.style.fontSize = '18px';
-            delBtn.style.padding = '0 6px';
-            delBtn.style.cursor = 'pointer';
-            delBtn.style.display = 'inline-flex';
-            delBtn.style.alignItems = 'center';
-            delBtn.style.justifyContent = 'center';
-            delBtn.onclick = (e) => {
-                e.stopPropagation();
-                deleteChecklistItem(item.id);
-            };
+            delBtn.onclick = (e) => { e.stopPropagation(); deleteChecklistItem(item.id); };
             
             row.appendChild(leftPart);
             row.appendChild(delBtn);
             container.appendChild(row);
         });
-    }
-
-    function updateMetricsAndWeekRange(apiMetrics) {
-        const now = new Date();
-        const currentDay = now.getDay();
-        const distanceToMonday = (currentDay === 0 ? -6 : 1) - currentDay; 
-        
-        const startOfThisWeek = new Date(now);
-        startOfThisWeek.setDate(now.getDate() + distanceToMonday);
-        startOfThisWeek.setHours(0,0,0,0);
-        
-        const endOfThisWeek = new Date(startOfThisWeek);
-        endOfThisWeek.setDate(startOfThisWeek.getDate() + 6);
-        endOfThisWeek.setHours(23,59,59,999);
-        
-        const startOfLastWeek = new Date(startOfThisWeek);
-        startOfLastWeek.setDate(startOfThisWeek.getDate() - 7);
-        
-        const endOfLastWeek = new Date(startOfLastWeek);
-        endOfLastWeek.setDate(startOfLastWeek.getDate() + 6);
-        endOfLastWeek.setHours(23,59,59,999);
-        
-        const formatDate = (d) => `${d.getMonth() + 1}/${d.getDate()}`;
-        const rangeText = `${formatDate(startOfThisWeek)} - ${formatDate(endOfLastWeek)}`;
-        
-        const metricsWeekRangeEl = document.getElementById('metricsWeekRange');
-        if (metricsWeekRangeEl) {
-            metricsWeekRangeEl.innerText = rangeText;
-        }
-
-        let interviewsThisWeek = 0;
-        let interviewsLastWeek = 0;
-        let hiresThisWeek = 0;
-        let hiresLastWeek = 0;
-
-        // Helper: Cleans timezone suffixes (" CT", " MT") so JS can parse dates cleanly
-        function parseCleanDate(dateStr) {
-            if (!dateStr) return null;
-            const cleanStr = dateStr.toString().replace(/\s+(CT|MT|ET|PT)/gi, '').trim();
-            const d = new Date(cleanStr);
-            return isNaN(d.getTime()) ? null : d;
-        }
-
-        // 1. Calculate Interviews from active interview list
-        if (Array.isArray(interviews)) {
-            interviews.forEach(item => {
-                if (!item.date) return;
-                const intDate = parseCleanDate(item.date);
-                if (!intDate) return;
-
-                if (intDate >= startOfThisWeek && intDate <= endOfThisWeek) {
-                    interviewsThisWeek++;
-                } else if (intDate >= startOfLastWeek && intDate <= endOfLastWeek) {
-                    interviewsLastWeek++;
-                }
-            });
-        }
-
-        // 2. Calculate Hires from active candidates list
-        if (Array.isArray(candidates)) {
-            candidates.forEach(item => {
-                if (!item.hired || !item.lastUpdated) return;
-                const updateDate = parseCleanDate(item.lastUpdated);
-                if (!updateDate) return;
-
-                if (updateDate >= startOfThisWeek && updateDate <= endOfThisWeek) {
-                    hiresThisWeek++;
-                } else if (updateDate >= startOfLastWeek && updateDate <= endOfLastWeek) {
-                    hiresLastWeek++;
-                }
-            });
-        }
-
-        // Manual override fallback if locally saved
-        const username = localStorage.getItem('onb_user');
-        const manualIntThis = localStorage.getItem(`metric_interviews_this_week_${username}`);
-        const manualIntLast = localStorage.getItem(`metric_interviews_last_week_${username}`);
-        if (manualIntThis !== null && manualIntThis !== '') interviewsThisWeek = Number(manualIntThis);
-        if (manualIntLast !== null && manualIntLast !== '') interviewsLastWeek = Number(manualIntLast);
-
-        const quotesThisWeekEl = document.getElementById('metricsQuotesThisWeek');
-        const quotesLastWeekEl = document.getElementById('metricsQuotesLastWeek');
-        const ordersThisWeekEl = document.getElementById('metricsOrdersThisWeek');
-        const ordersLastWeekEl = document.getElementById('metricsOrdersLastWeek');
-        
-        if (quotesThisWeekEl) quotesThisWeekEl.innerText = interviewsThisWeek;
-        if (quotesLastWeekEl) quotesLastWeekEl.innerText = interviewsLastWeek;
-        if (ordersThisWeekEl) ordersThisWeekEl.innerText = hiresThisWeek;
-        if (ordersLastWeekEl) ordersLastWeekEl.innerText = hiresLastWeek;
-    }
-
-    function editLocalMetric(key, elementId) {
-        if (window.hasApiMetrics) return; 
-        
-        const currentVal = document.getElementById(elementId).innerText;
-        const readableLabel = key.replace(/_/g, ' ');
-        const newVal = prompt(`Enter count for ${readableLabel}:`, currentVal);
-        if (newVal === null) return;
-        
-        const parsed = parseInt(newVal, 10);
-        if (isNaN(parsed) || parsed < 0) {
-            showBrandAlert("Please enter a valid non-negative number.", "Invalid Entry");
-            return;
-        }
-        
-        const username = localStorage.getItem('onb_user');
-        localStorage.setItem(`metric_${key}_${username}`, parsed);
-        
-        updateMetricsAndWeekRange(null);
-        syncNotesToBackend(username, parsed, `metric_${key}`);
     }
 
     function handleChecklistKeydown(e) {
@@ -2066,14 +2000,7 @@
             const input = document.getElementById('newChecklistItem');
             const text = input.value.trim();
             if (!text) return;
-            
-            const newItem = {
-                id: Date.now(),
-                text: text,
-                done: false
-            };
-            
-            checklistItemsData.push(newItem);
+            checklistItemsData.push({ id: Date.now(), text: text, done: false });
             input.value = '';
             saveChecklist();
             renderChecklist();
@@ -2081,12 +2008,7 @@
     }
 
     function toggleChecklistItem(id) {
-        checklistItemsData = checklistItemsData.map(item => {
-            if (item.id === id) {
-                return { ...item, done: !item.done };
-            }
-            return item;
-        });
+        checklistItemsData = checklistItemsData.map(item => item.id === id ? { ...item, done: !item.done } : item);
         saveChecklist();
         renderChecklist();
     }
@@ -2097,38 +2019,42 @@
         renderChecklist();
     }
 
+    function updateAuditMetrics() {
+        const currentPeriod = getDominosFiscalPeriod(new Date());
+        document.getElementById('stfCurrentPeriodName').innerText = currentPeriod;
+
+        let periodHires = 0, periodTerms = 0;
+        staffing.forEach(item => {
+            if (item.period === currentPeriod) {
+                if (item.termDate) periodTerms++;
+                else periodHires++;
+            }
+        });
+
+        document.getElementById('stfPeriodHires').innerText = periodHires;
+        document.getElementById('stfPeriodTerms').innerText = periodTerms;
+        const net = periodHires - periodTerms;
+        document.getElementById('stfPeriodNet').innerText = (net >= 0 ? '+' : '') + net;
+    }
+
     function silentSync() {
         const u = localStorage.getItem('onb_user');
         if (!u) return;
-        
         const city = getCityFromUser(u);
-        
         fetch(`${API_URL}?city=${city}`)
             .then(res => res.json())
             .then(data => {
-                if (data.error) return;
-                
                 candidates = data.onboarding || [];
                 interviews = data.interviews || [];
-                
+                staffing = data.staffing || [];
                 renderList();
-                
-                if (data.metrics) {
-                    window.hasApiMetrics = true;
-                    updateMetricsAndWeekRange(data.metrics);
-                } else {
-                    window.hasApiMetrics = false;
-                    updateMetricsAndWeekRange(null);
-                }
-            })
-            .catch(err => console.warn("Background sync quietly failed/offline:", err.message));
+                updateAuditMetrics();
+            });
     }
 
-    // Automatically calculates Day of Week from MM/DD/YYYY or YYYY-MM-DD
     function autoCalculateDayOfWeek() {
         const dateStr = document.getElementById('intDate').value.trim();
         if (!dateStr) return;
-    
         let year, month, day;
         if (dateStr.includes('/')) {
             const parts = dateStr.split('/');
@@ -2136,71 +2062,16 @@
                 month = parseInt(parts[0], 10);
                 day = parseInt(parts[1], 10);
                 year = parseInt(parts[2], 10);
-                if (year < 100) year += 2000; // handle 2-digit years (e.g. 26 -> 2026)
-            }
-        } else if (dateStr.includes('-')) {
-            const parts = dateStr.split('-');
-            if (parts.length === 3) {
-                year = parseInt(parts[0], 10);
-                month = parseInt(parts[1], 10);
-                day = parseInt(parts[2], 10);
+                if (year < 100) year += 2000;
             }
         }
-    
-        if (year && month && day && !isNaN(year) && !isNaN(month) && !isNaN(day)) {
-            // Construct date object using local components
+        if (year && month && day) {
             const dateObj = new Date(year, month - 1, day);
             if (!isNaN(dateObj.getTime())) {
                 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                const dayName = days[dateObj.getDay()];
-                document.getElementById('intDay').value = dayName;
+                document.getElementById('intDay').value = days[dateObj.getDay()];
             }
         }
-    }
-    
-    function portCandidateToOnboarding() {
-        // 1. Gather existing data from the Interview Form
-        const name = document.getElementById('intName').value.trim();
-        const position = document.getElementById('intPosition').value;
-        const store = document.getElementById('intStore').value.trim();
-        const phone = document.getElementById('intPhone').value.trim();
-        const email = document.getElementById('intEmail').value.trim();
-        const notes = document.getElementById('intNotes').value.trim();
-        const availability = document.getElementById('intAvailability').value.trim();
-    
-        // Validation
-        if (!name) {
-            showBrandAlert("Please select or fill out an interview candidate first.", "No Candidate Selected");
-            return;
-        }
-    
-        // Combine interview availability and feedback into Onboarding Notes
-        let combinedNotes = "";
-        if (availability) combinedNotes += `[Availability]: ${availability}\n`;
-        if (notes) combinedNotes += `[Interview Notes]: ${notes}`;
-    
-        // 2. Switch UI View to Onboarding
-        switchView('onboarding');
-    
-        // 3. Populate Onboarding Form Fields with Ported Data
-        document.getElementById('fieldId').value = ''; // Set as new entry
-        document.getElementById('fieldName').value = name;
-        document.getElementById('fieldPosition').value = position;
-        document.getElementById('fieldStore').value = store;
-        document.getElementById('fieldPhone').value = phone;
-        document.getElementById('fieldEmail').value = email;
-        document.getElementById('fieldNotes').value = combinedNotes.trim();
-    
-        // Auto-check "Submission Received"
-        document.getElementById('checkSubmission').checked = true;
-    
-        // Update title bar for clarity
-        document.getElementById('formTitle').innerText = `Ported: ${name} (New Candidate)`;
-        
-        // Focus the next logical field (Shirt Size)
-        document.getElementById('fieldShirt').focus();
-    
-        showBrandAlert(`Successfully ported details for ${name}! Fill out any remaining details (Shirt Size, Hat Style) and click 'Save Details'.`, "Candidate Ported");
     }
 </script>
 </body>
