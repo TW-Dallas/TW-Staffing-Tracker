@@ -240,7 +240,67 @@
         /* --- LOADING OVERLAY --- */
         .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(250, 242, 233, 0.8); display: flex; align-items: center; justify-content: center; font-family: 'ExtraBlack', sans-serif; font-size: 20px; z-index: 1000; }
         
+        /* --- CUSTOM BRAND DIALOG MODAL CSS --- */
+        .brand-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(71, 43, 16, 0.4);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .brand-modal-card {
+            background: var(--card-bg);
+            width: 90%;
+            max-width: 440px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 16px 48px rgba(71, 43, 16, 0.25);
+            border: 2px solid var(--crust-dark);
+            overflow: hidden;
+            animation: fadeIn 0.15s ease-out;
+        }
+        .brand-modal-brand-stripe {
+            background: linear-gradient(90deg, var(--brand-red) 50%, var(--brand-blue) 50%);
+            height: 8px;
+            width: 100%;
+        }
+        .brand-modal-content {
+            padding: 24px;
+        }
+        .brand-modal-content h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-family: 'Subhead1', sans-serif;
+            font-size: 20px;
+            color: var(--dark-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .brand-modal-content p {
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-family: 'Condensed', sans-serif;
+            font-size: 18px;
+            color: var(--crust-burnt);
+            line-height: 1.45;
+        }
+        .brand-modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        .brand-modal-actions button {
+            min-width: 100px;
+        }
+
         .hidden { display: none !important; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
 
         /* --- MOBILE STYLES --- */
         @media (max-width: 1024px) {
@@ -617,6 +677,24 @@
     </div>
 </div>
 
+<!-- Custom Brand Dialog Modal -->
+<div id="brandModal" class="brand-modal-overlay hidden">
+    <div class="brand-modal-card">
+        <div class="brand-modal-brand-stripe"></div>
+        <div class="brand-modal-content">
+            <h3 id="brandModalTitle">Notice</h3>
+            <p id="brandModalMessage">Message goes here.</p>
+            <div id="brandModalInputContainer" class="form-group hidden" style="margin-top: 12px;">
+                <input type="text" id="brandModalInput" style="width: 100%;">
+            </div>
+            <div class="brand-modal-actions" style="margin-top: 20px;">
+                <button type="button" id="brandModalCancelBtn" class="secondary">Cancel</button>
+                <button type="button" id="brandModalConfirmBtn">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     // ==========================================
     // DEPLOYED WEB APP URL
@@ -658,6 +736,131 @@
             }
         }
         select.value = ''; // Fallback if no match
+    }
+
+    /* --- BRANDED MODAL PROMISE WRAPPERS --- */
+    function showBrandAlert(message, title = "System Notification") {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('brandModal');
+            const titleEl = document.getElementById('brandModalTitle');
+            const msgEl = document.getElementById('brandModalMessage');
+            const confirmBtn = document.getElementById('brandModalConfirmBtn');
+            const cancelBtn = document.getElementById('brandModalCancelBtn');
+            const inputContainer = document.getElementById('brandModalInputContainer');
+            
+            titleEl.innerText = title;
+            msgEl.innerText = message;
+            
+            inputContainer.classList.add('hidden');
+            cancelBtn.classList.add('hidden'); 
+            confirmBtn.innerText = "OK";
+            
+            modal.classList.remove('hidden');
+            
+            const handleConfirm = () => {
+                modal.classList.add('hidden');
+                confirmBtn.removeEventListener('click', handleConfirm);
+                resolve(true);
+            };
+            
+            confirmBtn.addEventListener('click', handleConfirm);
+        });
+    }
+
+    function showBrandConfirm(message, title = "Confirmation Required") {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('brandModal');
+            const titleEl = document.getElementById('brandModalTitle');
+            const msgEl = document.getElementById('brandModalMessage');
+            const confirmBtn = document.getElementById('brandModalConfirmBtn');
+            const cancelBtn = document.getElementById('brandModalCancelBtn');
+            const inputContainer = document.getElementById('brandModalInputContainer');
+            
+            titleEl.innerText = title;
+            msgEl.innerText = message;
+            
+            inputContainer.classList.add('hidden');
+            cancelBtn.classList.remove('hidden');
+            confirmBtn.innerText = "Yes";
+            cancelBtn.innerText = "No";
+            
+            modal.classList.remove('hidden');
+            
+            const handleConfirm = () => {
+                modal.classList.add('hidden');
+                cleanup();
+                resolve(true);
+            };
+            
+            const handleCancel = () => {
+                modal.classList.add('hidden');
+                cleanup();
+                resolve(false);
+            };
+            
+            const cleanup = () => {
+                confirmBtn.removeEventListener('click', handleConfirm);
+                cancelBtn.removeEventListener('click', handleCancel);
+            };
+            
+            confirmBtn.addEventListener('click', handleConfirm);
+            cancelBtn.addEventListener('click', handleCancel);
+        });
+    }
+
+    function showBrandPrompt(message, defaultValue = "", title = "Input Required") {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('brandModal');
+            const titleEl = document.getElementById('brandModalTitle');
+            const msgEl = document.getElementById('brandModalMessage');
+            const confirmBtn = document.getElementById('brandModalConfirmBtn');
+            const cancelBtn = document.getElementById('brandModalCancelBtn');
+            const inputContainer = document.getElementById('brandModalInputContainer');
+            const inputEl = document.getElementById('brandModalInput');
+            
+            titleEl.innerText = title;
+            msgEl.innerText = message;
+            
+            inputEl.value = defaultValue;
+            inputContainer.classList.remove('hidden');
+            cancelBtn.classList.remove('hidden');
+            
+            confirmBtn.innerText = "OK";
+            cancelBtn.innerText = "Cancel";
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => inputEl.focus(), 50); // Set focus to input dynamically
+            
+            const handleConfirm = () => {
+                const val = inputEl.value;
+                modal.classList.add('hidden');
+                cleanup();
+                resolve(val);
+            };
+            
+            const handleCancel = () => {
+                modal.classList.add('hidden');
+                cleanup();
+                resolve(null);
+            };
+            
+            const cleanup = () => {
+                confirmBtn.removeEventListener('click', handleConfirm);
+                cancelBtn.removeEventListener('click', handleCancel);
+                inputContainer.classList.add('hidden');
+            };
+            
+            confirmBtn.addEventListener('click', handleConfirm);
+            cancelBtn.addEventListener('click', handleCancel);
+            
+            // Handle 'Enter' key inside prompt input
+            inputEl.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleConfirm();
+                }
+            };
+        });
     }
 
     function getCityFromUser(username) {
@@ -1205,7 +1408,7 @@
         })
         .catch(err => {
             showLoader(false);
-            alert("Error saving data: " + err.message);
+            showBrandAlert("Error saving data: " + err.message, "Database Error");
         });
     }
 
@@ -1224,15 +1427,15 @@
         return missing;
     }
 
-    // Trigger manual Gmail fires via Sheets POST API
-    function triggerCandidateEmail(emailType) {
+    // Trigger manual Gmail fires via Sheets POST API (Now Async with Custom Brand Modals)
+    async function triggerCandidateEmail(emailType) {
         const id = document.getElementById('fieldId').value;
         const name = document.getElementById('fieldName').value.trim();
         const email = document.getElementById('fieldEmail').value.trim();
 
         if (!id) return;
         if (!email) {
-            alert("Cannot trigger email: Candidate has no email address.");
+            showBrandAlert("Cannot trigger email: Candidate has no email address.", "Missing Email");
             return;
         }
 
@@ -1241,14 +1444,14 @@
         let payRateInput = "";
 
         if (emailType === "welcome") {
-            // Prompt only for starting hourly rate
-            payRateInput = prompt(`Enter starting hourly rate for ${name} (e.g., 14.50):`, "15.00");
+            // Prompt only for starting hourly rate using the new dynamic prompt modal
+            payRateInput = await showBrandPrompt(`Enter starting hourly rate for ${name} (e.g., 14.50):`, "15.00", "Starting Hourly Wage");
             if (payRateInput === null) return; // User cancelled
             confirmationMessage = `Send Dynamic Welcome Email & Offer to ${name} at $${payRateInput}/hr?\n\n(This will automatically CC the store and BCC the DO)`;
         } else if (emailType === "reminder") {
             const missing = getMissingOnboardingForms();
             if (missing.length === 0) {
-                alert("All onboarding forms are currently marked as completed. No reminder email is necessary.");
+                showBrandAlert("All onboarding forms are currently marked as completed. No reminder email is necessary.", "Reminder Cancelled");
                 return;
             }
             payloadMissing = missing.join(", ");
@@ -1257,7 +1460,8 @@
             confirmationMessage = `Are you sure you want to send the Orientation Registration Link to ${name} (${email})?\n\n(This will NOT CC the store or BCC the DO)`;
         }
 
-        if (!confirm(confirmationMessage)) return;
+        const confirmed = await showBrandConfirm(confirmationMessage, "Confirm Email Delivery");
+        if (!confirmed) return;
 
         showLoader(true, `Sending email template...`);
 
@@ -1284,7 +1488,7 @@
                 throw new Error(result.error || "Email delivery failed");
             }
             
-            alert(`Email successfully delivered! The spreadsheet has been updated.`);
+            showBrandAlert(`Email successfully delivered! The spreadsheet has been updated.`, "Email Delivered");
             const city = getCityFromUser(username);
             return fetch(`${API_URL}?city=${city}`);
         })
@@ -1305,7 +1509,7 @@
         })
         .catch(err => {
             showLoader(false);
-            alert("Error sending email: " + err.message);
+            showBrandAlert("Error sending email: " + err.message, "Email Error");
         });
     }
 
@@ -1582,7 +1786,7 @@
         
         const parsed = parseInt(newVal, 10);
         if (isNaN(parsed) || parsed < 0) {
-            alert("Please enter a valid non-negative number.");
+            showBrandAlert("Please enter a valid non-negative number.", "Invalid Entry");
             return;
         }
         
