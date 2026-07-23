@@ -193,6 +193,27 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
+        /* --- EMAIL ACTION GROUP --- */
+        .email-actions-container {
+            margin-top: 12px;
+            background: var(--crust-light);
+            border-radius: var(--border-radius);
+            padding: 12px;
+            border: 1.5px solid var(--crust-dark);
+        }
+        .email-action-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .email-action-row button {
+            flex: 1;
+            font-size: 13px;
+            padding: 6px 10px;
+            white-space: nowrap;
+        }
         
         /* --- ACTION FLAGS --- */
         .flag-box { padding: 4px 6px; border-radius: 4px; display: flex; align-items: center; gap: 6px; }
@@ -419,6 +440,19 @@
                                 <input type="checkbox" id="checkInactive"> 💤 Inactive
                             </label>
                         </div>
+
+                        <!-- MANUAL EMAIL QUICK ACTIONS -->
+                        <div id="emailQuickActions" class="email-actions-container hidden">
+                            <div style="font-family: 'ExtraBold', sans-serif; font-size: 14px; color: var(--dark-blue); text-transform: uppercase; border-bottom: 1px solid var(--crust-dark); padding-bottom: 4px; display: flex; align-items: center; justify-content: space-between;">
+                                <span>✉️ Email Quick Actions</span>
+                                <span style="font-size: 11px; font-family: 'Condensed'; font-weight: normal; color: var(--brand-grey);">Will auto-update checklists upon sending</span>
+                            </div>
+                            <div class="email-action-row">
+                                <button type="button" onclick="triggerCandidateEmail('welcome')" style="background: var(--brand-blue);">👋 Send Welcome Email</button>
+                                <button type="button" onclick="triggerCandidateEmail('reminder')" style="background: var(--brand-grey);">⏰ Send Reminder</button>
+                                <button type="button" onclick="triggerCandidateEmail('orientation')" style="background: var(--success-green);">📅 Send Orientation Link</button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- INTERVIEWS FORM TEMPLATE -->
@@ -609,6 +643,21 @@
             handleLogin(savedUser, savedPass);
         }
     });
+
+    // Utility helper to match select options case-insensitively
+    function setSelectValueCaseInsensitive(selectId, value) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        const normalizedValue = (value || '').toString().trim().toUpperCase();
+        
+        for (let i = 0; i < select.options.length; i++) {
+            if (select.options[i].value.toUpperCase() === normalizedValue) {
+                select.selectedIndex = i;
+                return;
+            }
+        }
+        select.value = ''; // Fallback if no match
+    }
 
     function getCityFromUser(username) {
         if (username.startsWith('denver')) return 'Denver';
@@ -996,6 +1045,8 @@
             document.getElementById('intStatusUpdates').value = item.statusUpdates || '';
             document.getElementById('intAvailability').value = item.availability || '';
             document.getElementById('intNotes').value = item.notes || '';
+            
+            document.getElementById('emailQuickActions').classList.add('hidden'); // Hide emails for interviews
         } else {
             document.getElementById('fieldId').value = item.id;
             document.getElementById('fieldName').value = item.name;
@@ -1007,9 +1058,9 @@
             document.getElementById('fieldPayCard').value = item.payCard || '';
             document.getElementById('fieldNotes').value = item.notes || '';
 
-            // Using distinct Column Z hat mapping
-            document.getElementById('fieldShirt').value = item.shirtSize || '';
-            document.getElementById('fieldHat').value = item.hatStyle || '';
+            // Using distinct Column Z hat mapping & case-insensitive matching
+            setSelectValueCaseInsensitive('fieldShirt', item.shirtSize);
+            setSelectValueCaseInsensitive('fieldHat', item.hatStyle);
 
             document.getElementById('checkSubmission').checked = item.submissionReceived || false;
             document.getElementById('checkOnbSent').checked = item.onboardingSent || false;
@@ -1024,6 +1075,8 @@
             document.getElementById('checkInactive').checked = item.inactive || false;
             document.getElementById('checkMissingDocs').checked = item.missingDocs || false;
             document.getElementById('checkPulseForm').checked = item.pulseFormComplete || false; // Column Y
+            
+            document.getElementById('emailQuickActions').classList.remove('hidden'); // Show emails for selected onboarding candidates
         }
     }
 
@@ -1054,6 +1107,7 @@
         }
         
         document.getElementById('btnCancel').innerText = "Clear / Deselect";
+        document.getElementById('emailQuickActions').classList.add('hidden'); // Hide email panel on reset
         currentSelectedId = null;
         renderList();
     }
@@ -1151,6 +1205,99 @@
         .catch(err => {
             showLoader(false);
             alert("Error saving data: " + err.message);
+        });
+    }
+
+    // Dynamic verification helper to calculate missing pre-orientation forms
+    function getMissingOnboardingForms() {
+        let missing = [];
+        if (!document.getElementById('checkAllPay').checked) {
+            missing.push("Onboarding Documents (AllPay/HR Alliance)");
+        }
+        if (!document.getElementById('checkBgc').checked) {
+            missing.push("Background Check (Checkr)");
+        }
+        if (!document.getElementById('checkPulseForm').checked) {
+            missing.push("Store System Setup Form (SmartRecruiters)");
+        }
+        return missing;
+    }
+
+    // Trigger manual Gmail fires via Sheets POST API
+    function triggerCandidateEmail(emailType) {
+        const id = document.getElementById('fieldId').value;
+        const name = document.getElementById('fieldName').value.trim();
+        const email = document.getElementById('fieldEmail').value.trim();
+
+        if (!id) return;
+        if (!email) {
+            alert("Cannot trigger email: Candidate has no email address.");
+            return;
+        }
+
+        let confirmationMessage = `Are you sure you want to send the Welcome Email to ${name} (${email})?`;
+        let payloadMissing = "";
+
+        if (emailType === "reminder") {
+            const missing = getMissingOnboardingForms();
+            if (missing.length === 0) {
+                alert("All onboarding forms are currently marked as completed. No reminder email is necessary.");
+                return;
+            }
+            payloadMissing = missing.join(", ");
+            confirmationMessage = `Are you sure you want to send the Onboarding Reminder to ${name} (${email}) for:\n\n• ${missing.join("\n• ")}`;
+        } else if (emailType === "orientation") {
+            confirmationMessage = `Are you sure you want to send the Orientation Registration Link to ${name} (${email})?`;
+        }
+
+        if (!confirm(confirmationMessage)) return;
+
+        showLoader(true, `Sending email template...`);
+
+        const username = localStorage.getItem('onb_user');
+        const password = localStorage.getItem('onb_pass');
+
+        const payload = {
+            username: username,
+            password: password,
+            action: "sendEmail",
+            id: id,
+            emailType: emailType,
+            missingForms: payloadMissing
+        };
+
+        fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (!result.success) {
+                throw new Error(result.error || "Email delivery failed");
+            }
+            
+            alert(`Email successfully delivered! The spreadsheet has been updated.`);
+            const city = getCityFromUser(username);
+            return fetch(`${API_URL}?city=${city}`);
+        })
+        .then(res => res.json())
+        .then(data => {
+            candidates = data.onboarding || [];
+            interviews = data.interviews || [];
+            
+            // Re-render and select the candidate to show updated checkbox states
+            renderList();
+            const reselected = candidates.find(c => c.id === id);
+            if (reselected) {
+                selectCandidate(reselected);
+            } else {
+                clearForm();
+            }
+            showLoader(false);
+        })
+        .catch(err => {
+            showLoader(false);
+            alert("Error sending email: " + err.message);
         });
     }
 
