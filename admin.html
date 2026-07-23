@@ -531,6 +531,7 @@
                             <label class="checkbox-item"><input type="checkbox" id="checkHired"> Hired</label>
                             
                             <div class="section-header">Active Flags & Blockers</div>
+
                             <label class="checkbox-item flag-box flag-reviewing">
                                 <input type="checkbox" id="checkReviewing"> 🔍 Currently Reviewing
                             </label>
@@ -540,8 +541,7 @@
                             <label class="checkbox-item flag-box flag-incorrect">
                                 <input type="checkbox" id="checkMissingDocs" onchange="toggleMissingDocsSelector()"> ⚠️ Missing/Incorrect Docs
                             </label>
-                            <div></div> 
-                            
+
                             <!-- SMART EXPANDABLE MISSING DOCUMENTS CHECKLIST -->
                             <div id="missingDocsContainer" class="hidden" style="grid-column: span 3; background: white; padding: 12px; border-radius: 8px; border: 1.5px solid var(--brand-red); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; box-sizing: border-box; font-family: 'Condensed', sans-serif;">
                                 <div style="grid-column: span 2; font-family: 'Subhead2'; font-size: 11px; color: var(--dark-red); text-transform: uppercase; font-weight: bold; border-bottom: 1px solid var(--crust-med); padding-bottom: 2px; margin-bottom: 4px;">Select Missing Documents</div>
@@ -558,7 +558,10 @@
                                     <input type="text" id="customMissingDoc" placeholder="e.g. Voided Check, Profile Signature" style="width: 100%; font-size: 13px; padding: 4px;">
                                 </div>
                             </div>
-                            
+
+                            <label class="checkbox-item flag-box flag-incorrect">
+                                <input type="checkbox" id="checkMissedNto"> ⚠️ Missed NTO
+                            </label>
                             <label class="checkbox-item flag-box flag-inactive">
                                 <input type="checkbox" id="checkIneligible"> 🚫 Ineligible / Rejected
                             </label>
@@ -1318,6 +1321,7 @@
     function getActiveStatusText(item) {
         if (item.ineligible) return "🚫 Ineligible";
         if (item.inactive) return "💤 Inactive";
+        if (item.missedNto) return "⚠️ Missed NTO";
         if (item.incorrectEmail) return "⚠️ Incorrect Email";
         if (item.currentlyReviewing) return "🔍 Reviewing";
         if (item.hired) return "🎉 Hired";
@@ -1369,11 +1373,7 @@
                 if (item.id === currentSelectedId) card.classList.add('selected');
 
                 const isTerm = !!item.termDate;
-                if (isTerm) {
-                    card.classList.add('status-red');
-                } else {
-                    card.classList.add('status-green');
-                }
+                card.classList.add(isTerm ? 'status-red' : 'status-green');
 
                 card.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -1391,18 +1391,6 @@
 
         } else if (currentView === 'interviews') {
             let filteredInterviews = interviews.filter(item => !searchQuery || (item.name && item.name.toLowerCase().includes(searchQuery)));
-
-            filteredInterviews.sort((a, b) => {
-                if (sortBy === 'name') return a.name.localeCompare(b.name);
-                if (sortBy === 'store') return (parseInt(a.store)||0) - (parseInt(b.store)||0);
-                return 0;
-            });
-
-            if (filteredInterviews.length === 0) {
-                listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No interview matches found.</div>';
-                return;
-            }
-
             filteredInterviews.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'candidate-card';
@@ -1426,7 +1414,6 @@
         } else {
             let filteredCandidates = candidates.filter(item => {
                 if (searchQuery && (!item.name || !item.name.toLowerCase().includes(searchQuery))) return false;
-                
                 const isTerminalState = item.hired || item.ineligible || item.inactive;
                 if (isTerminalState && item.lastUpdated) {
                     const updatedDate = new Date(item.lastUpdated);
@@ -1435,15 +1422,6 @@
                     }
                 }
                 return true; 
-            });
-
-            filteredCandidates.sort((a, b) => {
-                if (sortBy === 'name') return a.name.localeCompare(b.name);
-                if (sortBy === 'store') return (parseInt(a.store)||0) - (parseInt(b.store)||0);
-                if (sortBy === 'status') return getStatusWeight(b) - getStatusWeight(a);
-                const dateA = new Date(a.lastUpdated);
-                const dateB = new Date(b.lastUpdated);
-                return dateB - dateA;
             });
 
             if (filteredCandidates.length === 0) {
@@ -1459,25 +1437,56 @@
                 const rawMissingDocs = item.missingDocs || "";
                 const isBlockedByDocs = rawMissingDocs !== "" && rawMissingDocs.toString().toUpperCase() !== "FALSE";
 
-                if (item.incorrectEmail || isBlockedByDocs) card.classList.add('status-red');
-                else if (item.currentlyReviewing) card.classList.add('status-reviewing');
-                else if (item.hired) card.classList.add('status-green');
-                else if (item.ntoScheduled || item.ntoSignupLinkSent) card.classList.add('status-nto');
-                else if (item.bgcComplete || item.allPayCompleted) card.classList.add('status-processing');
-                else if (item.submissionReceived && !item.onboardingSent) card.classList.add('status-subrec');
-                else card.classList.add('status-blue');
+                // Turn card border RED if Missed NTO, Incorrect Email, or Missing Docs
+                if (item.incorrectEmail || isBlockedByDocs || item.missedNto) {
+                    card.classList.add('status-red');
+                } else if (item.currentlyReviewing) {
+                    card.classList.add('status-reviewing');
+                } else if (item.hired) {
+                    card.classList.add('status-green');
+                } else if (item.ineligible || item.inactive) {
+                    card.classList.add('status-gray');
+                } else if (item.ntoScheduled || item.ntoSignupLinkSent) {
+                    card.classList.add('status-nto');
+                } else if (item.bgcComplete || item.allPayCompleted) {
+                    card.classList.add('status-processing');
+                } else if (item.submissionReceived && !item.onboardingSent) {
+                    card.classList.add('status-subrec');
+                } else {
+                    card.classList.add('status-blue');
+                }
                 
                 const activeStatusText = getActiveStatusText(item);
+                
+                let statusStyleColor = 'var(--brand-blue)';
+                if (item.hired) statusStyleColor = 'var(--success-green)';
+                if (item.incorrectEmail || isBlockedByDocs || item.missedNto) statusStyleColor = 'var(--brand-red)';
+                if (item.currentlyReviewing) statusStyleColor = 'var(--med-blue)';
+                if (item.ntoScheduled || item.ntoSignupLinkSent) statusStyleColor = 'var(--dark-blue)';
+                if (item.bgcComplete || item.allPayCompleted) statusStyleColor = 'var(--med-blue)';
+                if (item.ineligible || item.inactive) statusStyleColor = 'var(--brand-grey)';
+
+                // Add warning badges
+                let flags = '';
+                if (item.incorrectEmail) flags += '<span class="badge-incorrect">⚠️ Email Error</span> ';
+                if (isBlockedByDocs) flags += '<span class="badge-incorrect">⚠️ Missing Docs</span> ';
+                if (item.missedNto) flags += '<span class="badge-incorrect">⚠️ Missed NTO</span> ';
+                
+                if (item.currentlyReviewing && activeStatusText !== "🔍 Reviewing") {
+                    flags += '<span class="badge-review">🔍 Reviewing</span> ';
+                }
 
                 card.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div class="card-name">${item.name}</div>
+                        <div style="display: flex; gap: 4px;">${flags}</div>
                     </div>
                     <div class="card-sub">
                         <span>Store #${item.store} (${item.position})</span>
-                        <span style="font-weight: bold; color: var(--brand-blue);">${activeStatusText}</span>
+                        <span style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: ${statusStyleColor};">${activeStatusText}</span>
                     </div>
                 `;
+                
                 card.onclick = () => selectCandidate(item);
                 listContainer.appendChild(card);
             });
@@ -1550,6 +1559,7 @@
             document.getElementById('checkIneligible').checked = item.ineligible || false;
             document.getElementById('checkInactive').checked = item.inactive || false;
             document.getElementById('checkPulseForm').checked = item.pulseFormComplete || false;
+            document.getElementById('checkMissedNto').checked = item.missedNto || false;
             
             const rawMissingDocs = item.missingDocs || "";
             if (rawMissingDocs && rawMissingDocs.toString().toUpperCase() !== "FALSE") {
@@ -1695,6 +1705,7 @@
             payload.ineligible = document.getElementById('checkIneligible').checked;
             payload.inactive = document.getElementById('checkInactive').checked;
             payload.pulseFormComplete = document.getElementById('checkPulseForm').checked;
+            payload.missedNto = document.getElementById('checkMissedNto').checked;
             
             let missingDocsValue = "FALSE";
             if (document.getElementById('checkMissingDocs').checked) {
