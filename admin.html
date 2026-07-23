@@ -1615,6 +1615,7 @@
         const id = document.getElementById('fieldId').value;
         const name = document.getElementById('fieldName').value.trim();
         const email = document.getElementById('fieldEmail').value.trim();
+        const position = document.getElementById('fieldPosition').value;
 
         if (!id) return;
         if (!email) {
@@ -1622,18 +1623,30 @@
             return;
         }
 
-        let confirmationMessage = `Are you sure you want to send the Welcome Email to ${name} (${email})?`;
+        let confirmationMessage = "";
         let payloadMissing = "";
         let payRateInput = "";
+        let roadPayInput = "";
         
         let payloadAllPayLink = "";
         let payloadCheckrLink = "";
         let payloadStoreSetupLink = "";
 
         if (emailType === "welcome") {
-            payRateInput = await showBrandPrompt(`Enter starting hourly rate for ${name} (e.g., 14.50):`, "15.00", "Starting Hourly Wage");
-            if (payRateInput === null) return;
-            confirmationMessage = `Send Dynamic Welcome Email & Offer to ${name} at $${payRateInput}/hr?\n\n(This will automatically CC the store and BCC the DO)`;
+            if (position === "DE") {
+                payRateInput = await showBrandPrompt(`Enter IN-STORE starting rate for ${name} (e.g., 9.00):`, "9.00", "In-Store Hourly Wage");
+                if (payRateInput === null) return; // User cancelled
+                
+                roadPayInput = await showBrandPrompt(`Enter ON-THE-ROAD rate for ${name} (e.g., 4.45):`, "4.35", "On-the-Road Hourly Wage");
+                if (roadPayInput === null) return; // User cancelled
+                
+                confirmationMessage = `Send Dynamic Welcome Email & Offer to ${name}?\n\n• In-Store Wage: $${payRateInput}/hr\n• On-The-Road Wage: $${roadPayInput}/hr + Mileage\n\n(This will automatically CC the store and BCC the DO)`;
+            } else {
+                payRateInput = await showBrandPrompt(`Enter starting hourly rate for ${name} (e.g., 9.00):`, "9.00", "Starting Hourly Wage");
+                if (payRateInput === null) return;
+                
+                confirmationMessage = `Send Dynamic Welcome Email & Offer to ${name} at $${payRateInput}/hr?\n\n(This will automatically CC the store and BCC the DO)`;
+            }
         } else if (emailType === "reminder") {
             const missing = getMissingOnboardingForms();
             if (missing.length === 0) {
@@ -1670,6 +1683,7 @@
             emailType: emailType,
             missingForms: payloadMissing,
             payRate: payRateInput,
+            roadPayRate: roadPayInput,
             allPayLink: payloadAllPayLink,
             checkrLink: payloadCheckrLink,
             storeSetupLink: payloadStoreSetupLink
