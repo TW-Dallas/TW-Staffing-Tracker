@@ -43,6 +43,20 @@
         .subtitle { font-family: 'Condensed', sans-serif; font-size: 12px; opacity: 0.9; }
         .logo { height: 32px; width: auto; margin-right: 12px; }
         
+        /* --- AUTH SCREEN --- */
+        .auth-container { 
+            max-width: 400px; 
+            width: 100%;
+            margin: 80px auto; 
+            padding: 24px; 
+            background: white; 
+            border-radius: var(--border-radius); 
+            box-shadow: 0 4px 12px rgba(71, 43, 16, 0.15); 
+            border-top: 6px solid var(--brand-blue); 
+            box-sizing: border-box;
+        }
+        .auth-container h2 { margin-top: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); }
+        
         /* --- DASHBOARD VIEWPORT LOCK LAYOUT --- */
         .dashboard { 
             display: flex; 
@@ -333,7 +347,7 @@
     <h2>Hiring Manager Login</h2>
     <div class="form-group">
         <label>Username</label>
-        <input type="text" id="loginUser" placeholder="e.g., denver_admin">
+        <input type="text" id="loginUser" placeholder="e.g., dallas_admin">
     </div>
     <div class="form-group">
         <label>Password</label>
