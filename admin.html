@@ -520,9 +520,9 @@
                             <!-- SMART EXPANDABLE MISSING DOCUMENTS CHECKLIST (Spans all 3 columns!) -->
                             <div id="missingDocsContainer" class="hidden" style="grid-column: span 3; background: white; padding: 12px; border-radius: 8px; border: 1.5px solid var(--brand-red); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; box-sizing: border-box; font-family: 'Condensed', sans-serif;">
                                 <div style="grid-column: span 2; font-family: 'Subhead2'; font-size: 11px; color: var(--dark-red); text-transform: uppercase; font-weight: bold; border-bottom: 1px solid var(--crust-med); padding-bottom: 2px; margin-bottom: 4px;">Select Missing Documents</div>
-                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="List A ID (Passport/Green Card/EAD)"> ✈️ List A ID (Passport, Permanent Resident Card, Employment Authorization Card)</label>
-                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="List B ID (Driver's License/State ID/School ID)"> 🪪 List B ID (DL, State ID, School ID)</label>
-                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="List C ID (Social Security Card/Birth Certificate)"> 💳 List C ID (Social Security Card, Birth Cert)</label>
+                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="List A ID (Passport, I-551 Permanent Resident Card, or I-766 Employment Authorization Card)"> ✈️ List A ID (Passport, I-551, I-766)</label>
+                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="List B ID (Driver's License, State ID, School ID)"> 🪪 List B ID (DL, State ID, School ID)</label>
+                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="List C ID (Social Security Card, Birth Certificate)"> 💳 List C ID (Social Security Card, Birth Cert)</label>
                                 <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="Vehicle Inspection"> 🚗 Vehicle Inspection</label>
                                 <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="Auto Insurance ID (Driver name must be listed as a covered driver)"> 📄 Auto Insurance ID</label>
                                 <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="Auto Registration"> 🏷️ Auto Registration</label>
@@ -1088,6 +1088,12 @@
                 }
                 
                 showLoader(false);
+                
+                // Start the 30-second silent background sync loop
+                if (!window.syncInterval) {
+                    window.syncInterval = setInterval(silentSync, 30000);
+                }
+                
             })
             .catch(err => {
                 showLoader(false);
@@ -2067,6 +2073,38 @@
         checklistItemsData = checklistItemsData.filter(item => item.id !== id);
         saveChecklist();
         renderChecklist();
+    }
+
+    // Silent background sync (no overlays, zero screen-freezes)
+    function silentSync() {
+        const u = localStorage.getItem('onb_user');
+        if (!u) return; // Exit if not logged in
+        
+        const city = getCityFromUser(u);
+        
+        fetch(`${API_URL}?city=${city}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) return; // Quietly ignore errors in the background
+                
+                candidates = data.onboarding || [];
+                interviews = data.interviews || [];
+                
+                // Quietly re-render only the left candidate list!
+                renderList();
+                
+                // If a candidate is selected, we keep their form fields exactly as is 
+                // so we never overwrite what you are typing or editing.
+                
+                if (data.metrics) {
+                    window.hasApiMetrics = true;
+                    updateMetricsAndWeekRange(data.metrics);
+                } else {
+                    window.hasApiMetrics = false;
+                    updateMetricsAndWeekRange(null);
+                }
+            })
+            .catch(err => console.warn("Background sync quietly failed/offline:", err.message));
     }
 </script>
 </body>

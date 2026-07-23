@@ -2,15 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" href="data:,">
+    <link class="favicon" rel="icon" type="image/png" href="tile_blue.png">
     <title>Staffing Command Center</title>
-    <link rel="icon" type="image/png" href="tile_blue.png">
     <meta name="theme-color" content="#005c91">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
-<style>
+    <style>
         @font-face { font-family: 'ExtraBlack'; src: url('fonts/Dominos Sans Header 1.ttf') format('truetype'); font-weight: bold; }
         @font-face { font-family: 'ExtraBold'; src: url('fonts/Dominos Sans Header 2.ttf') format('truetype'); font-weight: normal; }
         @font-face { font-family: 'Subhead1'; src: url('fonts/Dominos Sans Subhead 1.ttf') format('truetype'); font-weight: normal; }
@@ -34,7 +33,6 @@
             --card-bg: #FFFFFF;
             --border-radius: 12px;
             --brand-green: #28a745;
-            --warning-orange: #ff9800;
         }
 
         body { font-family: 'Condensed', sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; color: var(--crust-burnt); }
@@ -75,28 +73,27 @@
         .card { 
             background: var(--card-bg); 
             border-radius: var(--border-radius); 
-            padding: 16px; 
-            margin-bottom: 12px; 
+            padding: 12px 14px; 
+            margin-bottom: 10px; 
             box-shadow: 0 4px 6px rgba(71, 43, 16, 0.05); 
             border-left: 6px solid transparent; 
             position: relative; 
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        .card:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(71, 43, 16, 0.1); }
+        .card:hover { transform: translateY(-1px); box-shadow: 0 6px 12px rgba(71, 43, 16, 0.08); }
         
         /* Status Borders */
         .card.status-blue { border-left-color: var(--brand-blue); }
         .card.status-green { border-left-color: var(--brand-green); border-left-width: 8px; }
         .card.status-red { border-left-color: var(--brand-red); border: 2px solid var(--brand-red); } 
-        .card.status-orange { border-left-color: var(--warning-orange); }
         .card.status-gray { border-left-color: #6c757d; opacity: 0.8; background-color: #f8f9fa; }
 
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .name { font-family: 'Subhead2', sans-serif; font-size: 18px; color: var(--crust-burnt); }
+        .name { font-family: 'Subhead2', sans-serif; font-size: 15px; color: var(--crust-burnt); }
         .position-badge { font-family: 'Subhead2', sans-serif; font-size: 12px; padding: 4px 8px; border-radius: 12px; background: var(--crust-light); color: #005c91; border: 1px solid var(--crust-med); display: flex; align-items: center; gap: 4px; }
         
-        .meta-row { display: flex; justify-content: space-between; font-family: 'Condensed', sans-serif; font-size: 14px; color: var(--crust-deep); margin-bottom: 8px; }
+        .meta-row { display: flex; justify-content: space-between; font-family: 'Condensed', sans-serif; font-size: 13px; color: var(--crust-deep); margin-bottom: 6px; }
 
         /* --- PIPELINE VISUALS --- */
         .pipeline-container { margin-top: 10px; margin-bottom: 6px; }
@@ -113,7 +110,6 @@
 
         /* --- ALERT BANNER --- */
         .alert-banner { background-color: #ffebee; border: 1px solid var(--brand-red); color: var(--dark-red); padding: 8px; border-radius: 6px; font-size: 13px; margin-top: 8px; font-family: 'Subhead2', sans-serif; display: flex; align-items: center; gap: 6px; }
-        .alert-banner.warning { background-color: #ffebee; border: 1px solid var(--brand-red); color: var(--dark-red); }
 
         /* --- EXPANDABLE SECTIONS --- */
         .card-details { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
@@ -133,12 +129,12 @@
 
         /* --- DATA CHIPS --- */
         .chip-container { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-        .chip { font-size: 12px; background: #f0f4f8; padding: 4px 8px; border-radius: 6px; border: 1px solid #dde1e6; color: #555; display: flex; align-items: center; gap: 4px; }
+        .chip { font-size: 13px; background: #f0f4f8; padding: 5px 10px; border-radius: 6px; border: 1px solid #dde1e6; color: #444; display: flex; align-items: center; gap: 4px; font-family: 'Condensed', sans-serif; }
         .chip-nto { background: #e3f2fd; color: #0d47a1; border-color: #bbdefb; font-weight: bold; }
 
         /* --- NUDGE & ACTION BUTTONS --- */
         .action-container { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-        .action-btn { flex: 1; min-width: 120px; padding: 10px; border-radius: 8px; border: none; font-family: 'Subhead2', sans-serif; font-size: 13px; text-transform: uppercase; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .action-btn { flex: 1; min-width: 120px; padding: 8px; border-radius: 8px; border: none; font-family: 'Subhead2', sans-serif; font-size: 12px; text-transform: uppercase; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .btn-call { background-color: var(--dark-blue); color: white; }
         .btn-nudge { background-color: var(--brand-red); color: white; }
         .action-btn:active { transform: scale(0.98); }
@@ -183,38 +179,55 @@
 </div>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbyH-CITcN3UqGRPmxkhHFMdC-0YDnaPssEhGH__GxybYQKJymeQUWHtcUjhtNe5cyOHlw/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbymntzmSriM_M4foUfbmKic3LNVvlRr2xs-Jzan6CLPiniV62pa4BFfF0aqZF4ABYJH/exec";
     let rawData = { onboarding: [], interviews: [] };
+    let expandedCardIds = new Set(); // Track expanded cards across background refreshes
 
-fetch(API_URL)
-        .then(response => response.json())
-        .then(data => {
-            // Check if Google Apps Script returned an error
-            if (data.error) {
-                document.getElementById('loader').innerHTML = `
-                    <div style="color: var(--brand-red); font-family: 'Subhead2';">
-                        ⚠️ Database Error:<br>
-                        <span style="font-family: monospace; font-size: 14px; color: #444; display: block; margin-top: 10px;">
-                            ${data.error}
-                        </span>
-                    </div>`;
-                console.error("Google Sheets API Error:", data.error);
-                return;
-            }
+    // Perform initial loading with full-screen indicator
+    fetchData(true);
 
-            rawData = data;
-            populateFilters();
-            renderOnboarding();
-            renderInterviews();
-            // Ensure loader is hidden ONLY after success
-            document.getElementById('loader').classList.add('hidden');
-        })
-        .catch(err => {
-            document.getElementById('loader').innerText = "Error Loading Data";
-            console.error(err);
-        });
+    // Dynamic Silent background sync timer (every 30 seconds)
+    setInterval(() => {
+        fetchData(false);
+    }, 30000);
+
+    function fetchData(showFullScreenLoader) {
+        if (showFullScreenLoader) {
+            document.getElementById('loader').classList.remove('hidden');
+        }
+
+        fetch(API_URL)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('loader').innerHTML = `
+                        <div style="color: var(--brand-red); font-family: 'Subhead2';">
+                            ⚠️ Database Error:<br>
+                            <span style="font-family: monospace; font-size: 14px; color: #444; display: block; margin-top: 10px;">
+                                ${data.error}
+                            </span>
+                        </div>`;
+                    return;
+                }
+                rawData = data;
+                populateFilters();
+                renderOnboarding();
+                renderInterviews();
+                document.getElementById('loader').classList.add('hidden');
+            })
+            .catch(err => {
+                if (showFullScreenLoader) {
+                    document.getElementById('loader').innerText = "Error Loading Data";
+                }
+                console.error(err);
+            });
+    }
 
     function populateFilters() {
+        // Prevent clearing filters if the user is currently searching/selecting
+        const activeDo = document.getElementById('doFilter').value;
+        const activeStore = document.getElementById('storeFilter').value;
+
         const allDos = [...rawData.onboarding.map(i => i.doName), ...rawData.interviews.map(i => i.doName)];
         const dos = [...new Set(allDos.filter(d => d && d !== 'DO').map(d => d.toString().trim()))].sort();
         const allStores = [...rawData.onboarding.map(i => i.store), ...rawData.interviews.map(i => i.store)];
@@ -223,13 +236,15 @@ fetch(API_URL)
         const doSelect = document.getElementById('doFilter');
         doSelect.innerHTML = '<option value="All">All DOs</option>';
         dos.forEach(d => { let opt = document.createElement('option'); opt.value = d; opt.innerText = d; doSelect.appendChild(opt); });
+        doSelect.value = activeDo;
 
         const storeSelect = document.getElementById('storeFilter');
         storeSelect.innerHTML = '<option value="All">All Stores</option>';
         stores.forEach(s => { let opt = document.createElement('option'); opt.value = s; opt.innerText = s; storeSelect.appendChild(opt); });
+        storeSelect.value = activeStore;
 
-        doSelect.addEventListener('change', refreshViews);
-        storeSelect.addEventListener('change', refreshViews);
+        doSelect.onchange = refreshViews;
+        storeSelect.onchange = refreshViews;
     }
 
     function refreshViews() { renderOnboarding(); renderInterviews(); }
@@ -241,7 +256,6 @@ fetch(API_URL)
         if (item.ntoScheduled) return { pct: 90, color: 'blue', label: 'NTO Scheduled' };
         if (item.ntoSignupLinkSent) return { pct: 75, color: 'blue', label: 'NTO Signup Sent' };
 
-        // Standard Onboarding Stages Calculation
         if (item.onboardingSent) {
             let basePct = 35;
             if (item.bgcComplete) basePct += 10;
@@ -257,7 +271,6 @@ fetch(API_URL)
     function getStatusWeight(item) {
         if (item.incorrectEmail || item.hasMissingDocs) return 0; // Urgencies first!
         
-        // Hired today (Freshness Rule)
         if (item.hired) {
             const today = new Date();
             today.setHours(0,0,0,0);
@@ -271,7 +284,7 @@ fetch(API_URL)
         if (item.onboardingSent) return 4;
         if (item.submissionReceived) return 5;
         if (item.inactive) return 11;
-        if (item.ineligible) return 12; // Ineligible pushed right to the bottom!
+        if (item.ineligible) return 12;
         
         return 6;
     }
@@ -296,24 +309,28 @@ fetch(API_URL)
         const phone = item.phoneNumber ? item.phoneNumber.replace(/\D/g, '') : '';
         if (!phone) return '#';
 
-        const greeting = `Hey ${item.name}! This is Domino's. Excited to get you started!`;
-
-        // Case 1: Incorrect Email Blocker
         if (item.incorrectEmail) {
             const txt = `Hey ${item.name}! This is Domino's. We tried sending over your onboarding documents, but it looks like we have an incorrect email address on file. Can you please reply with your correct email so we can get you set up? Thanks!`;
             return `sms:${phone}?body=${encodeURIComponent(txt)}`;
         }
 
-        // Case 2: Missing Documents Blocker
         if (item.hasMissingDocs) {
-            let txt = `Hey ${item.name}! This is Domino's. It looks like we need a different form of I-9 identification. We are missing your documentation. Please reply back so we can arrange a time for you to bring that to the store or upload it.`;
+            let txt = `Hey ${item.name}! This is Domino's. We are missing some onboarding paperwork for you. Please reply back so we can help you get this updated and get you scheduled!`;
+            
             if (item.missingDocsText) {
-                txt = `Hey ${item.name}! This is Domino's. It looks like we need a different form of I-9 identification. We are missing your ${item.missingDocsText}. Please reply back so we can arrange a time for you to bring that to the store or upload it.`;
+                const textLower = item.missingDocsText.toLowerCase();
+                
+                // If it contains ID / I-9 related indicators
+                if (textLower.includes('id') || textLower.includes('license') || textLower.includes('social') || textLower.includes('ssn') || textLower.includes('birth') || textLower.includes('i-9') || textLower.includes('passport')) {
+                    txt = `Hey ${item.name}! This is Domino's. We need a different form of I-9 identification. We are missing your ${item.missingDocsText}. Please reply back so we can arrange a time for you to bring that to the store or upload it!`;
+                } else {
+                    // Non-I-9 indicators (auto insurance, registration, custom, etc.)
+                    txt = `Hey ${item.name}! This is Domino's. We are missing your ${item.missingDocsText} for your onboarding. Please reply back so we can get this updated and get you scheduled!`;
+                }
             }
             return `sms:${phone}?body=${encodeURIComponent(txt)}`;
         }
 
-        // Case 3: Missing checklists items (only applicable if onboarding has been sent)
         if (item.onboardingSent && !item.hired) {
             const missing = [];
             if (!item.bgcComplete) missing.push("background check");
@@ -331,13 +348,17 @@ fetch(API_URL)
             }
         }
 
-        // Catch-all generic nudge
         const defaultTxt = `Hey ${item.name}! This is Domino's. Just checking in on your onboarding paperwork. Let us know if you have any questions!`;
         return `sms:${phone}?body=${encodeURIComponent(defaultTxt)}`;
     }
 
-    function toggleCard(cardElement) {
-        cardElement.classList.toggle('expanded');
+    function toggleCard(cardElement, itemId) {
+        const isExpanded = cardElement.classList.toggle('expanded');
+        if (isExpanded) {
+            expandedCardIds.add(itemId);
+        } else {
+            expandedCardIds.delete(itemId);
+        }
     }
 
     function renderOnboarding() {
@@ -359,11 +380,10 @@ fetch(API_URL)
         filtered.forEach(item => {
             const icon = getPositionIcon(item.position);
             
-            // Card Color Logic (Orange completely removed!)
             let cardClass = 'status-blue';
             if (item.inactive || item.ineligible) {
                 cardClass = 'status-gray';
-            } else if (item.incorrectEmail || item.hasMissingDocs) { // <-- BOTH trigger Red now!
+            } else if (item.incorrectEmail || item.hasMissingDocs) {
                 cardClass = 'status-red';
             } else if (item.hired) {
                 cardClass = 'status-green';
@@ -371,25 +391,22 @@ fetch(API_URL)
             
             const pipe = getPipelineDetails(item);
             
-            // Alert Banners (Outer/Compact alerts)
             let alertHtml = '';
             if (item.incorrectEmail) {
                 alertHtml = `<div class="alert-banner">🛑 Incorrect Email (Requires Outreach)</div>`;
             } else if (item.hasMissingDocs) {
-                const missingText = item.missingDocsText ? `: ${item.missingDocsText}` : ' (I-9 ID Required)';
-                alertHtml = `<div class="alert-banner warning">⚠️ Missing Documents${missingText}</div>`;
+                const missingText = item.missingDocsText ? `: ${item.missingDocsText}` : ' (Paperwork Required)';
+                alertHtml = `<div class="alert-banner">⚠️ Missing Documents${missingText}</div>`;
             }
 
-            // Chips
             let chipsHtml = '';
             if (item.shirtSize) chipsHtml += `<span class="chip">👕 ${item.shirtSize}</span>`;
-            if (item.hatType && (item.hatType.toLowerCase() === 'cap' || item.hatType.toLowerCase() === 'visor')) {
-                chipsHtml += `<span class="chip">🧢 ${item.hatType}</span>`;
+            if (item.hatStyle && (item.hatStyle.toLowerCase() === 'cap' || item.hatStyle.toLowerCase() === 'visor')) {
+                chipsHtml += `<span class="chip">🧢 ${item.hatStyle}</span>`;
             }
             if (item.payCard) chipsHtml += `<span class="chip">💳 Pay Card Required</span>`;
             if (item.ntoDate) chipsHtml += `<span class="chip chip-nto">📅 NTO: ${item.ntoDate}</span>`;
 
-            // Active Checklist Box
             let checklistHtml = '';
             if (!item.inactive && !item.ineligible && !item.hired) {
                 checklistHtml = `
@@ -418,30 +435,22 @@ fetch(API_URL)
                     </div>`;
             }
 
-            // Notes
             let notesHtml = '';
             if (item.notes) {
                 const noteClass = item.incorrectEmail ? 'hold-notes' : '';
                 notesHtml = `<div class="notes-section ${noteClass}">📝 ${item.notes}</div>`;
             }
 
-            // Timestamp formatting
             let updatedHtml = '';
             if (item.lastUpdated) {
-                let displayTime = item.lastUpdated;
-                try {
-                    const d = new Date(item.lastUpdated);
-                    if (!isNaN(d.getTime())) {
-                        displayTime = d.toLocaleString('en-US', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
-                    }
-                } catch (e) {}
-                updatedHtml = `<div class="updated-text">Last Updated: ${displayTime}</div>`;
+                updatedHtml = `<div class="updated-text">Last Updated: ${item.lastUpdated}</div>`;
             }
 
             const smsUrl = buildSmsUrl(item);
+            const isCurrentlyExpanded = expandedCardIds.has(item.id);
 
             const html = `
-                <div class="card ${cardClass}" onclick="toggleCard(this)">
+                <div class="card ${cardClass} ${isCurrentlyExpanded ? 'expanded' : ''}" onclick="toggleCard(this, '${item.id}')">
                     <div class="card-header">
                         <div class="name-phone-group" style="display: flex; flex-direction: column;">
                             <div class="name" style="display: flex; align-items: center;">
@@ -462,13 +471,11 @@ fetch(API_URL)
                     
                     ${alertHtml}
 
-                    <!-- Expandable Details Section -->
                     <div class="card-details" onclick="event.stopPropagation()">
                         ${checklistHtml}
                         <div class="chip-container">${chipsHtml}</div>
                         ${notesHtml}
                         
-                        <!-- Quick Actions Group -->
                         ${item.phoneNumber ? `
                             <div class="action-container">
                                 <a href="tel:${item.phoneNumber}" class="action-btn btn-call">📞 Call Phone</a>
@@ -504,8 +511,7 @@ fetch(API_URL)
             let statusColor = 'status-blue';
             const s = item.status ? item.status.toString() : '';
             if(s.includes('No Show') || s.includes('Canceled') || s.includes('Pass')) statusColor = 'status-red';
-            if(s.includes('2nd Interview') || s.includes('Hired') || s.includes('Offered')) statusColor = 'status-green';
-            if(s.includes('Offered') || s.includes('TBD')) statusColor = 'status-blue';
+            if(s.includes('2nd Interview') || s.includes('Hired') || s.includes('Completed') || s.includes('Offered')) statusColor = 'status-green';
             if(s.includes('Reschedule') || s.includes('Withdrawn')) statusColor = 'status-gray';
 
             let showGmBox = false;
@@ -530,7 +536,7 @@ fetch(API_URL)
                 <div class="card ${statusColor}">
                     <div class="card-header"><div class="name">${item.name}</div><div class="position-badge">${icon} ${item.position}</div></div>
                     <div class="meta-row"><span>${item.day} ${item.time}</span><span>Store #${item.store}</span></div>
-                    <div class="main-status" style="font-family: 'Body-Bold'; font-size: 14px;">Result: ${item.status}</div>
+                    <div class="main-status" style="font-family: 'Subhead2'; font-size: 14px;">Result: ${item.status}</div>
                     ${gmHtml}
                     ${notesHtml}
                 </div>`;
