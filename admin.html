@@ -505,6 +505,11 @@
                         </div>
 
                         <div class="form-group">
+                            <label>Availability</label>
+                            <textarea id="intAvailability" placeholder="Enter availability details here..."></textarea>
+                        </div>
+
+                        <div class="form-group">
                             <label>Feedback & Notes</label>
                             <textarea id="intNotes" placeholder="Write any specific interview notes here..."></textarea>
                         </div>
@@ -582,6 +587,7 @@
     let checklistItemsData = [];
     let scratchpadTimeout = null;
     window.hasApiMetrics = false;
+    window.currentSelectedInterview = null; // Safety reference for Column N data
 
     // Run when page loads
     window.addEventListener('DOMContentLoaded', () => {
@@ -934,6 +940,8 @@
         document.getElementById('btnCancel').innerText = "Cancel Edit";
 
         if (currentView === 'interviews') {
+            window.currentSelectedInterview = interviews.find(i => i.id === item.id); // Hold references to prevent Column N overrides
+
             document.getElementById('fieldId').value = item.id;
             document.getElementById('intName').value = item.name || '';
             document.getElementById('intPosition').value = item.position || 'CSR';
@@ -948,6 +956,7 @@
             document.getElementById('intGmDate').value = item.gmDate || '';
             document.getElementById('intGmTime').value = item.gmTime || '';
             document.getElementById('intStatusUpdates').value = item.statusUpdates || '';
+            document.getElementById('intAvailability').value = item.availability || '';
             document.getElementById('intNotes').value = item.notes || '';
         } else {
             document.getElementById('fieldId').value = item.id;
@@ -1004,6 +1013,7 @@
         document.getElementById('candidateForm').reset();
         document.getElementById('fieldId').value = '';
         document.getElementById('fieldNto').value = '';
+        window.currentSelectedInterview = null; // Clear active safety variable
         
         if (currentView === 'interviews') {
             document.getElementById('formTitle').innerText = "Interview details";
@@ -1048,6 +1058,7 @@
             payload.gmDate = document.getElementById('intGmDate').value.trim();
             payload.gmTime = document.getElementById('intGmTime').value.trim();
             payload.statusUpdates = document.getElementById('intStatusUpdates').value.trim();
+            payload.availability = document.getElementById('intAvailability').value.trim();
             payload.notes = document.getElementById('intNotes').value.trim();
         } else {
             const shirt = document.getElementById('fieldShirt').value;
