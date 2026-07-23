@@ -260,7 +260,7 @@
             let basePct = 35;
             if (item.bgcComplete) basePct += 10;
             if (item.allPayCompleted) basePct += 10;
-            if (item.pulseFormCompleted) basePct += 10;
+            if (item.pulseFormComplete) basePct += 10;
             return { pct: basePct, color: 'blue', label: 'Onboarding Sent' };
         }
         
@@ -335,7 +335,7 @@
             const missing = [];
             if (!item.bgcComplete) missing.push("background check");
             if (!item.allPayCompleted) missing.push("forms in AllPay");
-            if (!item.pulseFormCompleted) missing.push("Pulse Form");
+            if (!item.pulseFormComplete) missing.push("Pulse Form");
 
             if (missing.length > 0) {
                 let missingStr = "";
@@ -429,7 +429,7 @@
                             <span>AllPay Forms Completed</span>
                         </div>
                         <div class="checklist-item">
-                            <span class="chk-icon ${item.pulseFormCompleted ? 'chk-done' : 'chk-missing'}">${item.pulseFormCompleted ? '✔' : '✖'}</span>
+                            <span class="chk-icon ${item.pulseFormComplete ? 'chk-done' : 'chk-missing'}">${item.pulseFormCompleted ? '✔' : '✖'}</span>
                             <span>Pulse Form Completed</span>
                         </div>
                     </div>`;
