@@ -10,7 +10,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
-        <style>
+    <style>
         @font-face { font-family: 'ExtraBlack'; src: url('fonts/Dominos Sans Header 1.ttf') format('truetype'); font-weight: bold; }
         @font-face { font-family: 'ExtraBold'; src: url('fonts/Dominos Sans Header 2.ttf') format('truetype'); font-weight: normal; }
         @font-face { font-family: 'Subhead1'; src: url('fonts/Dominos Sans Subhead 1.ttf') format('truetype'); font-weight: normal; }
@@ -35,16 +35,15 @@
             --bg-color: var(--crust-light);
             --card-bg: #FFFFFF;
             --border-radius: 12px;
-            --brand-green: #28a745
+            --brand-green: #28a745;
+            --warning-orange: #ff9800;
         }
 
         body { font-family: 'Compact', sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; color: var(--crust-burnt); }
         header { 
             background-color: #005c91; 
             color: white; 
-            /* Normal 12px side/bottom padding */
             padding: 12px 16px; 
-            /* On Android, env(...) equals 0px. On iPhone, it equals the exact height of the notch */
             padding-top: calc(12px + env(safe-area-inset-top, 0px)); 
             position: sticky; 
             top: 0; 
@@ -55,19 +54,8 @@
             gap: 12px; 
         }        
         .logo { height: 32px; width: auto; }
-        h1 { 
-            margin: 0; 
-            font-family: 'ExtraBlack', serif; 
-            font-size: 20px; 
-            text-transform: uppercase; 
-            line-height: 1.1; /* Explicitly locks the height in place */
-        }
-        .subtitle { 
-            font-family: 'Compact', sans-serif; 
-            font-size: 12px; 
-            opacity: 0.9; 
-            line-height: 1.2; /* Explicitly locks the height in place */
-        }
+        h1 { margin: 0; font-family: 'ExtraBlack', serif; font-size: 20px; text-transform: uppercase; line-height: 1.1; }
+        .subtitle { font-family: 'Compact', sans-serif; font-size: 12px; opacity: 0.9; line-height: 1.2; }
 
         /* --- CONTROLS --- */
         .controls { padding: 12px 16px; background: white; border-bottom: 2px solid var(--crust-med); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
@@ -86,20 +74,29 @@
         .container { padding: 16px; max-width: 800px; margin: 0 auto; }
         
         /* --- CARD STYLES --- */
-        .card { background: var(--card-bg); border-radius: var(--border-radius); padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(71, 43, 16, 0.05); border-left: 6px solid transparent; position: relative; }
+        .card { 
+            background: var(--card-bg); 
+            border-radius: var(--border-radius); 
+            padding: 16px; 
+            margin-bottom: 12px; 
+            box-shadow: 0 4px 6px rgba(71, 43, 16, 0.05); 
+            border-left: 6px solid transparent; 
+            position: relative; 
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(71, 43, 16, 0.1); }
         
         /* Status Borders */
         .card.status-blue { border-left-color: var(--brand-blue); }
         .card.status-green { border-left-color: var(--brand-green); border-left-width: 8px; }
         .card.status-red { border-left-color: var(--brand-red); border: 2px solid var(--brand-red); } 
-        .card.status-orange { border-left-color: var(--brand-orange); }
+        .card.status-orange { border-left-color: var(--warning-orange); }
         .card.status-gray { border-left-color: #6c757d; opacity: 0.8; background-color: #f8f9fa; }
-        .card.status-blue .notes-section { border-left-color: var(--brand-blue); }
-        .card.status-green .notes-section { border-left-color: var(--brand-green); }
 
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .name { font-family: 'Body-Bold', sans-serif; font-size: 18px; color: var(--crust-burnt); }
-        .position-badge { font-family: 'Body-Bold', sans-serif; font-size: 12px; padding: 4px 8px; border-radius: 12px; background: var(--crust-light); color: #005c91; border: 1px solid var(--crust-med); }
+        .position-badge { font-family: 'Body-Bold', sans-serif; font-size: 12px; padding: 4px 8px; border-radius: 12px; background: var(--crust-light); color: #005c91; border: 1px solid var(--crust-med); display: flex; align-items: center; gap: 4px; }
         
         .meta-row { display: flex; justify-content: space-between; font-family: 'Compact', sans-serif; font-size: 14px; color: var(--crust-deep); margin-bottom: 8px; }
 
@@ -116,18 +113,45 @@
         .status-text.green { color: var(--brand-green); }
         .status-text.grey { color: #6c757d; }
 
+        /* --- ALERT BANNER --- */
+        .alert-banner { background-color: #ffebee; border: 1px solid var(--brand-red); color: var(--dark-red); padding: 8px; border-radius: 6px; font-size: 13px; margin-top: 8px; font-family: 'Body-Bold', sans-serif; display: flex; align-items: center; gap: 6px; }
+        .alert-banner.warning { background-color: #fff3e0; border: 1px solid var(--warning-orange); color: #e65100; }
+
+        /* --- EXPANDABLE SECTIONS --- */
+        .card-details { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+        .card.expanded .card-details { max-height: 1000px; }
+        .expand-chevron { font-size: 14px; color: var(--crust-dark); transition: transform 0.2s ease; margin-left: 8px; }
+        .card.expanded .expand-chevron { transform: rotate(180deg); }
+
+        /* --- CHECKLIST STYLE --- */
+        .onboarding-checklist { background: var(--crust-light); border: 1px solid var(--crust-med); border-radius: 8px; padding: 12px; margin-top: 12px; }
+        .checklist-title { font-family: 'Body-Bold', sans-serif; font-size: 14px; margin-bottom: 8px; color: var(--crust-burnt); text-transform: uppercase; letter-spacing: 0.5px; }
+        .checklist-item { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 6px; font-family: 'Body', sans-serif; color: var(--crust-deep); }
+        .checklist-item:last-child { margin-bottom: 0; }
+        .chk-icon { font-size: 14px; font-weight: bold; }
+        .chk-done { color: var(--brand-green); }
+        .chk-missing { color: var(--brand-red); font-family: 'Body-Bold', sans-serif; }
+        .chk-pending { color: #888; }
+
         /* --- DATA CHIPS --- */
-        .chip-container { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+        .chip-container { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
         .chip { font-size: 12px; background: #f0f4f8; padding: 4px 8px; border-radius: 6px; border: 1px solid #dde1e6; color: #555; display: flex; align-items: center; gap: 4px; }
         .chip-nto { background: #e3f2fd; color: #0d47a1; border-color: #bbdefb; font-weight: bold; }
 
-        /* --- GM APPOINTMENT BOX (Restored!) --- */
+        /* --- NUDGE & ACTION BUTTONS --- */
+        .action-container { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .action-btn { flex: 1; min-width: 120px; padding: 10px; border-radius: 8px; border: none; font-family: 'Body-Bold', sans-serif; font-size: 13px; text-transform: uppercase; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-call { background-color: var(--dark-blue); color: white; }
+        .btn-nudge { background-color: var(--brand-red); color: white; }
+        .action-btn:active { transform: scale(0.98); }
+
+        /* --- GM APPOINTMENT BOX --- */
         .gm-appt-box { background-color: #e8f5e9; border: 1px solid #28a745; color: #1b5e20; padding: 10px; border-radius: 8px; margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
         .gm-appt-label { font-size: 11px; text-transform: uppercase; opacity: 0.8; font-weight: bold; }
         .gm-appt-time { font-family: 'Body-Bold', sans-serif; font-size: 16px; }
 
         /* --- NOTES --- */
-        .notes-section { font-size: 14px; margin-top: 10px; color: var(--crust-deep); background: #f9f9f9; padding: 8px; border-radius: 6px; border-left: 3px solid #ccc; }
+        .notes-section { font-size: 14px; margin-top: 12px; color: var(--crust-deep); background: #f9f9f9; padding: 8px; border-radius: 6px; border-left: 3px solid #ccc; }
         .notes-section.hold-notes { background: #ffebee; border-left-color: var(--brand-red); color: #b71c1c; }
 
         .updated-text { font-size: 11px; color: #999; text-align: right; margin-top: 8px; font-style: italic; }
@@ -171,7 +195,6 @@
             populateFilters();
             renderOnboarding();
             renderInterviews();
-            // Ensure loader is hidden ONLY after success
             document.getElementById('loader').classList.add('hidden');
         })
         .catch(err => {
@@ -199,84 +222,110 @@
 
     function refreshViews() { renderOnboarding(); renderInterviews(); }
 
-    function getPipelineData(status) {
-        const s = status ? status.toLowerCase() : '';
+    function getPipelineDetails(item) {
+        if (item.ineligible) return { pct: 100, color: 'grey', label: 'Ineligible' };
+        if (item.inactive) return { pct: 100, color: 'grey', label: 'Inactive' };
+        if (item.hired) return { pct: 100, color: 'green', label: 'Hired' };
+        if (item.ntoScheduled) return { pct: 90, color: 'blue', label: 'NTO Scheduled' };
+        if (item.ntoSignupLinkSent) return { pct: 75, color: 'blue', label: 'NTO Signup Sent' };
 
-        // 0. INELIGIBLE (New)
-        if (s.includes('ineligible') || s.includes('rejected')) { 
-            return { pct: 100, color: 'grey', label: 'Ineligible' }; 
-        }
-        // 0.5. INACTIVE (New Block)
-        if (s.includes('inactive')) { 
-            return { pct: 100, color: 'grey', label: 'Inactive' }; // Maybe a lighter grey?
-        }
-        
-        // 1. HIRED
-        if (s.includes('hired')) return { pct: 100, color: 'green', label: 'Hired' };
-        
-        // 2. NTO STAGES (Order matters!)
-        if (s.includes('nto signup link') || s.includes('link sent')) {
-            return { pct: 80, color: 'blue', label: 'NTO Signup Link Sent' }; 
-        }
-        if (s.includes('nto')) {
-            return { pct: 90, color: 'blue', label: 'NTO Scheduled' }; 
+        // Standard Onboarding Stages Calculation
+        if (item.onboardingSent) {
+            let basePct = 35;
+            if (item.bgcComplete) basePct += 10;
+            if (item.allPayCompleted) basePct += 10;
+            if (item.pulseFormCompleted) basePct += 10;
+            return { pct: basePct, color: 'blue', label: 'Onboarding Sent' };
         }
         
-        // 3. ONBOARDING
-        if (s.includes('onboard') || s.includes('background')) return { pct: 70, color: 'blue', label: 'Onboarding' };
-        
-        // 4. OFFER
-        if (s.includes('offer')) return { pct: 50, color: 'blue', label: 'Offer Letter Sent' };
-        
-        // 5. EARLIER STAGES
-        if (s.includes('interview')) return { pct: 30, color: 'blue', label: 'Interviewing' };
-        if (s.includes('submission')) return { pct: 15, color: 'blue', label: 'Submission Received' };
-        
-        // 6. HOLD
-        if (s.includes('hold')) return { pct: 100, color: 'red', label: 'HOLD' };
-        
-        // Fallback
-        return { pct: 5, color: 'gray', label: status };
+        if (item.submissionReceived) return { pct: 15, color: 'blue', label: 'Submission Received' };
+        return { pct: 5, color: 'grey', label: 'Pending Start' };
     }
 
-    // --- SORTING LOGIC ---
-   function getStatusWeight(item) {
-        const s = item.status ? item.status.toLowerCase() : '';
+    function getStatusWeight(item) {
+        if (item.incorrectEmail || item.hasMissingDocs) return 0; // Urgencies first!
         
-        // 1. HIRED (The Freshness Rule)
-        if (s.includes('hired')) {
+        // Hired today (Freshness Rule)
+        if (item.hired) {
             const today = new Date();
             today.setHours(0,0,0,0);
             const updateDate = new Date(item.lastUpdated); 
             updateDate.setHours(0,0,0,0);
-            
-            // If Hired Today -> Top (0). If Old -> Bottom (10).
-            return (updateDate.getTime() === today.getTime()) ? 0 : 10;
+            return (updateDate.getTime() === today.getTime()) ? 1 : 10;
         }
 
-        // 2. ACTIVE FUNNEL (Ordered by "Closest to Finish")
-        if (s.includes('nto')) return 1;        // Almost Hired
-        if (s.includes('onboard')) return 2;    // Middle
-        if (s.includes('offer')) return 3;      // Early
-        if (s.includes('submission')) return 4; // Start
+        if (item.ntoScheduled) return 2;
+        if (item.ntoSignupLinkSent) return 3;
+        if (item.onboardingSent) return 4;
+        if (item.submissionReceived) return 5;
+        if (item.inactive) return 11;
+        if (item.ineligible) return 12; // Ineligible pushed right to the bottom!
         
-        // 3. STALLED
-        if (s.includes('ineligible') || s.includes('inactive') || s.includes('rejected')) return 7; // Just above Holds (8)
-        if (s.includes('hold')) return 8;       // Stalled at bottom of active list
-        
-        return 5; // Catch-all (Active stuff that didn't match above)
+        return 6;
+    }
+
+    function getPositionIcon(position) {
+        const pos = position ? position.toUpperCase().trim() : '';
+        if (pos === 'DE') return '🚗';
+        if (pos === 'BIKE') return '🚲';
+        if (pos === 'CSR') return '🍕';
+        if (pos === 'MIT') return '🎓';
+        return '🍕';
     }
 
     function formatPhone(phone) {
         if (!phone) return '';
-        // Strip everything but numbers
         const cleaned = ('' + phone).replace(/\D/g, '');
-        // Check for standard 10 digit
         const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
-        if (match) {
-            return '(' + match[1] + ') ' + match[2] + '-' + match[3];
+        return match ? `(${match[1]}) ${match[2]}-${match[3]}` : phone;
+    }
+
+    function buildSmsUrl(item) {
+        const phone = item.phoneNumber ? item.phoneNumber.replace(/\D/g, '') : '';
+        if (!phone) return '#';
+
+        const greeting = `Hey ${item.name}! This is Domino's. Excited to get you started!`;
+
+        // Case 1: Incorrect Email Blocker
+        if (item.incorrectEmail) {
+            const txt = `Hey ${item.name}! This is Domino's. We tried sending over your onboarding documents, but it looks like we have an incorrect email address on file. Can you please reply with your correct email so we can get you set up? Thanks!`;
+            return `sms:${phone}?body=${encodeURIComponent(txt)}`;
         }
-        return phone; // Return original if weird format
+
+        // Case 2: Missing Documents Blocker
+        if (item.hasMissingDocs) {
+            let txt = `Hey ${item.name}! This is Domino's. It looks like we need a different form of I-9 identification. We are missing your documentation. Please reply back so we can arrange a time for you to bring that to the store or upload it.`;
+            if (item.missingDocsText) {
+                txt = `Hey ${item.name}! This is Domino's. It looks like we need a different form of I-9 identification. We are missing your ${item.missingDocsText}. Please reply back so we can arrange a time for you to bring that to the store or upload it.`;
+            }
+            return `sms:${phone}?body=${encodeURIComponent(txt)}`;
+        }
+
+        // Case 3: Missing checklists items (only applicable if onboarding has been sent)
+        if (item.onboardingSent && !item.hired) {
+            const missing = [];
+            if (!item.bgcComplete) missing.push("background check");
+            if (!item.allPayCompleted) missing.push("forms in AllPay");
+            if (!item.pulseFormCompleted) missing.push("Pulse Form");
+
+            if (missing.length > 0) {
+                let missingStr = "";
+                if (missing.length === 1) missingStr = missing[0];
+                else if (missing.length === 2) missingStr = `${missing[0]} and ${missing[1]}`;
+                else missingStr = `${missing[0]}, ${missing[1]}, and ${missing[2]}`;
+
+                const txt = `Hey ${item.name}! This is Domino's. Excited to get you started! We just need you to finish your ${missingStr} so we can schedule you. The links were sent to your email. Let us know when you finish them!`;
+                return `sms:${phone}?body=${encodeURIComponent(txt)}`;
+            }
+        }
+
+        // Catch-all generic nudge
+        const defaultTxt = `Hey ${item.name}! This is Domino's. Just checking in on your onboarding paperwork. Let us know if you have any questions!`;
+        return `sms:${phone}?body=${encodeURIComponent(defaultTxt)}`;
+    }
+
+    function toggleCard(cardElement) {
+        cardElement.classList.toggle('expanded');
     }
 
     function renderOnboarding() {
@@ -296,46 +345,77 @@
         if(filtered.length === 0) { list.innerHTML = '<div class="loader">No candidates active.</div>'; return; }
 
         filtered.forEach(item => {
-            const icon = (item.position && item.position.includes('DE')) ? '🚗' : '🍕';
+            const icon = getPositionIcon(item.position);
             
-            // --- NEW: COLOR LOGIC ---
-            const sLower = item.status ? item.status.toLowerCase() : '';
-            let cardClass = 'status-blue'; // Default
-            
-            // Check Inactive FIRST
-            if (sLower.includes('inactive')) {
-                cardClass = 'status-gray'; // <--- SET THE CLASS
-            }
-            // Then check Ineligible
-            else if (sLower.includes('ineligible') || sLower.includes('rejected')) {
-                cardClass = 'status-gray'; // <--- SET THE CLASS
-            }
-            // 2. Check for Red (Hold)
-            else if (sLower.includes('hold')) {
+            // Card Color Logic
+            let cardClass = 'status-blue';
+            if (item.inactive || item.ineligible) {
+                cardClass = 'status-gray';
+            } else if (item.incorrectEmail) {
                 cardClass = 'status-red';
-            }
-            // 3. Check for Green (Hired)
-            else if (sLower.includes('hired')) {
+            } else if (item.hasMissingDocs) {
+                cardClass = 'status-orange';
+            } else if (item.hired) {
                 cardClass = 'status-green';
             }
             
-            // Pipeline Data
-            const pipe = getPipelineData(item.status);
+            const pipe = getPipelineDetails(item);
             
+            // Alert Banners (Outer/Compact alerts)
+            let alertHtml = '';
+            if (item.incorrectEmail) {
+                alertHtml = `<div class="alert-banner">🛑 Incorrect Email (Requires Outreach)</div>`;
+            } else if (item.hasMissingDocs) {
+                const missingText = item.missingDocsText ? `: ${item.missingDocsText}` : ' (I-9 ID Required)';
+                alertHtml = `<div class="alert-banner warning">⚠️ Missing Documents${missingText}</div>`;
+            }
+
             // Chips
             let chipsHtml = '';
             if (item.shirtSize) chipsHtml += `<span class="chip">👕 ${item.shirtSize}</span>`;
-            if (item.payCard) chipsHtml += `<span class="chip">💳 ${item.payCard}</span>`;
+            if (item.hatType && (item.hatType.toLowerCase() === 'cap' || item.hatType.toLowerCase() === 'visor')) {
+                chipsHtml += `<span class="chip">🧢 ${item.hatType}</span>`;
+            }
+            if (item.payCard) chipsHtml += `<span class="chip">💳 Pay Card Required</span>`;
             if (item.ntoDate) chipsHtml += `<span class="chip chip-nto">📅 NTO: ${item.ntoDate}</span>`;
+
+            // Active Checklist Box
+            let checklistHtml = '';
+            if (!item.inactive && !item.ineligible && !item.hired) {
+                checklistHtml = `
+                    <div class="onboarding-checklist">
+                        <div class="checklist-title">Onboarding Tasks</div>
+                        <div class="checklist-item">
+                            <span class="chk-icon ${item.submissionReceived ? 'chk-done' : 'chk-pending'}">${item.submissionReceived ? '✔' : '○'}</span>
+                            <span>Submission Received</span>
+                        </div>
+                        <div class="checklist-item">
+                            <span class="chk-icon ${item.onboardingSent ? 'chk-done' : 'chk-pending'}">${item.onboardingSent ? '✔' : '○'}</span>
+                            <span>Onboarding Paperwork Sent</span>
+                        </div>
+                        <div class="checklist-item">
+                            <span class="chk-icon ${item.bgcComplete ? 'chk-done' : 'chk-missing'}">${item.bgcComplete ? '✔' : '✖'}</span>
+                            <span>Background Check (Checkr)</span>
+                        </div>
+                        <div class="checklist-item">
+                            <span class="chk-icon ${item.allPayCompleted ? 'chk-done' : 'chk-missing'}">${item.allPayCompleted ? '✔' : '✖'}</span>
+                            <span>AllPay Forms Completed</span>
+                        </div>
+                        <div class="checklist-item">
+                            <span class="chk-icon ${item.pulseFormCompleted ? 'chk-done' : 'chk-missing'}">${item.pulseFormCompleted ? '✔' : '✖'}</span>
+                            <span>Pulse Form Completed</span>
+                        </div>
+                    </div>`;
+            }
 
             // Notes
             let notesHtml = '';
             if (item.notes) {
-                const noteClass = sLower.includes('hold') ? 'hold-notes' : '';
-                notesHtml = `<div class="notes-section ${noteClass}">${item.notes}</div>`;
+                const noteClass = item.incorrectEmail ? 'hold-notes' : '';
+                notesHtml = `<div class="notes-section ${noteClass}">📝 ${item.notes}</div>`;
             }
 
-            // Timestamp
+            // Timestamp formatting
             let updatedHtml = '';
             if (item.lastUpdated) {
                 let displayTime = item.lastUpdated;
@@ -345,31 +425,49 @@
                         displayTime = d.toLocaleString('en-US', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
                     }
                 } catch (e) {}
-                updatedHtml = `<div class="updated-text">Updated: ${displayTime}</div>`;
+                updatedHtml = `<div class="updated-text">Last Updated: ${displayTime}</div>`;
             }
 
+            const smsUrl = buildSmsUrl(item);
+
             const html = `
-                <div class="card ${cardClass}">  <!-- ADD THIS LINE BACK -->
-                <div class="card-header">
-                    <div class="name-phone-group" style="display: flex; flex-direction: column;">
-                        <div class="name">${item.name}</div>
-                        ${item.phoneNumber ? `<a href="tel:${item.phoneNumber}" style="text-decoration: none; color: #006491; font-weight: bold; font-size: 0.85rem; margin-top: 2px;">📞 ${formatPhone(item.phoneNumber)}</a>` : ''}
+                <div class="card ${cardClass}" onclick="toggleCard(this)">
+                    <div class="card-header">
+                        <div class="name-phone-group" style="display: flex; flex-direction: column;">
+                            <div class="name" style="display: flex; align-items: center;">
+                                ${item.name} <span class="expand-chevron">▼</span>
+                            </div>
+                        </div>
+                        <div class="position-badge">${icon} ${item.position}</div>
                     </div>
-                    <div class="position-badge">${icon} ${item.position}</div>
-                </div>
-                
-                <div class="meta-row"><span>Store #${item.store}</span><span>DO: ${item.doName}</span></div>
+                    
+                    <div class="meta-row"><span>Store #${item.store}</span><span>DO: ${item.doName}</span></div>
 
                     <div class="pipeline-container">
                         <div class="pipeline-track">
                             <div class="pipeline-fill ${pipe.color}" style="width: ${pipe.pct}%"></div>
                         </div>
                     </div>
-                    <div class="status-text ${pipe.color}">${pipe.label}</div>
+                    <div class="status-text ${pipe.color}">${pipe.label} <span>${pipe.pct}%</span></div>
+                    
+                    ${alertHtml}
 
-                    <div class="chip-container">${chipsHtml}</div>
-                    ${notesHtml}
-                    ${updatedHtml}
+                    <!-- Expandable Details Section -->
+                    <div class="card-details" onclick="event.stopPropagation()">
+                        ${checklistHtml}
+                        <div class="chip-container">${chipsHtml}</div>
+                        ${notesHtml}
+                        
+                        <!-- Quick Actions Group -->
+                        ${item.phoneNumber ? `
+                            <div class="action-container">
+                                <a href="tel:${item.phoneNumber}" class="action-btn btn-call">📞 Call Phone</a>
+                                <a href="${smsUrl}" class="action-btn btn-nudge">💬 Nudge SMS</a>
+                            </div>
+                        ` : ''}
+                        
+                        ${updatedHtml}
+                    </div>
                 </div>`;
             list.innerHTML += html;
         });
@@ -392,7 +490,7 @@
         if(filtered.length === 0) { list.innerHTML = '<div class="loader">No interviews scheduled.</div>'; return; }
 
         filtered.forEach(item => {
-            const icon = (item.position && item.position.includes('DE')) ? '🚗' : (item.position && item.position.includes('BIKE')) ? '🚲' : '🍕';
+            const icon = getPositionIcon(item.position);
             let statusColor = 'status-blue';
             const s = item.status ? item.status.toString() : '';
             if(s.includes('No Show') || s.includes('Canceled') || s.includes('Pass')) statusColor = 'status-red';
@@ -422,7 +520,7 @@
                 <div class="card ${statusColor}">
                     <div class="card-header"><div class="name">${item.name}</div><div class="position-badge">${icon} ${item.position}</div></div>
                     <div class="meta-row"><span>${item.day} ${item.time}</span><span>Store #${item.store}</span></div>
-                    <div class="main-status">Result: ${item.status}</div>
+                    <div class="main-status" style="font-family: 'Body-Bold'; font-size: 14px;">Result: ${item.status}</div>
                     ${gmHtml}
                     ${notesHtml}
                 </div>`;
