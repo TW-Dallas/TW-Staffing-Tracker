@@ -506,27 +506,33 @@
                             <label class="checkbox-item flag-box flag-reviewing" style="grid-column: span 3;">
                                 <input type="checkbox" id="checkReviewing"> 🔍 Currently Reviewing
                             </label>
+                            
                             <label class="checkbox-item flag-box flag-incorrect">
                                 <input type="checkbox" id="checkIncorrect"> ⚠️ Incorrect Email
                             </label>
+                            <label class="checkbox-item flag-box flag-incorrect">
+                                <input type="checkbox" id="checkMissingDocs" onchange="toggleMissingDocsSelector()"> ⚠️ Missing/Incorrect Docs
+                            </label>
                             
-                            <!-- SMART EXPANDABLE MISSING DOCUMENTS CHECKLIST -->
-                            <label class="checkbox-item flag-box flag-incorrect" style="grid-column: span 2; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; box-sizing: border-box; height: auto;">
-                                <div style="display: flex; align-items: center; gap: 6px; width: 100%;">
-                                    <input type="checkbox" id="checkMissingDocs" onchange="toggleMissingDocsSelector()"> ⚠️ Missing/Incorrect Docs
+                            <!-- Blank spacer to complete the 3-column row nicely -->
+                            <div></div> 
+                            
+                            <!-- SMART EXPANDABLE MISSING DOCUMENTS CHECKLIST (Spans all 3 columns!) -->
+                            <div id="missingDocsContainer" class="hidden" style="grid-column: span 3; background: white; padding: 12px; border-radius: 8px; border: 1.5px solid var(--brand-red); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; box-sizing: border-box; font-family: 'Condensed', sans-serif;">
+                                <div style="grid-column: span 2; font-family: 'Subhead2'; font-size: 11px; color: var(--dark-red); text-transform: uppercase; font-weight: bold; border-bottom: 1px solid var(--crust-med); padding-bottom: 2px; margin-bottom: 4px;">Select Missing Documents</div>
+                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="List A ID (Passport/Green Card/EAD)"> ✈️ List A ID (Passport, Permanent Resident Card, Employment Authorization Card)</label>
+                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="List B ID (Driver's License/State ID/School ID)"> 🪪 List B ID (DL, State ID, School ID)</label>
+                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="List C ID (Social Security Card/Birth Certificate)"> 💳 List C ID (Social Security Card, Birth Cert)</label>
+                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="Vehicle Inspection"> 🚗 Vehicle Inspection</label>
+                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="Auto Insurance ID (Driver name must be listed as a covered driver)"> 📄 Auto Insurance ID</label>
+                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="Auto Registration"> 🏷️ Auto Registration</label>
+                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="Document Mismatch"> ✖️ Document Mismatch</label>
+                                
+                                <div style="grid-column: span 2; display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+                                    <span style="font-size: 11px; font-family: 'Subhead2'; color: var(--dark-red); text-transform: uppercase; font-weight: bold;">Custom Missing Document:</span>
+                                    <input type="text" id="customMissingDoc" placeholder="e.g. Profile Signature, W-4 info" style="width: 100%; font-size: 13px; padding: 4px;">
                                 </div>
-                                <div id="missingDocsContainer" class="hidden" style="width: 100%; margin-top: 8px; background: white; padding: 10px; border-radius: 8px; border: 1.5px solid var(--brand-red); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; box-sizing: border-box; font-family: 'Condensed', sans-serif;">
-                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="List B ID (DL/State ID)"> 🪪 List B (DL/ID)</label>
-                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="Social Security Card"> 💳 Social Security Card</label>
-                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="Birth Certificate"> 👶 Birth Certificate</label>
-                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="List A ID (Passport/Green Card)"> ✈️ List A ID</label>
-                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="Food Handler Card"> 🍕 Food Handler Card</label>
-                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="Voided Check / Direct Deposit Info"> 💰 Voided Check/DD</label>
-                                    <div style="grid-column: span 2; display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
-                                        <span style="font-size: 11px; font-family: 'Subhead2'; color: var(--dark-red); text-transform: uppercase; font-weight: bold;">Custom Missing Document:</span>
-                                        <input type="text" id="customMissingDoc" placeholder="e.g. W-4 signature, School ID" style="width: 100%; font-size: 13px; padding: 4px;">
-                                    </div>
-                                </div>
+                            </div>
                             </label>
                             
                             <!-- Blank spacer to cleanly push the gray terminal flags to the next row -->
