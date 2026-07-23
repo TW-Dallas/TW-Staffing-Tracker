@@ -504,10 +504,9 @@
                             <label class="checkbox-item"><input type="checkbox" id="checkHired"> Hired</label>
                             
                             <div class="section-header">Active Flags & Blockers</div>
-                            <label class="checkbox-item flag-box flag-reviewing" style="grid-column: span 3;">
+                            <label class="checkbox-item flag-box flag-reviewing">
                                 <input type="checkbox" id="checkReviewing"> 🔍 Currently Reviewing
                             </label>
-                            
                             <label class="checkbox-item flag-box flag-incorrect">
                                 <input type="checkbox" id="checkIncorrect"> ⚠️ Incorrect Email
                             </label>
@@ -558,6 +557,12 @@
 
                     <!-- INTERVIEWS FORM TEMPLATE -->
                     <div id="interviewFormFields" class="hidden">
+                        
+                        <!-- ADD THIS BUTTON AT THE TOP OF THE INTERVIEW FORM -->
+                        <button type="button" id="btnPortToOnboarding" onclick="portCandidateToOnboarding()" style="background: var(--success-green); width: 100%; margin-bottom: 12px; font-size: 16px;">
+                            🚀 Port Candidate to Onboarding
+                        </button>
+                    
                         <div class="form-group">
                             <label>Candidate Name</label>
                             <input type="text" id="intName">
@@ -600,7 +605,7 @@
                         <div class="form-row flex-three">
                             <div class="form-group">
                                 <label>Interview Date</label>
-                                <input type="text" id="intDate" placeholder="MM/DD/YYYY">
+                                <input type="text" id="intDate" placeholder="MM/DD/YYYY" oninput="autoCalculateDayOfWeek()">
                             </div>
                             <div class="form-group">
                                 <label>Day of Week</label>
@@ -627,6 +632,7 @@
                             <div class="form-group flex-two-weight">
                                 <label>Interview Status</label>
                                 <select id="intStatus">
+                                    <option value="Phone Interview">📞 Phone Interview</option>
                                     <option value="Scheduled">📞 Scheduled</option>
                                     <option value="Completed">✓ Completed</option>
                                     <option value="Passed to GM">👔 Passed to GM</option>
@@ -1372,7 +1378,7 @@
 
         if (currentView === 'interviews') {
             window.currentSelectedInterview = interviews.find(i => i.id === item.id);
-
+        
             document.getElementById('fieldId').value = item.id;
             document.getElementById('intName').value = item.name || '';
             document.getElementById('intPosition').value = item.position || 'CSR';
@@ -1383,7 +1389,10 @@
             document.getElementById('intDate').value = item.date || '';
             document.getElementById('intDay').value = item.day || '';
             document.getElementById('intTime').value = item.time || '';
-            document.getElementById('intStatus').value = item.status || 'Scheduled';
+            
+            // Case-insensitive status selector with fallback to 'Phone Interview'
+            setSelectValueCaseInsensitive('intStatus', item.status || 'Phone Interview');
+            
             document.getElementById('intGmDate').value = item.gmDate || '';
             document.getElementById('intGmTime').value = item.gmTime || '';
             document.getElementById('intStatusUpdates').value = item.statusUpdates || '';
@@ -2063,6 +2072,85 @@
                 }
             })
             .catch(err => console.warn("Background sync quietly failed/offline:", err.message));
+    }
+
+    // Automatically calculates Day of Week from MM/DD/YYYY or YYYY-MM-DD
+    function autoCalculateDayOfWeek() {
+        const dateStr = document.getElementById('intDate').value.trim();
+        if (!dateStr) return;
+    
+        let year, month, day;
+        if (dateStr.includes('/')) {
+            const parts = dateStr.split('/');
+            if (parts.length === 3) {
+                month = parseInt(parts[0], 10);
+                day = parseInt(parts[1], 10);
+                year = parseInt(parts[2], 10);
+                if (year < 100) year += 2000; // handle 2-digit years (e.g. 26 -> 2026)
+            }
+        } else if (dateStr.includes('-')) {
+            const parts = dateStr.split('-');
+            if (parts.length === 3) {
+                year = parseInt(parts[0], 10);
+                month = parseInt(parts[1], 10);
+                day = parseInt(parts[2], 10);
+            }
+        }
+    
+        if (year && month && day && !isNaN(year) && !isNaN(month) && !isNaN(day)) {
+            // Construct date object using local components
+            const dateObj = new Date(year, month - 1, day);
+            if (!isNaN(dateObj.getTime())) {
+                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const dayName = days[dateObj.getDay()];
+                document.getElementById('intDay').value = dayName;
+            }
+        }
+    }
+    
+    function portCandidateToOnboarding() {
+        // 1. Gather existing data from the Interview Form
+        const name = document.getElementById('intName').value.trim();
+        const position = document.getElementById('intPosition').value;
+        const store = document.getElementById('intStore').value.trim();
+        const phone = document.getElementById('intPhone').value.trim();
+        const email = document.getElementById('intEmail').value.trim();
+        const notes = document.getElementById('intNotes').value.trim();
+        const availability = document.getElementById('intAvailability').value.trim();
+    
+        // Validation
+        if (!name) {
+            showBrandAlert("Please select or fill out an interview candidate first.", "No Candidate Selected");
+            return;
+        }
+    
+        // Combine interview availability and feedback into Onboarding Notes
+        let combinedNotes = "";
+        if (availability) combinedNotes += `[Availability]: ${availability}\n`;
+        if (notes) combinedNotes += `[Interview Notes]: ${notes}`;
+    
+        // 2. Switch UI View to Onboarding
+        switchView('onboarding');
+    
+        // 3. Populate Onboarding Form Fields with Ported Data
+        document.getElementById('fieldId').value = ''; // Set as new entry
+        document.getElementById('fieldName').value = name;
+        document.getElementById('fieldPosition').value = position;
+        document.getElementById('fieldStore').value = store;
+        document.getElementById('fieldPhone').value = phone;
+        document.getElementById('fieldEmail').value = email;
+        document.getElementById('fieldNotes').value = combinedNotes.trim();
+    
+        // Auto-check "Submission Received"
+        document.getElementById('checkSubmission').checked = true;
+    
+        // Update title bar for clarity
+        document.getElementById('formTitle').innerText = `Ported: ${name} (New Candidate)`;
+        
+        // Focus the next logical field (Shirt Size)
+        document.getElementById('fieldShirt').focus();
+    
+        showBrandAlert(`Successfully ported details for ${name}! Fill out any remaining details (Shirt Size, Hat Style) and click 'Save Details'.`, "Candidate Ported");
     }
 </script>
 </body>
