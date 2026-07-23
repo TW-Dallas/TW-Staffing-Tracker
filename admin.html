@@ -509,8 +509,24 @@
                             <label class="checkbox-item flag-box flag-incorrect">
                                 <input type="checkbox" id="checkIncorrect"> ⚠️ Incorrect Email
                             </label>
-                            <label class="checkbox-item flag-box flag-incorrect">
-                                <input type="checkbox" id="checkMissingDocs"> ⚠️ Missing/Incorrect Docs
+                            
+                            <!-- SMART EXPANDABLE MISSING DOCUMENTS CHECKLIST -->
+                            <label class="checkbox-item flag-box flag-incorrect" style="grid-column: span 2; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; box-sizing: border-box; height: auto;">
+                                <div style="display: flex; align-items: center; gap: 6px; width: 100%;">
+                                    <input type="checkbox" id="checkMissingDocs" onchange="toggleMissingDocsSelector()"> ⚠️ Missing/Incorrect Docs
+                                </div>
+                                <div id="missingDocsContainer" class="hidden" style="width: 100%; margin-top: 8px; background: white; padding: 10px; border-radius: 8px; border: 1.5px solid var(--brand-red); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; box-sizing: border-box; font-family: 'Condensed', sans-serif;">
+                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="List B ID (DL/State ID)"> 🪪 List B (DL/ID)</label>
+                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="Social Security Card"> 💳 Social Security Card</label>
+                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="Birth Certificate"> 👶 Birth Certificate</label>
+                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="List A ID (Passport/Green Card)"> ✈️ List A ID</label>
+                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="Food Handler Card"> 🍕 Food Handler Card</label>
+                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox" class="doc-chk" value="Voided Check / Direct Deposit Info"> 💰 Voided Check/DD</label>
+                                    <div style="grid-column: span 2; display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+                                        <span style="font-size: 11px; font-family: 'Subhead2'; color: var(--dark-red); text-transform: uppercase; font-weight: bold;">Custom Missing Document:</span>
+                                        <input type="text" id="customMissingDoc" placeholder="e.g. W-4 signature, School ID" style="width: 100%; font-size: 13px; padding: 4px;">
+                                    </div>
+                                </div>
                             </label>
                             
                             <!-- Blank spacer to cleanly push the gray terminal flags to the next row -->
@@ -764,6 +780,20 @@
             handleLogin(savedUser, savedPass);
         }
     });
+
+    // Toggle custom missing documents dropdown visibility
+    function toggleMissingDocsSelector() {
+        const container = document.getElementById('missingDocsContainer');
+        const isChecked = document.getElementById('checkMissingDocs').checked;
+        if (isChecked) {
+            container.classList.remove('hidden');
+        } else {
+            container.classList.add('hidden');
+            // Clear checked sub-options on uncheck
+            document.querySelectorAll('.doc-chk').forEach(c => c.checked = false);
+            document.getElementById('customMissingDoc').value = '';
+        }
+    }
 
     // Utility helper to match select options case-insensitively
     function setSelectValueCaseInsensitive(selectId, value) {
@@ -1311,7 +1341,11 @@
                 card.className = 'candidate-card';
                 if (item.id === currentSelectedId) card.classList.add('selected');
                 
-                if (item.incorrectEmail || item.missingDocs) {
+                // Treat missingDocs as active blocker if it has content/true
+                const rawMissingDocs = item.missingDocs || "";
+                const isBlockedByDocs = rawMissingDocs !== "" && rawMissingDocs.toString().toUpperCase() !== "FALSE";
+
+                if (item.incorrectEmail || isBlockedByDocs) {
                     card.classList.add('status-red');
                 } else if (item.currentlyReviewing) {
                     card.classList.add('status-reviewing');
@@ -1327,13 +1361,13 @@
                 
                 let statusStyleColor = 'var(--brand-blue)';
                 if (item.hired) statusStyleColor = 'var(--success-green)';
-                if (item.incorrectEmail || item.missingDocs) statusStyleColor = 'var(--brand-red)';
+                if (item.incorrectEmail || isBlockedByDocs) statusStyleColor = 'var(--brand-red)';
                 if (item.currentlyReviewing) statusStyleColor = 'var(--med-blue)';
                 if (item.ineligible || item.inactive) statusStyleColor = 'var(--brand-grey)';
 
                 let flags = '';
                 if (item.incorrectEmail) flags += '<span class="badge-incorrect">⚠️ Email Error</span> ';
-                if (item.missingDocs) flags += '<span class="badge-incorrect">⚠️ Missing Docs</span> ';
+                if (isBlockedByDocs) flags += '<span class="badge-incorrect">⚠️ Missing Docs</span> ';
                 if (item.currentlyReviewing) flags += '<span class="badge-review">🔍 Reviewing</span> ';
 
                 card.innerHTML = `
@@ -1407,8 +1441,44 @@
             document.getElementById('checkReviewing').checked = item.currentlyReviewing || false;
             document.getElementById('checkIneligible').checked = item.ineligible || false;
             document.getElementById('checkInactive').checked = item.inactive || false;
-            document.getElementById('checkMissingDocs').checked = item.missingDocs || false;
             document.getElementById('checkPulseForm').checked = item.pulseFormComplete || false; // Column Y
+            
+            // --- POPULATE MULTI-SELECT CHECKBOXES FOR MISSING DOCUMENTS ---
+            const rawMissingDocs = item.missingDocs || "";
+            if (rawMissingDocs && rawMissingDocs.toString().toUpperCase() !== "FALSE") {
+                document.getElementById('checkMissingDocs').checked = true;
+                document.getElementById('missingDocsContainer').classList.remove('hidden');
+                
+                const docString = rawMissingDocs.toString();
+                const parts = docString.split(',').map(p => p.trim());
+                
+                // Reset doc checkboxes and custom input
+                document.querySelectorAll('.doc-chk').forEach(c => c.checked = false);
+                document.getElementById('customMissingDoc').value = '';
+                
+                const customParts = [];
+                parts.forEach(part => {
+                    let matched = false;
+                    document.querySelectorAll('.doc-chk').forEach(chk => {
+                        if (chk.value.toLowerCase() === part.toLowerCase()) {
+                            chk.checked = true;
+                            matched = true;
+                        }
+                    });
+                    if (!matched && part.toUpperCase() !== "TRUE" && part.trim() !== "") {
+                        customParts.push(part);
+                    }
+                });
+                
+                if (customParts.length > 0) {
+                    document.getElementById('customMissingDoc').value = customParts.join(', ');
+                }
+            } else {
+                document.getElementById('checkMissingDocs').checked = false;
+                document.getElementById('missingDocsContainer').classList.add('hidden');
+                document.querySelectorAll('.doc-chk').forEach(c => c.checked = false);
+                document.getElementById('customMissingDoc').value = '';
+            }
             
             document.getElementById('emailQuickActions').classList.remove('hidden'); // Show emails for selected onboarding candidates
         }
@@ -1442,6 +1512,7 @@
         
         document.getElementById('btnCancel').innerText = "Clear / Deselect";
         document.getElementById('emailQuickActions').classList.add('hidden'); // Hide email panel on reset
+        document.getElementById('missingDocsContainer').classList.add('hidden'); // Collapse missing docs
         currentSelectedId = null;
         renderList();
     }
@@ -1501,8 +1572,20 @@
             payload.currentlyReviewing = document.getElementById('checkReviewing').checked;
             payload.ineligible = document.getElementById('checkIneligible').checked;
             payload.inactive = document.getElementById('checkInactive').checked;
-            payload.missingDocs = document.getElementById('checkMissingDocs').checked;
             payload.pulseFormComplete = document.getElementById('checkPulseForm').checked; // Column Y
+            
+            // --- CONSOLIDATE MULTI-SELECT CHECKBOXES FOR MISSING DOCUMENTS ---
+            let missingDocsValue = "FALSE";
+            if (document.getElementById('checkMissingDocs').checked) {
+                const checkedDocs = [];
+                document.querySelectorAll('.doc-chk:checked').forEach(c => checkedDocs.push(c.value));
+                const customVal = document.getElementById('customMissingDoc').value.trim();
+                if (customVal) checkedDocs.push(customVal);
+                
+                // Fallback to "TRUE" if checked but no sub-checkbox is checked
+                missingDocsValue = checkedDocs.length > 0 ? checkedDocs.join(', ') : "TRUE";
+            }
+            payload.missingDocs = missingDocsValue;
         }
 
         fetch(API_URL, {
