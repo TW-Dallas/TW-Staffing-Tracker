@@ -1387,6 +1387,21 @@
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
         // Sorting Comparator Logic
+        // Helper function to safely parse date strings across all browsers
+        const parseDate = (val) => {
+            if (!val) return 0;
+            if (val instanceof Date) return val.getTime();
+            if (typeof val === 'number') return val;
+            let str = String(val).trim();
+            // Fix Safari/WebKit issue with "YYYY-MM-DD HH:MM:SS" space separators
+            if (str.includes('-') && str.includes(' ')) {
+                str = str.replace(' ', 'T');
+            }
+            const time = new Date(str).getTime();
+            return isNaN(time) ? 0 : time;
+        };
+
+        // Sorting Comparator Logic
         const sortComparator = (a, b) => {
             if (sortBy === 'name') {
                 return (a.name || '').localeCompare(b.name || '');
@@ -1404,7 +1419,7 @@
             }
             if (sortBy === 'status') {
                 if (currentView === 'onboarding') {
-                    return getStatusWeight(b) - getStatusWeight(a); // Higher weight priority first
+                    return getStatusWeight(b) - getStatusWeight(a);
                 } else if (currentView === 'interviews') {
                     return (a.status || '').localeCompare(b.status || '');
                 } else {
@@ -1415,9 +1430,25 @@
                 return (a.payCard || '').localeCompare(b.payCard || '');
             }
             if (sortBy === 'updated') {
-                const dateA = a.lastUpdated ? new Date(a.lastUpdated).getTime() : 0;
-                const dateB = b.lastUpdated ? new Date(b.lastUpdated).getTime() : 0;
-                if (dateA !== dateB) return dateB - dateA;
+                // Check multiple possible timestamp property names
+                const rawA = a.lastUpdated || a.timestamp || a.updatedAt || a.date;
+                const rawB = b.lastUpdated || b.timestamp || b.updatedAt || b.date;
+
+                const dateA = parseDate(rawA);
+                const dateB = parseDate(rawB);
+
+                // If dates are valid and different, sort most recent first
+                if (dateA !== dateB) {
+                    return dateB - dateA;
+                }
+
+                // Numeric Fallback (higher ID = newer entry)
+                const idA = parseFloat(a.id) || 0;
+                const idB = parseFloat(b.id) || 0;
+                if (idA !== idB) {
+                    return idB - idA;
+                }
+
                 return String(b.id || '').localeCompare(String(a.id || ''));
             }
             return 0;
