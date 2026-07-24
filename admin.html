@@ -2140,44 +2140,145 @@
 
     function updateAuditMetrics() {
         const currentPeriod = getDominosFiscalPeriod(new Date());
-        document.getElementById('stfCurrentPeriodName').innerText = currentPeriod;
+        const periodNameEl = document.getElementById('stfCurrentPeriodName');
+        if (periodNameEl) periodNameEl.innerText = currentPeriod;
 
+        // Calculate Monday-to-Sunday boundaries for This Week & Last Week
         const now = new Date();
-        const currentDay = now.getDay();
+        const currentDay = now.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
         const distanceToMonday = (currentDay === 0 ? -6 : 1) - currentDay; 
         
-        const startOfThisWeek = new Date(now);
-        startOfThisWeek.setDate(now.getDate() + distanceToMonday);
-        startOfThisWeek.setHours(0,0,0,0);
+        const startThisWeek = new Date(now);
+        startThisWeek.setDate(now.getDate() + distanceToMonday);
+        startThisWeek.setHours(0,0,0,0);
         
-        const endOfThisWeek = new Date(startOfThisWeek);
-        endOfThisWeek.setDate(startOfThisWeek.getDate() + 6);
-        endOfThisWeek.setHours(23,59,59,999);
+        const endThisWeek = new Date(startThisWeek);
+        endThisWeek.setDate(startThisWeek.getDate() + 6);
+        endThisWeek.setHours(23,59,59,999);
 
+        const startLastWeek = new Date(startThisWeek);
+        startLastWeek.setDate(startThisWeek.getDate() - 7);
+
+        const endLastWeek = new Date(endThisWeek);
+        endLastWeek.setDate(endThisWeek.getDate() - 7);
+
+        // Display current week date range in audit header
+        const formatShortDate = (d) => `${d.getMonth() + 1}/${d.getDate()}`;
+        const rangeEl = document.getElementById('metricsWeekRange');
+        if (rangeEl) {
+            rangeEl.innerText = `${formatShortDate(startThisWeek)} - ${formatShortDate(endThisWeek)}`;
+        }
+
+        // Helper to safely parse dates (MM/DD/YYYY, YYYY-MM-DD, or ISO strings)
+        const parseMetricDate = (val) => {
+            if (!val) return null;
+            if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
+            let str = String(val).trim();
+            if (!str) return null;
+
+            if (str.includes('/')) {
+                const parts = str.split('/');
+                if (parts.length === 3) {
+                    let m = parseInt(parts[0], 10) - 1;
+                    let d = parseInt(parts[1], 10);
+                    let y = parseInt(parts[2], 10);
+                    if (y < 100) y += 2000;
+                    const dt = new Date(y, m, d);
+                    return isNaN(dt.getTime()) ? null : dt;
+                }
+            }
+            if (str.includes('-') && str.includes(' ')) {
+                str = str.replace(' ', 'T');
+            }
+            const dt = new Date(str);
+            return isNaN(dt.getTime()) ? null : dt;
+        };
+
+        // 1. Calculate Interview Counts (This Week vs. Last Week)
+        let interviewsThisWeek = 0;
+        let interviewsLastWeek = 0;
+
+        (interviews || []).forEach(item => {
+            const d = parseMetricDate(item.date || item.gmDate || item.lastUpdated);
+            if (d) {
+                if (d >= startThisWeek && d <= endThisWeek) interviewsThisWeek++;
+                else if (d >= startLastWeek && d <= endLastWeek) interviewsLastWeek++;
+            }
+        });
+
+        // 2. Calculate Hire Counts (This Week vs. Last Week)
+        let hiresThisWeek = 0;
+        let hiresLastWeek = 0;
+        const countedHireIds = new Set();
+
+        // Check Candidates (Onboarding)
+        (candidates || []).forEach(item => {
+            if (item.hired) {
+                const d = parseMetricDate(item.ntoDate || item.lastUpdated || item.hireDate);
+                if (d) {
+                    if (d >= startThisWeek && d <= endThisWeek) {
+                        hiresThisWeek++;
+                        if (item.id) countedHireIds.add(String(item.id));
+                    } else if (d >= startLastWeek && d <= endLastWeek) {
+                        hiresLastWeek++;
+                        if (item.id) countedHireIds.add(String(item.id));
+                    }
+                }
+            }
+        });
+
+        // Check Staffing (Hires & Terms)
+        (staffing || []).forEach(item => {
+            if (item.hireDate && (!item.id || !countedHireIds.has(String(item.id)))) {
+                const d = parseMetricDate(item.hireDate);
+                if (d) {
+                    if (d >= startThisWeek && d <= endThisWeek) hiresThisWeek++;
+                    else if (d >= startLastWeek && d <= endLastWeek) hiresLastWeek++;
+                }
+            }
+        });
+
+        // Update Weekly Audit UI elements
+        const elIntThis = document.getElementById('metricsQuotesThisWeek');
+        const elIntLast = document.getElementById('metricsQuotesLastWeek');
+        const elHiresThis = document.getElementById('metricsOrdersThisWeek');
+        const elHiresLast = document.getElementById('metricsOrdersLastWeek');
+
+        if (elIntThis) elIntThis.innerText = interviewsThisWeek;
+        if (elIntLast) elIntLast.innerText = interviewsLastWeek;
+        if (elHiresThis) elHiresThis.innerText = hiresThisWeek;
+        if (elHiresLast) elHiresLast.innerText = hiresLastWeek;
+
+        // 3. Calculate Fiscal Period Staffing Metrics
         let weekHires = 0, weekTerms = 0;
         let periodHires = 0, periodTerms = 0;
 
-        staffing.forEach(item => {
-            // Calculate Period metrics
+        (staffing || []).forEach(item => {
             if (item.period === currentPeriod) {
                 if (item.termDate) periodTerms++;
                 else periodHires++;
             }
 
-            // Calculate Weekly metrics for Staffing
-            const checkDate = item.termDate ? new Date(item.termDate) : (item.hireDate ? new Date(item.hireDate) : null);
-            if (checkDate && !isNaN(checkDate.getTime()) && checkDate >= startOfThisWeek && checkDate <= endOfThisWeek) {
+            const checkDate = parseMetricDate(item.termDate || item.hireDate);
+            if (checkDate && checkDate >= startThisWeek && checkDate <= endThisWeek) {
                 if (item.termDate) weekTerms++;
                 else weekHires++;
             }
         });
 
-        document.getElementById('stfWeekHires').innerText = weekHires;
-        document.getElementById('stfWeekTerms').innerText = weekTerms;
-        document.getElementById('stfPeriodHires').innerText = periodHires;
-        document.getElementById('stfPeriodTerms').innerText = periodTerms;
+        const elStfWeekHires = document.getElementById('stfWeekHires');
+        const elStfWeekTerms = document.getElementById('stfWeekTerms');
+        const elStfPeriodHires = document.getElementById('stfPeriodHires');
+        const elStfPeriodTerms = document.getElementById('stfPeriodTerms');
+        const elStfPeriodNet = document.getElementById('stfPeriodNet');
+
+        if (elStfWeekHires) elStfWeekHires.innerText = weekHires;
+        if (elStfWeekTerms) elStfWeekTerms.innerText = weekTerms;
+        if (elStfPeriodHires) elStfPeriodHires.innerText = periodHires;
+        if (elStfPeriodTerms) elStfPeriodTerms.innerText = periodTerms;
+        
         const net = periodHires - periodTerms;
-        document.getElementById('stfPeriodNet').innerText = (net >= 0 ? '+' : '') + net;
+        if (elStfPeriodNet) elStfPeriodNet.innerText = (net >= 0 ? '+' : '') + net;
     }
 
     function silentSync() {
