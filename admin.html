@@ -121,13 +121,16 @@
         .form-actions { 
             flex: 0 0 auto;
             display: flex; 
+            flex-direction: row;
             gap: 12px; 
             background: white;
             padding-top: 10px;
             border-top: 1px solid var(--crust-med);
+            width: 100%;
         }
 
         .form-actions button {
+            flex: 1;
             font-size: 19px;       /* Increased text size */
             padding: 11px 18px;    /* Taller padding for better visual proportion */
         }
@@ -450,7 +453,7 @@
             <div id="candidateList"></div>
         </div>
 
-<!-- Middle Panel: Form Area -->
+        <!-- Middle Panel: Form Area -->
         <div class="form-panel" id="formPanel">
             <h2 id="formTitle" style="margin-top: 0; font-family: 'ExtraBold', sans-serif; font-size: 20px; color: var(--dark-blue); margin-bottom: 8px;">Candidate details</h2>
             <form id="candidateForm" onsubmit="saveCandidate(event)">
@@ -757,76 +760,9 @@
                             </div>
                         </div>
 
-                        <div class="section-header">Termination & Exit Details</div>
-
-                        <div class="form-row flex-three">
-                            <div class="form-group">
-                                <label>Re-Hire Eligible?</label>
-                                <select id="stfRehire">
-                                    <option value="Yes">Yes</option>
-                                    <option value="No">No</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Cause of Action</label>
-                                <select id="stfCause">
-                                    <option value="">Select Cause</option>
-                                    <option value="Abandoned job">Abandoned job</option>
-                                    <option value="Fired">Fired</option>
-                                    <option value="LOA">LOA</option>
-                                    <option value="Resignation">Resignation</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Submitted by:</label>
-                                <input type="text" id="stfGmName" placeholder="Manager who completed form">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Reason for Action</label>
-                            <select id="stfReason">
-                                <option value="">Select Reason</option>
-                                <option value="Quit without notice">Quit without notice</option>
-                                <option value="Illness">Illness</option>
-                                <option value="Problem with GM">Problem with GM</option>
-                                <option value="Problem with Co-worker">Problem with Co-worker</option>
-                                <option value="Attendance">Attendance</option>
-                                <option value="Insubordination">Insubordination</option>
-                                <option value="Violation of rules">Violation of rules</option>
-                                <option value="Unsatisfactory Performance">Unsatisfactory Performance</option>
-                                <option value="Other">Other</option>
-                                <option value="Medical Leave">Medical Leave</option>
-                                <option value="Personal Leave">Personal Leave</option>
-                                <option value="Returning to School">Returning to School</option>
-                                <option value="Gross Negligence">Gross Negligence</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Termination Comments / Notes</label>
-                            <textarea id="stfNotes" placeholder="Copy comments from form here..."></textarea>
-                        </div>
-                    </div>
-
-                        <div class="form-row flex-three">
-                            <div class="form-group">
-                                <label>Hire Date (NTO)</label>
-                                <input type="date" id="stfHireDate" onchange="autoCalculatePeriodFromDates()">
-                            </div>
-                            <div class="form-group">
-                                <label>Termination Date</label>
-                                <input type="date" id="stfTermDate" onchange="autoCalculatePeriodFromDates()">
-                            </div>
-                            <div class="form-group">
-                                <label>Domino's Period</label>
-                                <input type="text" id="stfPeriod" placeholder="P08" readonly style="background: var(--crust-light); font-weight: bold; color: var(--dark-blue);">
-                            </div>
-                        </div>
-
                         <div class="section-header">Termination & Bonus Eligibility Audit</div>
 
-                        <div class="form-row">
+                        <div class="form-row flex-three">
                             <div class="form-group">
                                 <label>Re-Hire Eligible?</label>
                                 <select id="stfRehire">
@@ -847,6 +783,10 @@
                                     <option value="Involuntary - Performance">Involuntary - Performance</option>
                                     <option value="Job Abandonment">Job Abandonment (Walk-out / NCNS)</option>
                                 </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Submitted by:</label>
+                                <input type="text" id="stfGmName" placeholder="Manager who completed form">
                             </div>
                         </div>
 
@@ -1465,7 +1405,7 @@
             btnStf.style.background = 'var(--dark-blue)';
             btnStf.style.color = 'white';
             btnAddMain.innerText = "📊 Add Staffing Record";
-            stfFormFields.classList.remove('hidden');
+            if (stfFormFields) stfFormFields.classList.remove('hidden');
             document.getElementById('formTitle').innerText = "Hires & Terminations Details";
             
             auditWeekly.classList.add('hidden');
@@ -1477,7 +1417,7 @@
             btnInt.style.background = 'var(--dark-blue)';
             btnInt.style.color = 'white';
             btnAddMain.innerText = "👥 Add New Interview";
-            intFormFields.classList.remove('hidden');
+            if (intFormFields) intFormFields.classList.remove('hidden');
             document.getElementById('formTitle').innerText = "Interview details";
             
             auditWeekly.classList.remove('hidden');
@@ -1488,7 +1428,7 @@
             btnOnb.style.background = 'var(--dark-blue)';
             btnOnb.style.color = 'white';
             btnAddMain.innerText = "📋 Add New Candidate";
-            onbFormFields.classList.remove('hidden');
+            if (onbFormFields) onbFormFields.classList.remove('hidden');
             document.getElementById('formTitle').innerText = "Candidate details";
             
             auditWeekly.classList.remove('hidden');
@@ -1838,8 +1778,7 @@
             document.getElementById('stfCause').value = item.causeOfAction || '';
             document.getElementById('stfReason').value = item.reasonOfAction || '';
             document.getElementById('stfNotes').value = item.notes || '';
-            document.getElementById('stfGmName').value = item.gmName || item.gm || ''; // 👈 ADD THIS LINE
-
+            document.getElementById('stfGmName').value = item.gmName || item.gm || '';
 
         } else if (currentView === 'interviews') {
             document.getElementById('fieldId').value = item.id;
