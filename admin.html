@@ -846,6 +846,14 @@
                             Terms: <strong id="stfPeriodTerms" style="color: var(--brand-red); font-family: 'Subhead2', sans-serif; font-size: 17px;">0</strong>
                         </span>
                     </div>
+                    <!-- Year-to-Date Row -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 17px;">
+                        <span>This Year (<span id="stfCurrentYear">2026</span>):</span>
+                        <span style="font-family: 'Compact'; font-size: 17px;">
+                            Hires: <strong id="stfYearHires" style="color: var(--med-blue); font-family: 'Subhead2', sans-serif; font-size: 17px;">0</strong> | 
+                            Terms: <strong id="stfYearTerms" style="color: var(--brand-red); font-family: 'Subhead2', sans-serif; font-size: 17px;">0</strong>
+                        </span>
+                    </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 17px; border-top: 1.5px dashed var(--crust-dark); padding-top: 6px;">
                         <span>Bonus Net Gain:</span>
                         <span style="font-family: 'Compact'; font-size: 17px;">
@@ -2139,12 +2147,17 @@
     }
 
     function updateAuditMetrics() {
-        const currentPeriod = getDominosFiscalPeriod(new Date());
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentPeriod = getDominosFiscalPeriod(now);
+
         const periodNameEl = document.getElementById('stfCurrentPeriodName');
         if (periodNameEl) periodNameEl.innerText = currentPeriod;
 
+        const yearNameEl = document.getElementById('stfCurrentYear');
+        if (yearNameEl) yearNameEl.innerText = currentYear;
+
         // Calculate Monday-to-Sunday boundaries for This Week & Last Week
-        const now = new Date();
         const currentDay = now.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
         const distanceToMonday = (currentDay === 0 ? -6 : 1) - currentDay; 
         
@@ -2194,7 +2207,7 @@
             return isNaN(dt.getTime()) ? null : dt;
         };
 
-        // 1. Calculate Interview Counts (This Week vs. Last Week)
+        // 1. WEEKLY ACTIVITY AUDIT (For Onboarding & Interviews views)
         let interviewsThisWeek = 0;
         let interviewsLastWeek = 0;
 
@@ -2206,7 +2219,6 @@
             }
         });
 
-        // 2. Calculate Hire Counts (This Week vs. Last Week)
         let hiresThisWeek = 0;
         let hiresLastWeek = 0;
         const countedHireIds = new Set();
@@ -2227,7 +2239,7 @@
             }
         });
 
-        // Check Staffing (Hires & Terms)
+        // Check Staffing (Hires)
         (staffing || []).forEach(item => {
             if (item.hireDate && (!item.id || !countedHireIds.has(String(item.id)))) {
                 const d = parseMetricDate(item.hireDate);
@@ -2238,7 +2250,6 @@
             }
         });
 
-        // Update Weekly Audit UI elements
         const elIntThis = document.getElementById('metricsQuotesThisWeek');
         const elIntLast = document.getElementById('metricsQuotesLastWeek');
         const elHiresThis = document.getElementById('metricsOrdersThisWeek');
@@ -2249,20 +2260,40 @@
         if (elHiresThis) elHiresThis.innerText = hiresThisWeek;
         if (elHiresLast) elHiresLast.innerText = hiresLastWeek;
 
-        // 3. Calculate Fiscal Period Staffing Metrics
+        // 2. PERIOD & YEARLY STAFFING AUDIT (For Hires & Terms view)
         let weekHires = 0, weekTerms = 0;
         let periodHires = 0, periodTerms = 0;
+        let yearHires = 0, yearTerms = 0;
 
         (staffing || []).forEach(item => {
+            const hDate = parseMetricDate(item.hireDate);
+            const tDate = parseMetricDate(item.termDate);
+
+            // Year-to-Date (YTD) counts
+            if (hDate && hDate.getFullYear() === currentYear) yearHires++;
+            if (tDate && tDate.getFullYear() === currentYear) yearTerms++;
+
+            // Fiscal Period counts
             if (item.period === currentPeriod) {
                 if (item.termDate) periodTerms++;
                 else periodHires++;
             }
 
-            const checkDate = parseMetricDate(item.termDate || item.hireDate);
+            // Weekly counts
+            const checkDate = tDate || hDate;
             if (checkDate && checkDate >= startThisWeek && checkDate <= endThisWeek) {
                 if (item.termDate) weekTerms++;
                 else weekHires++;
+            }
+        });
+
+        // Include hires marked in onboarding for the current year
+        (candidates || []).forEach(item => {
+            if (item.hired && (!item.id || !countedHireIds.has(String(item.id)))) {
+                const d = parseMetricDate(item.ntoDate || item.lastUpdated || item.hireDate);
+                if (d && d.getFullYear() === currentYear) {
+                    yearHires++;
+                }
             }
         });
 
@@ -2270,13 +2301,17 @@
         const elStfWeekTerms = document.getElementById('stfWeekTerms');
         const elStfPeriodHires = document.getElementById('stfPeriodHires');
         const elStfPeriodTerms = document.getElementById('stfPeriodTerms');
+        const elStfYearHires = document.getElementById('stfYearHires');
+        const elStfYearTerms = document.getElementById('stfYearTerms');
         const elStfPeriodNet = document.getElementById('stfPeriodNet');
 
         if (elStfWeekHires) elStfWeekHires.innerText = weekHires;
         if (elStfWeekTerms) elStfWeekTerms.innerText = weekTerms;
         if (elStfPeriodHires) elStfPeriodHires.innerText = periodHires;
         if (elStfPeriodTerms) elStfPeriodTerms.innerText = periodTerms;
-        
+        if (elStfYearHires) elStfYearHires.innerText = yearHires;
+        if (elStfYearTerms) elStfYearTerms.innerText = yearTerms;
+
         const net = periodHires - periodTerms;
         if (elStfPeriodNet) elStfPeriodNet.innerText = (net >= 0 ? '+' : '') + net;
     }
