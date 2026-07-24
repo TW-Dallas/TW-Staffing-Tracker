@@ -342,6 +342,7 @@
         if (item.ineligible) return { pct: 100, color: 'grey', label: 'Ineligible' };
         if (item.inactive) return { pct: 100, color: 'grey', label: 'Inactive' };
         if (item.hired) return { pct: 100, color: 'green', label: 'Hired' };
+        if (item.missedNto) return { pct: 90, color: 'red', label: 'Missed NTO' };
         if (item.ntoScheduled) return { pct: 90, color: 'blue', label: 'NTO Scheduled' };
         if (item.ntoSignupLinkSent) return { pct: 75, color: 'blue', label: 'NTO Signup Sent' };
 
@@ -358,7 +359,7 @@
     }
 
     function getStatusWeight(item) {
-        if (item.incorrectEmail || item.hasMissingDocs) return 0; // Urgencies first!
+        if (item.incorrectEmail || item.hasMissingDocs || item.missedNto) return 0; // Urgencies first!
         
         if (item.hired) {
             const today = new Date();
@@ -400,6 +401,11 @@
 
         if (item.incorrectEmail) {
             const txt = `Hey ${item.name}! This is Domino's. We tried sending over your onboarding documents, but it looks like we have an incorrect email address on file. Can you please reply with your correct email so we can get you set up? Thanks!`;
+            return `sms:${phone}?body=${encodeURIComponent(txt)}`;
+        }
+
+        if (item.missedNto) {
+            const txt = `Hey ${item.name}! This is Domino's. We noticed you missed your scheduled orientation (NTO). Please reply back to discuss rescheduling the class.`;
             return `sms:${phone}?body=${encodeURIComponent(txt)}`;
         }
 
@@ -469,10 +475,10 @@
         filtered.forEach(item => {
             const icon = getPositionIcon(item.position);
             
-            let cardClass = 'status-blue';
+    let cardClass = 'status-blue';
             if (item.inactive || item.ineligible) {
                 cardClass = 'status-gray';
-            } else if (item.incorrectEmail || item.hasMissingDocs) {
+            } else if (item.incorrectEmail || item.hasMissingDocs || item.missedNto) {
                 cardClass = 'status-red';
             } else if (item.hired) {
                 cardClass = 'status-green';
@@ -483,6 +489,8 @@
             let alertHtml = '';
             if (item.incorrectEmail) {
                 alertHtml = `<div class="alert-banner">🛑 Incorrect Email (Requires Outreach)</div>`;
+            } else if (item.missedNto) {
+                alertHtml = `<div class="alert-banner">⚠️ Missed Orientation / NTO (Needs Approval to Reschedule)</div>`;
             } else if (item.hasMissingDocs) {
                 const missingText = item.missingDocsText ? `: ${item.missingDocsText}` : ' (Paperwork Required)';
                 alertHtml = `<div class="alert-banner">⚠️ Missing Documents${missingText}</div>`;
