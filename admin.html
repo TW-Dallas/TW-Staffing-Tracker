@@ -1386,8 +1386,47 @@
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
+        // Sorting Comparator Logic
+        const sortComparator = (a, b) => {
+            if (sortBy === 'name') {
+                return (a.name || '').localeCompare(b.name || '');
+            }
+            if (sortBy === 'store') {
+                const numA = parseInt(a.store, 10);
+                const numB = parseInt(b.store, 10);
+                if (!isNaN(numA) && !isNaN(numB)) {
+                    return numA - numB;
+                }
+                return String(a.store || '').localeCompare(String(b.store || ''));
+            }
+            if (sortBy === 'do') {
+                return (a.doName || a.do || '').localeCompare(b.doName || b.do || '');
+            }
+            if (sortBy === 'status') {
+                if (currentView === 'onboarding') {
+                    return getStatusWeight(b) - getStatusWeight(a); // Higher weight priority first
+                } else if (currentView === 'interviews') {
+                    return (a.status || '').localeCompare(b.status || '');
+                } else {
+                    return (a.rehireEligible || '').localeCompare(b.rehireEligible || '');
+                }
+            }
+            if (sortBy === 'paycard') {
+                return (a.payCard || '').localeCompare(b.payCard || '');
+            }
+            if (sortBy === 'updated') {
+                const dateA = a.lastUpdated ? new Date(a.lastUpdated).getTime() : 0;
+                const dateB = b.lastUpdated ? new Date(b.lastUpdated).getTime() : 0;
+                if (dateA !== dateB) return dateB - dateA;
+                return String(b.id || '').localeCompare(String(a.id || ''));
+            }
+            return 0;
+        };
+
         if (currentView === 'staffing') {
             let filtered = staffing.filter(item => !searchQuery || (item.name && item.name.toLowerCase().includes(searchQuery)));
+            filtered.sort(sortComparator); // <-- Apply Sort
+
             if (filtered.length === 0) {
                 listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No staffing records found.</div>';
                 return;
@@ -1416,6 +1455,13 @@
 
         } else if (currentView === 'interviews') {
             let filteredInterviews = interviews.filter(item => !searchQuery || (item.name && item.name.toLowerCase().includes(searchQuery)));
+            filteredInterviews.sort(sortComparator); // <-- Apply Sort
+
+            if (filteredInterviews.length === 0) {
+                listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No interview candidates found.</div>';
+                return;
+            }
+
             filteredInterviews.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'candidate-card';
@@ -1448,6 +1494,8 @@
                 }
                 return true; 
             });
+
+            filteredCandidates.sort(sortComparator); // <-- Apply Sort
 
             if (filteredCandidates.length === 0) {
                 listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No candidate matches found.</div>';
