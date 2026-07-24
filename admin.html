@@ -427,12 +427,12 @@
             </div>
             
             <!-- Workspace Switcher Toggles -->
-            <!-- --- HTML UPDATE --- -->
             <div id="dallasToggleContainer" style="margin-bottom: 8px;">
                 <div style="display: flex; background: var(--crust-med); border-radius: 8px; padding: 2px; gap: 2px;">
-                    <button type="button" id="toggleOnb" onclick="switchView('onboarding')" style="flex: 1; font-size: 15px; padding: 8px 6px; background: var(--dark-blue); color: white; border: none; cursor: pointer;">Onboarding</button>
-                    <button type="button" id="toggleInt" onclick="switchView('interviews')" style="flex: 1; font-size: 15px; padding: 8px 6px; background: transparent; color: var(--crust-burnt); border: none; cursor: pointer;">Interviews</button>
-                    <button type="button" id="toggleStf" onclick="switchView('staffing')" style="flex: 1; font-size: 15px; padding: 8px 6px; background: transparent; color: var(--crust-burnt); border: none; cursor: pointer;">Hires & Terms</button>
+                    <button type="button" id="toggleOnb" onclick="switchView('onboarding')" style="flex: 1; font-size: 14px; padding: 8px 4px; background: var(--dark-blue); color: white; border: none; cursor: pointer;">Onboarding</button>
+                    <button type="button" id="toggleInt" onclick="switchView('interviews')" style="flex: 1; font-size: 14px; padding: 8px 4px; background: transparent; color: var(--crust-burnt); border: none; cursor: pointer;">Interviews</button>
+                    <button type="button" id="toggleStf" onclick="switchView('staffing')" style="flex: 1; font-size: 14px; padding: 8px 4px; background: transparent; color: var(--crust-burnt); border: none; cursor: pointer;">Hires & Terms</button>
+                    <button type="button" id="togglePay" onclick="switchView('paycards')" style="flex: 1; font-size: 14px; padding: 8px 4px; background: transparent; color: var(--crust-burnt); border: none; cursor: pointer;">Pay Cards</button>
                 </div>
             </div>
 
@@ -443,7 +443,7 @@
                     <option value="store">🏬 Sort: Store #</option>
                     <option value="do">👤 Sort: DO</option>
                     <option value="status">📊 Sort: Status / Stage</option>
-                    <option value="paycard">💳 Sort: Pay Card Status</option>
+                    <option value="nto">📅 Sort: Hire Date (NTO Class)</option>
                 </select>
             </div>
 
@@ -721,6 +721,72 @@
                             <input type="text" id="stfName" placeholder="e.g. John Smith">
                         </div>
 
+                    <!-- PAY CARDS FORM TEMPLATE -->
+                    <div id="payCardFormFields" class="hidden">
+                        <div class="form-group">
+                            <label>Employee Full Name</label>
+                            <input type="text" id="payName" placeholder="e.g. Chance Brown-Jackson">
+                        </div>
+
+                        <div class="form-row flex-three">
+                            <div class="form-group">
+                                <label>Position</label>
+                                <select id="payPosition">
+                                    <option value="">Select Position</option>
+                                    <option value="CSR">🍕 CSR</option>
+                                    <option value="BIKE">🚲 BIKE</option>
+                                    <option value="DE">🚗 DE</option>
+                                    <option value="MIT">🎓 MIT</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Store #</label>
+                                <input type="text" id="payStore">
+                            </div>
+                            <div class="form-group">
+                                <label>DO Name</label>
+                                <input type="text" id="payDo">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>NTO Date (Hire Date)</label>
+                                <input type="date" id="payNtoDate">
+                            </div>
+                            <div class="form-group">
+                                <label>GM Notice Sent Date</label>
+                                <input type="date" id="payNoticeDate">
+                            </div>
+                        </div>
+
+                        <div class="section-header">Payroll & Dispersement Stages</div>
+
+                        <div class="checkbox-grid">
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="checkPayReceived"> 📩 Card Info Received
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="checkPayRegistered"> 💳 Registered in Netspend
+                            </label>
+                            <div></div>
+
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="checkPayDdReceived"> 📄 Direct Deposit Rec'd
+                            </label>
+                            <label class="checkbox-item flag-box flag-reviewing">
+                                <input type="checkbox" id="checkPayDdEntered"> 🏦 DD / PayCard Entered in Payroll
+                            </label>
+                            <div></div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 10px;">
+                            <label>Payroll Notes</label>
+                            <textarea id="payNotes" placeholder="Notes regarding GM follow-up, card packet details, or bank account setup..."></textarea>
+                        </div>
+                    </div>
+                 </div>
+
                         <div class="form-row flex-three">
                             <div class="form-group">
                                 <label>Position</label>
@@ -962,6 +1028,7 @@
     let candidates = [];
     let interviews = [];
     let staffing = [];
+    let paycards = [];
     let currentSelectedId = null;
     let currentView = 'onboarding'; 
     
@@ -1248,6 +1315,7 @@
                 candidates = data.onboarding || [];
                 interviews = data.interviews || [];
                 staffing = data.staffing || [];
+                paycards = data.paycards || [];
                 
                 switchView('onboarding');
                 initScratchpad();
@@ -1283,11 +1351,13 @@
         const btnOnb = document.getElementById('toggleOnb');
         const btnInt = document.getElementById('toggleInt');
         const btnStf = document.getElementById('toggleStf');
+        const btnPay = document.getElementById('togglePay');
         const btnAddMain = document.getElementById('btnAddMain');
         
         const onbFormFields = document.getElementById('onboardingFormFields');
         const intFormFields = document.getElementById('interviewFormFields');
         const stfFormFields = document.getElementById('staffingFormFields');
+        const payFormFields = document.getElementById('payCardFormFields');
 
         const auditWeekly = document.getElementById('auditWeeklyContent');
         const auditPeriod = document.getElementById('auditPeriodContent');
@@ -1295,14 +1365,37 @@
 
         document.getElementById('searchControl').value = '';
 
-        [btnOnb, btnInt, btnStf].forEach(b => {
-            b.style.background = 'transparent';
-            b.style.color = 'var(--crust-burnt)';
+        [btnOnb, btnInt, btnStf, btnPay].forEach(b => {
+            if (b) {
+                b.style.background = 'transparent';
+                b.style.color = 'var(--crust-burnt)';
+            }
         });
         
-        [onbFormFields, intFormFields, stfFormFields].forEach(f => f.classList.add('hidden'));
+        [onbFormFields, intFormFields, stfFormFields, payFormFields].forEach(f => {
+            if (f) f.classList.add('hidden');
+        });
 
-        if (view === 'staffing') {
+        // Update Hire Date option label depending on active view
+        const ntoOption = document.querySelector('#sortControl option[value="nto"]');
+        if (ntoOption) {
+            if (view === 'interviews') ntoOption.innerText = "📅 Sort: Interview Date";
+            else if (view === 'staffing') ntoOption.innerText = "📅 Sort: Hire Date";
+            else ntoOption.innerText = "📅 Sort: Hire Date (NTO)";
+        }
+
+        if (view === 'paycards') {
+            btnPay.style.background = 'var(--dark-blue)';
+            btnPay.style.color = 'white';
+            btnAddMain.innerText = "💳 Add Pay Card Record";
+            if (payFormFields) payFormFields.classList.remove('hidden');
+            document.getElementById('formTitle').innerText = "Pay Card & Payroll Details";
+            
+            auditWeekly.classList.add('hidden');
+            auditPeriod.classList.remove('hidden');
+            auditTitle.innerText = "Period Staffing Audit";
+
+        } else if (view === 'staffing') {
             btnStf.style.background = 'var(--dark-blue)';
             btnStf.style.color = 'white';
             btnAddMain.innerText = "📊 Add Staffing Record";
@@ -1313,6 +1406,7 @@
             auditPeriod.classList.remove('hidden');
             auditTitle.innerText = "Period Staffing Audit";
             autoCalculatePeriodFromDates();
+
         } else if (view === 'interviews') {
             btnInt.style.background = 'var(--dark-blue)';
             btnInt.style.color = 'white';
@@ -1323,6 +1417,7 @@
             auditWeekly.classList.remove('hidden');
             auditPeriod.classList.add('hidden');
             auditTitle.innerText = "Weekly Activity Audit";
+
         } else {
             btnOnb.style.background = 'var(--dark-blue)';
             btnOnb.style.color = 'white';
@@ -1361,7 +1456,6 @@
         }
         if (item.ntoSignupLinkSent) return "📨 Link Sent";
         
-        // Require all 3 Stage 2 requirements to display "Paperwork Completed"
         if (item.bgcComplete && item.allPayCompleted && item.pulseFormComplete) return "✓ Paperwork Completed";
         
         if (item.bgcComplete) return "🔍 BGC Complete";
@@ -1394,14 +1488,12 @@
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-        // Sorting Comparator Logic
         // Helper function to safely parse date strings across all browsers
         const parseDate = (val) => {
             if (!val) return 0;
             if (val instanceof Date) return val.getTime();
             if (typeof val === 'number') return val;
             let str = String(val).trim();
-            // Fix Safari/WebKit issue with "YYYY-MM-DD HH:MM:SS" space separators
             if (str.includes('-') && str.includes(' ')) {
                 str = str.replace(' ', 'T');
             }
@@ -1434,23 +1526,29 @@
                     return (a.rehireEligible || '').localeCompare(b.rehireEligible || '');
                 }
             }
-            if (sortBy === 'paycard') {
-                return (a.payCard || '').localeCompare(b.payCard || '');
+            if (sortBy === 'nto') {
+                const rawA = a.ntoDate || a.hireDate || a.date;
+                const rawB = b.ntoDate || b.hireDate || b.date;
+
+                const dateA = parseDate(rawA);
+                const dateB = parseDate(rawB);
+
+                if (dateA !== dateB) {
+                    return dateB - dateA;
+                }
+                return (a.name || '').localeCompare(b.name || '');
             }
             if (sortBy === 'updated') {
-                // Check multiple possible timestamp property names
                 const rawA = a.lastUpdated || a.timestamp || a.updatedAt || a.date;
                 const rawB = b.lastUpdated || b.timestamp || b.updatedAt || b.date;
 
                 const dateA = parseDate(rawA);
                 const dateB = parseDate(rawB);
 
-                // If dates are valid and different, sort most recent first
                 if (dateA !== dateB) {
                     return dateB - dateA;
                 }
 
-                // Numeric Fallback (higher ID = newer entry)
                 const idA = parseFloat(a.id) || 0;
                 const idB = parseFloat(b.id) || 0;
                 if (idA !== idB) {
@@ -1461,10 +1559,47 @@
             }
             return 0;
         };
+        
+        if (currentView === 'paycards') {
+            let filtered = paycards.filter(item => !searchQuery || (item.name && item.name.toLowerCase().includes(searchQuery)));
+            filtered.sort(sortComparator);
 
-        if (currentView === 'staffing') {
+            if (filtered.length === 0) {
+                listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:var(--crust-burnt);">No pay card records found.</div>';
+                return;
+            }
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'candidate-card';
+                if (item.id === currentSelectedId) card.classList.add('selected');
+
+                const isPayrollComplete = item.ddEntered || item.registered;
+                
+                card.style.borderLeftColor = isPayrollComplete ? 'var(--success-green)' : 'var(--dark-red)';
+                card.style.borderLeftWidth = '8px';
+
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div class="card-name">${item.name}</div>
+                        <span class="badge-review" style="background:${isPayrollComplete ? '#e8f5e9' : '#ffebee'}; color:${isPayrollComplete ? 'var(--success-green)' : 'var(--dark-red)'}; font-weight: bold;">
+                            ${isPayrollComplete ? '✓ Payroll Complete' : '⚠️ Action Needed'}
+                        </span>
+                    </div>
+                    <div class="card-sub">
+                        <span>Store #${item.store} (${item.position})</span>
+                        <span style="font-weight: bold; color: ${isPayrollComplete ? 'var(--success-green)' : 'var(--dark-red)'};">
+                            ${item.ntoDate ? 'NTO: ' + item.ntoDate : 'Manual Entry'}
+                        </span>
+                    </div>
+                `;
+                card.onclick = () => selectCandidate(item);
+                listContainer.appendChild(card);
+            });
+
+        } else if (currentView === 'staffing') {
             let filtered = staffing.filter(item => !searchQuery || (item.name && item.name.toLowerCase().includes(searchQuery)));
-            filtered.sort(sortComparator); // <-- Apply Sort
+            filtered.sort(sortComparator);
 
             if (filtered.length === 0) {
                 listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No staffing records found.</div>';
@@ -1494,7 +1629,7 @@
 
         } else if (currentView === 'interviews') {
             let filteredInterviews = interviews.filter(item => !searchQuery || (item.name && item.name.toLowerCase().includes(searchQuery)));
-            filteredInterviews.sort(sortComparator); // <-- Apply Sort
+            filteredInterviews.sort(sortComparator);
 
             if (filteredInterviews.length === 0) {
                 listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No interview candidates found.</div>';
@@ -1534,7 +1669,7 @@
                 return true; 
             });
 
-            filteredCandidates.sort(sortComparator); // <-- Apply Sort
+            filteredCandidates.sort(sortComparator);
 
             if (filteredCandidates.length === 0) {
                 listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No candidate matches found.</div>';
@@ -1549,7 +1684,6 @@
                 const rawMissingDocs = item.missingDocs || "";
                 const isBlockedByDocs = rawMissingDocs !== "" && rawMissingDocs.toString().toUpperCase() !== "FALSE";
 
-                // Turn card border RED if Missed NTO, Incorrect Email, or Missing Docs
                 if (item.incorrectEmail || isBlockedByDocs || item.missedNto) {
                     card.classList.add('status-red');
                 } else if (item.currentlyReviewing) {
@@ -1578,7 +1712,6 @@
                 if (item.bgcComplete || item.allPayCompleted || item.pulseFormComplete) statusStyleColor = 'var(--med-blue)';
                 if (item.ineligible || item.inactive) statusStyleColor = 'var(--brand-grey)';
 
-                // Add warning badges
                 let flags = '';
                 if (item.incorrectEmail) flags += '<span class="badge-incorrect">⚠️ Email Error</span> ';
                 if (isBlockedByDocs) flags += '<span class="badge-incorrect">⚠️ Missing Docs</span> ';
@@ -1612,7 +1745,21 @@
         document.getElementById('formTitle').innerText = `Edit: ${item.name}`;
         document.getElementById('btnCancel').innerText = "Cancel Edit";
 
-        if (currentView === 'staffing') {
+        if (currentView === 'paycards') {
+            document.getElementById('fieldId').value = item.id;
+            document.getElementById('payName').value = item.name || '';
+            document.getElementById('payPosition').value = item.position || '';
+            document.getElementById('payStore').value = item.store || '';
+            document.getElementById('payDo').value = item.doName || item.do || '';
+            document.getElementById('payNtoDate').value = item.ntoDate || '';
+            document.getElementById('payNoticeDate').value = item.noticeSentDate || '';
+            document.getElementById('checkPayReceived').checked = item.cardReceived || false;
+            document.getElementById('checkPayRegistered').checked = item.registered || false;
+            document.getElementById('checkPayDdReceived').checked = item.ddReceived || false;
+            document.getElementById('checkPayDdEntered').checked = item.ddEntered || false;
+            document.getElementById('payNotes').value = item.notes || '';
+
+        } else if (currentView === 'staffing') {
             document.getElementById('fieldId').value = item.id;
             document.getElementById('stfName').value = item.name || '';
             document.getElementById('stfPosition').value = item.position || '';
@@ -1712,7 +1859,10 @@
         currentSelectedId = null;
         renderList();
         
-        if (currentView === 'staffing') {
+        if (currentView === 'paycards') {
+            document.getElementById('formTitle').innerText = "Add Pay Card Record";
+            document.getElementById('payName').focus();
+        } else if (currentView === 'staffing') {
             document.getElementById('formTitle').innerText = "Add Staffing Entry";
             autoCalculatePeriodFromDates();
             document.getElementById('stfName').focus();
@@ -1731,7 +1881,9 @@
         document.getElementById('fieldId').value = '';
         document.getElementById('fieldNto').value = '';
         
-        if (currentView === 'staffing') {
+        if (currentView === 'paycards') {
+            document.getElementById('formTitle').innerText = "Pay Card & Payroll Details";
+        } else if (currentView === 'staffing') {
             document.getElementById('formTitle').innerText = "Hires & Terminations Details";
             autoCalculatePeriodFromDates();
         } else if (currentView === 'interviews') {
@@ -1765,7 +1917,20 @@
             id: id
         };
 
-        if (currentView === 'staffing') {
+        if (currentView === 'paycards') {
+            payload.name = document.getElementById('payName').value.trim();
+            payload.position = document.getElementById('payPosition').value;
+            payload.store = document.getElementById('payStore').value.trim();
+            payload.doName = document.getElementById('payDo').value.trim();
+            payload.ntoDate = document.getElementById('payNtoDate').value;
+            payload.noticeSentDate = document.getElementById('payNoticeDate').value;
+            payload.cardReceived = document.getElementById('checkPayReceived').checked;
+            payload.registered = document.getElementById('checkPayRegistered').checked;
+            payload.ddReceived = document.getElementById('checkPayDdReceived').checked;
+            payload.ddEntered = document.getElementById('checkPayDdEntered').checked;
+            payload.notes = document.getElementById('payNotes').value.trim();
+
+        } else if (currentView === 'staffing') {
             payload.name = document.getElementById('stfName').value.trim();
             payload.position = document.getElementById('stfPosition').value;
             payload.store = document.getElementById('stfStore').value.trim();
@@ -1842,6 +2007,7 @@
             candidates = data.onboarding || [];
             interviews = data.interviews || [];
             staffing = data.staffing || [];
+            paycards = data.paycards || [];
 
             renderList();
             updateAuditMetrics();
@@ -1952,6 +2118,7 @@
             candidates = data.onboarding || [];
             interviews = data.interviews || [];
             staffing = data.staffing || [];
+            paycards = data.paycards || [];
             renderList();
             showLoader(false);
         })
@@ -2326,6 +2493,7 @@
                 candidates = data.onboarding || [];
                 interviews = data.interviews || [];
                 staffing = data.staffing || [];
+                paycards = data.paycards || [];
                 renderList();
                 updateAuditMetrics();
             });
