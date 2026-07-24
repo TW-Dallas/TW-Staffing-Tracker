@@ -138,10 +138,11 @@
         }
 
         /* --- DALLAS SPECIFIC VIEW TOGGLE BUTTONS --- */
+        /* --- CSS UPDATE --- */
         #dallasToggleContainer button {
             font-family: 'Subhead1', sans-serif;
-            font-size: 13px;
-            padding: 6px;
+            font-size: 15px;      /* Increased from 13px */
+            padding: 8px 6px;     /* Adjusted padding */
             border-radius: 6px;
             cursor: pointer;
             border: none;
@@ -238,7 +239,15 @@
         button { background: var(--dark-blue); color: white; border: none; padding: 10px 16px; border-radius: 6px; font-family: 'Subhead1', sans-serif; font-size: 16px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
         button:hover { opacity: 0.9; }
         button.secondary { background: var(--brand-grey); }
-        button.btn-add { margin-bottom: 8px; background: var(--brand-blue); width: 100%; flex: 0 0 auto; }
+        /* --- CSS UPDATE --- */
+        button.btn-add { 
+            margin-bottom: 8px; 
+            background: var(--brand-blue); 
+            width: 100%; 
+            flex: 0 0 auto; 
+            font-size: 20px;       /* Increased from base 16px */
+            padding: 12px 16px;    /* Increased padding to fit larger text */
+        }
         
         /* --- BADGES --- */
         .badge-review { background: #e3f2fd; color: var(--dark-blue); font-size: 12px; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #bbdefb; animation: pulse 2s infinite; }
@@ -404,11 +413,12 @@
             </div>
             
             <!-- Workspace Switcher Toggles -->
+            <!-- --- HTML UPDATE --- -->
             <div id="dallasToggleContainer" style="margin-bottom: 8px;">
                 <div style="display: flex; background: var(--crust-med); border-radius: 8px; padding: 2px; gap: 2px;">
-                    <button type="button" id="toggleOnb" onclick="switchView('onboarding')" style="flex: 1; font-size: 12px; padding: 6px; border-radius: 6px; background: var(--dark-blue); color: white; border: none; cursor: pointer;">Onboarding</button>
-                    <button type="button" id="toggleInt" onclick="switchView('interviews')" style="flex: 1; font-size: 12px; padding: 6px; border-radius: 6px; background: transparent; color: var(--crust-burnt); border: none; cursor: pointer;">Interviews</button>
-                    <button type="button" id="toggleStf" onclick="switchView('staffing')" style="flex: 1; font-size: 12px; padding: 6px; border-radius: 6px; background: transparent; color: var(--crust-burnt); border: none; cursor: pointer;">Hires & Terms</button>
+                    <button type="button" id="toggleOnb" onclick="switchView('onboarding')" style="flex: 1; font-size: 15px; padding: 8px 6px; background: var(--dark-blue); color: white; border: none; cursor: pointer;">Onboarding</button>
+                    <button type="button" id="toggleInt" onclick="switchView('interviews')" style="flex: 1; font-size: 15px; padding: 8px 6px; background: transparent; color: var(--crust-burnt); border: none; cursor: pointer;">Interviews</button>
+                    <button type="button" id="toggleStf" onclick="switchView('staffing')" style="flex: 1; font-size: 15px; padding: 8px 6px; background: transparent; color: var(--crust-burnt); border: none; cursor: pointer;">Hires & Terms</button>
                 </div>
             </div>
 
