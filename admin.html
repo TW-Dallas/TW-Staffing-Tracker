@@ -721,6 +721,79 @@
                             <input type="text" id="stfName" placeholder="e.g. John Smith">
                         </div>
 
+                        <div class="form-row flex-three">
+                            <div class="form-group">
+                                <label>Position</label>
+                                <select id="stfPosition">
+                                    <option value="">Select Position</option>
+                                    <option value="CSR">🍕 CSR</option>
+                                    <option value="BIKE">🚲 BIKE</option>
+                                    <option value="DE">🚗 DE</option>
+                                    <option value="MIT">🎓 MIT</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Store #</label>
+                                <input type="text" id="stfStore">
+                            </div>
+                            <div class="form-group">
+                                <label>DO Name</label>
+                                <input type="text" id="stfDo">
+                            </div>
+                        </div>
+
+                        <div class="form-row flex-three">
+                            <div class="form-group">
+                                <label>Hire Date (NTO)</label>
+                                <input type="date" id="stfHireDate" onchange="autoCalculatePeriodFromDates()">
+                            </div>
+                            <div class="form-group">
+                                <label>Termination Date</label>
+                                <input type="date" id="stfTermDate" onchange="autoCalculatePeriodFromDates()">
+                            </div>
+                            <div class="form-group">
+                                <label>Domino's Period</label>
+                                <input type="text" id="stfPeriod" placeholder="P08" readonly style="background: var(--crust-light); font-weight: bold; color: var(--dark-blue);">
+                            </div>
+                        </div>
+
+                        <div class="section-header">Termination & Bonus Eligibility Audit</div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Re-Hire Eligible?</label>
+                                <select id="stfRehire">
+                                    <option value="Yes">✅ Yes - Eligible for Re-Hire</option>
+                                    <option value="No">🚫 No - Ineligible / Do Not Rehire</option>
+                                    <option value="Review Required">⚠️ Review Required</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Cause of Action</label>
+                                <select id="stfCause">
+                                    <option value="">Select Action Cause</option>
+                                    <option value="Voluntary - Personal">Voluntary - Personal Reasons</option>
+                                    <option value="Voluntary - Resigned">Voluntary - Resigned with Notice</option>
+                                    <option value="Voluntary - Better Opportunity">Voluntary - Better Opportunity</option>
+                                    <option value="Involuntary - Attendance">Involuntary - Attendance / No-Show</option>
+                                    <option value="Involuntary - Policy Violation">Involuntary - Policy Violation</option>
+                                    <option value="Involuntary - Performance">Involuntary - Performance</option>
+                                    <option value="Job Abandonment">Job Abandonment (Walk-out / NCNS)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Reason of Action (Detailed)</label>
+                            <textarea id="stfReason" placeholder="Specify exact reason for termination / exit..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>General Staffing Notes</label>
+                            <textarea id="stfNotes" placeholder="Additional notes or bonus log context..."></textarea>
+                        </div>
+                    </div>
+
                     <!-- PAY CARDS FORM TEMPLATE -->
                     <div id="payCardFormFields" class="hidden">
                         <div class="form-group">
@@ -785,28 +858,16 @@
                             <textarea id="payNotes" placeholder="Notes regarding GM follow-up, card packet details, or bank account setup..."></textarea>
                         </div>
                     </div>
-                 </div>
 
-                        <div class="form-row flex-three">
-                            <div class="form-group">
-                                <label>Position</label>
-                                <select id="stfPosition">
-                                    <option value="">Select Position</option>
-                                    <option value="CSR">🍕 CSR</option>
-                                    <option value="BIKE">🚲 BIKE</option>
-                                    <option value="DE">🚗 DE</option>
-                                    <option value="MIT">🎓 MIT</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Store #</label>
-                                <input type="text" id="stfStore">
-                            </div>
-                            <div class="form-group">
-                                <label>DO Name</label>
-                                <input type="text" id="stfDo">
-                            </div>
-                        </div>
+                </div> <!-- Scrollable area closes here -->
+
+                <!-- Fixed Footer Action Buttons -->
+                <div class="form-actions">
+                    <button type="submit" style="flex: 1; background: var(--brand-blue);">Save Details</button>
+                    <button type="button" class="secondary" id="btnCancel" onclick="clearForm()">Clear / Deselect</button>
+                </div>
+            </form>
+        </div>
 
                         <div class="form-row flex-three">
                             <div class="form-group">
