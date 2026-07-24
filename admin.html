@@ -181,8 +181,8 @@
         .card-sub { font-family: 'Subhead2', sans-serif; font-size: 15px; color: var(--text-light); margin-top: 6px; display: flex; justify-content: space-between; align-items: center; }
         
         /* --- FORMS & INPUTS --- */
-        .form-group { margin-bottom: 6px; } /* Compact margin */
-        .form-group label { display: block; font-family: 'Subhead2', sans-serif; font-size: 18px; margin-bottom: 2px; }
+        .form-group { margin-bottom: 8px; }
+        .form-group label { display: block; font-family: 'Subhead2', sans-serif; font-size: 18px; margin-bottom: 3px; }
         .form-row { display: flex; gap: 12px; }
         .form-row .form-group { flex: 1; }
         
@@ -191,23 +191,23 @@
         .form-row.flex-three .form-group { flex: 1; }
         .form-row.flex-three .flex-two-weight { flex: 1.5; } 
 
-        input[type="text"], input[type="password"], input[type="date"], textarea, select { width: 100%; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--crust-dark); font-family: 'Condensed', sans-serif; box-sizing: border-box; font-size: 18px; }
-        textarea { height: 42px; resize: none; } /* Compact height for notes */
+        input[type="text"], input[type="password"], input[type="date"], textarea, select { width: 100%; padding: 8px 11px; border-radius: 8px; border: 1px solid var(--crust-dark); font-family: 'Condensed', sans-serif; box-sizing: border-box; font-size: 18px; }
+        textarea { height: 50px; resize: none; }
         
         /* --- COMPACT 3-COLUMN CHECKBOX GRID --- */
-        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 6px; background: var(--crust-light); padding: 8px 10px; border-radius: 8px; }
-        .checkbox-item { display: flex; align-items: center; gap: 6px; font-family: 'Condensed', sans-serif; font-size: 16px; cursor: pointer; }
-        .checkbox-item input { width: 16px; height: 16px; cursor: pointer; }
+        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px; background: var(--crust-light); padding: 10px 12px; border-radius: 8px; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; font-family: 'Condensed', sans-serif; font-size: 17px; cursor: pointer; }
+        .checkbox-item input { width: 17px; height: 17px; cursor: pointer; }
         
         /* Pipeline Section Headers spanning 3 columns */
         .section-header {
             grid-column: span 3;
             font-family: 'ExtraBold', sans-serif;
-            font-size: 15px;
+            font-size: 16px;
             color: var(--dark-blue);
             border-bottom: 2px solid var(--crust-dark);
-            padding-bottom: 2px;
-            margin-top: 4px;
+            padding-bottom: 3px;
+            margin-top: 6px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -235,16 +235,16 @@
         
         /* --- ACTION FLAGS --- */
         .flag-box { 
-            padding: 3px 6px; 
-            border-radius: 4px; 
+            padding: 5px 8px; 
+            border-radius: 6px; 
             display: flex; 
             align-items: center; 
-            gap: 6px; 
-            font-size: 14px; /* Compact font for flags */
+            gap: 7px; 
+            font-size: 16px; /* Restored clean 16px font for flags */
         }
         .flag-box input[type="checkbox"] {
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
         }
         .flag-incorrect { background: #ffebee; color: var(--brand-red); font-weight: bold; }
         .flag-reviewing { background: #e3f2fd; color: var(--med-blue); font-weight: bold; position: relative; }
