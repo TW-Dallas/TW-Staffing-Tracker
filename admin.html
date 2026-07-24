@@ -450,7 +450,7 @@
             <div id="candidateList"></div>
         </div>
 
-        <!-- Middle Panel: Form Area -->
+<!-- Middle Panel: Form Area -->
         <div class="form-panel" id="formPanel">
             <h2 id="formTitle" style="margin-top: 0; font-family: 'ExtraBold', sans-serif; font-size: 20px; color: var(--dark-blue); margin-bottom: 8px;">Candidate details</h2>
             <form id="candidateForm" onsubmit="saveCandidate(event)">
@@ -461,7 +461,7 @@
                 <!-- Scrollable Input Fields Container -->
                 <div class="form-scroll-area">
                     
-                    <!-- ONBOARDING FORM TEMPLATE -->
+                    <!-- 1. ONBOARDING FORM TEMPLATE -->
                     <div id="onboardingFormFields">
 
                         <div class="form-group">
@@ -607,7 +607,7 @@
                         </div>
                     </div>
 
-                    <!-- INTERVIEWS FORM TEMPLATE -->
+                    <!-- 2. INTERVIEWS FORM TEMPLATE -->
                     <div id="interviewFormFields" class="hidden">
                         <button type="button" id="btnPortToOnboarding" onclick="portCandidateToOnboarding()" style="background: var(--dark-blue); width: 100%; margin-bottom: 12px; font-size: 19px; padding: 11px 18px;">
                             🚀 Port Candidate to Onboarding
@@ -714,7 +714,7 @@
                         </div>
                     </div>
 
-                    <!-- HIRES & TERMINATIONS FORM TEMPLATE -->
+                    <!-- 3. HIRES & TERMINATIONS FORM TEMPLATE -->
                     <div id="staffingFormFields" class="hidden">
                         <div class="form-group">
                             <label>Employee Full Name</label>
@@ -794,7 +794,7 @@
                         </div>
                     </div>
 
-                    <!-- PAY CARDS FORM TEMPLATE -->
+                    <!-- 4. PAY CARDS FORM TEMPLATE -->
                     <div id="payCardFormFields" class="hidden">
                         <div class="form-group">
                             <label>Employee Full Name</label>
@@ -860,68 +860,6 @@
                     </div>
 
                 </div> <!-- Scrollable area closes here -->
-
-                <!-- Fixed Footer Action Buttons -->
-                <div class="form-actions">
-                    <button type="submit" style="flex: 1; background: var(--brand-blue);">Save Details</button>
-                    <button type="button" class="secondary" id="btnCancel" onclick="clearForm()">Clear / Deselect</button>
-                </div>
-            </form>
-        </div>
-
-                        <div class="form-row flex-three">
-                            <div class="form-group">
-                                <label>Hire Date (NTO)</label>
-                                <input type="date" id="stfHireDate" onchange="autoCalculatePeriodFromDates()">
-                            </div>
-                            <div class="form-group">
-                                <label>Termination Date</label>
-                                <input type="date" id="stfTermDate" onchange="autoCalculatePeriodFromDates()">
-                            </div>
-                            <div class="form-group">
-                                <label>Domino's Period</label>
-                                <input type="text" id="stfPeriod" placeholder="P08" readonly style="background: var(--crust-light); font-weight: bold; color: var(--dark-blue);">
-                            </div>
-                        </div>
-
-                        <div class="section-header">Termination & Bonus Eligibility Audit</div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Re-Hire Eligible?</label>
-                                <select id="stfRehire">
-                                    <option value="Yes">✅ Yes - Eligible for Re-Hire</option>
-                                    <option value="No">🚫 No - Ineligible / Do Not Rehire</option>
-                                    <option value="Review Required">⚠️ Review Required</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Cause of Action</label>
-                                <select id="stfCause">
-                                    <option value="">Select Action Cause</option>
-                                    <option value="Voluntary - Personal">Voluntary - Personal Reasons</option>
-                                    <option value="Voluntary - Resigned">Voluntary - Resigned with Notice</option>
-                                    <option value="Voluntary - Better Opportunity">Voluntary - Better Opportunity</option>
-                                    <option value="Involuntary - Attendance">Involuntary - Attendance / No-Show</option>
-                                    <option value="Involuntary - Policy Violation">Involuntary - Policy Violation</option>
-                                    <option value="Involuntary - Performance">Involuntary - Performance</option>
-                                    <option value="Job Abandonment">Job Abandonment (Walk-out / NCNS)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Reason of Action (Detailed)</label>
-                            <textarea id="stfReason" placeholder="Specify exact reason for termination / exit..."></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>General Staffing Notes</label>
-                            <textarea id="stfNotes" placeholder="Additional notes or bonus log context..."></textarea>
-                        </div>
-                    </div>
-
-                </div>
 
                 <!-- Fixed Footer Action Buttons -->
                 <div class="form-actions">
