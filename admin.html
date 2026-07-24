@@ -1353,20 +1353,23 @@
         }
         if (item.ntoSignupLinkSent) return "📨 Link Sent";
         
-        if (item.bgcComplete && item.allPayCompleted) return "✓ Paperwork Completed";
+        // Require all 3 Stage 2 requirements to display "Paperwork Completed"
+        if (item.bgcComplete && item.allPayCompleted && item.pulseFormComplete) return "✓ Paperwork Completed";
+        
         if (item.bgcComplete) return "🔍 BGC Complete";
         if (item.allPayCompleted) return "💳 AllPay Complete";
+        if (item.pulseFormComplete) return "📝 Pulse Form Complete";
         if (item.onboardingSent) return "📨 Onboarding Sent";
         if (item.submissionReceived) return "✓ Submission Rec'd";
         return "New / Pending";
     }
-
+    
     function getStatusWeight(item) {
         if (item.submissionReceived && !item.onboardingSent) return 10;
         if (item.ntoScheduled) return 8;
         if (item.ntoSignupLinkSent) return 7;
-        if (item.bgcComplete && item.allPayCompleted) return 6;
-        if (item.bgcComplete || item.allPayCompleted) return 5;
+        if (item.bgcComplete && item.allPayCompleted && item.pulseFormComplete) return 6;
+        if (item.bgcComplete || item.allPayCompleted || item.pulseFormComplete) return 5;
         if (item.onboardingSent) return 4;
         if (item.hired) return 1;
         if (item.ineligible) return -1;
@@ -1470,7 +1473,7 @@
                     card.classList.add('status-gray');
                 } else if (item.ntoScheduled || item.ntoSignupLinkSent) {
                     card.classList.add('status-nto');
-                } else if (item.bgcComplete || item.allPayCompleted) {
+                } else if (item.bgcComplete || item.allPayCompleted || item.pulseFormComplete) {
                     card.classList.add('status-processing');
                 } else if (item.submissionReceived && !item.onboardingSent) {
                     card.classList.add('status-subrec');
@@ -1485,7 +1488,7 @@
                 if (item.incorrectEmail || isBlockedByDocs || item.missedNto) statusStyleColor = 'var(--brand-red)';
                 if (item.currentlyReviewing) statusStyleColor = 'var(--med-blue)';
                 if (item.ntoScheduled || item.ntoSignupLinkSent) statusStyleColor = 'var(--dark-blue)';
-                if (item.bgcComplete || item.allPayCompleted) statusStyleColor = 'var(--med-blue)';
+                if (item.bgcComplete || item.allPayCompleted || item.pulseFormComplete) statusStyleColor = 'var(--med-blue)';
                 if (item.ineligible || item.inactive) statusStyleColor = 'var(--brand-grey)';
 
                 // Add warning badges
