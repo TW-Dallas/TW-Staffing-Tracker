@@ -1343,6 +1343,14 @@
                 staffing = data.staffing || [];
                 paycards = processPayCards(data);
                 
+                // Restore Cloud Scratchpad Notes
+                if (data.scratchpadText !== undefined) {
+                    localStorage.setItem(`scratchpad_text_${u}`, data.scratchpadText);
+                }
+                if (data.scratchpadChecklist !== undefined) {
+                    localStorage.setItem(`scratchpad_checklist_${u}`, data.scratchpadChecklist);
+                }
+
                 switchView('onboarding');
                 initScratchpad();
                 showLoader(false);
@@ -1360,7 +1368,8 @@
     }
 
     function handleLogout() {
-        localStorage.clear();
+        localStorage.removeItem('onb_user');
+        localStorage.removeItem('onb_pass');
         location.reload();
     }
 
@@ -1472,12 +1481,6 @@
     function getActiveStatusText(item) {
         if (item.ineligible) return "🚫 Ineligible";
         if (item.inactive) return "💤 Inactive";
-
-        // Check for Missing Documents first so it overrides standard stage labels
-        const rawMissingDocs = (item.missingDocs || "").toString().trim();
-        const isBlockedByDocs = rawMissingDocs !== "" && rawMissingDocs.toUpperCase() !== "FALSE";
-
-        if (isBlockedByDocs) return "⚠️ Missing Docs";
         if (item.incorrectEmail) return "⚠️ Incorrect Email";
         if (item.missedNto) return "⚠️ Missed NTO";
         if (item.currentlyReviewing) return "🔍 Reviewing";
@@ -1750,11 +1753,13 @@
                 
                 let statusStyleColor = 'var(--brand-blue)';
                 if (item.hired) statusStyleColor = 'var(--success-green)';
-                if (item.incorrectEmail || isBlockedByDocs || item.missedNto) statusStyleColor = 'var(--brand-red)';
                 if (item.currentlyReviewing) statusStyleColor = 'var(--med-blue)';
                 if (item.ntoScheduled || item.ntoSignupLinkSent) statusStyleColor = 'var(--dark-blue)';
                 if (item.bgcComplete || item.allPayCompleted || item.pulseFormComplete) statusStyleColor = 'var(--med-blue)';
                 if (item.ineligible || item.inactive) statusStyleColor = 'var(--brand-grey)';
+
+                // MOVED HERE: Blockers run last so they ALWAYS turn red!
+                if (item.incorrectEmail || isBlockedByDocs || item.missedNto) statusStyleColor = 'var(--brand-red)';
 
                 let flags = '';
                 if (item.incorrectEmail) flags += '<span class="badge-incorrect">⚠️ Email Error</span> ';
