@@ -1827,39 +1827,40 @@
             document.getElementById('checkPulseForm').checked = item.pulseFormComplete || false;
             document.getElementById('checkMissedNto').checked = item.missedNto || false;
             
-            const rawMissingDocs = item.missingDocs || "";
-            if (rawMissingDocs && rawMissingDocs.toString().toUpperCase() !== "FALSE") {
+            const rawMissingDocs = (item.missingDocs || "").toString().trim();
+            if (rawMissingDocs && rawMissingDocs.toUpperCase() !== "FALSE") {
                 document.getElementById('checkMissingDocs').checked = true;
                 document.getElementById('missingDocsContainer').classList.remove('hidden');
                 
-                const parts = rawMissingDocs.toString().split(',').map(p => p.trim());
-                document.querySelectorAll('.doc-chk').forEach(c => c.checked = false);
-                document.getElementById('customMissingDoc').value = '';
-                
-                const customParts = [];
-                parts.forEach(part => {
-                    let matched = false;
-                    document.querySelectorAll('.doc-chk').forEach(chk => {
-                        if (chk.value.toLowerCase() === part.toLowerCase()) {
-                            chk.checked = true;
-                            matched = true;
-                        }
-                    });
-                    if (!matched && part.toUpperCase() !== "TRUE" && part.trim() !== "") {
-                        customParts.push(part);
+                let remainingText = rawMissingDocs;
+
+                // Match exact document options without getting tripped up by internal commas
+                document.querySelectorAll('.doc-chk').forEach(chk => {
+                    if (chk.value && rawMissingDocs.toLowerCase().includes(chk.value.toLowerCase())) {
+                        chk.checked = true;
+                        const escapedVal = chk.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        remainingText = remainingText.replace(new RegExp(escapedVal, 'gi'), '');
+                    } else {
+                        chk.checked = false;
                     }
                 });
-                if (customParts.length > 0) {
-                    document.getElementById('customMissingDoc').value = customParts.join(', ');
-                }
+
+                // Clean up any remaining text for custom missing documents
+                remainingText = remainingText
+                    .replace(/TRUE/gi, '')
+                    .replace(/^[,\s|]+|[,\s|]+$/g, '')
+                    .replace(/,\s*,/g, ',')
+                    .trim();
+
+                document.getElementById('customMissingDoc').value = remainingText;
             } else {
                 document.getElementById('checkMissingDocs').checked = false;
                 document.getElementById('missingDocsContainer').classList.add('hidden');
+                document.querySelectorAll('.doc-chk').forEach(c => c.checked = false);
+                document.getElementById('customMissingDoc').value = '';
             }
-            
-            document.getElementById('emailQuickActions').classList.remove('hidden');
-        }
-    }
+        } // <--- Closes the main else statement
+    }     // <--- Closes function selectCandidate(item)
 
     function prepareAddNew() {
         clearForm();
@@ -1883,7 +1884,7 @@
         }
     }
 
-    function clearForm() {
+function clearForm() {
         document.getElementById('candidateForm').reset();
         document.getElementById('fieldId').value = '';
         document.getElementById('fieldNto').value = '';
@@ -1904,7 +1905,7 @@
         document.getElementById('missingDocsContainer').classList.add('hidden');
         currentSelectedId = null;
         renderList();
-    }
+    } // <--- MAKE SURE THIS CLOSING BRACE IS HERE!
 
     function saveCandidate(event) {
         event.preventDefault();
@@ -2019,7 +2020,15 @@
 
             renderList();
             updateAuditMetrics();
-            clearForm();
+            
+            // Re-select current candidate so checkmarks stay visible on save
+            if (currentSelectedId) {
+                const savedItem = candidates.find(c => c.id === currentSelectedId);
+                if (savedItem) selectCandidate(savedItem);
+            } else {
+                clearForm();
+            }
+            
             showLoader(false);
         })
         .catch(err => {

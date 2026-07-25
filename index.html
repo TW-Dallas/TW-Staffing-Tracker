@@ -338,25 +338,30 @@
 
     function refreshViews() { renderOnboarding(); renderInterviews(); }
 
-    function getPipelineDetails(item) {
-        if (item.ineligible) return { pct: 100, color: 'grey', label: 'Ineligible' };
-        if (item.inactive) return { pct: 100, color: 'grey', label: 'Inactive' };
-        if (item.hired) return { pct: 100, color: 'green', label: 'Hired' };
-        if (item.missedNto) return { pct: 90, color: 'red', label: 'Missed NTO' };
-        if (item.ntoScheduled) return { pct: 90, color: 'blue', label: 'NTO Scheduled' };
-        if (item.ntoSignupLinkSent) return { pct: 75, color: 'blue', label: 'NTO Signup Sent' };
+function getPipelineDetails(item) {
+    if (item.ineligible) return { pct: 100, color: 'grey', label: 'Ineligible' };
+    if (item.inactive) return { pct: 100, color: 'grey', label: 'Inactive' };
+    if (item.hired) return { pct: 100, color: 'green', label: 'Hired' };
+    if (item.missedNto) return { pct: 90, color: 'red', label: 'Missed NTO' };
+    
+    // Active Flag Blockers
+    if (item.hasMissingDocs) return { pct: 15, color: 'red', label: 'Missing / Incorrect Docs' };
+    if (item.incorrectEmail) return { pct: 15, color: 'red', label: 'Incorrect Email' };
 
-        if (item.onboardingSent) {
-            let basePct = 35;
-            if (item.bgcComplete) basePct += 10;
-            if (item.allPayCompleted) basePct += 10;
-            if (item.pulseFormComplete) basePct += 10;
-            return { pct: basePct, color: 'blue', label: 'Onboarding Sent' };
-        }
-        
-        if (item.submissionReceived) return { pct: 15, color: 'blue', label: 'Submission Received' };
-        return { pct: 5, color: 'grey', label: 'Pending Start' };
+    if (item.ntoScheduled) return { pct: 90, color: 'blue', label: 'NTO Scheduled' };
+    if (item.ntoSignupLinkSent) return { pct: 75, color: 'blue', label: 'NTO Signup Sent' };
+
+    if (item.onboardingSent) {
+        let basePct = 35;
+        if (item.bgcComplete) basePct += 10;
+        if (item.allPayCompleted) basePct += 10;
+        if (item.pulseFormComplete) basePct += 10;
+        return { pct: basePct, color: 'blue', label: 'Onboarding Sent' };
     }
+    
+    if (item.submissionReceived) return { pct: 15, color: 'blue', label: 'Submission Received' };
+    return { pct: 5, color: 'grey', label: 'Awaiting Onboarding' };
+}
 
     function getStatusWeight(item) {
         if (item.incorrectEmail || item.hasMissingDocs || item.missedNto) return 0; // Urgencies first!
