@@ -891,12 +891,12 @@
 
         <!-- Right Panel: Activity Audits & Synchronized Scratchpad -->
         <div class="notes-panel">
+            <!-- RIGHT PANEL: AUDIT METRICS -->
             <div id="metricsBox" style="background: var(--crust-light); border: 2px solid var(--crust-dark); border-radius: var(--border-radius); padding: 14px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); color: var(--crust-burnt);">
+                
+                <!-- Clean Header Row with Date Range -->
                 <div style="display: flex; justify-content: space-between; border-bottom: 2px solid var(--crust-med); padding-bottom: 8px; align-items: center;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                        <span id="auditTitleHeader" style="font-family: 'ExtraBold', sans-serif; font-size: 18px; color: var(--dark-blue); text-transform: uppercase; letter-spacing: 0.5px;">Weekly Activity Audit</span>
-                        <button type="button" onclick="openStoreTrendsModal()" style="font-size: 11px; padding: 4px 8px; background: var(--med-blue); color: white; border-radius: 4px; border: none; cursor: pointer; text-transform: uppercase; font-family: 'Subhead2', sans-serif;">📊 Store Trends</button>
-                    </div>
+                    <span id="auditTitleHeader" style="font-family: 'ExtraBold', sans-serif; font-size: 18px; color: var(--dark-blue); text-transform: uppercase; letter-spacing: 0.5px;">Weekly Activity Audit</span>
                     <span id="metricsWeekRange" style="font-size: 13px; font-family: 'Compact'; color: var(--crust-deep); font-weight: bold;"></span>
                 </div>
                 
@@ -905,15 +905,15 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 17px;">
                         <span>Interviews:</span>
                         <span style="font-family: 'Compact'; font-size: 17px;">
-                            This Week: <strong id="metricsQuotesThisWeek" style="color: var(--med-blue); font-family: 'Subhead2', sans-serif; font-size: 17px;" onclick="editLocalMetric('interviews_this_week', 'metricsQuotesThisWeek')">0</strong> | 
-                            Last Week: <strong id="metricsQuotesLastWeek" style="font-family: 'Subhead2', sans-serif; font-size: 17px;" onclick="editLocalMetric('interviews_last_week', 'metricsQuotesLastWeek')">0</strong>
+                            This Week: <strong id="metricsQuotesThisWeek" style="color: var(--med-blue); font-family: 'Subhead2', sans-serif; font-size: 17px;">0</strong> | 
+                            Last Week: <strong id="metricsQuotesLastWeek" style="font-family: 'Subhead2', sans-serif; font-size: 17px;">0</strong>
                         </span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 17px;">
                         <span>Hires:</span>
                         <span style="font-family: 'Compact'; font-size: 17px;">
-                            This Week: <strong id="metricsOrdersThisWeek" style="color: var(--med-blue); font-family: 'Subhead2', sans-serif; font-size: 17px;" onclick="editLocalMetric('hires_this_week', 'metricsOrdersThisWeek')">0</strong> | 
-                            Last Week: <strong id="metricsOrdersLastWeek" style="font-family: 'Subhead2', sans-serif; font-size: 17px;" onclick="editLocalMetric('hires_last_week', 'metricsOrdersLastWeek')">0</strong>
+                            This Week: <strong id="metricsOrdersThisWeek" style="color: var(--med-blue); font-family: 'Subhead2', sans-serif; font-size: 17px;">0</strong> | 
+                            Last Week: <strong id="metricsOrdersLastWeek" style="font-family: 'Subhead2', sans-serif; font-size: 17px;">0</strong>
                         </span>
                     </div>
                 </div>
@@ -934,7 +934,6 @@
                             Terms: <strong id="stfPeriodTerms" style="color: var(--brand-red); font-family: 'Subhead2', sans-serif; font-size: 17px;">0</strong>
                         </span>
                     </div>
-                    <!-- Year-to-Date Row -->
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 17px;">
                         <span>This Year (<span id="stfCurrentYear">2026</span>):</span>
                         <span style="font-family: 'Compact'; font-size: 17px;">
@@ -949,6 +948,11 @@
                         </span>
                     </div>
                 </div>
+
+                <!-- Clean Full-Width Action Button -->
+                <button type="button" onclick="openStoreTrendsModal()" style="width: 100%; margin-top: 4px; padding: 8px 12px; background: var(--dark-blue); color: white; border-radius: 6px; font-family: 'Subhead2', sans-serif; font-size: 14px; text-transform: uppercase; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    📊 View Store Hiring Trends Breakdown
+                </button>
             </div>
             
             <div style="flex: 1; display: flex; flex-direction: column; background: var(--crust-base); border: 2px solid var(--crust-dark); border-radius: var(--border-radius); padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); position: relative; overflow: hidden;">
