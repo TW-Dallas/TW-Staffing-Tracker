@@ -1472,8 +1472,14 @@
     function getActiveStatusText(item) {
         if (item.ineligible) return "🚫 Ineligible";
         if (item.inactive) return "💤 Inactive";
-        if (item.missedNto) return "⚠️ Missed NTO";
+
+        // Check for Missing Documents first so it overrides standard stage labels
+        const rawMissingDocs = (item.missingDocs || "").toString().trim();
+        const isBlockedByDocs = rawMissingDocs !== "" && rawMissingDocs.toUpperCase() !== "FALSE";
+
+        if (isBlockedByDocs) return "⚠️ Missing Docs";
         if (item.incorrectEmail) return "⚠️ Incorrect Email";
+        if (item.missedNto) return "⚠️ Missed NTO";
         if (item.currentlyReviewing) return "🔍 Reviewing";
         if (item.hired) return "🎉 Hired";
         
@@ -1491,17 +1497,29 @@
         if (item.submissionReceived) return "✓ Submission Rec'd";
         return "New / Pending";
     }
-    
+
     function getStatusWeight(item) {
-        if (item.submissionReceived && !item.onboardingSent) return 10;
-        if (item.ntoScheduled) return 8;
-        if (item.ntoSignupLinkSent) return 7;
-        if (item.bgcComplete && item.allPayCompleted && item.pulseFormComplete) return 6;
-        if (item.bgcComplete || item.allPayCompleted || item.pulseFormComplete) return 5;
-        if (item.onboardingSent) return 4;
-        if (item.hired) return 1;
         if (item.ineligible) return -1;
         if (item.inactive) return -2;
+
+        const rawMissingDocs = (item.missingDocs || "").toString().trim();
+        const isBlockedByDocs = rawMissingDocs !== "" && rawMissingDocs.toUpperCase() !== "FALSE";
+        const isBlocked = isBlockedByDocs || item.incorrectEmail || item.missedNto;
+
+        // Clean Submissions (Ready for action) -> TOP PRIORITY (Weight 10)
+        if (item.submissionReceived && !item.onboardingSent && !isBlocked) return 10;
+
+        // Clean Active Pipeline Stages
+        if (item.ntoScheduled && !isBlocked) return 8;
+        if (item.ntoSignupLinkSent && !isBlocked) return 7;
+        if (item.bgcComplete && item.allPayCompleted && item.pulseFormComplete && !isBlocked) return 6;
+        if ((item.bgcComplete || item.allPayCompleted || item.pulseFormComplete) && !isBlocked) return 5;
+        if (item.onboardingSent && !isBlocked) return 4;
+
+        // Blocked Candidates (Missing Docs / Incorrect Email / Missed NTO) -> Grouped below active queue (Weight 3)
+        if (isBlocked) return 3;
+
+        if (item.hired) return 1;
         return 0;
     }
 
@@ -2143,6 +2161,8 @@ function clearForm() {
             emailType: emailType,
             missingForms: payloadMissing,
             payRate: payRateInput,
+            hourlyRate: payRateInput,
+            roadRate: roadPayInput,
             roadPayRate: roadPayInput,
             allPayLink: payloadAllPayLink,
             checkrLink: payloadCheckrLink,
