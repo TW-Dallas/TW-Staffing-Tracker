@@ -1116,7 +1116,7 @@
         return "P08";
     }
 
-    // Global date parsing helper function
+    // Global date parsing helper function (Deduplicated)
     function parseCandidateDate(val) {
         if (!val) return null;
         if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
@@ -1353,21 +1353,26 @@
             confirmBtn.innerText = "Send Email";
             cancelBtn.innerText = "Cancel";
 
-            const normalizedItems = missingFormsArray.map(item => item.toLowerCase());
+            const normalizedItems = missingFormsArray.map(item => item.toLowerCase().trim());
             
-            if (normalizedItems.includes("onboarding documents (allpay/hr alliance)")) {
+            // Clean substring matching to prevent naming configuration bugs
+            const hasAllPay = normalizedItems.some(item => item.includes("allpay") || item.includes("hr alliance") || item.includes("onboarding documents"));
+            const hasCheckr = normalizedItems.some(item => item.includes("checkr") || item.includes("background check"));
+            const hasStoreSetup = normalizedItems.some(item => item.includes("smartrecruiters") || item.includes("system setup") || item.includes("setup form"));
+
+            if (hasAllPay) {
                 allPayGroup.classList.remove('hidden');
             } else {
                 allPayGroup.classList.add('hidden');
             }
 
-            if (normalizedItems.includes("background check (checkr)")) {
+            if (hasCheckr) {
                 checkrGroup.classList.remove('hidden');
             } else {
                 checkrGroup.classList.add('hidden');
             }
 
-            if (normalizedItems.includes("store system setup form (smartrecruiters)")) {
+            if (hasStoreSetup) {
                 storeGroup.classList.remove('hidden');
             } else {
                 storeGroup.classList.add('hidden');
@@ -2196,7 +2201,7 @@
         let confirmationMessage = "";
         let payloadMissing = "";
         let payRateInput = "";
-        let roadPayInput = "";
+        let roadRateInput = "";
         let payloadAllPayLink = "";
         let payloadCheckrLink = "";
         let payloadStoreSetupLink = "";
@@ -2206,10 +2211,10 @@
                 payRateInput = await showBrandPrompt(`Enter IN-STORE starting rate for ${name} (e.g., 9.00):`, "9.00", "In-Store Hourly Wage");
                 if (payRateInput === null) return;
                 
-                roadPayInput = await showBrandPrompt(`Enter ON-THE-ROAD rate for ${name} (e.g., 4.45):`, "4.35", "On-the-Road Hourly Wage");
-                if (roadPayInput === null) return;
+                roadRateInput = await showBrandPrompt(`Enter ON-THE-ROAD rate for ${name} (e.g., 4.45):`, "4.35", "On-the-Road Hourly Wage");
+                if (roadRateInput === null) return;
                 
-                confirmationMessage = `Send Dynamic Welcome Email & Offer to ${name}?\n\n• In-Store Wage: $${payRateInput}/hr\n• On-The-Road Wage: $${roadPayInput}/hr + Mileage\n\n(This will automatically CC the store and BCC the DO)`;
+                confirmationMessage = `Send Dynamic Welcome Email & Offer to ${name}?\n\n• In-Store Wage: $${payRateInput}/hr\n• On-The-Road Wage: $${roadRateInput}/hr + Mileage\n\n(This will automatically CC the store and BCC the DO)`;
             } else {
                 payRateInput = await showBrandPrompt(`Enter starting hourly rate for ${name} (e.g., 9.00):`, "9.00", "Starting Hourly Wage");
                 if (payRateInput === null) return;
@@ -2253,11 +2258,28 @@
             missingForms: payloadMissing,
             payRate: payRateInput,
             hourlyRate: payRateInput,
-            roadRate: roadPayInput,
-            roadPayRate: roadPayInput,
+            roadRate: roadRateInput,
+            roadPayRate: roadRateInput,
+            
+            // Multi-case payload bindings for full code.gs backend compatibility
             allPayLink: payloadAllPayLink,
+            allpayLink: payloadAllPayLink,
+            allPayUrl: payloadAllPayLink,
+            allpayUrl: payloadAllPayLink,
+            
             checkrLink: payloadCheckrLink,
-            storeSetupLink: payloadStoreSetupLink
+            checkrlink: payloadCheckrLink,
+            checkrUrl: payloadCheckrLink,
+            checkrurl: payloadCheckrLink,
+            
+            storeSetupLink: payloadStoreSetupLink,
+            storesetupLink: payloadStoreSetupLink,
+            storeSetupUrl: payloadStoreSetupLink,
+            storesetupUrl: payloadStoreSetupLink,
+            smartRecruitersLink: payloadStoreSetupLink,
+            smartrecruitersLink: payloadStoreSetupLink,
+            smartRecruitersUrl: payloadStoreSetupLink,
+            smartrecruitersUrl: payloadStoreSetupLink
         };
 
         fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
