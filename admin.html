@@ -2600,45 +2600,128 @@ function clearForm() {
         if (modal) modal.classList.add('hidden');
     }
 
+// Standalone helper for parsing dates safely across all formats
+    function parseTrendDate(val) {
+        if (!val) return null;
+        if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
+        let str = String(val).trim();
+        if (!str) return null;
+
+        if (str.includes('/')) {
+            const parts = str.split('/');
+            if (parts.length === 3) {
+                let m = parseInt(parts[0], 10) - 1;
+                let d = parseInt(parts[1], 10);
+                let y = parseInt(parts[2], 10);
+                if (y < 100) y += 2000;
+                const dt = new Date(y, m, d);
+                return isNaN(dt.getTime()) ? null : dt;
+            }
+        }
+        if (str.includes('-') && str.includes(' ')) {
+            str = str.replace(' ', 'T');
+        }
+        const dt = new Date(str);
+        return isNaN(dt.getTime()) ? null : dt;
+    }
+
+    function openStoreTrendsModal() {
+        const modal = document.getElementById('storeTrendsModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            const currentPeriod = getDominosFiscalPeriod(new Date());
+            const periodSelect = document.getElementById('trendPeriodFilter');
+            if (periodSelect) periodSelect.value = currentPeriod;
+            renderStoreTrends();
+        }
+    }
+
+    function closeStoreTrendsModal() {
+        const modal = document.getElementById('storeTrendsModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
     function renderStoreTrends() {
         const tbody = document.getElementById('storeTrendsTableBody');
         if (!tbody) return;
         tbody.innerHTML = '';
 
-        const selectedPeriod = document.getElementById('trendPeriodFilter').value;
-        const sortBy = document.getElementById('trendSortFilter').value;
+        const selectedPeriodEl = document.getElementById('trendPeriodFilter');
+        const sortFilterEl = document.getElementById('trendSortFilter');
+
+        const selectedPeriod = selectedPeriodEl ? selectedPeriodEl.value : 'P08';
+        const sortBy = sortFilterEl ? sortFilterEl.value : 'store_asc';
 
         const now = new Date();
         const currentYear = now.getFullYear();
         const storeMap = {};
 
-        // Build store metrics from staffing records
-        (staffing || []).forEach(item => {
-            const store = (item.store || '').toString().trim();
-            if (!store || store === 'Store #') return;
-
-            if (!storeMap[store]) {
-                storeMap[store] = {
-                    store: store,
-                    doName: item.doName || item.do || 'N/A',
+        const getOrCreateStore = (storeNum, doName) => {
+            const sKey = String(storeNum).trim();
+            if (!storeMap[sKey]) {
+                storeMap[sKey] = {
+                    store: sKey,
+                    doName: doName || 'N/A',
                     p_hires: 0,
                     p_terms: 0,
                     ytd_hires: 0,
                     ytd_terms: 0
                 };
             }
+            if (doName && storeMap[sKey].doName === 'N/A') {
+                storeMap[sKey].doName = doName;
+            }
+            return storeMap[sKey];
+        };
 
-            const hDate = parseMetricDate(item.hireDate);
-            const tDate = parseMetricDate(item.termDate);
+        // 1. Process Staffing Records (Hires & Terms)
+        (staffing || []).forEach(item => {
+            const store = (item.store || '').toString().trim();
+            if (!store || store.toLowerCase() === 'store #') return;
 
-            // YTD (2026)
-            if (hDate && hDate.getFullYear() === currentYear) storeMap[store].ytd_hires++;
-            if (tDate && tDate.getFullYear() === currentYear) storeMap[store].ytd_terms++;
+            const st = getOrCreateStore(store, item.doName || item.do);
 
-            // Period Specific
-            if (selectedPeriod === 'ALL' || item.period === selectedPeriod) {
-                if (item.termDate) storeMap[store].p_terms++;
-                else storeMap[store].p_hires++;
+            const hDate = parseTrendDate(item.hireDate);
+            const tDate = parseTrendDate(item.termDate);
+
+            // YTD Counts
+            if (hDate && hDate.getFullYear() === currentYear) st.ytd_hires++;
+            if (tDate && tDate.getFullYear() === currentYear) st.ytd_terms++;
+
+            // Period Match (Normalizes P08 vs P8)
+            const itemPeriod = String(item.period || '').trim().toUpperCase();
+            const normSelected = String(selectedPeriod).trim().toUpperCase();
+
+            const isPeriodMatch = (
+                normSelected === 'ALL' ||
+                itemPeriod === normSelected ||
+                (itemPeriod && normSelected && itemPeriod.replace('P0', 'P') === normSelected.replace('P0', 'P'))
+            );
+
+            if (isPeriodMatch) {
+                if (item.termDate) st.p_terms++;
+                else st.p_hires++;
+            }
+        });
+
+        // 2. Process Candidates (Active Hires in Onboarding)
+        (candidates || []).forEach(item => {
+            if (item.hired) {
+                const store = (item.store || '').toString().trim();
+                if (!store || store.toLowerCase() === 'store #') return;
+
+                const st = getOrCreateStore(store, item.doName || item.do);
+                const hDate = parseTrendDate(item.ntoDate || item.lastUpdated || item.hireDate);
+                const candPeriod = getDominosFiscalPeriod(hDate || now);
+
+                if (hDate && hDate.getFullYear() === currentYear) {
+                    st.ytd_hires++;
+                }
+
+                const normSelected = String(selectedPeriod).trim().toUpperCase();
+                if (normSelected === 'ALL' || candPeriod === normSelected) {
+                    st.p_hires++;
+                }
             }
         });
 
@@ -2648,17 +2731,30 @@ function clearForm() {
             return s;
         });
 
-        // Ranking Sort Logic
+        // 3. Sort Ranking Logic (Store #, DO Name, Net Gain, Hires, Terms)
         storeList.sort((a, b) => {
+            if (sortBy === 'store_asc') {
+                const numA = parseInt(a.store, 10);
+                const numB = parseInt(b.store, 10);
+                if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+                return a.store.localeCompare(b.store);
+            }
+            if (sortBy === 'do_asc') {
+                const doCompare = a.doName.localeCompare(b.doName);
+                if (doCompare !== 0) return doCompare;
+                const numA = parseInt(a.store, 10);
+                const numB = parseInt(b.store, 10);
+                if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+                return a.store.localeCompare(b.store);
+            }
             if (sortBy === 'net_desc') return b.p_net - a.p_net;
             if (sortBy === 'hires_desc') return b.p_hires - a.p_hires;
             if (sortBy === 'terms_desc') return b.p_terms - a.p_terms;
-            if (sortBy === 'store_asc') return parseInt(a.store, 10) - parseInt(b.store, 10);
             return 0;
         });
 
         if (storeList.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px; color:#888;">No staffing data available for this selection.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px; color:#888;">No store data available for this selection.</td></tr>`;
             return;
         }
 
@@ -2759,13 +2855,13 @@ function clearForm() {
                 <div style="flex: 1; min-width: 160px;">
                     <label style="font-family: 'Subhead2'; font-size: 12px; font-weight: bold; color: var(--crust-burnt);">Sort Ranking By:</label>
                     <select id="trendSortFilter" onchange="renderStoreTrends()" style="padding: 6px; font-size: 14px; border-radius: 6px; border: 1px solid var(--crust-dark);">
+                        <option value="store_asc">🏬 Store # (Numerical)</option>
+                        <option value="do_asc">👤 DO Name (Alphabetical)</option>
                         <option value="net_desc">📈 Highest Net Gain</option>
                         <option value="hires_desc">🎉 Most Hires</option>
                         <option value="terms_desc">🔴 Most Terminations</option>
-                        <option value="store_asc">🏬 Store # (Ascending)</option>
                     </select>
                 </div>
-            </div>
 
             <!-- Trends Table Container -->
             <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--crust-dark); border-radius: 8px;">
