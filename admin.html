@@ -1882,8 +1882,12 @@
                 document.querySelectorAll('.doc-chk').forEach(c => c.checked = false);
                 document.getElementById('customMissingDoc').value = '';
             }
-        } // <--- Closes the main else statement
-    }     // <--- Closes function selectCandidate(item)
+
+            // ADD THIS LINE RIGHT HERE:
+            document.getElementById('emailQuickActions').classList.remove('hidden');
+
+        } // Closes the main else
+    }     // Closes selectCandidate(item)
 
     function prepareAddNew() {
         clearForm();
