@@ -292,7 +292,7 @@
         }
         .brand-modal-card {
             background: var(--card-bg);
-            width: 90%;
+            width: 95%;
             max-width: 440px;
             border-radius: var(--border-radius);
             box-shadow: 0 16px 48px rgba(71, 43, 16, 0.25);
@@ -1008,6 +1008,71 @@
             <div class="brand-modal-actions" style="margin-top: 20px;">
                 <button type="button" id="brandModalCancelBtn" class="secondary">Cancel</button>
                 <button type="button" id="brandModalConfirmBtn">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- STORE HIRING TRENDS MODAL -->
+<div id="storeTrendsModal" class="brand-modal-overlay hidden">
+    <div class="brand-modal-card" style="max-width: 1200px; width: 95%;">
+        <div class="brand-modal-brand-stripe"></div>
+        <div class="brand-modal-content" style="padding: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--crust-med); padding-bottom: 8px; margin-bottom: 12px;">
+                <h3 style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 20px; text-transform: uppercase;">📊 Store Hiring Trends Audit</h3>
+                <button type="button" onclick="closeStoreTrendsModal()" style="background: var(--brand-grey); font-size: 13px; padding: 4px 10px;">✕ Close</button>
+            </div>
+
+            <!-- Controls Row -->
+            <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 140px;">
+                    <label style="font-family: 'Subhead2'; font-size: 12px; font-weight: bold; color: var(--crust-burnt);">Filter Period:</label>
+                    <select id="trendPeriodFilter" onchange="renderStoreTrends()" style="padding: 6px; font-size: 14px; border-radius: 6px; border: 1px solid var(--crust-dark);">
+                        <option value="P08" selected>Current Period (P08)</option>
+                        <option value="ALL">All Periods (YTD Summary)</option>
+                        <option value="P01">Period 1 (P01)</option>
+                        <option value="P02">Period 2 (P02)</option>
+                        <option value="P03">Period 3 (P03)</option>
+                        <option value="P04">Period 4 (P04)</option>
+                        <option value="P05">Period 5 (P05)</option>
+                        <option value="P06">Period 6 (P06)</option>
+                        <option value="P07">Period 7 (P07)</option>
+                        <option value="P08">Period 8 (P08)</option>
+                        <option value="P09">Period 9 (P09)</option>
+                        <option value="P10">Period 10 (P10)</option>
+                        <option value="P11">Period 11 (P11)</option>
+                        <option value="P12">Period 12 (P12)</option>
+                        <option value="P13">Period 13 (P13)</option>
+                    </select>
+                </div>
+                <div style="flex: 1; min-width: 160px;">
+                    <label style="font-family: 'Subhead2'; font-size: 12px; font-weight: bold; color: var(--crust-burnt);">Sort Ranking By:</label>
+                    <select id="trendSortFilter" onchange="renderStoreTrends()" style="padding: 6px; font-size: 14px; border-radius: 6px; border: 1px solid var(--crust-dark);">
+                        <option value="store_asc">🏬 Store # (Numerical)</option>
+                        <option value="do_asc">👤 DO Name (Alphabetical)</option>
+                        <option value="net_desc">📈 Highest Net Gain</option>
+                        <option value="hires_desc">🎉 Most Hires</option>
+                        <option value="terms_desc">🔴 Most Terminations</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Trends Table Container -->
+            <div style="max-height: 500px; overflow-y: auto; border: 1px solid var(--crust-dark); border-radius: 8px;">
+                <table style="width: 100%; border-collapse: collapse; font-family: 'Condensed', sans-serif; font-size: 15px; text-align: left;">
+                    <thead>
+                        <tr style="background: var(--dark-blue); color: white; position: sticky; top: 0; font-family: 'Subhead2'; font-size: 13px; text-transform: uppercase;">
+                            <th style="padding: 8px 10px;">Store / DO</th>
+                            <th style="padding: 8px 10px; text-align: center;">Period Hires</th>
+                            <th style="padding: 8px 10px; text-align: center;">Period Terms</th>
+                            <th style="padding: 8px 10px; text-align: center;">Period Net</th>
+                            <th style="padding: 8px 10px; text-align: center;">YTD Hires</th>
+                            <th style="padding: 8px 10px; text-align: center;">YTD Terms</th>
+                            <th style="padding: 8px 10px; text-align: center;">YTD Net</th>
+                        </tr>
+                    </thead>
+                    <tbody id="storeTrendsTableBody"></tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -2505,17 +2570,22 @@
             if (hDate && hDate.getFullYear() === currentYear) yearHires++;
             if (tDate && tDate.getFullYear() === currentYear) yearTerms++;
 
-            // Fiscal Period counts
-            if (item.period === currentPeriod) {
-                if (item.termDate) periodTerms++;
-                else periodHires++;
+            // Fiscal Period counts (evaluate independently to avoid overrides)
+            if (hDate) {
+                const hPeriod = getDominosFiscalPeriod(hDate);
+                if (hPeriod === currentPeriod) periodHires++;
+            }
+            if (tDate) {
+                const tPeriod = getDominosFiscalPeriod(tDate);
+                if (tPeriod === currentPeriod) periodTerms++;
             }
 
-            // Weekly counts
-            const checkDate = tDate || hDate;
-            if (checkDate && checkDate >= startThisWeek && checkDate <= endThisWeek) {
-                if (item.termDate) weekTerms++;
-                else weekHires++;
+            // Weekly counts (evaluate independently to avoid overrides)
+            if (hDate && hDate >= startThisWeek && hDate <= endThisWeek) {
+                weekHires++;
+            }
+            if (tDate && tDate >= startThisWeek && tDate <= endThisWeek) {
+                weekTerms++;
             }
         });
 
@@ -2610,31 +2680,6 @@
         return '';
     }
 
-    // Standalone helper for parsing dates safely across all formats
-    function parseTrendDate(val) {
-        if (!val) return null;
-        if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
-        let str = String(val).trim();
-        if (!str) return null;
-
-        if (str.includes('/')) {
-            const parts = str.split('/');
-            if (parts.length === 3) {
-                let m = parseInt(parts[0], 10) - 1;
-                let d = parseInt(parts[1], 10);
-                let y = parseInt(parts[2], 10);
-                if (y < 100) y += 2000;
-                const dt = new Date(y, m, d);
-                return isNaN(dt.getTime()) ? null : dt;
-            }
-        }
-        if (str.includes('-') && str.includes(' ')) {
-            str = str.replace(' ', 'T');
-        }
-        const dt = new Date(str);
-        return isNaN(dt.getTime()) ? null : dt;
-    }
-
     function openStoreTrendsModal() {
         const modal = document.getElementById('storeTrendsModal');
         if (modal) {
@@ -2684,41 +2729,68 @@
             return storeMap[sKey];
         };
 
-        // 1. Process Staffing Records (Hires & Terms)
+        const staffingKeys = new Set();
+
+        // 1. Process Staffing Records (Hires & Terminations)
         (staffing || []).forEach(item => {
             const store = (item.store || '').toString().trim();
             if (!store || store.toLowerCase() === 'store #') return;
 
             const st = getOrCreateStore(store, item.doName || item.do);
 
+            // Record this entry to avoid double counting onboarding candidates later
+            if (item.name) {
+                staffingKeys.add(`${item.name.toLowerCase().trim()}_${store}`);
+            }
+
             const hDate = parseTrendDate(item.hireDate);
             const tDate = parseTrendDate(item.termDate);
 
-            // YTD Counts
-            if (hDate && hDate.getFullYear() === currentYear) st.ytd_hires++;
-            if (tDate && tDate.getFullYear() === currentYear) st.ytd_terms++;
+            // Dynamic Year-to-Date Counts (Independent evaluations)
+            if (hDate && hDate.getFullYear() === currentYear) {
+                st.ytd_hires++;
+            }
+            if (tDate && tDate.getFullYear() === currentYear) {
+                st.ytd_terms++;
+            }
 
-            // Period Match (Normalizes P08 vs P8)
-            const itemPeriod = String(item.period || '').trim().toUpperCase();
+            // Period Selection Match (Processed independently to avoid mutual exclusions)
             const normSelected = String(selectedPeriod).trim().toUpperCase();
 
-            const isPeriodMatch = (
-                normSelected === 'ALL' ||
-                itemPeriod === normSelected ||
-                (itemPeriod && normSelected && itemPeriod.replace('P0', 'P') === normSelected.replace('P0', 'P'))
-            );
+            if (hDate) {
+                const hPeriod = getDominosFiscalPeriod(hDate);
+                const isHirePeriodMatch = (
+                    normSelected === 'ALL' ||
+                    hPeriod.toUpperCase() === normSelected ||
+                    hPeriod.toUpperCase().replace('P0', 'P') === normSelected.replace('P0', 'P')
+                );
+                if (isHirePeriodMatch) {
+                    st.p_hires++;
+                }
+            }
 
-            if (isPeriodMatch) {
-                if (item.termDate) st.p_terms++;
-                else st.p_hires++;
+            if (tDate) {
+                const tPeriod = getDominosFiscalPeriod(tDate);
+                const isTermPeriodMatch = (
+                    normSelected === 'ALL' ||
+                    tPeriod.toUpperCase() === normSelected ||
+                    tPeriod.toUpperCase().replace('P0', 'P') === normSelected.replace('P0', 'P')
+                );
+                if (isTermPeriodMatch) {
+                    st.p_terms++;
+                }
             }
         });
 
-        // 2. Process Candidates (Active Hires in Onboarding)
+        // 2. Process Onboarding Candidates (Active Hires) - deduplicated against staffing
         (candidates || []).forEach(item => {
             if (item.hired) {
                 const store = (item.store || '').toString().trim();
                 if (!store || store.toLowerCase() === 'store #') return;
+
+                // Stop double-counting if candidate is already recorded in staffing sheet
+                const uniqueKey = `${(item.name || '').toLowerCase().trim()}_${store}`;
+                if (staffingKeys.has(uniqueKey)) return;
 
                 const st = getOrCreateStore(store, item.doName || item.do);
                 const hDate = parseTrendDate(item.ntoDate || item.lastUpdated || item.hireDate);
@@ -2735,6 +2807,7 @@
             }
         });
 
+        // Calculate nets correctly
         const storeList = Object.values(storeMap).map(s => {
             s.p_net = s.p_hires - s.p_terms;
             s.ytd_net = s.ytd_hires - s.ytd_terms;
@@ -2831,70 +2904,5 @@
         return matchedFromOnboarding;
     }
 </script>
-
-<!-- STORE HIRING TRENDS MODAL -->
-<div id="storeTrendsModal" class="brand-modal-overlay hidden">
-    <div class="brand-modal-card" style="max-width: 720px; width: 95%;">
-        <div class="brand-modal-brand-stripe"></div>
-        <div class="brand-modal-content" style="padding: 18px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--crust-med); padding-bottom: 8px; margin-bottom: 12px;">
-                <h3 style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 20px; text-transform: uppercase;">📊 Store Hiring Trends Audit</h3>
-                <button type="button" onclick="closeStoreTrendsModal()" style="background: var(--brand-grey); font-size: 13px; padding: 4px 10px;">✕ Close</button>
-            </div>
-
-            <!-- Controls Row -->
-            <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
-                <div style="flex: 1; min-width: 140px;">
-                    <label style="font-family: 'Subhead2'; font-size: 12px; font-weight: bold; color: var(--crust-burnt);">Filter Period:</label>
-                    <select id="trendPeriodFilter" onchange="renderStoreTrends()" style="padding: 6px; font-size: 14px; border-radius: 6px; border: 1px solid var(--crust-dark);">
-                        <option value="P08" selected>Current Period (P08)</option>
-                        <option value="ALL">All Periods (YTD Summary)</option>
-                        <option value="P01">Period 1 (P01)</option>
-                        <option value="P02">Period 2 (P02)</option>
-                        <option value="P03">Period 3 (P03)</option>
-                        <option value="P04">Period 4 (P04)</option>
-                        <option value="P05">Period 5 (P05)</option>
-                        <option value="P06">Period 6 (P06)</option>
-                        <option value="P07">Period 7 (P07)</option>
-                        <option value="P08">Period 8 (P08)</option>
-                        <option value="P09">Period 9 (P09)</option>
-                        <option value="P10">Period 10 (P10)</option>
-                        <option value="P11">Period 11 (P11)</option>
-                        <option value="P12">Period 12 (P12)</option>
-                        <option value="P13">Period 13 (P13)</option>
-                    </select>
-                </div>
-                <div style="flex: 1; min-width: 160px;">
-                    <label style="font-family: 'Subhead2'; font-size: 12px; font-weight: bold; color: var(--crust-burnt);">Sort Ranking By:</label>
-                    <select id="trendSortFilter" onchange="renderStoreTrends()" style="padding: 6px; font-size: 14px; border-radius: 6px; border: 1px solid var(--crust-dark);">
-                        <option value="store_asc">🏬 Store # (Numerical)</option>
-                        <option value="do_asc">👤 DO Name (Alphabetical)</option>
-                        <option value="net_desc">📈 Highest Net Gain</option>
-                        <option value="hires_desc">🎉 Most Hires</option>
-                        <option value="terms_desc">🔴 Most Terminations</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Trends Table Container -->
-            <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--crust-dark); border-radius: 8px;">
-                <table style="width: 100%; border-collapse: collapse; font-family: 'Condensed', sans-serif; font-size: 15px; text-align: left;">
-                    <thead>
-                        <tr style="background: var(--dark-blue); color: white; position: sticky; top: 0; font-family: 'Subhead2'; font-size: 13px; text-transform: uppercase;">
-                            <th style="padding: 8px 10px;">Store / DO</th>
-                            <th style="padding: 8px 10px; text-align: center;">Period Hires</th>
-                            <th style="padding: 8px 10px; text-align: center;">Period Terms</th>
-                            <th style="padding: 8px 10px; text-align: center;">Period Net</th>
-                            <th style="padding: 8px 10px; text-align: center;">YTD Hires</th>
-                            <th style="padding: 8px 10px; text-align: center;">YTD Terms</th>
-                            <th style="padding: 8px 10px; text-align: center;">YTD Net</th>
-                        </tr>
-                    </thead>
-                    <tbody id="storeTrendsTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
 </body>
 </html>
