@@ -1116,6 +1116,38 @@
         return "P08";
     }
 
+    // Global date parsing helper function
+    function parseCandidateDate(val) {
+        if (!val) return null;
+        if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
+        if (typeof val === 'number') {
+            const d = new Date(val);
+            return isNaN(d.getTime()) ? null : d;
+        }
+        let str = String(val).trim();
+        if (!str) return null;
+
+        // Safely parse MM/DD/YYYY format
+        if (str.includes('/')) {
+            const parts = str.split('/');
+            if (parts.length === 3) {
+                let m = parseInt(parts[0], 10) - 1;
+                let d = parseInt(parts[1], 10);
+                let y = parseInt(parts[2], 10);
+                if (y < 100) y += 2000;
+                const dt = new Date(y, m, d);
+                return isNaN(dt.getTime()) ? null : dt;
+            }
+        }
+        
+        // Convert local spacing safely
+        if (str.includes('-') && str.includes(' ')) {
+            str = str.replace(' ', 'T');
+        }
+        const dt = new Date(str);
+        return isNaN(dt.getTime()) ? null : dt;
+    }
+
     let candidates = [];
     let interviews = [];
     let staffing = [];
@@ -1446,8 +1478,6 @@
     }
 
     function switchView(view) {
-        currentView = view;
-        
         const btnOnb = document.getElementById('toggleOnb');
         const btnInt = document.getElementById('toggleInt');
         const btnStf = document.getElementById('toggleStf');
@@ -1463,6 +1493,7 @@
         const auditPeriod = document.getElementById('auditPeriodContent');
         const auditTitle = document.getElementById('auditTitleHeader');
 
+        currentView = view;
         document.getElementById('searchControl').value = '';
 
         [btnOnb, btnInt, btnStf, btnPay].forEach(b => {
@@ -1476,7 +1507,7 @@
             if (f) f.classList.add('hidden');
         });
 
-        // Update Hire Date option label depending on active view
+        // Update Sort option label
         const ntoOption = document.querySelector('#sortControl option[value="nto"]');
         if (ntoOption) {
             if (view === 'interviews') ntoOption.innerText = "📅 Sort: Interview Date";
@@ -1602,19 +1633,6 @@
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-        // Helper function to safely parse date strings across all browsers
-        const parseDate = (val) => {
-            if (!val) return 0;
-            if (val instanceof Date) return val.getTime();
-            if (typeof val === 'number') return val;
-            let str = String(val).trim();
-            if (str.includes('-') && str.includes(' ')) {
-                str = str.replace(' ', 'T');
-            }
-            const time = new Date(str).getTime();
-            return isNaN(time) ? 0 : time;
-        };
-
         // Sorting Comparator Logic
         const sortComparator = (a, b) => {
             if (sortBy === 'name') {
@@ -1644,11 +1662,14 @@
                 const rawA = a.ntoDate || a.hireDate || a.date;
                 const rawB = b.ntoDate || b.hireDate || b.date;
 
-                const dateA = parseDate(rawA);
-                const dateB = parseDate(rawB);
+                const dateA = parseCandidateDate(rawA);
+                const dateB = parseCandidateDate(rawB);
 
-                if (dateA !== dateB) {
-                    return dateB - dateA;
+                const timeA = dateA ? dateA.getTime() : 0;
+                const timeB = dateB ? dateB.getTime() : 0;
+
+                if (timeA !== timeB) {
+                    return timeB - timeA;
                 }
                 return (a.name || '').localeCompare(b.name || '');
             }
@@ -1656,11 +1677,14 @@
                 const rawA = a.lastUpdated || a.timestamp || a.updatedAt || a.date;
                 const rawB = b.lastUpdated || b.timestamp || b.updatedAt || b.date;
 
-                const dateA = parseDate(rawA);
-                const dateB = parseDate(rawB);
+                const dateA = parseCandidateDate(rawA);
+                const dateB = parseCandidateDate(rawB);
 
-                if (dateA !== dateB) {
-                    return dateB - dateA;
+                const timeA = dateA ? dateA.getTime() : 0;
+                const timeB = dateB ? dateB.getTime() : 0;
+
+                if (timeA !== timeB) {
+                    return timeB - timeA;
                 }
 
                 const idA = parseFloat(a.id) || 0;
@@ -2479,37 +2503,12 @@
             rangeEl.innerText = `${formatShortDate(startThisWeek)} - ${formatShortDate(endThisWeek)}`;
         }
 
-        // Helper to safely parse dates (MM/DD/YYYY, YYYY-MM-DD, or ISO strings)
-        const parseMetricDate = (val) => {
-            if (!val) return null;
-            if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
-            let str = String(val).trim();
-            if (!str) return null;
-
-            if (str.includes('/')) {
-                const parts = str.split('/');
-                if (parts.length === 3) {
-                    let m = parseInt(parts[0], 10) - 1;
-                    let d = parseInt(parts[1], 10);
-                    let y = parseInt(parts[2], 10);
-                    if (y < 100) y += 2000;
-                    const dt = new Date(y, m, d);
-                    return isNaN(dt.getTime()) ? null : dt;
-                }
-            }
-            if (str.includes('-') && str.includes(' ')) {
-                str = str.replace(' ', 'T');
-            }
-            const dt = new Date(str);
-            return isNaN(dt.getTime()) ? null : dt;
-        };
-
         // 1. WEEKLY ACTIVITY AUDIT (For Onboarding & Interviews views)
         let interviewsThisWeek = 0;
         let interviewsLastWeek = 0;
 
         (interviews || []).forEach(item => {
-            const d = parseMetricDate(item.date || item.gmDate || item.lastUpdated);
+            const d = parseCandidateDate(item.date || item.gmDate || item.lastUpdated);
             if (d) {
                 if (d >= startThisWeek && d <= endThisWeek) interviewsThisWeek++;
                 else if (d >= startLastWeek && d <= endLastWeek) interviewsLastWeek++;
@@ -2523,7 +2522,7 @@
         // Check Candidates (Onboarding)
         (candidates || []).forEach(item => {
             if (item.hired) {
-                const d = parseMetricDate(item.ntoDate || item.lastUpdated || item.hireDate);
+                const d = parseCandidateDate(item.ntoDate || item.lastUpdated || item.hireDate);
                 if (d) {
                     if (d >= startThisWeek && d <= endThisWeek) {
                         hiresThisWeek++;
@@ -2539,7 +2538,7 @@
         // Check Staffing (Hires)
         (staffing || []).forEach(item => {
             if (item.hireDate && (!item.id || !countedHireIds.has(String(item.id)))) {
-                const d = parseMetricDate(item.hireDate);
+                const d = parseCandidateDate(item.hireDate);
                 if (d) {
                     if (d >= startThisWeek && d <= endThisWeek) hiresThisWeek++;
                     else if (d >= startLastWeek && d <= endLastWeek) hiresLastWeek++;
@@ -2563,8 +2562,8 @@
         let yearHires = 0, yearTerms = 0;
 
         (staffing || []).forEach(item => {
-            const hDate = parseMetricDate(item.hireDate);
-            const tDate = parseMetricDate(item.termDate);
+            const hDate = parseCandidateDate(item.hireDate);
+            const tDate = parseCandidateDate(item.termDate);
 
             // Year-to-Date (YTD) counts
             if (hDate && hDate.getFullYear() === currentYear) yearHires++;
@@ -2592,7 +2591,7 @@
         // Include hires marked in onboarding for the current year
         (candidates || []).forEach(item => {
             if (item.hired && (!item.id || !countedHireIds.has(String(item.id)))) {
-                const d = parseMetricDate(item.ntoDate || item.lastUpdated || item.hireDate);
+                const d = parseCandidateDate(item.ntoDate || item.lastUpdated || item.hireDate);
                 if (d && d.getFullYear() === currentYear) {
                     yearHires++;
                 }
@@ -2743,8 +2742,8 @@
                 staffingKeys.add(`${item.name.toLowerCase().trim()}_${store}`);
             }
 
-            const hDate = parseTrendDate(item.hireDate);
-            const tDate = parseTrendDate(item.termDate);
+            const hDate = parseCandidateDate(item.hireDate);
+            const tDate = parseCandidateDate(item.termDate);
 
             // Dynamic Year-to-Date Counts (Independent evaluations)
             if (hDate && hDate.getFullYear() === currentYear) {
@@ -2793,7 +2792,7 @@
                 if (staffingKeys.has(uniqueKey)) return;
 
                 const st = getOrCreateStore(store, item.doName || item.do);
-                const hDate = parseTrendDate(item.ntoDate || item.lastUpdated || item.hireDate);
+                const hDate = parseCandidateDate(item.ntoDate || item.lastUpdated || item.hireDate);
                 const candPeriod = getDominosFiscalPeriod(hDate || now);
 
                 if (hDate && hDate.getFullYear() === currentYear) {
