@@ -718,6 +718,7 @@
                     </div>
 
                     <!-- 3. HIRES & TERMINATIONS FORM TEMPLATE -->
+                    <!-- 3. HIRES & TERMINATIONS FORM TEMPLATE -->
                     <div id="staffingFormFields" class="hidden">
                         <div class="form-group">
                             <label>Employee Full Name</label>
@@ -775,13 +776,10 @@
                                 <label>Cause of Action</label>
                                 <select id="stfCause">
                                     <option value="">Select Action Cause</option>
-                                    <option value="Voluntary - Personal">Voluntary - Personal Reasons</option>
-                                    <option value="Voluntary - Resigned">Voluntary - Resigned with Notice</option>
-                                    <option value="Voluntary - Better Opportunity">Voluntary - Better Opportunity</option>
-                                    <option value="Involuntary - Attendance">Involuntary - Attendance / No-Show</option>
-                                    <option value="Involuntary - Policy Violation">Involuntary - Policy Violation</option>
-                                    <option value="Involuntary - Performance">Involuntary - Performance</option>
-                                    <option value="Job Abandonment">Job Abandonment (Walk-out / NCNS)</option>
+                                    <option value="Abandoned job">Abandoned job</option>
+                                    <option value="Resignation">Resignation</option>
+                                    <option value="Fired">Fired</option>
+                                    <option value="LOA">LOA</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -791,13 +789,28 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Reason of Action (Detailed)</label>
-                            <textarea id="stfReason" placeholder="Specify exact reason for termination / exit..."></textarea>
+                            <label>Reason for Action</label>
+                            <select id="stfReason">
+                                <option value="">Select Reason</option>
+                                <option value="Quit without notice">Quit without notice</option>
+                                <option value="Illness">Illness</option>
+                                <option value="Problem with GM">Problem with GM</option>
+                                <option value="Problem with Co-worker">Problem with Co-worker</option>
+                                <option value="Attendance">Attendance</option>
+                                <option value="Insubordination">Insubordination</option>
+                                <option value="Violation of Rules">Violation of Rules</option>
+                                <option value="Unsatisfactory Performance">Unsatisfactory Performance</option>
+                                <option value="Medical Leave">Medical Leave</option>
+                                <option value="Personal Leave">Personal Leave</option>
+                                <option value="Returning to School">Returning to School</option>
+                                <option value="Gross Negligence">Gross Negligence</option>
+                                <option value="Other">Other</option>
+                            </select>
                         </div>
 
                         <div class="form-group">
-                            <label>General Staffing Notes</label>
-                            <textarea id="stfNotes" placeholder="Additional notes or bonus log context..."></textarea>
+                            <label>General Staffing Notes / Explain Reason in Detail</label>
+                            <textarea id="stfNotes" placeholder="Enter detailed explanation here..."></textarea>
                         </div>
                     </div>
 
@@ -880,7 +893,10 @@
         <div class="notes-panel">
             <div id="metricsBox" style="background: var(--crust-light); border: 2px solid var(--crust-dark); border-radius: var(--border-radius); padding: 14px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); color: var(--crust-burnt);">
                 <div style="display: flex; justify-content: space-between; border-bottom: 2px solid var(--crust-med); padding-bottom: 8px; align-items: center;">
-                    <span id="auditTitleHeader" style="font-family: 'ExtraBold', sans-serif; font-size: 18px; color: var(--dark-blue); text-transform: uppercase; letter-spacing: 0.5px;">Weekly Activity Audit</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <span id="auditTitleHeader" style="font-family: 'ExtraBold', sans-serif; font-size: 18px; color: var(--dark-blue); text-transform: uppercase; letter-spacing: 0.5px;">Weekly Activity Audit</span>
+                        <button type="button" onclick="openStoreTrendsModal()" style="font-size: 11px; padding: 4px 8px; background: var(--med-blue); color: white; border-radius: 4px; border: none; cursor: pointer; text-transform: uppercase; font-family: 'Subhead2', sans-serif;">📊 Store Trends</button>
+                    </div>
                     <span id="metricsWeekRange" style="font-size: 13px; font-family: 'Compact'; color: var(--crust-deep); font-weight: bold;"></span>
                 </div>
                 
@@ -1321,7 +1337,7 @@
                 candidates = data.onboarding || [];
                 interviews = data.interviews || [];
                 staffing = data.staffing || [];
-                paycards = data.paycards || [];
+                paycards = processPayCards(data);
                 
                 switchView('onboarding');
                 initScratchpad();
@@ -1771,12 +1787,15 @@
             document.getElementById('stfPosition').value = item.position || '';
             document.getElementById('stfStore').value = item.store || '';
             document.getElementById('stfDo').value = item.doName || '';
-            document.getElementById('stfHireDate').value = item.hireDate || '';
-            document.getElementById('stfTermDate').value = item.termDate || '';
+            
+            // Convert sheet dates to YYYY-MM-DD so calendar inputs display them
+            document.getElementById('stfHireDate').value = formatDateForInput(item.hireDate);
+            document.getElementById('stfTermDate').value = formatDateForInput(item.termDate);
+            
             document.getElementById('stfPeriod').value = item.period || getDominosFiscalPeriod(item.termDate || item.hireDate);
-            document.getElementById('stfRehire').value = item.rehireEligible || 'Yes';
-            document.getElementById('stfCause').value = item.causeOfAction || '';
-            document.getElementById('stfReason').value = item.reasonOfAction || '';
+            setSelectValueCaseInsensitive('stfRehire', item.rehireEligible || 'Yes');
+            setSelectValueCaseInsensitive('stfCause', item.causeOfAction || '');
+            setSelectValueCaseInsensitive('stfReason', item.reasonOfAction || '');
             document.getElementById('stfNotes').value = item.notes || '';
             document.getElementById('stfGmName').value = item.gmName || item.gm || '';
 
@@ -2016,7 +2035,7 @@ function clearForm() {
             candidates = data.onboarding || [];
             interviews = data.interviews || [];
             staffing = data.staffing || [];
-            paycards = data.paycards || [];
+            paycards = processPayCards(data);
 
             renderList();
             updateAuditMetrics();
@@ -2135,7 +2154,6 @@ function clearForm() {
             candidates = data.onboarding || [];
             interviews = data.interviews || [];
             staffing = data.staffing || [];
-            paycards = data.paycards || [];
             renderList();
             showLoader(false);
         })
@@ -2510,7 +2528,7 @@ function clearForm() {
                 candidates = data.onboarding || [];
                 interviews = data.interviews || [];
                 staffing = data.staffing || [];
-                paycards = data.paycards || [];
+                paycards = processPayCards(data);
                 renderList();
                 updateAuditMetrics();
             });
@@ -2537,6 +2555,233 @@ function clearForm() {
             }
         }
     }
+
+    // Helper to convert sheet dates (7/24/2026) to YYYY-MM-DD for HTML <input type="date">
+    function formatDateForInput(dateStr) {
+        if (!dateStr) return '';
+        let str = String(dateStr).trim();
+        if (str.includes('/')) {
+            const parts = str.split('/');
+            if (parts.length === 3) {
+                let m = parts[0].padStart(2, '0');
+                let d = parts[1].padStart(2, '0');
+                let y = parts[2];
+                if (y.length === 2) y = '20' + y;
+                return `${y}-${m}-${d}`;
+            }
+        }
+        const d = new Date(str);
+        if (!isNaN(d.getTime())) {
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+        return '';
+    }
+
+    function openStoreTrendsModal() {
+    const modal = document.getElementById('storeTrendsModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        const currentPeriod = getDominosFiscalPeriod(new Date());
+        const periodSelect = document.getElementById('trendPeriodFilter');
+        if (periodSelect) periodSelect.value = currentPeriod;
+        renderStoreTrends();
+        }
+    }
+
+    function closeStoreTrendsModal() {
+        const modal = document.getElementById('storeTrendsModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function renderStoreTrends() {
+        const tbody = document.getElementById('storeTrendsTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        const selectedPeriod = document.getElementById('trendPeriodFilter').value;
+        const sortBy = document.getElementById('trendSortFilter').value;
+
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const storeMap = {};
+
+        // Build store metrics from staffing records
+        (staffing || []).forEach(item => {
+            const store = (item.store || '').toString().trim();
+            if (!store || store === 'Store #') return;
+
+            if (!storeMap[store]) {
+                storeMap[store] = {
+                    store: store,
+                    doName: item.doName || item.do || 'N/A',
+                    p_hires: 0,
+                    p_terms: 0,
+                    ytd_hires: 0,
+                    ytd_terms: 0
+                };
+            }
+
+            const hDate = parseMetricDate(item.hireDate);
+            const tDate = parseMetricDate(item.termDate);
+
+            // YTD (2026)
+            if (hDate && hDate.getFullYear() === currentYear) storeMap[store].ytd_hires++;
+            if (tDate && tDate.getFullYear() === currentYear) storeMap[store].ytd_terms++;
+
+            // Period Specific
+            if (selectedPeriod === 'ALL' || item.period === selectedPeriod) {
+                if (item.termDate) storeMap[store].p_terms++;
+                else storeMap[store].p_hires++;
+            }
+        });
+
+        const storeList = Object.values(storeMap).map(s => {
+            s.p_net = s.p_hires - s.p_terms;
+            s.ytd_net = s.ytd_hires - s.ytd_terms;
+            return s;
+        });
+
+        // Ranking Sort Logic
+        storeList.sort((a, b) => {
+            if (sortBy === 'net_desc') return b.p_net - a.p_net;
+            if (sortBy === 'hires_desc') return b.p_hires - a.p_hires;
+            if (sortBy === 'terms_desc') return b.p_terms - a.p_terms;
+            if (sortBy === 'store_asc') return parseInt(a.store, 10) - parseInt(b.store, 10);
+            return 0;
+        });
+
+        if (storeList.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px; color:#888;">No staffing data available for this selection.</td></tr>`;
+            return;
+        }
+
+        storeList.forEach((s, idx) => {
+            const row = document.createElement('tr');
+            row.style.background = idx % 2 === 0 ? '#ffffff' : 'var(--crust-light)';
+            row.style.borderBottom = '1px solid var(--crust-med)';
+
+            const formatNet = (net) => {
+                const color = net > 0 ? 'var(--success-green)' : (net < 0 ? 'var(--brand-red)' : 'var(--text-dark)');
+                const sign = net > 0 ? '+' : '';
+                return `<strong style="color:${color};">${sign}${net}</strong>`;
+            };
+
+            row.innerHTML = `
+                <td style="padding: 8px 10px; font-weight: bold; color: var(--dark-blue);">
+                    Store #${s.store} <span style="font-size:12px; color:var(--text-light); font-weight:normal;">(DO: ${s.doName})</span>
+                </td>
+                <td style="padding: 8px 10px; text-align: center; color: var(--med-blue); font-weight: bold;">${s.p_hires}</td>
+                <td style="padding: 8px 10px; text-align: center; color: var(--brand-red); font-weight: bold;">${s.p_terms}</td>
+                <td style="padding: 8px 10px; text-align: center;">${formatNet(s.p_net)}</td>
+                <td style="padding: 8px 10px; text-align: center;">${s.ytd_hires}</td>
+                <td style="padding: 8px 10px; text-align: center;">${s.ytd_terms}</td>
+                <td style="padding: 8px 10px; text-align: center;">${formatNet(s.ytd_net)}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+    // Automatically pull candidates from Onboarding who have Pay Card Status = "Yes"
+    function processPayCards(data) {
+        const onboardingList = data.onboarding || [];
+        const serverPaycards = data.paycards || [];
+        
+        // Find all onboarding candidates with payCard = "Yes"
+        const matchedFromOnboarding = onboardingList.filter(item => {
+            const val = (item.payCard || "").toString().trim().toLowerCase();
+            return val === "yes" || val === "true" || val === "1" || val.includes("yes");
+        }).map(item => {
+            const existing = serverPaycards.find(p => p.id === item.id);
+            return {
+                id: item.id,
+                name: item.name,
+                position: item.position,
+                store: item.store,
+                doName: item.doName,
+                ntoDate: item.ntoDate,
+                notes: item.notes,
+                cardReceived: existing ? existing.cardReceived : false,
+                registered: existing ? existing.registered : false,
+                ddReceived: existing ? existing.ddReceived : false,
+                ddEntered: existing ? existing.ddEntered : false,
+                noticeSentDate: existing ? existing.noticeSentDate : ''
+            };
+        });
+
+        // Keep any manual pay cards added directly in pay cards tab
+        serverPaycards.forEach(sp => {
+            if (!matchedFromOnboarding.some(m => m.id === sp.id)) {
+                matchedFromOnboarding.push(sp);
+            }
+        });
+
+        return matchedFromOnboarding;
+    }
 </script>
+<!-- STORE HIRING TRENDS MODAL -->
+<div id="storeTrendsModal" class="brand-modal-overlay hidden">
+    <div class="brand-modal-card" style="max-width: 720px; width: 95%;">
+        <div class="brand-modal-brand-stripe"></div>
+        <div class="brand-modal-content" style="padding: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--crust-med); padding-bottom: 8px; margin-bottom: 12px;">
+                <h3 style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 20px; text-transform: uppercase;">📊 Store Hiring Trends Audit</h3>
+                <button type="button" onclick="closeStoreTrendsModal()" style="background: var(--brand-grey); font-size: 13px; padding: 4px 10px;">✕ Close</button>
+            </div>
+
+            <!-- Controls Row -->
+            <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 140px;">
+                    <label style="font-family: 'Subhead2'; font-size: 12px; font-weight: bold; color: var(--crust-burnt);">Filter Period:</label>
+                    <select id="trendPeriodFilter" onchange="renderStoreTrends()" style="padding: 6px; font-size: 14px; border-radius: 6px; border: 1px solid var(--crust-dark);">
+                        <option value="P08" selected>Current Period (P08)</option>
+                        <option value="ALL">All Periods (YTD Summary)</option>
+                        <option value="P01">Period 1 (P01)</option>
+                        <option value="P02">Period 2 (P02)</option>
+                        <option value="P03">Period 3 (P03)</option>
+                        <option value="P04">Period 4 (P04)</option>
+                        <option value="P05">Period 5 (P05)</option>
+                        <option value="P06">Period 6 (P06)</option>
+                        <option value="P07">Period 7 (P07)</option>
+                        <option value="P08">Period 8 (P08)</option>
+                        <option value="P09">Period 9 (P09)</option>
+                        <option value="P10">Period 10 (P10)</option>
+                        <option value="P11">Period 11 (P11)</option>
+                        <option value="P12">Period 12 (P12)</option>
+                        <option value="P13">Period 13 (P13)</option>
+                    </select>
+                </div>
+                <div style="flex: 1; min-width: 160px;">
+                    <label style="font-family: 'Subhead2'; font-size: 12px; font-weight: bold; color: var(--crust-burnt);">Sort Ranking By:</label>
+                    <select id="trendSortFilter" onchange="renderStoreTrends()" style="padding: 6px; font-size: 14px; border-radius: 6px; border: 1px solid var(--crust-dark);">
+                        <option value="net_desc">📈 Highest Net Gain</option>
+                        <option value="hires_desc">🎉 Most Hires</option>
+                        <option value="terms_desc">🔴 Most Terminations</option>
+                        <option value="store_asc">🏬 Store # (Ascending)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Trends Table Container -->
+            <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--crust-dark); border-radius: 8px;">
+                <table style="width: 100%; border-collapse: collapse; font-family: 'Condensed', sans-serif; font-size: 15px; text-align: left;">
+                    <thead>
+                        <tr style="background: var(--dark-blue); color: white; position: sticky; top: 0; font-family: 'Subhead2'; font-size: 13px; text-transform: uppercase;">
+                            <th style="padding: 8px 10px;">Store / DO</th>
+                            <th style="padding: 8px 10px; text-align: center;">Period Hires</th>
+                            <th style="padding: 8px 10px; text-align: center;">Period Terms</th>
+                            <th style="padding: 8px 10px; text-align: center;">Period Net</th>
+                            <th style="padding: 8px 10px; text-align: center;">YTD Hires</th>
+                            <th style="padding: 8px 10px; text-align: center;">YTD Terms</th>
+                            <th style="padding: 8px 10px; text-align: center;">YTD Net</th>
+                        </tr>
+                    </thead>
+                    <tbody id="storeTrendsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
