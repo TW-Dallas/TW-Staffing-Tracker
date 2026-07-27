@@ -1639,6 +1639,12 @@
 
         // Sorting Comparator Logic
         const sortComparator = (a, b) => {
+            // Push "Hired" candidates to the bottom of the list for onboarding
+            if (currentView === 'onboarding') {
+                if (a.hired && !b.hired) return 1;
+                if (!a.hired && b.hired) return -1;
+            }
+
             if (sortBy === 'name') {
                 return (a.name || '').localeCompare(b.name || '');
             }
