@@ -3073,12 +3073,12 @@
                 </div>
                 <div style="flex: 1;">
                     <select class="nto-attendance-select" data-name="${item.name}" data-store="${item.store}" data-position="${item.position || 'CSR'}" data-shirt="${item.shirtSize || ''}" data-hat="${item.hatStyle || ''}" data-paycard="${item.payCard || ''}" style="padding: 6px; font-size: 14px;">
-                        <option value="">Select Status</option>
+                        <option value="" selected disabled>Select Status...</option>
                         <option value="In Lobby">🏨 In Lobby (Checked In)</option>
                         <option value="In Class">📖 In Class</option>                        
                         <option value="Not in NTO">❌ Not in NTO (Absent)</option>
                         <option value="Left Early">⚠️ Left Early</option>
-                        <option value="NTO Complete" selected>🎓 NTO Complete</option>
+                        <option value="NTO Complete">🎓 NTO Complete</option>
                     </select>
                 </div>
             `;
@@ -3098,7 +3098,10 @@
         }
 
         const rosterData = [];
+        let missingSelection = false;
+
         rosterElements.forEach(el => {
+            if (!el.value) missingSelection = true;
             rosterData.push({
                 name: el.getAttribute('data-name'),
                 store: el.getAttribute('data-store'),
@@ -3109,6 +3112,11 @@
                 attendance: el.value
             });
         });
+
+        if (missingSelection) {
+            showBrandAlert("Please select an attendance status for all trainees on the roster before concluding class.", "Missing Attendance Status");
+            return;
+        }
 
         const attendedCount = rosterData.filter(r => 
             r.attendance === 'NTO Complete' || r.attendance === 'In Class' || r.attendance === 'Attended'
