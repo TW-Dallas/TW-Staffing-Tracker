@@ -2512,8 +2512,8 @@
             const row = document.createElement('div');
             row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; border-bottom: 1px dashed var(--crust-med);';
             
-            // Left Side: Checkbox & Task Label
-            const leftPart = document.createElement('label');
+            // Left Side: Checkbox & Task Label (<div> prevents auto-check on click)
+            const leftPart = document.createElement('div');
             leftPart.style.cssText = 'display: flex; align-items: center; gap: 8px; cursor: pointer; flex: 1; overflow: hidden;';
             
             const chk = document.createElement('input');
@@ -2528,7 +2528,11 @@
             
             // Click text to edit item directly in UI!
             labelText.title = "Click to edit task";
-            labelText.onclick = (e) => { e.stopPropagation(); editChecklistItem(item.id); };
+            labelText.onclick = (e) => { 
+                e.preventDefault(); 
+                e.stopPropagation(); 
+                editChecklistItem(item.id); 
+            };
             
             leftPart.appendChild(chk);
             leftPart.appendChild(labelText);
