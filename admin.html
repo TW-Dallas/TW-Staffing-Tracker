@@ -1797,7 +1797,7 @@
             });
 
         } else if (currentView === 'staffing') {
-            let filtered = staffing.filter(item => !searchQuery || (item.name && item.name.toLowerCase().includes(searchQuery)));
+            let filtered = staffing.filter(item => matchesSearchQuery(item, searchQuery));
             filtered.sort(sortComparator);
 
             if (filtered.length === 0) {
@@ -1827,7 +1827,7 @@
             });
 
         } else if (currentView === 'interviews') {
-            let filteredInterviews = interviews.filter(item => !searchQuery || (item.name && item.name.toLowerCase().includes(searchQuery)));
+            let filteredInterviews = interviews.filter(item => matchesSearchQuery(item, searchQuery));
             filteredInterviews.sort(sortComparator);
 
             if (filteredInterviews.length === 0) {
@@ -1857,7 +1857,7 @@
 
         } else {
             let filteredCandidates = candidates.filter(item => {
-                if (searchQuery && (!item.name || !item.name.toLowerCase().includes(searchQuery))) return false;
+                if (searchQuery && !matchesSearchQuery(item, searchQuery)) return false;
                 const isTerminalState = item.hired || item.ineligible || item.inactive;
                 if (isTerminalState && item.lastUpdated) {
                     const updatedDate = new Date(item.lastUpdated);
@@ -3269,6 +3269,25 @@
             const formatted = formatTimeDisplayFrontEnd(inputEl.value);
             if (formatted) inputEl.value = formatted;
         }
+    }
+
+    function matchesSearchQuery(item, query) {
+        if (!query) return true;
+        const q = query.toLowerCase().trim();
+        const digitsOnly = q.replace(/\D/g, ''); // Extracts digits for phone search
+
+        // 1. Name Match
+        const nameMatch = item.name && item.name.toLowerCase().includes(q);
+        
+        // 2. Email Match
+        const emailMatch = item.email && item.email.toLowerCase().includes(q);
+        
+        // 3. Phone Match (Formatted or Digits only)
+        const phoneStr = (item.phoneNumber || '').toLowerCase();
+        const phoneDigits = phoneStr.replace(/\D/g, '');
+        const phoneMatch = phoneStr.includes(q) || (digitsOnly.length >= 3 && phoneDigits.includes(digitsOnly));
+
+        return nameMatch || emailMatch || phoneMatch;
     }
 </script>
 </body>
