@@ -657,7 +657,7 @@
                         <div class="form-row flex-three">
                             <div class="form-group">
                                 <label>Interview Date</label>
-                                <input type="text" id="intDate" placeholder="MM/DD/YYYY" oninput="autoCalculateDayOfWeek()">
+                                <input type="date" id="intDate" placeholder="MM/DD/YYYY" oninput="autoCalculateDayOfWeek()">
                             </div>
                             <div class="form-group">
                                 <label>Day of Week</label>
@@ -674,7 +674,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Time</label>
-                                <input type="text" id="intTime" placeholder="e.g., 10:00 AM">
+                                <input type="date" id="intTime" placeholder="e.g., 10:00 AM">
                             </div>
                         </div>
 
@@ -1932,11 +1932,11 @@
             document.getElementById('intDo').value = item.doName || '';
             document.getElementById('intPhone').value = item.phoneNumber || '';
             document.getElementById('intEmail').value = item.email || '';
-            document.getElementById('intDate').value = item.date || '';
+            document.getElementById('intDate').value = formatDateForInput(item.date);
             document.getElementById('intDay').value = item.day || '';
             document.getElementById('intTime').value = item.time || '';
             setSelectValueCaseInsensitive('intStatus', item.status || 'Phone Interview');
-            document.getElementById('intGmDate').value = item.gmDate || '';
+            document.getElementById('intGmDate').value = formatDateForInput(item.gmDate);
             document.getElementById('intGmTime').value = item.gmTime || '';
             document.getElementById('intStatusUpdates').value = item.statusUpdates || '';
             document.getElementById('intAvailability').value = item.availability || '';
@@ -2291,6 +2291,12 @@
         .then(res => res.json())
         .then(result => {
             if (!result.success) throw new Error(result.error || "Email delivery failed");
+            
+            // Auto-check "NTO Signup Link Sent" in UI
+            if (emailType === "orientation") {
+                document.getElementById('checkNtoLink').checked = true;
+            }
+
             showBrandAlert(`Email successfully delivered!`, "Email Delivered");
             const city = getCityFromUser(username);
             return fetch(`${API_URL}?city=${city}`);
@@ -2664,7 +2670,14 @@
         const dateStr = document.getElementById('intDate').value.trim();
         if (!dateStr) return;
         let year, month, day;
-        if (dateStr.includes('/')) {
+        if (dateStr.includes('-')) {
+            const parts = dateStr.split('-');
+            if (parts.length === 3) {
+                year = parseInt(parts[0], 10);
+                month = parseInt(parts[1], 10);
+                day = parseInt(parts[2], 10);
+            }
+        } else if (dateStr.includes('/')) {
             const parts = dateStr.split('/');
             if (parts.length === 3) {
                 month = parseInt(parts[0], 10);
