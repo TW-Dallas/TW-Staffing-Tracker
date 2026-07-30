@@ -2150,10 +2150,17 @@
             payload.missingDocs = missingDocsValue;
         }
 
+        let savedNewId = null;
+
         fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
         .then(res => res.json())
         .then(result => {
             if (!result.success) throw new Error(result.error || "Save failed");
+            // Store newly generated ID from Google Apps Script
+            if (result.id) {
+                savedNewId = result.id;
+                currentSelectedId = result.id;
+            }
             const city = getCityFromUser(username);
             return fetch(`${API_URL}?city=${city}`);
         })
@@ -2167,10 +2174,20 @@
             renderList();
             updateAuditMetrics();
             
-            // Re-select current candidate so checkmarks stay visible on save
-            if (currentSelectedId) {
-                const savedItem = candidates.find(c => c.id === currentSelectedId);
-                if (savedItem) selectCandidate(savedItem);
+            // Auto-select newly created or updated record across all workspace views
+            const targetId = currentSelectedId || savedNewId;
+            if (targetId) {
+                let savedItem = null;
+                if (currentView === 'paycards') savedItem = paycards.find(c => c.id === targetId);
+                else if (currentView === 'staffing') savedItem = staffing.find(c => c.id === targetId);
+                else if (currentView === 'interviews') savedItem = interviews.find(c => c.id === targetId);
+                else savedItem = candidates.find(c => c.id === targetId);
+
+                if (savedItem) {
+                    selectCandidate(savedItem);
+                } else {
+                    clearForm();
+                }
             } else {
                 clearForm();
             }
@@ -2292,8 +2309,10 @@
         .then(result => {
             if (!result.success) throw new Error(result.error || "Email delivery failed");
             
-            // Auto-check "NTO Signup Link Sent" in UI
-            if (emailType === "orientation") {
+            // Auto-check respective stage checkboxes in UI
+            if (emailType === "welcome") {
+                document.getElementById('checkOnbSent').checked = true;
+            } else if (emailType === "orientation") {
                 document.getElementById('checkNtoLink').checked = true;
             }
 
