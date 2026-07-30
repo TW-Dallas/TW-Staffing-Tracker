@@ -3227,6 +3227,9 @@
             showLoader(false);
             if (!result.success) throw new Error(result.error || "Failed to conclude class.");
             showBrandAlert(result.message, "Class Concluded!");
+
+            // 👈 ADD THIS SINGLE LINE HERE!
+            silentSync();
         })
         .catch(err => {
             showLoader(false);
