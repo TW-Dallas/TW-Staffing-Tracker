@@ -3032,11 +3032,12 @@
                 </div>
                 <div style="flex: 1;">
                     <select class="nto-attendance-select" data-name="${item.name}" data-store="${item.store}" data-position="${item.position || 'CSR'}" data-shirt="${item.shirtSize || ''}" data-hat="${item.hatStyle || ''}" data-paycard="${item.payCard || ''}" style="padding: 6px; font-size: 14px;">
-                        <option value="NTO Complete" selected>🎓 NTO Complete</option>
-                        <option value="In Class">📖 In Class</option>
+                        <option value="">Select Status</option>
                         <option value="In Lobby">🏨 In Lobby (Checked In)</option>
+                        <option value="In Class">📖 In Class</option>                        
                         <option value="Not in NTO">❌ Not in NTO (Absent)</option>
                         <option value="Left Early">⚠️ Left Early</option>
+                        <option value="NTO Complete" selected>🎓 NTO Complete</option>
                     </select>
                 </div>
             `;
