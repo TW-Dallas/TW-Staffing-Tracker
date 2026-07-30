@@ -2501,23 +2501,20 @@
         }).catch(err => console.warn("Notes offline save active"));
     }
 
+    /* --- UPGRADED UI SCRATCHPAD ENGINE --- */
+
     function renderChecklist() {
         const container = document.getElementById('checklistItems');
         if (!container) return;
         container.innerHTML = '';
         
-        checklistItemsData.forEach(item => {
+        checklistItemsData.forEach((item, index) => {
             const row = document.createElement('div');
-            row.style.display = 'flex';
-            row.style.alignItems = 'center';
-            row.style.justifyContent = 'space-between';
-            row.style.gap = '8px';
+            row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; border-bottom: 1px dashed var(--crust-med);';
             
+            // Left Side: Checkbox & Task Label
             const leftPart = document.createElement('label');
-            leftPart.style.display = 'flex';
-            leftPart.style.alignItems = 'center';
-            leftPart.style.gap = '8px';
-            leftPart.style.cursor = 'pointer';
+            leftPart.style.cssText = 'display: flex; align-items: center; gap: 8px; cursor: pointer; flex: 1; overflow: hidden;';
             
             const chk = document.createElement('input');
             chk.type = 'checkbox';
@@ -2526,23 +2523,84 @@
             
             const labelText = document.createElement('span');
             labelText.innerText = item.text;
+            labelText.style.cssText = 'font-size: 16px; word-break: break-word; color: var(--crust-burnt);';
             if (item.done) labelText.style.textDecoration = 'line-through';
+            
+            // Click text to edit item directly in UI!
+            labelText.title = "Click to edit task";
+            labelText.onclick = (e) => { e.stopPropagation(); editChecklistItem(item.id); };
             
             leftPart.appendChild(chk);
             leftPart.appendChild(labelText);
             
+            // Right Side Controls: Up, Down, Delete
+            const controls = document.createElement('div');
+            controls.style.cssText = 'display: flex; gap: 2px; align-items: center;';
+            
+            // Move Up Button ▲
+            if (index > 0) {
+                const upBtn = document.createElement('button');
+                upBtn.type = 'button';
+                upBtn.innerHTML = '▲';
+                upBtn.title = "Move Up";
+                upBtn.style.cssText = 'background: transparent; color: var(--dark-blue); border: none; padding: 2px 4px; font-size: 12px; cursor: pointer; border-radius: 3px;';
+                upBtn.onclick = (e) => { e.stopPropagation(); moveChecklistItem(item.id, -1); };
+                controls.appendChild(upBtn);
+            }
+            
+            // Move Down Button ▼
+            if (index < checklistItemsData.length - 1) {
+                const downBtn = document.createElement('button');
+                downBtn.type = 'button';
+                downBtn.innerHTML = '▼';
+                downBtn.title = "Move Down";
+                downBtn.style.cssText = 'background: transparent; color: var(--dark-blue); border: none; padding: 2px 4px; font-size: 12px; cursor: pointer; border-radius: 3px;';
+                downBtn.onclick = (e) => { e.stopPropagation(); moveChecklistItem(item.id, 1); };
+                controls.appendChild(downBtn);
+            }
+            
+            // Delete Button ×
             const delBtn = document.createElement('button');
             delBtn.type = 'button';
             delBtn.innerHTML = '×';
-            delBtn.style.background = 'transparent';
-            delBtn.style.color = 'var(--brand-grey)';
-            delBtn.style.border = 'none';
+            delBtn.title = "Delete Task";
+            delBtn.style.cssText = 'background: transparent; color: var(--brand-grey); border: none; padding: 2px 4px; font-size: 18px; font-weight: bold; cursor: pointer;';
             delBtn.onclick = (e) => { e.stopPropagation(); deleteChecklistItem(item.id); };
+            controls.appendChild(delBtn);
             
             row.appendChild(leftPart);
-            row.appendChild(delBtn);
+            row.appendChild(controls);
             container.appendChild(row);
         });
+    }
+
+    // Move Item Up (-1) or Down (+1) in UI
+    function moveChecklistItem(id, direction) {
+        const index = checklistItemsData.findIndex(item => item.id === id);
+        if (index === -1) return;
+        const newIndex = index + direction;
+        if (newIndex < 0 || newIndex >= checklistItemsData.length) return;
+
+        // Swap position in array
+        const temp = checklistItemsData[index];
+        checklistItemsData[index] = checklistItemsData[newIndex];
+        checklistItemsData[newIndex] = temp;
+
+        saveChecklist();
+        renderChecklist();
+    }
+
+    // Click Task Text to Edit in UI
+    async function editChecklistItem(id) {
+        const item = checklistItemsData.find(i => i.id === id);
+        if (!item) return;
+
+        const newText = await showBrandPrompt("Edit task description:", item.text, "Edit Task");
+        if (newText !== null && newText.trim() !== "") {
+            item.text = newText.trim();
+            saveChecklist();
+            renderChecklist();
+        }
     }
 
     function handleChecklistKeydown(e) {
