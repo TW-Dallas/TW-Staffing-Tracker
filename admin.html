@@ -888,7 +888,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Class End Time</label>
-                                <input type="text" id="ntoEndTime" value="4:30 PM" placeholder="e.g., 4:30 PM">
+                                <input type="text" id="ntoEndTime" value="4:30 PM" placeholder="e.g. 18:30 or 4:30 PM" onblur="autoFormatEndTimeInput()">
                             </div>
                         </div>
 
@@ -2767,8 +2767,8 @@
 
     // Helper to convert sheet dates (7/24/2026) to YYYY-MM-DD for HTML <input type="date">
     function formatDateForInput(dateStr) {
-        if (!dateStr) return '';
-        let str = String(dateStr).trim();
+    if (!dateStr || dateStr === "null" || dateStr === "undefined") return '';
+    let str = String(dateStr).trim();
         if (str.includes('/')) {
             const parts = str.split('/');
             if (parts.length === 3) {
@@ -3089,7 +3089,11 @@
     // Trigger Conclude NTO Class
     async function concludeNtoClass() {
         const classDate = document.getElementById('ntoClassDate').value;
-        const endTime = document.getElementById('ntoEndTime').value.trim();
+        const rawEndTime = document.getElementById('ntoEndTime').value.trim();
+        
+        // Format military time (e.g. 18:30 -> 6:30 PM) for the modal
+        const endTime = formatTimeDisplayFrontEnd(rawEndTime) || rawEndTime;
+        document.getElementById('ntoEndTime').value = endTime; // Update input box text
 
         const rosterElements = document.querySelectorAll('.nto-attendance-select');
         if (rosterElements.length === 0) {
@@ -3122,6 +3126,7 @@
             r.attendance === 'NTO Complete' || r.attendance === 'In Class' || r.attendance === 'Attended'
         ).length;
 
+        // Modal will now show 6:30 PM even if you typed 18:30 or 1830!
         const confirmMsg = `Are you sure you want to conclude class and send all roster emails?\n\n` +
                         `• Class Date: ${classDate}\n` +
                         `• End Time: ${endTime}\n` +
@@ -3156,6 +3161,52 @@
             showLoader(false);
             showBrandAlert("Error concluding class: " + err.message, "System Error");
         });
+    }
+
+    // Converts 18:30 or 1830 to "6:30 PM" for Frontend
+    function formatTimeDisplayFrontEnd(tStr) {
+        if (!tStr) return '';
+        let str = tStr.toString().trim().toUpperCase();
+        let isPm = str.includes("PM");
+        let isAm = str.includes("AM");
+        let clean = str.replace(/(AM|PM|\s)/g, "");
+        
+        let h = 0, m = 0;
+        if (clean.includes(":")) {
+            let parts = clean.split(":");
+            h = parseInt(parts[0], 10) || 0;
+            m = parseInt(parts[1], 10) || 0;
+        } else {
+            let num = parseInt(clean, 10) || 0;
+            if (num >= 100) {
+                h = Math.floor(num / 100);
+                m = num % 100;
+            } else {
+                h = num;
+                m = 0;
+            }
+        }
+        if (isPm && h < 12) h += 12;
+        if (isAm && h === 12) h = 0;
+        
+        let totalMins = (h * 60) + m;
+        let finalH = Math.floor(totalMins / 60) % 24;
+        let finalM = totalMins % 60;
+        let period = finalH >= 12 ? "PM" : "AM";
+        let displayH = finalH % 12;
+        if (displayH === 0) displayH = 12;
+        let displayM = finalM < 10 ? "0" + finalM : finalM;
+        
+        return `${displayH}:${displayM} ${period}`;
+    }
+
+    // Automatically formats the input field when you finish typing
+    function autoFormatEndTimeInput() {
+        const inputEl = document.getElementById('ntoEndTime');
+        if (inputEl && inputEl.value.trim()) {
+            const formatted = formatTimeDisplayFrontEnd(inputEl.value);
+            if (formatted) inputEl.value = formatted;
+        }
     }
 </script>
 </body>
