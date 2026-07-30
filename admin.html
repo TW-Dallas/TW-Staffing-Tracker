@@ -888,7 +888,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Class End Time</label>
-                                <input type="text" id="ntoEndTime" value="4:30 PM" placeholder="e.g. 18:30 or 4:30 PM" onblur="autoFormatEndTimeInput()">
+                                <input type="text" id="ntoEndTime" value="" placeholder="e.g. 18:30 or 4:30 PM" onblur="autoFormatEndTimeInput()">
                             </div>
                         </div>
 
@@ -3156,11 +3156,23 @@
     }
 
     // Trigger Conclude NTO Class
+    // Trigger Conclude NTO Class
     async function concludeNtoClass() {
         const classDate = document.getElementById('ntoClassDate').value;
-        const rawEndTime = document.getElementById('ntoEndTime').value.trim();
-        
-        // Format military time (e.g. 18:30 -> 6:30 PM) for the modal
+        let rawEndTime = document.getElementById('ntoEndTime').value.trim();
+
+        // 🛑 INTERACTIVE MODAL: Asks for time in popup if blank!
+        if (!rawEndTime) {
+            rawEndTime = await showBrandPrompt("Class End Time is required! Enter the class end time below (e.g. 4:30 PM or 16:30):", "", "Class End Time Required");
+            
+            // If you click Cancel or leave it blank in the modal -> STOP!
+            if (!rawEndTime || !rawEndTime.trim()) {
+                return; // ⛔ STOP! No emails are sent.
+            }
+            rawEndTime = rawEndTime.trim();
+        }
+
+        // Format military time (e.g. 18:30 -> 6:30 PM) for display
         const endTime = formatTimeDisplayFrontEnd(rawEndTime) || rawEndTime;
         document.getElementById('ntoEndTime').value = endTime; // Update input box text
 
@@ -3195,7 +3207,6 @@
             r.attendance === 'NTO Complete' || r.attendance === 'In Class' || r.attendance === 'Attended'
         ).length;
 
-        // Modal will now show 6:30 PM even if you typed 18:30 or 1830!
         const confirmMsg = `Are you sure you want to conclude class and send all roster emails?\n\n` +
                         `• Class Date: ${classDate}\n` +
                         `• End Time: ${endTime}\n` +
@@ -3225,8 +3236,8 @@
             showLoader(false);
             if (!result.success) throw new Error(result.error || "Failed to conclude class.");
             showBrandAlert(result.message, "Class Concluded!");
-
-            // 👈 ADD THIS SINGLE LINE HERE!
+            
+            // Auto-refresh candidates UI to reflect new "Hired" statuses
             silentSync();
         })
         .catch(err => {
