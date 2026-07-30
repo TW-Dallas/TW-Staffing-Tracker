@@ -432,10 +432,11 @@
             <!-- Workspace Switcher Toggles -->
             <div id="dallasToggleContainer" style="margin-bottom: 8px;">
                 <div style="display: flex; background: var(--crust-med); border-radius: 8px; padding: 2px; gap: 2px;">
-                    <button type="button" id="toggleOnb" onclick="switchView('onboarding')" style="flex: 1; font-size: 14px; padding: 8px 4px; background: var(--dark-blue); color: white; border: none; cursor: pointer;">Onboarding</button>
-                    <button type="button" id="toggleInt" onclick="switchView('interviews')" style="flex: 1; font-size: 14px; padding: 8px 4px; background: transparent; color: var(--crust-burnt); border: none; cursor: pointer;">Interviews</button>
-                    <button type="button" id="toggleStf" onclick="switchView('staffing')" style="flex: 1; font-size: 14px; padding: 8px 4px; background: transparent; color: var(--crust-burnt); border: none; cursor: pointer;">Hires & Terms</button>
-                    <button type="button" id="togglePay" onclick="switchView('paycards')" style="flex: 1; font-size: 14px; padding: 8px 4px; background: transparent; color: var(--crust-burnt); border: none; cursor: pointer;">Pay Cards</button>
+                    <button type="button" id="toggleOnb" onclick="switchView('onboarding')" style="flex: 1; font-size: 13px; padding: 8px 2px; background: var(--dark-blue); color: white; border: none; cursor: pointer;">Onboarding</button>
+                    <button type="button" id="toggleInt" onclick="switchView('interviews')" style="flex: 1; font-size: 13px; padding: 8px 2px; background: transparent; color: var(--crust-burnt); border: none; cursor: pointer;">Interviews</button>
+                    <button type="button" id="toggleStf" onclick="switchView('staffing')" style="flex: 1; font-size: 13px; padding: 8px 2px; background: transparent; color: var(--crust-burnt); border: none; cursor: pointer;">Hires/Terms</button>
+                    <button type="button" id="togglePay" onclick="switchView('paycards')" style="flex: 1; font-size: 13px; padding: 8px 2px; background: transparent; color: var(--crust-burnt); border: none; cursor: pointer;">Pay Cards</button>
+                    <button type="button" id="toggleNto" onclick="switchView('nto')" style="flex: 1; font-size: 13px; padding: 8px 2px; background: transparent; color: var(--crust-burnt); border: none; cursor: pointer;">🎓 NTO Class</button>
                 </div>
             </div>
 
@@ -876,6 +877,30 @@
                             <label>Payroll Notes</label>
                             <textarea id="payNotes" placeholder="Notes regarding GM follow-up, card packet details, or bank account setup..."></textarea>
                         </div>
+                    </div>
+                    
+                    <!-- 5. NTO CLASS ATTENDANCE FORM TEMPLATE -->
+                    <div id="ntoFormFields" class="hidden">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Class Date</label>
+                                <input type="date" id="ntoClassDate">
+                            </div>
+                            <div class="form-group">
+                                <label>Class End Time</label>
+                                <input type="text" id="ntoEndTime" value="4:30 PM" placeholder="e.g., 4:30 PM">
+                            </div>
+                        </div>
+
+                        <div class="section-header">Today's Trainee Roster & Attendance</div>
+                        
+                        <div id="ntoRosterListContainer" style="margin-top: 10px; max-height: 400px; overflow-y: auto; border: 1.5px solid var(--crust-dark); border-radius: 8px; background: white; padding: 8px;">
+                            <p style="text-align: center; color: var(--brand-grey);">Loading class roster...</p>
+                        </div>
+
+                        <button type="button" onclick="concludeNtoClass()" style="width: 100%; margin-top: 16px; background: var(--success-green); font-size: 18px; padding: 12px;">
+                            🚀 Conclude NTO Class & Send Rosters
+                        </button>
                     </div>
 
                 </div> <!-- Scrollable area closes here -->
@@ -1486,12 +1511,14 @@
         const btnInt = document.getElementById('toggleInt');
         const btnStf = document.getElementById('toggleStf');
         const btnPay = document.getElementById('togglePay');
+        const btnNto = document.getElementById('toggleNto'); // 👈 Added
         const btnAddMain = document.getElementById('btnAddMain');
         
         const onbFormFields = document.getElementById('onboardingFormFields');
         const intFormFields = document.getElementById('interviewFormFields');
         const stfFormFields = document.getElementById('staffingFormFields');
         const payFormFields = document.getElementById('payCardFormFields');
+        const ntoFormFields = document.getElementById('ntoFormFields'); // 👈 Added
 
         const auditWeekly = document.getElementById('auditWeeklyContent');
         const auditPeriod = document.getElementById('auditPeriodContent');
@@ -1500,16 +1527,21 @@
         currentView = view;
         document.getElementById('searchControl').value = '';
 
-        [btnOnb, btnInt, btnStf, btnPay].forEach(b => {
+        // Reset all toggle button styles
+        [btnOnb, btnInt, btnStf, btnPay, btnNto].forEach(b => {
             if (b) {
                 b.style.background = 'transparent';
                 b.style.color = 'var(--crust-burnt)';
             }
         });
         
-        [onbFormFields, intFormFields, stfFormFields, payFormFields].forEach(f => {
+        // Hide all form fields
+        [onbFormFields, intFormFields, stfFormFields, payFormFields, ntoFormFields].forEach(f => {
             if (f) f.classList.add('hidden');
         });
+
+        // Ensure "Add" button is visible for standard tabs
+        if (btnAddMain) btnAddMain.classList.remove('hidden');
 
         // Update Sort option label
         const ntoOption = document.querySelector('#sortControl option[value="nto"]');
@@ -1552,6 +1584,16 @@
             auditWeekly.classList.remove('hidden');
             auditPeriod.classList.add('hidden');
             auditTitle.innerText = "Weekly Activity Audit";
+
+        } else if (view === 'nto') {
+            if (btnNto) {
+                btnNto.style.background = 'var(--dark-blue)';
+                btnNto.style.color = 'white';
+            }
+            if (btnAddMain) btnAddMain.classList.add('hidden'); // Hide Add button in NTO mode
+            if (ntoFormFields) ntoFormFields.classList.remove('hidden');
+            document.getElementById('formTitle').innerText = "🎓 NTO Attendance & Class Closure";
+            renderNtoClassView();
 
         } else {
             btnOnb.style.background = 'var(--dark-blue)';
@@ -2960,6 +3002,110 @@
         });
 
         return matchedFromOnboarding;
+    }
+
+    // Render NTO Class View inside UI
+    function renderNtoClassView() {
+        const todayStr = new Date().toISOString().split('T')[0];
+        document.getElementById('ntoClassDate').value = todayStr;
+
+        const container = document.getElementById('ntoRosterListContainer');
+        container.innerHTML = '';
+
+        // Pull registered trainees from candidates (Dallas Info / Dallas Roster)
+        const activeClassList = candidates.filter(c => c.ntoScheduled || c.hired || c.ntoDate);
+
+        if (activeClassList.length === 0) {
+            container.innerHTML = '<p style="text-align:center; padding: 15px; color:#888;">No trainees currently scheduled for NTO today.</p>';
+            return;
+        }
+
+        activeClassList.forEach((item, index) => {
+            const row = document.createElement('div');
+            row.className = 'nto-roster-row';
+            row.style.cssText = "display: flex; align-items: center; justify-content: space-between; padding: 8px; border-bottom: 1px solid var(--crust-med); gap: 10px;";
+            
+            row.innerHTML = `
+                <div style="flex: 2;">
+                    <strong style="font-size: 16px; color: var(--dark-blue);">${item.name}</strong>
+                    <div style="font-size: 13px; color: var(--text-light);">Store #${item.store} • ${item.position || 'CSR'}</div>
+                </div>
+                <div style="flex: 1;">
+                    <select class="nto-attendance-select" data-name="${item.name}" data-store="${item.store}" data-position="${item.position || 'CSR'}" data-shirt="${item.shirtSize || ''}" data-hat="${item.hatStyle || ''}" data-paycard="${item.payCard || ''}" style="padding: 6px; font-size: 14px;">
+                        <option value="NTO Complete" selected>🎓 NTO Complete</option>
+                        <option value="In Class">📖 In Class</option>
+                        <option value="In Lobby">🏨 In Lobby (Checked In)</option>
+                        <option value="Not in NTO">❌ Not in NTO (Absent)</option>
+                        <option value="Left Early">⚠️ Left Early</option>
+                    </select>
+                </div>
+            `;
+            container.appendChild(row);
+        });
+    }
+
+    // Trigger Conclude NTO Class
+    async function concludeNtoClass() {
+        const classDate = document.getElementById('ntoClassDate').value;
+        const endTime = document.getElementById('ntoEndTime').value.trim();
+
+        const rosterElements = document.querySelectorAll('.nto-attendance-select');
+        if (rosterElements.length === 0) {
+            showBrandAlert("No trainees found on the roster to process.", "Class Empty");
+            return;
+        }
+
+        const rosterData = [];
+        rosterElements.forEach(el => {
+            rosterData.push({
+                name: el.getAttribute('data-name'),
+                store: el.getAttribute('data-store'),
+                position: el.getAttribute('data-position'),
+                shirtSize: el.getAttribute('data-shirt'),
+                hatStyle: el.getAttribute('data-hat'),
+                payCard: el.getAttribute('data-paycard'),
+                attendance: el.value
+            });
+        });
+
+        const attendedCount = rosterData.filter(r => 
+            r.attendance === 'NTO Complete' || r.attendance === 'In Class' || r.attendance === 'Attended'
+        ).length;
+
+        const confirmMsg = `Are you sure you want to conclude class and send all roster emails?\n\n` +
+                        `• Class Date: ${classDate}\n` +
+                        `• End Time: ${endTime}\n` +
+                        `• Total Attendees: ${attendedCount} / ${rosterData.length}\n\n` +
+                        `This will send 3 automated email reports (HR, Leadership, and Store/DOs).`;
+
+        const confirmed = await showBrandConfirm(confirmMsg, "Conclude NTO Class");
+        if (!confirmed) return;
+
+        showLoader(true, "Processing NTO hours & sending emails...");
+
+        const username = localStorage.getItem('onb_user');
+        const password = localStorage.getItem('onb_pass');
+
+        const payload = {
+            username: username,
+            password: password,
+            action: "concludeNtoClass",
+            classDate: classDate,
+            endTime: endTime,
+            roster: rosterData
+        };
+
+        fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
+        .then(res => res.json())
+        .then(result => {
+            showLoader(false);
+            if (!result.success) throw new Error(result.error || "Failed to conclude class.");
+            showBrandAlert(result.message, "Class Concluded!");
+        })
+        .catch(err => {
+            showLoader(false);
+            showBrandAlert("Error concluding class: " + err.message, "System Error");
+        });
     }
 </script>
 </body>
