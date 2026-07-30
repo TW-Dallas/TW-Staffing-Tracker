@@ -894,25 +894,25 @@
 
                         <!-- Quick Roster Search & Date Filter Controls -->
                         <div style="display: flex; gap: 8px; margin-top: 10px; align-items: center;">
-                            <input type="text" id="ntoRosterSearch" placeholder="🔍 Search trainee name..." oninput="renderNtoClassView()" style="flex: 1; padding: 6px 10px; font-size: 15px;">
-                            <label style="font-size: 14px; display: flex; align-items: center; gap: 6px; white-space: nowrap; cursor: pointer; font-family: 'Subhead2', sans-serif;">
-                                <input type="checkbox" id="ntoShowAllDates" onchange="renderNtoClassView()" style="width: 16px; height: 16px; cursor: pointer;">
+                            <input type="text" id="ntoRosterSearch" placeholder="🔍 Search trainee name..." oninput="renderNtoClassView()" style="flex: 1; padding: 8px 11px; font-size: 18px;">
+                            <label style="font-size: 16px; display: flex; align-items: center; gap: 6px; white-space: nowrap; cursor: pointer; font-family: 'Subhead2', sans-serif;">
+                                <input type="checkbox" id="ntoShowAllDates" onchange="renderNtoClassView()" style="width: 18px; height: 18px; cursor: pointer;">
                                 Show All Dates
                             </label>
                         </div>
 
-                        <div class="section-header" style="margin-top: 12px;">Class Trainee Roster & Attendance</div>
+                        <div class="section-header" style="margin-top: 14px;">Class Trainee Roster & Attendance</div>
                         
-                        <div id="ntoRosterListContainer" style="margin-top: 10px; max-height: 400px; overflow-y: auto; border: 1.5px solid var(--crust-dark); border-radius: 8px; background: white; padding: 8px;">
-                            <p style="text-align: center; color: var(--brand-grey);">Loading class roster...</p>
+                        <div id="ntoRosterListContainer" style="margin-top: 10px; max-height: 440px; overflow-y: auto; border: 1.5px solid var(--crust-dark); border-radius: 8px; background: white; padding: 10px;">
+                            <p style="text-align: center; color: var(--brand-grey); font-size: 17px;">Loading class roster...</p>
                         </div>
 
-                        <!-- Replace the single Conclude button in #ntoFormFields with this button row -->
-                        <div style="display: flex; gap: 10px; margin-top: 16px;">
-                            <button type="button" onclick="saveNtoAttendanceOnly()" style="flex: 1; background: var(--brand-blue); font-size: 17px; padding: 12px;">
+                        <!-- Single Dedicated NTO Action Button Row -->
+                        <div style="display: flex; gap: 12px; margin-top: 16px;">
+                            <button type="button" onclick="saveNtoAttendanceOnly()" style="flex: 1; background: var(--brand-blue); font-size: 19px; padding: 12px 16px;">
                                 💾 Save Live Attendance
                             </button>
-                            <button type="button" onclick="concludeNtoClass()" style="flex: 1; background: var(--success-green); font-size: 17px; padding: 12px;">
+                            <button type="button" onclick="concludeNtoClass()" style="flex: 1; background: var(--success-green); font-size: 19px; padding: 12px 16px;">
                                 🚀 Conclude Class & Send Rosters
                             </button>
                         </div>
@@ -1526,14 +1526,15 @@
         const btnInt = document.getElementById('toggleInt');
         const btnStf = document.getElementById('toggleStf');
         const btnPay = document.getElementById('togglePay');
-        const btnNto = document.getElementById('toggleNto'); // 👈 Added
+        const btnNto = document.getElementById('toggleNto');
         const btnAddMain = document.getElementById('btnAddMain');
+        const formActions = document.querySelector('.form-actions'); // 👈 Footer actions reference
         
         const onbFormFields = document.getElementById('onboardingFormFields');
         const intFormFields = document.getElementById('interviewFormFields');
         const stfFormFields = document.getElementById('staffingFormFields');
         const payFormFields = document.getElementById('payCardFormFields');
-        const ntoFormFields = document.getElementById('ntoFormFields'); // 👈 Added
+        const ntoFormFields = document.getElementById('ntoFormFields');
 
         const auditWeekly = document.getElementById('auditWeeklyContent');
         const auditPeriod = document.getElementById('auditPeriodContent');
@@ -1557,6 +1558,9 @@
 
         // Ensure "Add" button is visible for standard tabs
         if (btnAddMain) btnAddMain.classList.remove('hidden');
+
+        // Show standard form actions footer by default
+        if (formActions) formActions.classList.remove('hidden');
 
         // Update Sort option label
         const ntoOption = document.querySelector('#sortControl option[value="nto"]');
@@ -1606,6 +1610,7 @@
                 btnNto.style.color = 'white';
             }
             if (btnAddMain) btnAddMain.classList.add('hidden'); // Hide Add button in NTO mode
+            if (formActions) formActions.classList.add('hidden'); // 👈 Hides duplicate bottom Save Details bar
             if (ntoFormFields) ntoFormFields.classList.remove('hidden');
             document.getElementById('formTitle').innerText = "🎓 NTO Attendance & Class Closure";
             renderNtoClassView();
@@ -3081,38 +3086,33 @@
         return matchedFromOnboarding;
     }
 
-    // Render NTO Class View inside UI
+    // Render NTO Class View inside UI with matched 18px/19px site font sizing
     function renderNtoClassView() {
-        // 1. Auto-set Class Date picker to Today's date if empty
         const dateInput = document.getElementById('ntoClassDate');
         if (!dateInput.value) {
             const todayYyyyMmDd = new Date().toISOString().split('T')[0];
             dateInput.value = todayYyyyMmDd;
         }
         
-        const selectedDate = dateInput.value; // Format: YYYY-MM-DD
+        const selectedDate = dateInput.value;
         const searchQuery = (document.getElementById('ntoRosterSearch')?.value || '').toLowerCase().trim();
         const showAllDates = document.getElementById('ntoShowAllDates')?.checked || false;
 
         const container = document.getElementById('ntoRosterListContainer');
         container.innerHTML = '';
 
-        // 2. Filter candidates for Today's date (or selected date / search fallback)
         const activeClassList = candidates.filter(c => {
             const isScheduled = c.ntoScheduled || c.hired || c.ntoDate;
             if (!isScheduled) return false;
 
-            // Name search query matching
             if (searchQuery && (!c.name || !c.name.toLowerCase().includes(searchQuery))) {
                 return false;
             }
 
-            // If 'Show All Dates' is checked OR user typed a search query, show across all dates
             if (showAllDates || searchQuery) {
                 return true;
             }
 
-            // Match candidate's NTO date to the selected date picker
             const candidateFormattedDate = formatDateForInput(c.ntoDate);
             return candidateFormattedDate === selectedDate;
         });
@@ -3120,30 +3120,28 @@
         if (activeClassList.length === 0) {
             const dateDisplay = showAllDates ? "across all dates" : `scheduled for ${selectedDate}`;
             container.innerHTML = `
-                <div style="text-align:center; padding: 20px; color: var(--brand-grey);">
+                <div style="text-align:center; padding: 20px; color: var(--brand-grey); font-size: 17px;">
                     No trainees found ${dateDisplay}.<br>
-                    <span style="font-size: 13px; color: var(--crust-deep);">Try searching a name or check <strong>"Show All Dates"</strong> to view the full roster.</span>
+                    <span style="font-size: 15px; color: var(--crust-deep);">Try searching a name or check <strong>"Show All Dates"</strong> to view the full roster.</span>
                 </div>
             `;
             return;
         }
 
-        // 3. Render matching roster items
         activeClassList.forEach((item) => {
             const row = document.createElement('div');
             row.className = 'nto-roster-row';
-            row.style.cssText = "display: flex; align-items: center; justify-content: space-between; padding: 8px; border-bottom: 1px solid var(--crust-med); gap: 10px;";
+            row.style.cssText = "display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--crust-med); gap: 12px;";
             
-            // Existing saved status from DB
             const savedStatus = item.ntoAttendance || item.ntoStatus || '';
 
             row.innerHTML = `
                 <div style="flex: 2;">
-                    <strong style="font-size: 16px; color: var(--dark-blue);">${item.name}</strong>
-                    <div style="font-size: 13px; color: var(--text-light);">Store #${item.store} • ${item.position || 'CSR'} • Date: ${item.ntoDate || 'N/A'}</div>
+                    <div style="font-family: 'Subhead2', sans-serif; font-size: 19px; color: var(--dark-blue);">${item.name}</div>
+                    <div style="font-family: 'Condensed', sans-serif; font-size: 16px; color: var(--text-dark); margin-top: 2px;">Store #${item.store} • ${item.position || 'CSR'} • Date: ${item.ntoDate || 'N/A'}</div>
                 </div>
-                <div style="flex: 1;">
-                    <select class="nto-attendance-select" data-id="${item.id || ''}" data-name="${item.name}" data-store="${item.store}" data-position="${item.position || 'CSR'}" data-shirt="${item.shirtSize || ''}" data-hat="${item.hatStyle || ''}" data-paycard="${item.payCard || ''}" style="padding: 6px; font-size: 14px;">
+                <div style="flex: 1.2;">
+                    <select class="nto-attendance-select" data-id="${item.id || ''}" data-name="${item.name}" data-store="${item.store}" data-position="${item.position || 'CSR'}" data-shirt="${item.shirtSize || ''}" data-hat="${item.hatStyle || ''}" data-paycard="${item.payCard || ''}" style="width: 100%; padding: 8px 10px; font-size: 18px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1px solid var(--crust-dark);">
                         <option value="" ${!savedStatus ? 'selected' : ''} disabled>Select Status...</option>
                         <option value="In Lobby" ${savedStatus === 'In Lobby' ? 'selected' : ''}>🏨 In Lobby (Checked In)</option>
                         <option value="In Class" ${savedStatus === 'In Class' ? 'selected' : ''}>📖 In Class</option>                        
