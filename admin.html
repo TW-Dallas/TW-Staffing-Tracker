@@ -907,9 +907,15 @@
                             <p style="text-align: center; color: var(--brand-grey);">Loading class roster...</p>
                         </div>
 
-                        <button type="button" onclick="concludeNtoClass()" style="width: 100%; margin-top: 16px; background: var(--success-green); font-size: 18px; padding: 12px;">
-                            🚀 Conclude NTO Class & Send Rosters
-                        </button>
+                        <!-- Replace the single Conclude button in #ntoFormFields with this button row -->
+                        <div style="display: flex; gap: 10px; margin-top: 16px;">
+                            <button type="button" onclick="saveNtoAttendanceOnly()" style="flex: 1; background: var(--brand-blue); font-size: 17px; padding: 12px;">
+                                💾 Save Live Attendance
+                            </button>
+                            <button type="button" onclick="concludeNtoClass()" style="flex: 1; background: var(--success-green); font-size: 17px; padding: 12px;">
+                                🚀 Conclude Class & Send Rosters
+                            </button>
+                        </div>
                     </div>
 
                 </div> <!-- Scrollable area closes here -->
@@ -3128,19 +3134,22 @@
             row.className = 'nto-roster-row';
             row.style.cssText = "display: flex; align-items: center; justify-content: space-between; padding: 8px; border-bottom: 1px solid var(--crust-med); gap: 10px;";
             
+            // Existing saved status from DB
+            const savedStatus = item.ntoAttendance || item.ntoStatus || '';
+
             row.innerHTML = `
                 <div style="flex: 2;">
                     <strong style="font-size: 16px; color: var(--dark-blue);">${item.name}</strong>
                     <div style="font-size: 13px; color: var(--text-light);">Store #${item.store} • ${item.position || 'CSR'} • Date: ${item.ntoDate || 'N/A'}</div>
                 </div>
                 <div style="flex: 1;">
-                    <select class="nto-attendance-select" data-name="${item.name}" data-store="${item.store}" data-position="${item.position || 'CSR'}" data-shirt="${item.shirtSize || ''}" data-hat="${item.hatStyle || ''}" data-paycard="${item.payCard || ''}" style="padding: 6px; font-size: 14px;">
-                        <option value="" selected disabled>Select Status...</option>
-                        <option value="In Lobby">🏨 In Lobby (Checked In)</option>
-                        <option value="In Class">📖 In Class</option>                        
-                        <option value="Not in NTO">❌ Not in NTO (Absent)</option>
-                        <option value="Left Early">⚠️ Left Early</option>
-                        <option value="NTO Complete">🎓 NTO Complete</option>
+                    <select class="nto-attendance-select" data-id="${item.id || ''}" data-name="${item.name}" data-store="${item.store}" data-position="${item.position || 'CSR'}" data-shirt="${item.shirtSize || ''}" data-hat="${item.hatStyle || ''}" data-paycard="${item.payCard || ''}" style="padding: 6px; font-size: 14px;">
+                        <option value="" ${!savedStatus ? 'selected' : ''} disabled>Select Status...</option>
+                        <option value="In Lobby" ${savedStatus === 'In Lobby' ? 'selected' : ''}>🏨 In Lobby (Checked In)</option>
+                        <option value="In Class" ${savedStatus === 'In Class' ? 'selected' : ''}>📖 In Class</option>                        
+                        <option value="Not in NTO" ${savedStatus === 'Not in NTO' ? 'selected' : ''}>❌ Not in NTO (Absent)</option>
+                        <option value="Left Early" ${savedStatus === 'Left Early' ? 'selected' : ''}>⚠️ Left Early</option>
+                        <option value="NTO Complete" ${savedStatus === 'NTO Complete' ? 'selected' : ''}>🎓 NTO Complete</option>
                     </select>
                 </div>
             `;
@@ -3288,6 +3297,63 @@
         const phoneMatch = phoneStr.includes(q) || (digitsOnly.length >= 3 && phoneDigits.includes(digitsOnly));
 
         return nameMatch || emailMatch || phoneMatch;
+    }
+
+    async function saveNtoAttendanceOnly() {
+        const classDate = document.getElementById('ntoClassDate').value;
+        const rosterElements = document.querySelectorAll('.nto-attendance-select');
+        
+        if (rosterElements.length === 0) {
+            showBrandAlert("No trainees found on the roster to save.", "Roster Empty");
+            return;
+        }
+
+        const rosterData = [];
+        rosterElements.forEach(el => {
+            if (el.value) {
+                rosterData.push({
+                    id: el.getAttribute('data-id'),
+                    name: el.getAttribute('data-name'),
+                    store: el.getAttribute('data-store'),
+                    position: el.getAttribute('data-position'),
+                    attendance: el.value
+                });
+            }
+        });
+
+        if (rosterData.length === 0) {
+            showBrandAlert("Please select an attendance status for at least one trainee before saving.", "No Status Selected");
+            return;
+        }
+
+        showLoader(true, "Saving live attendance...");
+
+        const username = localStorage.getItem('onb_user');
+        const password = localStorage.getItem('onb_pass');
+
+        const payload = {
+            username: username,
+            password: password,
+            action: "saveNtoAttendance", // Pure DB update action (no emails sent)
+            classDate: classDate,
+            roster: rosterData
+        };
+
+        try {
+            const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+            const result = await res.json();
+            showLoader(false);
+
+            if (!result.success) throw new Error(result.error || "Failed to save attendance.");
+            
+            showBrandAlert("Live attendance updated successfully! (No emails sent)", "Attendance Saved");
+            
+            // Silently sync local state so the rest of the application stays up-to-date
+            silentSync();
+        } catch (err) {
+            showLoader(false);
+            showBrandAlert("Error saving attendance: " + err.message, "Database Error");
+        }
     }
 </script>
 </body>
