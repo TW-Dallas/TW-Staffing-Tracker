@@ -383,6 +383,26 @@
                 grid-template-columns: 1fr !important;
                 grid-column: 1 / -1 !important;
             }
+            .header-quick-links {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+            .header-link-btn {
+                background: var(--brand-blue);
+                color: white;
+                font-family: 'Subhead1', sans-serif;
+                font-size: 16px;
+                padding: 8px 14px;
+                border-radius: 6px;
+                border: 1px solid rgba(255, 255, 255, 0.25);
+                transition: background-color 0.15s ease;
+                white-space: nowrap;
+            }
+            .header-link-btn:hover {
+                background: var(--med-blue);
+            }
         }
     </style>
 </head>
@@ -408,17 +428,36 @@
 
 <!-- Main App Wrapper -->
 <div id="appContainer" class="hidden">
-    <header>
-        <div style="display: flex; align-items: center;">
-            <img src="New_Logo_v2.png" alt="Logo" class="logo" onerror="this.style.display='none'">
-            <div>
-                <h1 id="headerTitle">Hiring Manager Portal</h1>
-                <div id="headerCity" class="subtitle">Checking Location...</div>
-            </div>
+<header>
+    <div style="display: flex; align-items: center;">
+        <img src="New_Logo_v2.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+        <div>
+            <h1 id="headerTitle">Hiring Manager Portal</h1>
+            <div id="headerCity" class="subtitle">Checking Location...</div>
         </div>
-        <button class="secondary" onclick="handleLogout()">Log Out</button>
-    </header>
+    </div>
 
+    <!-- ONBOARDING QUICK LINKS -->
+    <div class="header-quick-links">
+        <a href="https://www.hralliance.net/" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+            <button type="button" class="header-link-btn">🔗 AllPay</button>
+        </a>
+        <a href="https://identity.checkr.com/u/login" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+            <button type="button" class="header-link-btn">🔗 Checkr</button>
+        </a>
+        <a href="https://www.smartrecruiters.com/account/sign-in" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+            <button type="button" class="header-link-btn">🔗 Smart Recruiters</button>
+        </a>
+        <a href="https://www.dpreporting.com/paycard/PaycardHome" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+            <button type="button" class="header-link-btn">🔗 Netspend</button>
+        </a>
+        <a href="https://www.zenput.com/reports/" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+            <button type="button" class="header-link-btn">🔗 Zenput Reports</button>
+        </a>
+    </div>
+
+    <button class="secondary" onclick="handleLogout()">Log Out</button>
+</header>
     <div class="dashboard">
         <!-- Left Panel: List of Candidates -->
         <div class="list-panel">
