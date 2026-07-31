@@ -1,0 +1,511 @@
+        /* ==========================================================================
+           1. CUSTOM FONTS & BRAND VARIABLES
+           ========================================================================== */
+        @font-face { font-family: 'ExtraBlack'; src: url('fonts/Dominos Sans Header 1.ttf') format('truetype'); font-weight: normal; }
+        @font-face { font-family: 'ExtraBold'; src: url('fonts/Dominos Sans Header 2.ttf') format('truetype'); font-weight: normal; }
+        @font-face { font-family: 'Subhead1'; src: url('fonts/Dominos Sans Subhead 1.ttf') format('truetype'); font-weight: normal; }
+        @font-face { font-family: 'Subhead2'; src: url('fonts/Dominos Sans Subhead 2.ttf') format('truetype'); font-weight: normal; }
+        @font-face { font-family: 'Condensed'; src: url('fonts/Dominos Sans Body Condensed.ttf') format('truetype'); font-weight: normal; }
+        @font-face { font-family: 'Compact'; src: url('fonts/Dominos Sans Body Compact.ttf') format('truetype'); font-weight: normal; }
+
+        :root {
+            --brand-red: #ff0000;
+            --dark-red: #910000;
+            --brand-blue: #0090e2;
+            --med-blue: #0077bd;
+            --dark-blue: #005c91;
+            --crust-base: #fefaf6;
+            --crust-light: #faf2e9;
+            --crust-med: #f0decc;
+            --crust-dark: #c0a588;
+            --crust-deep: #603913;
+            --crust-burnt: #472b10;
+            --brand-grey: #6c757d;
+            --card-bg: #FFFFFF;
+            --border-radius: 12px;
+            --success-green: #117a30; 
+            --bg-color: var(--crust-light);
+            --text-dark: var(--crust-burnt);
+            --text-light: var(--crust-deep);
+        }
+
+        /* ==========================================================================
+           2. GLOBAL RESETS & BODY LOCK
+           ========================================================================== */
+        html, body { 
+            height: 100%; 
+            overflow: hidden; 
+            margin: 0; 
+            padding: 0; 
+        }
+        body { 
+            font-family: 'Condensed', sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-dark); 
+            display: flex; 
+            flex-direction: column; 
+            font-size: 16px; 
+        }
+
+        /* ==========================================================================
+           3. HEADER & QUICK PORTAL NAVIGATION
+           ========================================================================== */
+        header { 
+            background-color: var(--dark-blue); 
+            color: white; 
+            padding: 10px 16px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            box-shadow: 0 4px 12px rgba(71, 43, 16, 0.15); 
+            flex: 0 0 auto; 
+        }
+        h1 { margin: 0; font-family: 'ExtraBlack', sans-serif; font-size: 22px; text-transform: uppercase; }
+        .subtitle { font-family: 'Condensed', sans-serif; font-size: 14px; opacity: 0.9; }
+        .logo { height: 32px; width: auto; margin-right: 12px; }
+
+        .header-center-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: nowrap;
+        }
+
+        .btn-quick-link {
+            background: var(--crust-base) !important;
+            color: var(--dark-blue) !important;
+            border: none !important;
+            padding: 8px 14px !important;
+            border-radius: 6px !important;
+            font-family: 'Subhead1', sans-serif !important;
+            font-size: 15px !important;
+            cursor: pointer !important;
+            white-space: nowrap !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
+            transition: all 0.15s ease !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            line-height: 1 !important;
+        }
+
+        .btn-quick-link:hover {
+            background: #ffffff !important;
+            color: var(--brand-blue) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.25) !important;
+            text-decoration: none !important;
+        }
+
+        /* ==========================================================================
+           4. AUTH / LOGIN SCREEN
+           ========================================================================== */
+        .auth-container { 
+            max-width: 400px; 
+            width: 100%;
+            margin: 80px auto; 
+            padding: 24px; 
+            background: white; 
+            border-radius: var(--border-radius); 
+            box-shadow: 0 4px 12px rgba(71, 43, 16, 0.15); 
+            border-top: 6px solid var(--brand-blue); 
+            box-sizing: border-box;
+        }
+        .auth-container h2 { margin-top: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 20px; }
+
+        /* ==========================================================================
+           5. DASHBOARD & PANEL LAYOUTS
+           ========================================================================== */
+        .dashboard { 
+            display: flex; 
+            max-width: 1650px; 
+            width: 100%;
+            margin: 12px auto; 
+            padding: 0 16px; 
+            gap: 16px; 
+            flex: 1;
+            height: calc(100vh - 75px);
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        /* Left Panel */
+        .list-panel { 
+            flex: 0 0 320px; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+            overflow: hidden;
+        }
+        #candidateList { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding-right: 4px; 
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Middle Form Panel */
+        .form-panel { 
+            flex: 1; 
+            background: white; 
+            padding: 16px; 
+            border-radius: var(--border-radius); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+            border-top: 4px solid var(--brand-blue); 
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        #candidateForm {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+        .form-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 8px;
+            margin-bottom: 8px;
+        }
+        .form-actions { 
+            flex: 0 0 auto;
+            display: flex; 
+            flex-direction: row;
+            gap: 12px; 
+            background: white;
+            padding-top: 10px;
+            border-top: 1px solid var(--crust-med);
+            width: 100%;
+        }
+        .form-actions button {
+            flex: 1;
+            font-size: 19px;
+            padding: 11px 18px;
+        }
+
+        /* Right Panel */
+        .notes-panel { 
+            flex: 0 0 340px; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+            overflow: hidden; 
+            gap: 16px; 
+        }
+
+        /* ==========================================================================
+           6. SEARCH, SORT & WORKSPACE TOGGLES
+           ========================================================================== */
+        #dallasToggleContainer button {
+            font-family: 'Subhead1', sans-serif;
+            font-size: 15px;
+            padding: 8px 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none;
+        }
+        .control-row { display: flex; gap: 10px; margin-bottom: 8px; }
+        .control-row select { padding: 8px 10px; border-radius: 6px; border: 1px solid var(--crust-dark); font-family: 'Condensed', sans-serif; font-size: 16px; background: white; flex: 1; }
+        .search-container { margin-bottom: 8px; }
+        .search-container input { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--crust-dark); font-family: 'Condensed', sans-serif; font-size: 16px; box-sizing: border-box; }
+
+        /* ==========================================================================
+           7. CARDS & BADGES
+           ========================================================================== */
+        .candidate-card { 
+            background: white; 
+            padding: 12px 14px; 
+            border-radius: var(--border-radius); 
+            box-shadow: 0 3px 5px rgba(0,0,0,0.02); 
+            border-left: 6px solid var(--brand-blue); 
+            cursor: pointer; 
+            transition: transform 0.15s ease; 
+            position: relative; 
+        }
+        .candidate-card:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.04); }
+        .candidate-card.selected { background: var(--crust-light); box-shadow: 0 4px 12px rgba(0, 144, 226, 0.15); border: 1.5px solid var(--brand-blue); }
+
+        /* Status Border & Color Variants */
+        .candidate-card.status-blue { border-left-color: var(--brand-blue); }
+        .candidate-card.status-subrec { border-left-color: var(--brand-blue); border-left-width: 8px; background-color: #f4f9fd; }
+        .candidate-card.status-processing { border-left-color: var(--med-blue); }
+        .candidate-card.status-nto { border-left-color: var(--dark-blue); }
+        .candidate-card.status-green { border-left-color: var(--success-green); border-left-width: 8px; }
+        .candidate-card.status-red { border-left-color: var(--brand-red); border: 1.5px solid var(--brand-red); }
+        .candidate-card.status-reviewing { border-left-color: var(--crust-dark); box-shadow: 0 0 8px rgba(192, 165, 136, 0.3); }
+        .candidate-card.status-gray { border-left-color: var(--brand-grey); opacity: 0.6; background-color: #fbfbfb; }
+
+        .card-name { font-family: 'Subhead2', sans-serif; font-size: 19px; }
+        .card-sub { font-family: 'Subhead2', sans-serif; font-size: 15px; color: var(--text-light); margin-top: 6px; display: flex; justify-content: space-between; align-items: center; }
+
+        .badge-review { background: #e3f2fd; color: var(--dark-blue); font-size: 12px; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #bbdefb; animation: pulse 2s infinite; }
+        .badge-incorrect { background: #ffebee; color: var(--brand-red); font-size: 12px; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #ffcdd2; }
+
+        /* ==========================================================================
+           8. FORMS, INPUTS & CHECKBOX GRID
+           ========================================================================== */
+        .form-group { margin-bottom: 8px; }
+        .form-group label { display: block; font-family: 'Subhead2', sans-serif; font-size: 18px; margin-bottom: 3px; }
+        .form-row { display: flex; gap: 12px; }
+        .form-row .form-group { flex: 1; }
+
+        .form-row.flex-three { display: flex; gap: 12px; }
+        .form-row.flex-three .form-group { flex: 1; }
+        .form-row.flex-three .flex-two-weight { flex: 1.5; } 
+
+        input[type="text"], input[type="password"], input[type="date"], textarea, select { 
+            width: 100%; 
+            padding: 8px 11px; 
+            border-radius: 8px; 
+            border: 1px solid var(--crust-dark); 
+            font-family: 'Condensed', sans-serif; 
+            box-sizing: border-box; 
+            font-size: 18px; 
+        }
+        textarea { height: 50px; resize: none; }
+
+        .checkbox-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr 1fr; 
+            gap: 8px; 
+            margin-top: 8px; 
+            background: var(--crust-light); 
+            padding: 10px 12px; 
+            border-radius: 8px; 
+        }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; font-family: 'Condensed', sans-serif; font-size: 17px; cursor: pointer; }
+        .checkbox-item input { width: 17px; height: 17px; cursor: pointer; }
+
+        .section-header {
+            grid-column: span 3;
+            font-family: 'ExtraBold', sans-serif;
+            font-size: 16px;
+            color: var(--dark-blue);
+            border-bottom: 2px solid var(--crust-dark);
+            padding-bottom: 3px;
+            margin-top: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ==========================================================================
+           9. FLAGS, EMAIL ACTIONS & COPY BUTTONS
+           ========================================================================== */
+        .flag-box { 
+            padding: 5px 8px; 
+            border-radius: 6px; 
+            display: flex; 
+            align-items: center; 
+            gap: 7px; 
+            font-size: 16px; 
+        }
+        .flag-box input[type="checkbox"] { width: 16px; height: 16px; }
+        .flag-incorrect { background: #ffebee; color: var(--brand-red); font-weight: bold; }
+        .flag-reviewing { background: #e3f2fd; color: var(--med-blue); font-weight: bold; position: relative; }
+        .flag-inactive { background: #f5f5f5; color: var(--brand-grey); font-weight: bold; }
+
+        .email-actions-container {
+            margin-top: 12px;
+            background: var(--crust-light);
+            border-radius: var(--border-radius);
+            padding: 12px;
+            border: 1.5px solid var(--crust-dark);
+        }
+        .email-action-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .email-action-row button {
+            flex: 1;
+            font-size: 15px;
+            padding: 8px 12px;
+            white-space: nowrap;
+        }
+
+        .btn-copy-icon {
+            background: transparent;
+            border: none;
+            color: var(--brand-blue);
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+        .btn-copy-icon:hover {
+            background: var(--crust-med);
+            color: var(--dark-blue);
+        }
+
+        /* ==========================================================================
+           10. GENERAL BUTTONS & UTILITIES
+           ========================================================================== */
+        button { 
+            background: var(--dark-blue); 
+            color: white; 
+            border: none; 
+            padding: 10px 16px; 
+            border-radius: 6px; 
+            font-family: 'Subhead1', sans-serif; 
+            font-size: 16px; 
+            cursor: pointer; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+        }
+        button:hover { opacity: 0.9; }
+        button.secondary { background: var(--brand-grey); }
+        button.btn-add { 
+            margin-bottom: 8px; 
+            background: var(--brand-blue); 
+            width: 100%; 
+            flex: 0 0 auto; 
+            font-size: 20px;
+            padding: 12px 16px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* ==========================================================================
+           11. MODALS & OVERLAYS
+           ========================================================================== */
+        .overlay { 
+            position: fixed; 
+            top: 0; left: 0; right: 0; bottom: 0; 
+            background: rgba(250, 242, 233, 0.8); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-family: 'ExtraBlack', sans-serif; 
+            font-size: 20px; 
+            z-index: 1000; 
+        }
+
+        .brand-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(71, 43, 16, 0.4);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .brand-modal-card {
+            background: var(--card-bg);
+            width: 95%;
+            max-width: 440px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 16px 48px rgba(71, 43, 16, 0.25);
+            border: 2px solid var(--crust-dark);
+            overflow: hidden;
+            animation: fadeIn 0.15s ease-out;
+        }
+        .brand-modal-brand-stripe {
+            background: linear-gradient(90deg, var(--brand-red) 50%, var(--brand-blue) 50%);
+            height: 8px;
+            width: 100%;
+        }
+        .brand-modal-content { padding: 24px; }
+        .brand-modal-content h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-family: 'Subhead1', sans-serif;
+            font-size: 20px;
+            color: var(--dark-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .brand-modal-content p {
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-family: 'Condensed', sans-serif;
+            font-size: 18px;
+            color: var(--crust-burnt);
+            line-height: 1.45;
+        }
+        .brand-modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        .brand-modal-actions button { min-width: 100px; }
+        
+        #brandModalReminderForm input {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--crust-dark);
+            font-family: 'Condensed', sans-serif;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-top: 4px;
+        }
+
+        /* ==========================================================================
+           12. KEYFRAME ANIMATIONS
+           ========================================================================== */
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* ==========================================================================
+           13. MOBILE RESPONSIVE OVERRIDES
+           ========================================================================== */
+        @media (max-width: 768px) {
+            html, body { overflow: auto; height: auto; }
+            .dashboard { flex-direction: column; height: auto; overflow: visible; }
+            .list-panel { flex: none; height: auto; overflow: visible; width: 100% !important; }
+            .form-panel { position: static; height: auto; overflow: visible; width: 100% !important; }
+            .notes-panel { flex: none; height: auto; overflow: visible; width: 100% !important; margin-top: 16px; }
+            #candidateForm { height: auto; overflow: visible; }
+            .form-scroll-area { overflow-y: visible; height: auto; }
+            .form-row.flex-three { flex-direction: column; gap: 8px; }
+
+            .checkbox-grid { 
+                grid-template-columns: 1fr 1fr !important;
+                gap: 8px;
+                padding: 10px;
+            }
+            .checkbox-grid > div:empty { display: none; }
+            .checkbox-item { font-size: 14px; word-break: break-word; }
+            .checkbox-item input { flex-shrink: 0; }
+            
+            #missingDocsContainer {
+                grid-template-columns: 1fr !important;
+                grid-column: 1 / -1 !important;
+            }
+            header { 
+                background-color: var(--dark-blue); 
+                color: white; 
+                padding: 8px 16px; 
+                display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                box-shadow: 0 4px 12px rgba(71, 43, 16, 0.15); 
+                flex: 0 0 auto; 
+            }
+        }
