@@ -403,33 +403,33 @@
                 flex-wrap: nowrap;
             }
             
-            .header-center-nav a {
-                text-decoration: none;
-                display: inline-block;
-            }
-            
-            /* Crust-Base Custom Portal Buttons */
+            /* The <a> link IS the button natively */
             .btn-quick-link {
                 background: var(--crust-base) !important;
                 color: var(--dark-blue) !important;
-                border: none;
-                padding: 8px 14px;
-                border-radius: 6px;
-                font-family: 'Subhead1', sans-serif;
-                font-size: 15px;
-                cursor: pointer;
-                white-space: nowrap;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                transition: all 0.15s ease;
+                border: none !important;
+                padding: 8px 14px !important;
+                border-radius: 6px !important;
+                font-family: 'Subhead1', sans-serif !important;
+                font-size: 15px !important;
+                cursor: pointer !important;
+                white-space: nowrap !important;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
+                transition: all 0.15s ease !important;
+                text-decoration: none !important; /* Kills the blue underline sliver! */
+                display: inline-flex !important;  /* Makes the link act like a button */
+                align-items: center !important;
+                justify-content: center !important;
+                line-height: 1 !important;
             }
             
             .btn-quick-link:hover {
                 background: #ffffff !important;
                 color: var(--brand-blue) !important;
-                transform: translateY(-1px);
-                box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+                transform: translateY(-1px) !important;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.25) !important;
+                text-decoration: none !important;
             }
-        }
     </style>
 </head>
 <body>
@@ -463,23 +463,13 @@
         </div>
     </div>
 
-    <!-- CENTERED QUICK PORTAL BUTTONS -->
+    <!-- CENTERED QUICK PORTAL LINKS (STYLED AS BUTTONS) -->
     <div class="header-center-nav">
-        <a href="https://www.hralliance.net/" target="_blank" rel="noopener noreferrer">
-            <button type="button" class="btn-quick-link">AllPay</button>
-        </a>
-        <a href="https://identity.checkr.com/u/login" target="_blank" rel="noopener noreferrer">
-            <button type="button" class="btn-quick-link">Checkr</button>
-        </a>
-        <a href="https://www.smartrecruiters.com/account/sign-in" target="_blank" rel="noopener noreferrer">
-            <button type="button" class="btn-quick-link">Smart Recruiters</button>
-        </a>
-        <a href="https://www.dpreporting.com/paycard/PaycardHome" target="_blank" rel="noopener noreferrer">
-            <button type="button" class="btn-quick-link">Netspend</button>
-        </a>
-        <a href="https://www.zenput.com/reports/" target="_blank" rel="noopener noreferrer">
-            <button type="button" class="btn-quick-link">Zenput Reports</button>
-        </a>
+        <a href="https://www.hralliance.net/" target="_blank" rel="noopener noreferrer" class="btn-quick-link">AllPay</a>
+        <a href="https://identity.checkr.com/u/login" target="_blank" rel="noopener noreferrer" class="btn-quick-link">Checkr</a>
+        <a href="https://www.smartrecruiters.com/account/sign-in" target="_blank" rel="noopener noreferrer" class="btn-quick-link">Smart Recruiters</a>
+        <a href="https://www.dpreporting.com/paycard/PaycardHome" target="_blank" rel="noopener noreferrer" class="btn-quick-link">Netspend</a>
+        <a href="https://www.zenput.com/reports/" target="_blank" rel="noopener noreferrer" class="btn-quick-link">Zenput Reports</a>
     </div>
 
     <button class="secondary" onclick="handleLogout()">Log Out</button>
