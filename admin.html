@@ -383,25 +383,53 @@
                 grid-template-columns: 1fr !important;
                 grid-column: 1 / -1 !important;
             }
+            header {
+                background-color: var(--dark-blue);
+                color: white;
+                padding: 10px 20px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                box-shadow: 0 4px 12px rgba(71, 43, 16, 0.15);
+                flex: 0 0 auto;
+            }
+            
+            .header-right-group {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            
             .header-quick-links {
                 display: flex;
                 align-items: center;
-                gap: 8px;
-                flex-wrap: wrap;
+                gap: 6px;
+                background: rgba(0, 0, 0, 0.2);
+                padding: 4px 8px;
+                border-radius: 8px;
+                border: 1px solid rgba(255, 255, 255, 0.15);
             }
+            
             .header-link-btn {
-                background: var(--brand-blue);
-                color: white;
+                background: rgba(255, 255, 255, 0.12);
+                color: #ffffff;
                 font-family: 'Subhead1', sans-serif;
-                font-size: 16px;
-                padding: 8px 14px;
+                font-size: 15px;
+                padding: 6px 12px;
                 border-radius: 6px;
                 border: 1px solid rgba(255, 255, 255, 0.25);
-                transition: background-color 0.15s ease;
+                transition: all 0.2s ease;
                 white-space: nowrap;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
             }
+            
             .header-link-btn:hover {
-                background: var(--med-blue);
+                background: var(--brand-blue);
+                border-color: #ffffff;
+                transform: translateY(-1px);
+                box-shadow: 0 2px 6px rgba(0,0,0,0.2);
             }
         }
     </style>
@@ -437,26 +465,28 @@
         </div>
     </div>
 
-    <!-- ONBOARDING QUICK LINKS -->
-    <div class="header-quick-links">
-        <a href="https://www.hralliance.net/" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
-            <button type="button" class="header-link-btn">🔗 AllPay</button>
-        </a>
-        <a href="https://identity.checkr.com/u/login" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
-            <button type="button" class="header-link-btn">🔗 Checkr</button>
-        </a>
-        <a href="https://www.smartrecruiters.com/account/sign-in" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
-            <button type="button" class="header-link-btn">🔗 Smart Recruiters</button>
-        </a>
-        <a href="https://www.dpreporting.com/paycard/PaycardHome" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
-            <button type="button" class="header-link-btn">🔗 Netspend</button>
-        </a>
-        <a href="https://www.zenput.com/reports/" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
-            <button type="button" class="header-link-btn">🔗 Zenput Reports</button>
-        </a>
-    </div>
+    <!-- RIGHT ACTION GROUP -->
+    <div class="header-right-group">
+        <div class="header-quick-links">
+            <a href="https://www.hralliance.net/" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+                <button type="button" class="header-link-btn">AllPay</button>
+            </a>
+            <a href="https://identity.checkr.com/u/login" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+                <button type="button" class="header-link-btn">Checkr</button>
+            </a>
+            <a href="https://www.smartrecruiters.com/account/sign-in" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+                <button type="button" class="header-link-btn">Smart Recruiters</button>
+            </a>
+            <a href="https://www.dpreporting.com/paycard/PaycardHome" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+                <button type="button" class="header-link-btn">Netspend</button>
+            </a>
+            <a href="https://www.zenput.com/reports/" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+                <button type="button" class="header-link-btn">Zenput Reports</button>
+            </a>
+        </div>
 
-    <button class="secondary" onclick="handleLogout()">Log Out</button>
+        <button class="secondary" onclick="handleLogout()">Log Out</button>
+    </div>
 </header>
     <div class="dashboard">
         <!-- Left Panel: List of Candidates -->
