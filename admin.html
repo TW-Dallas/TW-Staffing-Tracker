@@ -62,13 +62,12 @@
             
             <!-- Workspace Switcher Toggles -->
             <div id="dallasToggleContainer" style="margin-bottom: 8px;">
-                <div style="display: flex; background: var(--crust-med); border-radius: 8px; padding: 2px; gap: 2px;">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); background: var(--crust-med); border-radius: 8px; padding: 3px; gap: 3px;">
                     <button type="button" id="toggleOnb" onclick="switchView('onboarding')">Onboarding</button>
                     <button type="button" id="toggleInt" onclick="switchView('interviews')">Interviews</button>
                     <button type="button" id="toggleStf" onclick="switchView('staffing')">Hires/Terms</button>
                     <button type="button" id="togglePay" onclick="switchView('paycards')">Pay Cards</button>
                     <button type="button" id="toggleNto" onclick="switchView('nto')">NTO Class</button>
-                    <!-- ADD THIS BUTTON -->
                     <button type="button" id="toggleCnt" onclick="switchView('contacts')">Contacts</button>
                 </div>
             </div>
