@@ -463,13 +463,13 @@
         </div>
     </div>
 
-    <!-- CENTERED QUICK PORTAL LINKS (STYLED AS BUTTONS) -->
-    <div class="header-center-nav">
-        <a href="https://www.hralliance.net/" target="_blank" rel="noopener noreferrer" class="btn-quick-link">AllPay</a>
-        <a href="https://identity.checkr.com/u/login" target="_blank" rel="noopener noreferrer" class="btn-quick-link">Checkr</a>
-        <a href="https://www.smartrecruiters.com/account/sign-in" target="_blank" rel="noopener noreferrer" class="btn-quick-link">Smart Recruiters</a>
-        <a href="https://www.dpreporting.com/paycard/PaycardHome" target="_blank" rel="noopener noreferrer" class="btn-quick-link">Netspend</a>
-        <a href="https://www.zenput.com/reports/" target="_blank" rel="noopener noreferrer" class="btn-quick-link">Zenput Reports</a>
+    <!-- CENTERED QUICK PORTAL BUTTONS (PURE BUTTONS - NO LINK TAGS) -->
+    <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <button type="button" onclick="window.open('https://www.hralliance.net/', '_blank')" style="background: var(--crust-base); color: var(--dark-blue); font-size: 15px; padding: 7px 14px; font-family: 'Subhead1', sans-serif;">AllPay</button>
+        <button type="button" onclick="window.open('https://identity.checkr.com/u/login', '_blank')" style="background: var(--crust-base); color: var(--dark-blue); font-size: 15px; padding: 7px 14px; font-family: 'Subhead1', sans-serif;">Checkr</button>
+        <button type="button" onclick="window.open('https://www.smartrecruiters.com/account/sign-in', '_blank')" style="background: var(--crust-base); color: var(--dark-blue); font-size: 15px; padding: 7px 14px; font-family: 'Subhead1', sans-serif;">Smart Recruiters</button>
+        <button type="button" onclick="window.open('https://www.dpreporting.com/paycard/PaycardHome', '_blank')" style="background: var(--crust-base); color: var(--dark-blue); font-size: 15px; padding: 7px 14px; font-family: 'Subhead1', sans-serif;">Netspend</button>
+        <button type="button" onclick="window.open('https://www.zenput.com/reports/', '_blank')" style="background: var(--crust-base); color: var(--dark-blue); font-size: 15px; padding: 7px 14px; font-family: 'Subhead1', sans-serif;">Zenput Reports</button>
     </div>
 
     <button class="secondary" onclick="handleLogout()">Log Out</button>
