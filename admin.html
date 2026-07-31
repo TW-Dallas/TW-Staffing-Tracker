@@ -386,66 +386,48 @@
             header { 
                 background-color: var(--dark-blue); 
                 color: white; 
-                padding: 0 16px; 
-                height: 56px; 
+                padding: 8px 16px; 
                 display: flex; 
                 align-items: center; 
                 justify-content: space-between; 
                 box-shadow: 0 4px 12px rgba(71, 43, 16, 0.15); 
-                flex: 0 0 56px; 
-                box-sizing: border-box;
-                overflow: hidden;
+                flex: 0 0 auto; 
             }
             
-            .dashboard { 
-                display: flex; 
-                max-width: 1650px; 
-                width: 100%;
-                margin: 12px auto; 
-                padding: 0 16px; 
-                gap: 16px; 
-                flex: 1; 
-                height: calc(100vh - 68px); /* Perfect fit - zero page scrollbars */
-                box-sizing: border-box;
-                overflow: hidden;
-            }
-            
-            .header-right-group {
+            /* Centered container for buttons */
+            .header-center-nav {
                 display: flex;
                 align-items: center;
-                gap: 12px;
+                justify-content: center;
+                gap: 8px;
+                flex-wrap: nowrap;
             }
             
-            .header-quick-links {
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                background: rgba(0, 0, 0, 0.2);
-                padding: 3px 6px;
-                border-radius: 8px;
-                border: 1px solid rgba(255, 255, 255, 0.15);
+            .header-center-nav a {
+                text-decoration: none;
+                display: inline-block;
             }
             
-            .header-link-btn {
-                background: rgba(255, 255, 255, 0.12);
-                color: #ffffff !important;
-                font-family: 'Subhead1', sans-serif;
-                font-size: 14px;
-                padding: 5px 10px;
+            /* Crust-Base Custom Portal Buttons */
+            .btn-quick-link {
+                background: var(--crust-base) !important;
+                color: var(--dark-blue) !important;
+                border: none;
+                padding: 8px 14px;
                 border-radius: 6px;
-                border: 1px solid rgba(255, 255, 255, 0.25);
-                text-decoration: none !important;
-                white-space: nowrap;
-                display: inline-flex;
-                align-items: center;
-                transition: all 0.15s ease;
+                font-family: 'Subhead1', sans-serif;
+                font-size: 15px;
                 cursor: pointer;
+                white-space: nowrap;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                transition: all 0.15s ease;
             }
             
-            .header-link-btn:hover {
-                background: var(--brand-blue);
-                border-color: #ffffff;
-                box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            .btn-quick-link:hover {
+                background: #ffffff !important;
+                color: var(--brand-blue) !important;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.25);
             }
         }
     </style>
@@ -481,18 +463,26 @@
         </div>
     </div>
 
-    <!-- RIGHT ACTION GROUP -->
-    <div class="header-right-group">
-        <div class="header-quick-links">
-            <a href="https://www.hralliance.net/" target="_blank" rel="noopener noreferrer" class="header-link-btn">🔗 AllPay</a>
-            <a href="https://identity.checkr.com/u/login" target="_blank" rel="noopener noreferrer" class="header-link-btn">🔗 Checkr</a>
-            <a href="https://www.smartrecruiters.com/account/sign-in" target="_blank" rel="noopener noreferrer" class="header-link-btn">🔗 Smart Recruiters</a>
-            <a href="https://www.dpreporting.com/paycard/PaycardHome" target="_blank" rel="noopener noreferrer" class="header-link-btn">🔗 Netspend</a>
-            <a href="https://www.zenput.com/reports/" target="_blank" rel="noopener noreferrer" class="header-link-btn">🔗 Zenput Reports</a>
-        </div>
-
-        <button class="secondary" onclick="handleLogout()">Log Out</button>
+    <!-- CENTERED QUICK PORTAL BUTTONS -->
+    <div class="header-center-nav">
+        <a href="https://www.hralliance.net/" target="_blank" rel="noopener noreferrer">
+            <button type="button" class="btn-quick-link">AllPay</button>
+        </a>
+        <a href="https://identity.checkr.com/u/login" target="_blank" rel="noopener noreferrer">
+            <button type="button" class="btn-quick-link">Checkr</button>
+        </a>
+        <a href="https://www.smartrecruiters.com/account/sign-in" target="_blank" rel="noopener noreferrer">
+            <button type="button" class="btn-quick-link">Smart Recruiters</button>
+        </a>
+        <a href="https://www.dpreporting.com/paycard/PaycardHome" target="_blank" rel="noopener noreferrer">
+            <button type="button" class="btn-quick-link">Netspend</button>
+        </a>
+        <a href="https://www.zenput.com/reports/" target="_blank" rel="noopener noreferrer">
+            <button type="button" class="btn-quick-link">Zenput Reports</button>
+        </a>
     </div>
+
+    <button class="secondary" onclick="handleLogout()">Log Out</button>
 </header>
     <div class="dashboard">
         <!-- Left Panel: List of Candidates -->
