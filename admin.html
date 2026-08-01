@@ -1112,7 +1112,7 @@
 
     function handleLogin(savedUser, savedPass) {
         const u = savedUser || document.getElementById('loginUser').value.trim();
-        const p = savedPass || document.getElementById('loginPass').value;
+        const p = savedPass || document.getElementById('loginPass').value.trim();
         const errorEl = document.getElementById('loginError');
 
         if (!u || !p) return;
@@ -1122,13 +1122,15 @@
 
         const city = getCityFromUser(u);
         
-        fetch(`${API_URL}?city=${city}`)
+        // Pass username & password to backend for verification
+        fetch(`${API_URL}?city=${city}&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`)
             .then(res => res.json())
             .then(data => {
                 if (data.error) {
                     throw new Error(data.error);
                 }
                 
+                // Save verified credentials
                 localStorage.setItem('onb_user', u);
                 localStorage.setItem('onb_pass', p);
                 
@@ -1136,20 +1138,11 @@
                 document.getElementById('appContainer').classList.remove('hidden');
                 document.getElementById('headerCity').innerText = `${city} Workspace`;
 
-                // ==========================================
-                // DENVER VS DALLAS FEATURE TOGGLES
-                // ==========================================
+                // Feature toggles for Denver vs Dallas
                 const isDenver = city.toLowerCase() === 'denver';
-
-                // Hide tabs that Denver does not use (Interviews, Staffing, Pay Cards)
                 document.getElementById('toggleInt').style.display = isDenver ? 'none' : 'block';
                 document.getElementById('toggleStf').style.display = isDenver ? 'none' : 'block';
                 document.getElementById('togglePay').style.display = isDenver ? 'none' : 'block';
-
-                // Hide Store Hiring Trends modal button for Denver
-                const metricsBtn = document.querySelector('#metricsBox button');
-                if (metricsBtn) metricsBtn.style.display = isDenver ? 'none' : 'flex';
-                // ==========================================
 
                 candidates = data.onboarding || [];
                 interviews = data.interviews || [];
@@ -1157,7 +1150,6 @@
                 contacts = data.contacts || [];
                 paycards = processPayCards(data);
                 
-                // Restore Cloud Scratchpad Notes
                 if (data.scratchpadText !== undefined) {
                     localStorage.setItem(`scratchpad_text_${u}`, data.scratchpadText);
                 }
@@ -1175,9 +1167,33 @@
             })
             .catch(err => {
                 showLoader(false);
-                errorEl.innerText = "Invalid login credentials or Sheet configuration error.";
+                // 🧹 Wipe bad/stale credentials from localStorage immediately
+                localStorage.removeItem('onb_user');
+                localStorage.removeItem('onb_pass');
+                
+                errorEl.innerText = err.message || "Invalid login credentials.";
                 errorEl.classList.remove('hidden');
-                localStorage.clear();
+                document.getElementById('authContainer').classList.remove('hidden');
+                document.getElementById('appContainer').classList.add('hidden');
+            });
+    }
+
+    function silentSync() {
+        const u = localStorage.getItem('onb_user');
+        const p = localStorage.getItem('onb_pass');
+        if (!u || !p) return;
+        
+        const city = getCityFromUser(u);
+        fetch(`${API_URL}?city=${city}&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) return; // Ignore silent errors
+                candidates = data.onboarding || [];
+                interviews = data.interviews || [];
+                staffing = data.staffing || [];
+                paycards = processPayCards(data);
+                renderList();
+                updateAuditMetrics();
             });
     }
 
@@ -2471,22 +2487,6 @@
 
         const net = periodHires - periodTerms;
         if (elStfPeriodNet) elStfPeriodNet.innerText = (net >= 0 ? '+' : '') + net;
-    }
-
-    function silentSync() {
-        const u = localStorage.getItem('onb_user');
-        if (!u) return;
-        const city = getCityFromUser(u);
-        fetch(`${API_URL}?city=${city}`)
-            .then(res => res.json())
-            .then(data => {
-                candidates = data.onboarding || [];
-                interviews = data.interviews || [];
-                staffing = data.staffing || [];
-                paycards = processPayCards(data);
-                renderList();
-                updateAuditMetrics();
-            });
     }
 
     function autoCalculateDayOfWeek() {
