@@ -194,6 +194,19 @@
         }
         .hidden { display: none !important; }
     </style>
+    <!-- OneSignal Web Push SDK -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+        appId: "260aafa0-6a1c-40fc-a8a7-2a8e80b206b4",
+        });
+        
+        // Check if user has selected their Store tag
+        checkPushSetupStatus();
+    });
+    </script>
 </head>
 <body>
 
@@ -220,6 +233,32 @@
     <div id="interviewList" class="hidden"></div>
 </div>
 
+<!-- Push Notification Store Setup Modal -->
+<div id="pushSetupModal" class="brand-modal-overlay hidden">
+    <div class="brand-modal-card">
+        <div class="brand-modal-brand-stripe"></div>
+        <div class="brand-modal-content" style="padding: 20px;">
+            <h3 style="margin-top: 0; color: var(--dark-blue); font-family: 'Subhead1', sans-serif; font-size: 18px; text-transform: uppercase;">🔔 Enable Hiring Push Alerts</h3>
+            <p style="font-size: 14px; color: var(--crust-burnt); margin-top: 0; font-family: 'Condensed';">Select your Store # or District to receive instant notifications (Interview Bookings, NTO Signups, Hires):</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px; margin: 15px 0;">
+                <div>
+                    <label style="font-family: 'Subhead2'; font-size: 13px; color: var(--crust-deep);">Select Your Store #:</label>
+                    <select id="pushStoreSelect" style="width: 100%; margin-top: 4px;"><option value="ALL">All Stores</option></select>
+                </div>
+                <div>
+                    <label style="font-family: 'Subhead2'; font-size: 13px; color: var(--crust-deep);">Or Select Your District (DO):</label>
+                    <select id="pushDoSelect" style="width: 100%; margin-top: 4px;"><option value="ALL">All DOs</option></select>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px;">
+                <button type="button" onclick="closePushSetupModal()" style="background: var(--crust-med); color: var(--crust-burnt); border: none; padding: 8px 14px; border-radius: 6px; font-family: 'Subhead2'; font-size: 13px; cursor: pointer;">Skip</button>
+                <button type="button" onclick="savePushSubscriptionTags()" style="background: var(--brand-blue); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-family: 'Subhead2'; font-size: 13px; text-transform: uppercase; cursor: pointer;">Enable Push Alerts</button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- What's New Welcome Modal -->
 <div id="updateModal" class="brand-modal-overlay hidden">
     <div class="brand-modal-card">
@@ -311,6 +350,77 @@
                 console.error(err);
             });
     }
+    
+    // --- ONE SIGNAL PUSH TAGGING & DEEP LINKING ---
+    function checkPushSetupStatus() {
+        try {
+            const hasSetTags = localStorage.getItem('pushSetupCompleted_v1');
+            if (!hasSetTags) {
+                document.getElementById('pushSetupModal').classList.remove('hidden');
+            }
+        } catch(e) {}
+    }
+
+    function savePushSubscriptionTags() {
+        const selectedStore = document.getElementById('pushStoreSelect').value;
+        const selectedDo = document.getElementById('pushDoSelect').value;
+
+        window.OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.Notifications.requestPermission();
+            
+            if (selectedStore && selectedStore !== "ALL") {
+                const cleanStore = selectedStore.replace(/\D/g, "").trim();
+                await OneSignal.User.addTag("store_number", cleanStore);
+            }
+            if (selectedDo && selectedDo !== "ALL") {
+                await OneSignal.User.addTag("do_name", selectedDo.trim().toLowerCase());
+            }
+
+            try { localStorage.setItem('pushSetupCompleted_v1', 'true'); } catch(e) {}
+            document.getElementById('pushSetupModal').classList.add('hidden');
+        });
+    }
+
+    function closePushSetupModal() {
+        try { localStorage.setItem('pushSetupCompleted_v1', 'true'); } catch(e) {}
+        document.getElementById('pushSetupModal').classList.add('hidden');
+    }
+
+    // --- DEEP LINK PARAMETER READER ---
+    function checkDeepLinkParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetStore = urlParams.get('store');
+        const targetView = urlParams.get('view');
+        const targetDo = urlParams.get('do');
+
+        if (targetDo) {
+            const doSelect = document.getElementById('doFilter');
+            if (doSelect) { doSelect.value = targetDo; }
+        }
+        if (targetStore) {
+            const storeSelect = document.getElementById('storeFilter');
+            if (storeSelect) { storeSelect.value = targetStore; }
+        }
+        if (targetView) {
+            switchView(targetView);
+        }
+
+        // Silent Usage Pinger
+        logUsagePinger(targetStore || document.getElementById('storeFilter').value, targetDo || document.getElementById('doFilter').value, targetView || 'onboarding');
+    }
+
+    function logUsagePinger(storeVal, doVal, activeView) {
+        try {
+            const payload = {
+                action: "logUsage",
+                storeNum: storeVal || "All",
+                doName: doVal || "All",
+                actionView: activeView || "Opened App",
+                deviceType: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? "Mobile" : "Desktop"
+            };
+            fetch(API_URL, { method: "POST", body: JSON.stringify(payload) }).catch(e => {});
+        } catch(e) {}
+    }
 
     function populateFilters() {
         // Prevent clearing filters if the user is currently searching/selecting
@@ -334,6 +444,14 @@
 
         doSelect.onchange = refreshViews;
         storeSelect.onchange = refreshViews;
+        // Sync filter options into Push Subscription Modal
+        const pushStoreSelect = document.getElementById('pushStoreSelect');
+        const pushDoSelect = document.getElementById('pushDoSelect');
+        if (pushStoreSelect) pushStoreSelect.innerHTML = storeSelect.innerHTML;
+        if (pushDoSelect) pushDoSelect.innerHTML = doSelect.innerHTML;
+
+        // Check URL parameters for Deep Links (from push notification taps)
+        checkDeepLinkParams();
     }
 
     function refreshViews() { renderOnboarding(); renderInterviews(); }
