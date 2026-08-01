@@ -460,23 +460,28 @@
         if (item.ineligible) return { pct: 100, color: 'grey', label: 'Ineligible' };
         if (item.inactive) return { pct: 100, color: 'grey', label: 'Inactive' };
         if (item.hired) return { pct: 100, color: 'green', label: 'Hired' };
-    
+        
         // Active Flag Blockers
         if (item.hasMissingDocs) return { pct: 15, color: 'red', label: 'Missing / Incorrect Docs' };
         if (item.incorrectEmail) return { pct: 15, color: 'red', label: 'Incorrect Email' };
     
-        // Live NTO Attendance Overrides (During class day)
-        if (item.ntoAttendance) {
-            const att = item.ntoAttendance.trim();
-            if (att === 'In Lobby') return { pct: 92, color: 'blue', label: '🏨 In Lobby' };
-            if (att === 'In Class') return { pct: 95, color: 'blue', label: '📖 In Class' };
-            if (att === 'NTO Complete' || att === 'Attended') return { pct: 98, color: 'green', label: '🎓 NTO Complete' };
-            if (att === 'Left Early') return { pct: 90, color: 'red', label: '⚠️ Left Class Early' };
+        // If candidate is actively scheduled for NTO, prioritize NTO Scheduled!
+        if (item.ntoScheduled) {
+            // Live NTO Attendance Overrides (during class)
+            if (item.ntoAttendance) {
+                const att = item.ntoAttendance.trim();
+                if (att === 'In Lobby') return { pct: 92, color: 'blue', label: '🏨 In Lobby' };
+                if (att === 'In Class') return { pct: 95, color: 'blue', label: '📖 In Class' };
+                if (att === 'NTO Complete' || att === 'Attended') return { pct: 98, color: 'green', label: '🎓 NTO Complete' };
+                if (att === 'Left Early') return { pct: 90, color: 'red', label: '⚠️ Left Class Early' };
+            }
+            return { pct: 90, color: 'blue', label: 'NTO Scheduled' };
         }
     
-        // Prioritize new NTO scheduled dates over past missed NTOs
-        if (item.ntoScheduled) return { pct: 90, color: 'blue', label: 'NTO Scheduled' };
-        if (item.missedNto) return { pct: 90, color: 'red', label: 'Missed NTO' };
+        // Only show Missed NTO if they are NOT currently scheduled for a new class
+        if (item.missedNto || (item.ntoAttendance && (item.ntoAttendance === 'Not in NTO' || item.ntoAttendance.includes('Incomplete')))) {
+            return { pct: 90, color: 'red', label: 'Missed NTO' };
+        }
     
         if (item.ntoSignupLinkSent) return { pct: 75, color: 'blue', label: 'NTO Signup Sent' };
     
@@ -493,13 +498,15 @@
     }
     
     function getStatusWeight(item) {
-        // 1. Inactive & Ineligible candidates ALWAYS go to the very bottom
+        // 1. Ineligible & Inactive ALWAYS go to the very bottom
         if (item.ineligible) return 12;
         if (item.inactive) return 11;
     
+        const isMissedNtoActive = !item.ntoScheduled && (item.missedNto || (item.ntoAttendance && (item.ntoAttendance === 'Not in NTO' || item.ntoAttendance.includes('Incomplete'))));
+    
         // 2. Active candidates needing immediate GM action float to the top
-        if (item.incorrectEmail || item.hasMissingDocs || item.missedNto) return 0;
-        if (item.ntoAttendance === 'Left Early' || item.ntoAttendance === 'Not in NTO' || (item.ntoAttendance && item.ntoAttendance.includes('Incomplete'))) return 0;
+        if (item.incorrectEmail || item.hasMissingDocs || isMissedNtoActive) return 0;
+        if (item.ntoAttendance === 'Left Early') return 0;
         
         // 3. Hired Candidates
         if (item.hired) {
@@ -511,14 +518,14 @@
         }
     
         // 4. Active pipeline candidates in order of progress
-        if (item.ntoAttendance || item.ntoScheduled) return 2;
+        if (item.ntoScheduled || item.ntoAttendance === 'In Lobby' || item.ntoAttendance === 'In Class' || item.ntoAttendance === 'NTO Complete' || item.ntoAttendance === 'Attended') return 2;
         if (item.ntoSignupLinkSent) return 3;
         if (item.onboardingSent) return 4;
         if (item.submissionReceived) return 5;
         
         return 6;
     }
-
+    
     function getPositionIcon(position) {
         const pos = position ? position.toUpperCase().trim() : '';
         if (pos === 'DE') return '🚗';
@@ -615,12 +622,14 @@
         filtered.forEach(item => {
             const icon = getPositionIcon(item.position);
             
-    const pipe = getPipelineDetails(item);
+        const pipe = getPipelineDetails(item);
             
+            const isMissedNtoActive = !item.ntoScheduled && (item.missedNto || (item.ntoAttendance && (item.ntoAttendance === 'Not in NTO' || item.ntoAttendance.includes('Incomplete'))));
+
             let cardClass = 'status-blue';
             if (item.inactive || item.ineligible) {
                 cardClass = 'status-gray';
-            } else if (item.incorrectEmail || item.hasMissingDocs || item.missedNto || pipe.color === 'red') {
+            } else if (item.incorrectEmail || item.hasMissingDocs || isMissedNtoActive || pipe.color === 'red') {
                 cardClass = 'status-red';
             } else if (item.hired || pipe.color === 'green') {
                 cardClass = 'status-green';
@@ -629,13 +638,13 @@
             let alertHtml = '';
             if (item.incorrectEmail) {
                 alertHtml = `<div class="alert-banner">🛑 Incorrect Email (Requires Outreach)</div>`;
-            } else if (item.missedNto) {
+            } else if (isMissedNtoActive) {
                 alertHtml = `<div class="alert-banner">⚠️ Missed Orientation / NTO (Needs Approval to Reschedule)</div>`;
             } else if (item.hasMissingDocs) {
                 const missingText = item.missingDocsText ? `: ${item.missingDocsText}` : ' (Paperwork Required)';
                 alertHtml = `<div class="alert-banner">⚠️ Missing Documents${missingText}</div>`;
             }
-
+            
             let chipsHtml = '';
             if (item.shirtSize) chipsHtml += `<span class="chip">👕 ${item.shirtSize}</span>`;
             if (item.hatStyle && (item.hatStyle.toLowerCase() === 'cap' || item.hatStyle.toLowerCase() === 'visor')) {
