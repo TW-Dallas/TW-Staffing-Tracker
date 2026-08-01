@@ -309,34 +309,42 @@
                         </div>
 
                         <div class="section-header">GM Interview & Final Progression</div>
-                        <div class="form-row flex-three">
-                            <div class="form-group flex-two-weight">
-                                <label>Interview Status</label>
-                                <select id="intStatus">
-                                    <option value="Phone Interview">📞 Phone Interview</option>
-                                    <option value="Scheduled">📞 Scheduled</option>
-                                    <option value="Completed">✓ Completed</option>
-                                    <option value="Passed to GM">👔 Passed to GM</option>
-                                    <option value="Hired">🎉 Hired</option>
-                                    <option value="No Show">❌ No Show</option>
-                                    <option value="Declined">🚫 Declined</option>
-                                    <option value="Hold">⏸ Hold</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>GM Date</label>
-                                <input type="date" id="intGmDate" placeholder="MM/DD/YYYY">
-                            </div>
-                            <div class="form-group">
-                                <label>GM Time</label>
-                                <input type="text" id="intGmTime" placeholder="e.g., 2:00 PM">
-                            </div>
-                        </div>
+                            <div class="form-row" style="display: flex; gap: 8px; align-items: flex-end;">
+                                <!-- Column 1: Interview Status -->
+                                <div class="form-group" style="flex: 1;">
+                                    <label>Interview Status</label>
+                                    <select id="intStatus">
+                                        <option value="Phone Interview">📞 Phone Interview</option>
+                                        <option value="Scheduled">📞 Scheduled</option>
+                                        <option value="Completed">✓ Completed</option>
+                                        <option value="Passed to GM">👔 Passed to GM</option>
+                                        <option value="Hired">🎉 Hired</option>
+                                        <option value="No Show">❌ No Show</option>
+                                        <option value="Declined">🚫 Declined</option>
+                                        <option value="Hold">⏸ Hold</option>
+                                    </select>
+                                </div>
 
-                        <!-- Standalone Full-Width Action Button -->
-                        <button type="button" onclick="triggerGmInterviewEmail()" style="background: var(--brand-blue); color: white; width: 100%; margin-top: 8px; margin-bottom: 12px; font-size: 15px; padding: 10px; border: none; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer;">
-                            ✉️ Send GM Interview Email & Calendar Invite
-                        </button>
+                                <!-- Column 2: GM Date -->
+                                <div class="form-group" style="flex: 1;">
+                                    <label>GM Date</label>
+                                    <input type="date" id="intGmDate" placeholder="MM/DD/YYYY">
+                                </div>
+
+                                <!-- Column 3: GM Time -->
+                                <div class="form-group" style="flex: 1;">
+                                    <label>GM Time</label>
+                                    <input type="text" id="intGmTime" placeholder="e.g., 2:00 PM">
+                                </div>
+
+                                <!-- Column 4: Send Button -->
+                                <div class="form-group" style="flex: 1.2;">
+                                    <label style="visibility: hidden;">Action</label>
+                                    <button type="button" onclick="triggerGmInterviewEmail()" style="background: var(--brand-blue); color: white; width: 100%; height: 38px; font-size: 14px; padding: 0 8px; border: none; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; white-space: nowrap;">
+                                        ✉️ Send GM Invite
+                                    </button>
+                                </div>
+                            </div>
 
                         <div class="form-group">
                             <label>Status Updates</label>
