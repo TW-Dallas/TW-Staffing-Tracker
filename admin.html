@@ -331,6 +331,9 @@
                                 <label>GM Time</label>
                                 <input type="text" id="intGmTime" placeholder="e.g., 2:00 PM">
                             </div>
+                            <button type="button" onclick="triggerGmInterviewEmail()" style="background: var(--brand-blue); color: white; width: 100%; margin-top: 10px; font-size: 15px; padding: 10px 14px; border: none; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer;">
+                            ✉️ Send GM Interview Email & Calendar Invite
+                            </button>
                         </div>
 
                         <div class="form-group">
@@ -2080,6 +2083,70 @@
         });
     }
 
+    async function triggerGmInterviewEmail() {
+        const id = document.getElementById('fieldId').value;
+        const name = document.getElementById('intName').value.trim();
+        const email = document.getElementById('intEmail').value.trim();
+        const position = document.getElementById('intPosition').value;
+        const store = document.getElementById('intStore').value.trim();
+        const gmDate = document.getElementById('intGmDate').value.trim();
+        const gmTime = document.getElementById('intGmTime').value.trim();
+
+        if (!name || !email) {
+            showBrandAlert("Candidate name and email address are required to send the interview invite.", "Missing Email or Name");
+            return;
+        }
+        if (!gmDate || !gmTime) {
+            showBrandAlert("Please enter the GM Interview Date and GM Time before sending.", "Missing Date/Time");
+            return;
+        }
+
+        const confirmMsg = `Send In-Person GM Interview Invite to ${name} (${email})?\n\n` +
+                        `• Interview Date: ${gmDate}\n` +
+                        `• Interview Time: ${gmTime}\n` +
+                        `• Store #: ${store}\n\n` +
+                        `(This will attach an .ics Calendar Invite & CC the Store GM)`;
+
+        const confirmed = await showBrandConfirm(confirmMsg, "Confirm GM Interview Email");
+        if (!confirmed) return;
+
+        showLoader(true, "Sending GM Interview Email & Invite...");
+
+        const username = localStorage.getItem('onb_user');
+        const password = localStorage.getItem('onb_pass');
+
+        const payload = {
+            username: username,
+            password: password,
+            action: "sendEmail",
+            emailType: "sendGmInterviewEmail",
+            id: id,
+            name: name,
+            candidateName: name,
+            email: email,
+            candidateEmail: email,
+            position: position,
+            store: store,
+            storeNum: store,
+            gmDate: gmDate,
+            gmTime: gmTime
+        };
+
+        fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
+        .then(res => res.json())
+        .then(result => {
+            showLoader(false);
+            if (!result.success) throw new Error(result.error || "Failed to send interview email.");
+            showBrandAlert("GM Interview email & calendar invite delivered successfully!", "Invite Delivered");
+            
+            // Auto-update status dropdown to "Passed to GM"
+            document.getElementById('intStatus').value = "Passed to GM";
+        })
+        .catch(err => {
+            showLoader(false);
+            showBrandAlert("Error sending interview email: " + err.message, "Email Error");
+        });
+    }
     function portCandidateToOnboarding() {
         const name = document.getElementById('intName').value.trim();
         const position = document.getElementById('intPosition').value;
