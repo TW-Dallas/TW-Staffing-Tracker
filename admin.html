@@ -1135,7 +1135,22 @@
                 document.getElementById('authContainer').classList.add('hidden');
                 document.getElementById('appContainer').classList.remove('hidden');
                 document.getElementById('headerCity').innerText = `${city} Workspace`;
-                
+
+                // ==========================================
+                // DENVER VS DALLAS FEATURE TOGGLES
+                // ==========================================
+                const isDenver = city.toLowerCase() === 'denver';
+
+                // Hide tabs that Denver does not use (Interviews, Staffing, Pay Cards)
+                document.getElementById('toggleInt').style.display = isDenver ? 'none' : 'block';
+                document.getElementById('toggleStf').style.display = isDenver ? 'none' : 'block';
+                document.getElementById('togglePay').style.display = isDenver ? 'none' : 'block';
+
+                // Hide Store Hiring Trends modal button for Denver
+                const metricsBtn = document.querySelector('#metricsBox button');
+                if (metricsBtn) metricsBtn.style.display = isDenver ? 'none' : 'flex';
+                // ==========================================
+
                 candidates = data.onboarding || [];
                 interviews = data.interviews || [];
                 staffing = data.staffing || [];
