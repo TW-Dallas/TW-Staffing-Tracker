@@ -190,9 +190,6 @@
                             
                             <div class="section-header">Active Flags & Blockers</div>
 
-                            <label class="checkbox-item flag-box flag-reviewing">
-                                <input type="checkbox" id="checkReviewing"> 🔍 Currently Reviewing
-                            </label>
                             <label class="checkbox-item flag-box flag-incorrect">
                                 <input type="checkbox" id="checkIncorrect"> ⚠️ Incorrect Email
                             </label>
@@ -1340,7 +1337,6 @@
         if (item.inactive) return "💤 Inactive";
         if (item.incorrectEmail) return "⚠️ Incorrect Email";
         if (item.missedNto) return "⚠️ Missed NTO";
-        if (item.currentlyReviewing) return "🔍 Reviewing";
         if (item.hired) return "🎉 Hired";
         
         if (item.ntoScheduled) {
@@ -1591,8 +1587,6 @@
 
                 if (item.incorrectEmail || isBlockedByDocs || item.missedNto) {
                     card.classList.add('status-red');
-                } else if (item.currentlyReviewing) {
-                    card.classList.add('status-reviewing');
                 } else if (item.hired) {
                     card.classList.add('status-green');
                 } else if (item.ineligible || item.inactive) {
@@ -1620,10 +1614,6 @@
                 if (item.incorrectEmail) flags += '<span class="badge-incorrect">⚠️ Email Error</span> ';
                 if (isBlockedByDocs) flags += '<span class="badge-incorrect">⚠️ Missing Docs</span> ';
                 if (item.missedNto) flags += '<span class="badge-incorrect">⚠️ Missed NTO</span> ';
-                
-                if (item.currentlyReviewing && activeStatusText !== "🔍 Reviewing") {
-                    flags += '<span class="badge-review">🔍 Reviewing</span> ';
-                }
 
                 card.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -1722,7 +1712,6 @@
             document.getElementById('checkNto').checked = item.ntoScheduled || false;
             document.getElementById('checkHired').checked = item.hired || false;
             document.getElementById('checkIncorrect').checked = item.incorrectEmail || false;
-            document.getElementById('checkReviewing').checked = item.currentlyReviewing || false;
             document.getElementById('checkIneligible').checked = item.ineligible || false;
             document.getElementById('checkInactive').checked = item.inactive || false;
             document.getElementById('checkPulseForm').checked = item.pulseFormComplete || false;
@@ -1890,7 +1879,6 @@
             payload.ntoScheduled = document.getElementById('checkNto').checked;
             payload.hired = document.getElementById('checkHired').checked;
             payload.incorrectEmail = document.getElementById('checkIncorrect').checked;
-            payload.currentlyReviewing = document.getElementById('checkReviewing').checked;
             payload.ineligible = document.getElementById('checkIneligible').checked;
             payload.inactive = document.getElementById('checkInactive').checked;
             payload.pulseFormComplete = document.getElementById('checkPulseForm').checked;

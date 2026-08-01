@@ -348,6 +348,16 @@ function getPipelineDetails(item) {
     if (item.hasMissingDocs) return { pct: 15, color: 'red', label: 'Missing / Incorrect Docs' };
     if (item.incorrectEmail) return { pct: 15, color: 'red', label: 'Incorrect Email' };
 
+    // Live NTO Attendance Overrides (Replaces static "NTO Scheduled" cleanly)
+    if (item.ntoAttendance) {
+        const att = item.ntoAttendance.trim();
+        if (att === 'In Lobby') return { pct: 92, color: 'blue', label: '🏨 In Lobby' };
+        if (att === 'In Class') return { pct: 95, color: 'blue', label: '📖 In Class' };
+        if (att === 'NTO Complete' || att === 'Attended') return { pct: 98, color: 'green', label: '🎓 NTO Complete' };
+        if (att === 'Left Early') return { pct: 90, color: 'red', label: '⚠️ Left Class Early' };
+        if (att === 'Not in NTO' || att.includes('Incomplete')) return { pct: 90, color: 'red', label: '❌ Missed Orientation' };
+    }
+
     if (item.ntoScheduled) return { pct: 90, color: 'blue', label: 'NTO Scheduled' };
     if (item.ntoSignupLinkSent) return { pct: 75, color: 'blue', label: 'NTO Signup Sent' };
 
@@ -365,6 +375,7 @@ function getPipelineDetails(item) {
 
     function getStatusWeight(item) {
         if (item.incorrectEmail || item.hasMissingDocs || item.missedNto) return 0; // Urgencies first!
+        if (item.ntoAttendance === 'Left Early' || item.ntoAttendance === 'Not in NTO' || (item.ntoAttendance && item.ntoAttendance.includes('Incomplete'))) return 0;
         
         if (item.hired) {
             const today = new Date();
@@ -374,7 +385,7 @@ function getPipelineDetails(item) {
             return (updateDate.getTime() === today.getTime()) ? 1 : 10;
         }
 
-        if (item.ntoScheduled) return 2;
+        if (item.ntoAttendance || item.ntoScheduled) return 2;
         if (item.ntoSignupLinkSent) return 3;
         if (item.onboardingSent) return 4;
         if (item.submissionReceived) return 5;
@@ -480,16 +491,16 @@ function getPipelineDetails(item) {
         filtered.forEach(item => {
             const icon = getPositionIcon(item.position);
             
-    let cardClass = 'status-blue';
+    const pipe = getPipelineDetails(item);
+            
+            let cardClass = 'status-blue';
             if (item.inactive || item.ineligible) {
                 cardClass = 'status-gray';
-            } else if (item.incorrectEmail || item.hasMissingDocs || item.missedNto) {
+            } else if (item.incorrectEmail || item.hasMissingDocs || item.missedNto || pipe.color === 'red') {
                 cardClass = 'status-red';
-            } else if (item.hired) {
+            } else if (item.hired || pipe.color === 'green') {
                 cardClass = 'status-green';
             }
-            
-            const pipe = getPipelineDetails(item);
             
             let alertHtml = '';
             if (item.incorrectEmail) {
