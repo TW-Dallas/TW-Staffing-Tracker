@@ -272,6 +272,12 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbxa1XNdNgwOULiYpeAoBIjTy1wv034pON4-hnR444XB07vegHhoSR56UacR7UaktTaGZg/exec?city=Denver&username=denver_admin&password=denver_password_123";
     let rawData = { onboarding: [] };
     let expandedCardIds = new Set(); 
+    let showOlderForStore = false; // Tracks if GM clicked "View Older Candidates"
+
+    function toggleOlderCandidates() {
+        showOlderForStore = !showOlderForStore;
+        renderOnboarding();
+    }
 
     (function() {
         try {
@@ -415,8 +421,8 @@
         stores.forEach(s => { let opt = document.createElement('option'); opt.value = s; opt.innerText = s; storeSelect.appendChild(opt); });
         storeSelect.value = activeStore;
 
-        doSelect.onchange = renderOnboarding;
-        storeSelect.onchange = renderOnboarding;
+        doSelect.onchange = () => { showOlderForStore = false; renderOnboarding(); };
+        storeSelect.onchange = () => { showOlderForStore = false; renderOnboarding(); };
 
         const pushStoreSelect = document.getElementById('pushStoreSelect');
         const pushDoSelect = document.getElementById('pushDoSelect');

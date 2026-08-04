@@ -288,6 +288,12 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbxa1XNdNgwOULiYpeAoBIjTy1wv034pON4-hnR444XB07vegHhoSR56UacR7UaktTaGZg/exec?city=Dallas&username=dallas_admin&password=dallas_password_123";
     let rawData = { onboarding: [], interviews: [] };
     let expandedCardIds = new Set(); // Track expanded cards across...
+    let showOlderForStore = false; // Tracks if GM clicked "View Older Candidates"
+
+    function toggleOlderCandidates() {
+        showOlderForStore = !showOlderForStore;
+        renderOnboarding();
+    }
 
     // Check if we should display the welcome modal (runs safely in private windows too) [0]
     (function() {
@@ -442,8 +448,17 @@
         stores.forEach(s => { let opt = document.createElement('option'); opt.value = s; opt.innerText = s; storeSelect.appendChild(opt); });
         storeSelect.value = activeStore;
 
-        doSelect.onchange = refreshViews;
-        storeSelect.onchange = refreshViews;
+        doSelect.onchange = () => { 
+            showOlderForStore = false; 
+            renderOnboarding(); 
+            if (typeof renderInterviews === 'function') renderInterviews(); 
+        };
+
+        storeSelect.onchange = () => {  
+            showOlderForStore = false; 
+            renderOnboarding(); 
+            if (typeof renderInterviews === 'function') renderInterviews(); 
+        };
         // Sync filter options into Push Subscription Modal
         const pushStoreSelect = document.getElementById('pushStoreSelect');
         const pushDoSelect = document.getElementById('pushDoSelect');
@@ -738,27 +753,44 @@
 
     function renderInterviews() {
         const list = document.getElementById('interviewList');
+        if (!list) return;
         list.innerHTML = '';
         const doVal = document.getElementById('doFilter').value;
         const storeVal = document.getElementById('storeFilter').value;
 
-        const filtered = rawData.interviews.filter(item => {
+        const interviewsData = rawData.interviews || [];
+        const twoWeeksAgo = new Date();
+        twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+
+        const filtered = interviewsData.filter(item => {
             const iDo = item.doName ? item.doName.toString().trim() : '';
             const iStore = item.store ? item.store.toString().trim() : '';
-            return item.store !== 'Store #' &&
-                   (doVal === 'All' || iDo === doVal) &&
-                   (storeVal === 'All' || iStore === storeVal);
+            const matchesDo = (doVal === 'All' || iDo === doVal);
+            const matchesStore = (storeVal === 'All' || iStore === storeVal);
+
+            if (item.store === 'Store #' || !matchesDo || !matchesStore) return false;
+
+            // Filter interviews older than 14 days unless showOlderForStore is true
+            const intDate = item.date ? new Date(item.date) : null;
+            if (intDate && !isNaN(intDate.getTime()) && intDate < twoWeeksAgo) {
+                if (!showOlderForStore) return false;
+            }
+
+            return true;
         });
 
-        if(filtered.length === 0) { list.innerHTML = '<div class="loader">No interviews scheduled.</div>'; return; }
+        if (filtered.length === 0) { 
+            list.innerHTML = '<div class="loader">No interviews scheduled in the last 2 weeks.</div>'; 
+            return; 
+        }
 
         filtered.forEach(item => {
             const icon = getPositionIcon(item.position);
             let statusColor = 'status-blue';
             const s = item.status ? item.status.toString() : '';
-            if(s.includes('No Show') || s.includes('Canceled') || s.includes('Pass')) statusColor = 'status-red';
-            if(s.includes('2nd Interview') || s.includes('Hired') || s.includes('Completed') || s.includes('Offered')) statusColor = 'status-green';
-            if(s.includes('Reschedule') || s.includes('Withdrawn')) statusColor = 'status-gray';
+            if (s.includes('No Show') || s.includes('Canceled') || s.includes('Pass')) statusColor = 'status-red';
+            if (s.includes('2nd Interview') || s.includes('Hired') || s.includes('Completed') || s.includes('Offered')) statusColor = 'status-green';
+            if (s.includes('Reschedule') || s.includes('Withdrawn')) statusColor = 'status-gray';
 
             let showGmBox = false;
             if (item.gmDate) {
@@ -781,7 +813,7 @@
             const html = `
                 <div class="card ${statusColor}">
                     <div class="card-header"><div class="name">${item.name}</div><div class="position-badge">${icon} ${item.position}</div></div>
-                    <div class="meta-row"><span>${item.day} ${item.time}</span><span>Store #${item.store}</span></div>
+                    <div class="meta-row"><span>${item.day || ''} ${item.time || ''}</span><span>Store #${item.store}</span></div>
                     <div class="main-status" style="font-family: 'Subhead2'; font-size: 14px;">Result: ${item.status}</div>
                     ${gmHtml}
                     ${notesHtml}
