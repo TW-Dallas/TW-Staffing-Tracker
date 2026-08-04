@@ -237,24 +237,24 @@
 <div id="pushSetupModal" class="brand-modal-overlay hidden">
     <div class="brand-modal-card">
         <div class="brand-modal-brand-stripe"></div>
-        <div class="brand-modal-content" style="padding: 20px;">
-            <h3 style="margin-top: 0; color: var(--dark-blue); font-family: 'Subhead1', sans-serif; font-size: 21px; text-transform: uppercase;">🔔 Enable Hiring Push Alerts</h3>
-            <p style="font-size: 15px; color: var(--crust-burnt); margin-top: 0; font-family: 'Condensed';">Select your Store # or District to receive instant notifications (Interview Bookings, NTO Signups, Hires):</p>
+        <div class="brand-modal-content" style="padding: 24px;">
+            <h3 style="margin-top: 0; margin-bottom: 12px; color: var(--dark-blue); font-family: 'Subhead1', sans-serif; font-size: 22px; text-transform: uppercase; letter-spacing: 0.5px;">🔔 Enable Hiring Push Alerts</h3>
+            <p style="font-size: 19px; line-height: 1.45; color: var(--crust-burnt); margin-top: 0; margin-bottom: 16px; font-family: 'Condensed';">Select your Store # or District to receive instant notifications (Interview Bookings, NTO Signups, Hires):</p>
             
-            <div style="display: flex; flex-direction: column; gap: 10px; margin: 15px 0;">
+            <div style="display: flex; flex-direction: column; gap: 14px; margin: 20px 0;">
                 <div>
                     <label style="font-family: 'Subhead2'; font-size: 17px; color: var(--crust-deep);">Select Your Store #:</label>
-                    <select id="pushStoreSelect" style="width: 100%; margin-top: 4px;"><option value="ALL">All Stores</option></select>
+                    <select id="pushStoreSelect" style="width: 100%; margin-top: 6px; padding: 10px; border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 16px;"><option value="ALL">All Stores</option></select>
                 </div>
                 <div>
                     <label style="font-family: 'Subhead2'; font-size: 17px; color: var(--crust-deep);">Or Select Your District (DO):</label>
-                    <select id="pushDoSelect" style="width: 100%; margin-top: 4px;"><option value="ALL">All DOs</option></select>
+                    <select id="pushDoSelect" style="width: 100%; margin-top: 6px; padding: 10px; border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 16px;"><option value="ALL">All DOs</option></select>
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px;">
-                <button type="button" onclick="closePushSetupModal()" style="background: var(--crust-med); color: var(--crust-burnt); border: none; padding: 8px 14px; border-radius: 6px; font-family: 'Subhead2'; font-size: 15px; cursor: pointer;">Skip</button>
-                <button type="button" onclick="savePushSubscriptionTags()" style="background: var(--brand-blue); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-family: 'Subhead2'; font-size: 15px; text-transform: uppercase; cursor: pointer;">Enable Push Alerts</button>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; border-top: 1.5px solid var(--crust-med); padding-top: 14px;">
+                <button type="button" onclick="closePushSetupModal()" style="background: var(--crust-med); color: var(--crust-burnt); border: none; padding: 10px 18px; border-radius: 6px; font-family: 'Subhead2'; font-size: 16px; cursor: pointer;">Skip</button>
+                <button type="button" onclick="savePushSubscriptionTags()" style="background: var(--brand-blue); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-family: 'Subhead2'; font-size: 16px; text-transform: uppercase; cursor: pointer;">Enable Push Alerts</button>
             </div>
         </div>
     </div>
@@ -264,21 +264,21 @@
     <div class="brand-modal-card">
         <div class="brand-modal-brand-stripe"></div>
         <div class="brand-modal-content" style="padding: 24px;">
-            <h3 style="margin-top: 0; margin-bottom: 12px; color: var(--dark-blue); font-family: 'Subhead1', sans-serif; font-size: 21px; text-transform: uppercase; letter-spacing: 0.5px;">Tracker Updates! 🍕</h3>
-            <p style="font-size: 17px; line-height: 1.45; color: var(--crust-burnt); margin-top: 0; margin-bottom: 16px; font-family: 'Condensed';">
+            <h3 style="margin-top: 0; margin-bottom: 12px; color: var(--dark-blue); font-family: 'Subhead1', sans-serif; font-size: 22px; text-transform: uppercase; letter-spacing: 0.5px;">Tracker Updates! 🍕</h3>
+            <p style="font-size: 19px; line-height: 1.45; color: var(--crust-burnt); margin-top: 0; margin-bottom: 16px; font-family: 'Condensed';">
                 We upgraded your Hiring Tracker to make onboarding new team members even smoother! Here is what's new:
             </p>
-            <ul style="font-size: 14px; line-height: 1.5; color: var(--crust-deep); padding-left: 20px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px; font-family: 'Condensed';">
+            <ul style="font-size: 17px; line-height: 1.5; color: var(--crust-deep); padding-left: 20px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 10px; font-family: 'Condensed';">
                 <li>📱 <strong>Tap to Expand:</strong> Tap any candidate's card to view their onboarding checklist, assets, and action items.</li>
                 <li>💬 <strong>Smart Nudge Texts:</strong> Tapping "Nudge SMS" now automatically drafts a text based on exactly what they are missing.</li>
-                <li>🔄 <strong>Real-Time Sync:</strong> The tracker quietly refreshes itself in the background every 30 seconds.</li>
+                <li>📲 <strong>Add to Home Screen:</strong> Save as an app for 1-tap access! On iPhone, tap Safari's Share button ➔ <em>Add to Home Screen</em>. Android: tap <em>Install</em> when prompted.</li>
                 <li>🎨 <strong>Clean Design:</strong> Cleaned up fonts and layouts for faster mobile reading.</li>
             </ul>
             <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1.5px solid var(--crust-med); padding-top: 14px;">
-                <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-family: 'Condensed'; color: var(--crust-deep); cursor: pointer;">
-                    <input type="checkbox" id="hideUpdateCheckbox" style="width: 16px; height: 16px; cursor: pointer;"> Don't show this again
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 16px; font-family: 'Condensed'; color: var(--crust-deep); cursor: pointer;">
+                    <input type="checkbox" id="hideUpdateCheckbox" style="width: 20px; height: 20px; cursor: pointer;"> Don't show this again
                 </label>
-                <button type="button" onclick="closeUpdateModal()" style="background: var(--brand-blue); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-family: 'Subhead2'; font-size: 13px; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">Got It!</button>
+                <button type="button" onclick="closeUpdateModal()" style="background: var(--brand-blue); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-family: 'Subhead2'; font-size: 16px; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">Got It!</button>
             </div>
         </div>
     </div>
