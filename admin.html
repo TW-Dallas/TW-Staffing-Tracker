@@ -590,6 +590,7 @@
                 <div class="form-actions">
                     <button type="submit" style="flex: 1; background: var(--brand-blue);">Save Details</button>
                     <button type="button" class="secondary" id="btnCancel" onclick="clearForm()">Clear / Deselect</button>
+                    <button type="button" id="btnDelete" onclick="deleteCurrentCandidate()" class="hidden" style="background: var(--brand-red); color: white; padding: 0 16px;">🗑️ Delete</button>
                 </div>
             </form>
         </div> <!-- Middle Panel Closes Here -->
@@ -1193,7 +1194,7 @@
                 showLoader(false);
                 
                 if (!window.syncInterval) {
-                    window.syncInterval = setInterval(silentSync, 30000);
+                    window.syncInterval = setInterval(silentSync, 90000);
                 }
             })
             .catch(err => {
@@ -1210,6 +1211,10 @@
     }
 
     function silentSync() {
+        // Don't sync if the loader overlay is currently showing an active save
+        const loader = document.getElementById('loadingOverlay');
+        if (loader && !loader.classList.contains('hidden')) return;
+
         const u = localStorage.getItem('onb_user');
         const p = localStorage.getItem('onb_pass');
         if (!u || !p) return;
@@ -1218,14 +1223,16 @@
         fetch(`${API_URL}?city=${city}&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`)
             .then(res => res.json())
             .then(data => {
-                if (data.error) return; // Ignore silent errors
+                if (data.error) return;
                 candidates = data.onboarding || [];
                 interviews = data.interviews || [];
                 staffing = data.staffing || [];
+                contacts = data.contacts || [];
                 paycards = processPayCards(data);
                 renderList();
                 updateAuditMetrics();
-            });
+            })
+            .catch(err => console.warn("Silent sync skipped"));
     }
 
     function handleLogout() {
@@ -1694,7 +1701,6 @@
             document.getElementById('stfStore').value = item.store || '';
             document.getElementById('stfDo').value = item.doName || '';
             
-            // Convert sheet dates to YYYY-MM-DD so calendar inputs display them
             document.getElementById('stfHireDate').value = formatDateForInput(item.hireDate);
             document.getElementById('stfTermDate').value = formatDateForInput(item.termDate);
             
@@ -1758,7 +1764,6 @@
                 
                 let remainingText = rawMissingDocs;
 
-                // Match exact document options without getting tripped up by internal commas
                 document.querySelectorAll('.doc-chk').forEach(chk => {
                     if (chk.value && rawMissingDocs.toLowerCase().includes(chk.value.toLowerCase())) {
                         chk.checked = true;
@@ -1769,7 +1774,6 @@
                     }
                 });
 
-                // Clean up any remaining text for custom missing documents
                 remainingText = remainingText
                     .replace(/TRUE/gi, '')
                     .replace(/^[,\s|]+|[,\s|]+$/g, '')
@@ -1785,7 +1789,10 @@
             }
 
             document.getElementById('emailQuickActions').classList.remove('hidden');
-        } 
+        }
+
+        // ✅ MOVED TO THE BOTTOM: Reveals Delete Button across ALL views
+        document.getElementById('btnDelete').classList.remove('hidden');
     }     
 
     function prepareAddNew() {
@@ -1811,6 +1818,7 @@
     }
 
     function clearForm() {
+        document.getElementById('btnDelete').classList.add('hidden');
         document.getElementById('candidateForm').reset();
         document.getElementById('fieldId').value = '';
         document.getElementById('fieldNto').value = '';
@@ -1940,8 +1948,9 @@
                 savedNewId = result.id;
                 currentSelectedId = result.id;
             }
+            // ✅ FIXED RE-FETCH CALL:
             const city = getCityFromUser(username);
-            return fetch(`${API_URL}?city=${city}`);
+            return fetch(`${API_URL}?city=${city}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`);
         })
         .then(res => res.json())
         .then(data => {
@@ -2097,8 +2106,9 @@
             }
 
             showBrandAlert(`Email successfully delivered!`, "Email Delivered");
+            // ✅ FIXED RE-FETCH CALL:
             const city = getCityFromUser(username);
-            return fetch(`${API_URL}?city=${city}`);
+            return fetch(`${API_URL}?city=${city}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`);
         })
         .then(res => res.json())
         .then(data => {
@@ -3260,6 +3270,64 @@
 
     function escapeText(str) {
         return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    async function deleteCurrentCandidate() {
+        const id = document.getElementById('fieldId').value;
+        const name = document.getElementById('fieldName').value || 
+                    document.getElementById('intName').value || 
+                    document.getElementById('stfName').value || 
+                    "this record";
+
+        if (!id) return;
+
+        const confirmed = await showBrandConfirm(
+            `Are you sure you want to permanently delete ${name}? This will remove their record from the Google Sheet.`,
+            "Confirm Permanent Deletion"
+        );
+
+        if (!confirmed) return;
+
+        showLoader(true, "Deleting record from sheet...");
+
+        const username = localStorage.getItem('onb_user');
+        const password = localStorage.getItem('onb_pass');
+
+        const payload = {
+            username: username,
+            password: password,
+            action: "delete",
+            target: currentView,
+            id: id
+        };
+
+        fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
+        .then(res => res.json())
+        .then(result => {
+            if (!result.success) throw new Error(result.error || "Delete failed");
+            
+            showBrandAlert(`${name} was permanently deleted.`, "Record Deleted");
+            
+            const city = getCityFromUser(username);
+            return fetch(`${API_URL}?city=${city}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`);
+        })
+        .then(res => res.json())
+        .then(data => {
+            candidates = data.onboarding || [];
+            interviews = data.interviews || [];
+            staffing = data.staffing || [];
+            contacts = data.contacts || []; 
+            paycards = processPayCards(data);
+
+            clearForm();
+            renderList();
+            updateAuditMetrics();
+            showLoader(false);
+        })
+        .catch(err => {
+            showLoader(false);
+            showBrandAlert("Error deleting record: " + err.message, "Delete Error");
+        });
     }
 </script>
 <datalist id="time15MinList"></datalist>
