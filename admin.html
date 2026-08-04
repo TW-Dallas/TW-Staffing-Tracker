@@ -554,6 +554,9 @@
                             <button type="button" onclick="saveNtoAttendanceOnly()" style="flex: 1; background: var(--brand-blue); font-size: 19px; padding: 12px 16px;">
                                 💾 Save Live Attendance
                             </button>
+                            <button type="button" onclick="triggerSendNtoMeetLinks()" style="flex: 1; background: var(--brand-red); font-size: 19px; padding: 12px 16px;">
+                                ✉️ Send Google Meet Links
+                            </button>
                             <button type="button" onclick="concludeNtoClass()" style="flex: 1; background: var(--success-green); font-size: 19px; padding: 12px 16px;">
                                 🚀 Conclude Class & Send Rosters
                             </button>
@@ -3327,6 +3330,83 @@
         .catch(err => {
             showLoader(false);
             showBrandAlert("Error deleting record: " + err.message, "Delete Error");
+        });
+    }
+
+    async function triggerSendNtoMeetLinks() {
+        const classDate = document.getElementById('ntoClassDate').value;
+        if (!classDate) {
+            showBrandAlert("Please select a class date first.", "No Date Selected");
+            return;
+        }
+
+        const classTrainees = candidates.filter(c => {
+            const isScheduled = c.ntoScheduled || c.hired || c.ntoDate;
+            if (!isScheduled) return false;
+            return formatDateForInput(c.ntoDate) === classDate;
+        });
+
+        if (classTrainees.length === 0) {
+            showBrandAlert(`No trainees were found scheduled for ${classDate}.`, "No Trainees Scheduled");
+            return;
+        }
+
+        const traineesWithEmails = classTrainees.filter(c => c.email && c.email.trim() !== "").map(c => ({
+            name: c.name,
+            email: c.email.trim(),
+            store: c.store,
+            position: c.position || "CSR"
+        }));
+
+        if (traineesWithEmails.length === 0) {
+            showBrandAlert("Trainees exist for this date, but none have email addresses listed in the database.", "Missing Emails");
+            return;
+        }
+
+        const username = localStorage.getItem('onb_user') || '';
+        const isDenver = username.toLowerCase().startsWith('denver');
+        const defaultMeetLink = isDenver 
+            ? "https://meet.google.com/denver-nto-class" 
+            : "https://meet.google.com/dallas-nto-class";
+
+        const meetUrl = await showBrandPrompt(
+            `Confirm or paste the Google Meet URL for class on ${classDate}:`, 
+            defaultMeetLink, 
+            "Google Meet Class Link"
+        );
+
+        if (!meetUrl || !meetUrl.trim()) return;
+
+        const confirmMsg = `Send Google Meet links to ${traineesWithEmails.length} trainee(s) for ${classDate}?\n\n` +
+                           `• Meeting URL: ${meetUrl.trim()}\n` +
+                           `• Recipients:\n  - ` + traineesWithEmails.map(t => `${t.name} (${t.email})`).join("\n  - ");
+
+        const confirmed = await showBrandConfirm(confirmMsg, "Confirm Batch Email Delivery");
+        if (!confirmed) return;
+
+        showLoader(true, "Delivering Google Meet links...");
+
+        const password = localStorage.getItem('onb_pass');
+
+        const payload = {
+            username: username,
+            password: password,
+            action: "sendNtoMeetLinks",
+            classDate: classDate,
+            meetLink: meetUrl.trim(),
+            trainees: traineesWithEmails
+        };
+
+        fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
+        .then(res => res.json())
+        .then(result => {
+            showLoader(false);
+            if (!result.success) throw new Error(result.error || "Failed to deliver links.");
+            showBrandAlert(result.message, "Class Links Sent!");
+        })
+        .catch(err => {
+            showLoader(false);
+            showBrandAlert("Error sending links: " + err.message, "Delivery Error");
         });
     }
 </script>
