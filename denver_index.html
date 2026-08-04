@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link class="favicon" rel="icon" type="image/png" href="images/tile_blue.png">
-    <title>Dallas Staffing Command Center</title>
+    <title>Denver Staffing Command Center</title>
     <meta name="theme-color" content="#005c91">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
@@ -54,17 +54,12 @@
         .subtitle { font-family: 'Condensed', sans-serif; font-size: 13px; opacity: 0.9; line-height: 1.2; }
 
         /* --- CONTROLS --- */
-        .controls { padding: 12px 16px; background: white; border-bottom: 2px solid var(--crust-med); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+        .controls { padding: 12px 16px; background: white; border-bottom: 2px solid var(--crust-med); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: flex-start; }
         select { padding: 8px; border-radius: 8px; border: 1px solid var(--crust-dark); background: var(--crust-light); font-family: 'Subhead2', sans-serif; font-size: 16px; color: var(--crust-burnt); width: 250px; }
-        .view-toggle { display: flex; background: var(--crust-med); border-radius: 8px; padding: 4px; margin-left: auto; }
-        .view-btn { padding: 8px 16px; border: none; background: none; font-family: 'Subhead2', sans-serif; font-size: 15px; color: #472b10; cursor: pointer; border-radius: 6px; text-transform: uppercase; }
-        .view-btn.active { background: white; color: var(--brand-blue); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
         @media (max-width: 600px) {
             .controls { gap: 8px; justify-content: space-between; }
             select { width: 48%; min-width: 0; flex: 0 0 48%; margin-bottom: 0; }
-            .view-toggle { width: 100%; justify-content: center; margin-left: 0; margin-top: 4px; flex: 0 0 100%; }
-            .view-btn { flex: 1; text-align: center; } 
         }
 
         .container { padding: 16px; max-width: 900px; margin: 0 auto; }
@@ -139,11 +134,6 @@
         .btn-nudge { background-color: var(--brand-red); color: white; }
         .action-btn:active { transform: scale(0.98); }
 
-        /* --- GM APPOINTMENT BOX --- */
-        .gm-appt-box { background-color: #e8f5e9; border: 1px solid #28a745; color: #1b5e20; padding: 10px; border-radius: 8px; margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
-        .gm-appt-label { font-size: 13px; text-transform: uppercase; opacity: 0.8; font-weight: bold; }
-        .gm-appt-time { font-family: 'Subhead2', sans-serif; font-size: 18px; }
-
         /* --- NOTES --- */
         .notes-section { 
             font-size: 16px; 
@@ -203,7 +193,6 @@
         appId: "260aafa0-6a1c-40fc-a8a7-2a8e80b206b4",
         });
         
-        // Check if user has selected their Store tag
         checkPushSetupStatus();
     });
     </script>
@@ -221,16 +210,11 @@
 <div class="controls">
     <select id="doFilter"><option value="All">All DOs</option></select>
     <select id="storeFilter"><option value="All">All Stores</option></select>
-    <div class="view-toggle">
-        <button class="view-btn active" onclick="switchView('onboarding')">Pipeline</button>
-        <button class="view-btn" onclick="switchView('interviews')">Interviews</button>
-    </div>
 </div>
 
 <div class="container">
     <div id="loader" class="loader">Accessing Database...</div>
     <div id="onboardingList"></div>
-    <div id="interviewList" class="hidden"></div>
 </div>
 
 <!-- Push Notification Store Setup Modal -->
@@ -239,7 +223,7 @@
         <div class="brand-modal-brand-stripe"></div>
         <div class="brand-modal-content" style="padding: 20px;">
             <h3 style="margin-top: 0; color: var(--dark-blue); font-family: 'Subhead1', sans-serif; font-size: 18px; text-transform: uppercase;">🔔 Enable Hiring Push Alerts</h3>
-            <p style="font-size: 14px; color: var(--crust-burnt); margin-top: 0; font-family: 'Condensed';">Select your Store # or District to receive instant notifications (Interview Bookings, NTO Signups, Hires):</p>
+            <p style="font-size: 14px; color: var(--crust-burnt); margin-top: 0; font-family: 'Condensed';">Select your Store # or District to receive instant notifications (NTO Signups, Hires):</p>
             
             <div style="display: flex; flex-direction: column; gap: 10px; margin: 15px 0;">
                 <div>
@@ -259,6 +243,7 @@
         </div>
     </div>
 </div>
+
 <!-- What's New Welcome Modal -->
 <div id="updateModal" class="brand-modal-overlay hidden">
     <div class="brand-modal-card">
@@ -285,11 +270,10 @@
 </div>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxa1XNdNgwOULiYpeAoBIjTy1wv034pON4-hnR444XB07vegHhoSR56UacR7UaktTaGZg/exec?city=Dallas&username=dallas_admin&password=dallas_password_123";
-    let rawData = { onboarding: [], interviews: [] };
-    let expandedCardIds = new Set(); // Track expanded cards across...
+    const API_URL = "https://script.google.com/macros/s/AKfycbxa1XNdNgwOULiYpeAoBIjTy1wv034pON4-hnR444XB07vegHhoSR56UacR7UaktTaGZg/exec?city=Denver&username=denver_admin&password=denver_password_123";
+    let rawData = { onboarding: [] };
+    let expandedCardIds = new Set(); 
 
-    // Check if we should display the welcome modal (runs safely in private windows too) [0]
     (function() {
         try {
             const hideModal = localStorage.getItem('hideTrackerUpdate_v1');
@@ -311,10 +295,8 @@
         document.getElementById('updateModal').classList.add('hidden');
     }
 
-    // Perform initial loading with full-screen indicator
     fetchData(true);
 
-    // Dynamic Silent background sync timer (every 30 seconds)
     setInterval(() => {
         fetchData(false);
     }, 30000);
@@ -340,7 +322,6 @@
                 rawData = data;
                 populateFilters();
                 renderOnboarding();
-                renderInterviews();
                 document.getElementById('loader').classList.add('hidden');
             })
             .catch(err => {
@@ -351,7 +332,6 @@
             });
     }
     
-    // --- ONE SIGNAL PUSH TAGGING & DEEP LINKING ---
     function checkPushSetupStatus() {
         try {
             const hasSetTags = localStorage.getItem('pushSetupCompleted_v1');
@@ -386,11 +366,9 @@
         document.getElementById('pushSetupModal').classList.add('hidden');
     }
 
-    // --- DEEP LINK PARAMETER READER ---
     function checkDeepLinkParams() {
         const urlParams = new URLSearchParams(window.location.search);
         const targetStore = urlParams.get('store');
-        const targetView = urlParams.get('view');
         const targetDo = urlParams.get('do');
 
         if (targetDo) {
@@ -401,12 +379,8 @@
             const storeSelect = document.getElementById('storeFilter');
             if (storeSelect) { storeSelect.value = targetStore; }
         }
-        if (targetView) {
-            switchView(targetView);
-        }
 
-        // Silent Usage Pinger
-        logUsagePinger(targetStore || document.getElementById('storeFilter').value, targetDo || document.getElementById('doFilter').value, targetView || 'onboarding');
+        logUsagePinger(targetStore || document.getElementById('storeFilter').value, targetDo || document.getElementById('doFilter').value, 'onboarding');
     }
 
     function logUsagePinger(storeVal, doVal, activeView) {
@@ -423,13 +397,13 @@
     }
 
     function populateFilters() {
-        // Prevent clearing filters if the user is currently searching/selecting
         const activeDo = document.getElementById('doFilter').value;
         const activeStore = document.getElementById('storeFilter').value;
 
-        const allDos = [...rawData.onboarding.map(i => i.doName), ...rawData.interviews.map(i => i.doName)];
+        const onboardingData = rawData.onboarding || [];
+        const allDos = onboardingData.map(i => i.doName);
         const dos = [...new Set(allDos.filter(d => d && d !== 'DO').map(d => d.toString().trim()))].sort();
-        const allStores = [...rawData.onboarding.map(i => i.store), ...rawData.interviews.map(i => i.store)];
+        const allStores = onboardingData.map(i => i.store);
         const stores = [...new Set(allStores.filter(s => s && s !== 'Store #').map(s => s.toString().trim()))].sort();
 
         const doSelect = document.getElementById('doFilter');
@@ -442,32 +416,26 @@
         stores.forEach(s => { let opt = document.createElement('option'); opt.value = s; opt.innerText = s; storeSelect.appendChild(opt); });
         storeSelect.value = activeStore;
 
-        doSelect.onchange = refreshViews;
-        storeSelect.onchange = refreshViews;
-        // Sync filter options into Push Subscription Modal
+        doSelect.onchange = renderOnboarding;
+        storeSelect.onchange = renderOnboarding;
+
         const pushStoreSelect = document.getElementById('pushStoreSelect');
         const pushDoSelect = document.getElementById('pushDoSelect');
         if (pushStoreSelect) pushStoreSelect.innerHTML = storeSelect.innerHTML;
         if (pushDoSelect) pushDoSelect.innerHTML = doSelect.innerHTML;
 
-        // Check URL parameters for Deep Links (from push notification taps)
         checkDeepLinkParams();
     }
-
-    function refreshViews() { renderOnboarding(); renderInterviews(); }
 
     function getPipelineDetails(item) {
         if (item.ineligible) return { pct: 100, color: 'grey', label: 'Ineligible' };
         if (item.inactive) return { pct: 100, color: 'grey', label: 'Inactive' };
         if (item.hired) return { pct: 100, color: 'green', label: 'Hired' };
         
-        // Active Flag Blockers
         if (item.hasMissingDocs) return { pct: 15, color: 'red', label: 'Missing / Incorrect Docs' };
         if (item.incorrectEmail) return { pct: 15, color: 'red', label: 'Incorrect Email' };
     
-        // If candidate is actively scheduled for NTO, prioritize NTO Scheduled!
         if (item.ntoScheduled) {
-            // Live NTO Attendance Overrides (during class)
             if (item.ntoAttendance) {
                 const att = item.ntoAttendance.trim();
                 if (att === 'In Lobby') return { pct: 92, color: 'blue', label: '🏨 In Lobby' };
@@ -478,7 +446,6 @@
             return { pct: 90, color: 'blue', label: 'NTO Scheduled' };
         }
     
-        // Only show Missed NTO if they are NOT currently scheduled for a new class
         if (item.missedNto || (item.ntoAttendance && (item.ntoAttendance === 'Not in NTO' || item.ntoAttendance.includes('Incomplete')))) {
             return { pct: 90, color: 'red', label: 'Missed NTO' };
         }
@@ -498,17 +465,14 @@
     }
     
     function getStatusWeight(item) {
-        // 1. Ineligible & Inactive ALWAYS go to the very bottom
         if (item.ineligible) return 12;
         if (item.inactive) return 11;
     
         const isMissedNtoActive = !item.ntoScheduled && (item.missedNto || (item.ntoAttendance && (item.ntoAttendance === 'Not in NTO' || item.ntoAttendance.includes('Incomplete'))));
     
-        // 2. Active candidates needing immediate GM action float to the top
         if (item.incorrectEmail || item.hasMissingDocs || isMissedNtoActive) return 0;
         if (item.ntoAttendance === 'Left Early') return 0;
         
-        // 3. Hired Candidates
         if (item.hired) {
             const today = new Date();
             today.setHours(0,0,0,0);
@@ -517,7 +481,6 @@
             return (updateDate.getTime() === today.getTime()) ? 1 : 10;
         }
     
-        // 4. Active pipeline candidates in order of progress
         if (item.ntoScheduled || item.ntoAttendance === 'In Lobby' || item.ntoAttendance === 'In Class' || item.ntoAttendance === 'NTO Complete' || item.ntoAttendance === 'Attended') return 2;
         if (item.ntoSignupLinkSent) return 3;
         if (item.onboardingSent) return 4;
@@ -561,12 +524,9 @@
             
             if (item.missingDocsText) {
                 const textLower = item.missingDocsText.toLowerCase();
-                
-                // If it contains ID / I-9 related indicators
                 if (textLower.includes('id') || textLower.includes('license') || textLower.includes('social') || textLower.includes('ssn') || textLower.includes('birth') || textLower.includes('i-9') || textLower.includes('passport')) {
                     txt = `Hey ${item.name}! This is Domino's. We need a different form of I-9 identification. We are missing your ${item.missingDocsText}. Please reply back so we can arrange a time for you to bring that to the store or upload it!`;
                 } else {
-                    // Non-I-9 indicators (auto insurance, registration, custom, etc.)
                     txt = `Hey ${item.name}! This is Domino's. We are missing your ${item.missingDocsText} for your onboarding. Please reply back so we can get this updated and get you scheduled!`;
                 }
             }
@@ -609,7 +569,8 @@
         const doVal = document.getElementById('doFilter').value;
         const storeVal = document.getElementById('storeFilter').value;
 
-        const filtered = rawData.onboarding.filter(item => {
+        const onboardingData = rawData.onboarding || [];
+        const filtered = onboardingData.filter(item => {
             const iDo = item.doName ? item.doName.toString().trim() : '';
             const iStore = item.store ? item.store.toString().trim() : '';
             return item.store !== 'Store #' && 
@@ -621,8 +582,7 @@
 
         filtered.forEach(item => {
             const icon = getPositionIcon(item.position);
-            
-        const pipe = getPipelineDetails(item);
+            const pipe = getPipelineDetails(item);
             
             const isMissedNtoActive = !item.ntoScheduled && (item.missedNto || (item.ntoAttendance && (item.ntoAttendance === 'Not in NTO' || item.ntoAttendance.includes('Incomplete'))));
 
@@ -736,79 +696,13 @@
         });
     }
 
-    function renderInterviews() {
-        const list = document.getElementById('interviewList');
-        list.innerHTML = '';
-        const doVal = document.getElementById('doFilter').value;
-        const storeVal = document.getElementById('storeFilter').value;
-
-        const filtered = rawData.interviews.filter(item => {
-            const iDo = item.doName ? item.doName.toString().trim() : '';
-            const iStore = item.store ? item.store.toString().trim() : '';
-            return item.store !== 'Store #' &&
-                   (doVal === 'All' || iDo === doVal) &&
-                   (storeVal === 'All' || iStore === storeVal);
-        });
-
-        if(filtered.length === 0) { list.innerHTML = '<div class="loader">No interviews scheduled.</div>'; return; }
-
-        filtered.forEach(item => {
-            const icon = getPositionIcon(item.position);
-            let statusColor = 'status-blue';
-            const s = item.status ? item.status.toString() : '';
-            if(s.includes('No Show') || s.includes('Canceled') || s.includes('Pass')) statusColor = 'status-red';
-            if(s.includes('2nd Interview') || s.includes('Hired') || s.includes('Completed') || s.includes('Offered')) statusColor = 'status-green';
-            if(s.includes('Reschedule') || s.includes('Withdrawn')) statusColor = 'status-gray';
-
-            let showGmBox = false;
-            if (item.gmDate) {
-                try {
-                    const dateStr = item.gmDate + (item.gmTime ? ' ' + item.gmTime : '');
-                    const apptDate = new Date(dateStr);
-                    const now = new Date();
-                    if (!isNaN(apptDate.getTime())) { showGmBox = apptDate > now; }
-                } catch(e) { showGmBox = false; }
-            }
-
-            let gmHtml = '';
-            if (showGmBox) {
-                gmHtml = `<div class="gm-appt-box"><div class="gm-appt-label">GM Interview Scheduled</div><div class="gm-appt-time">📅 ${item.gmDate} @ ${item.gmTime}</div></div>`;
-            }
-
-            let notesHtml = '';
-            if (item.notes && item.notes.trim() !== '') { notesHtml = `<div class="notes-section">📝 ${item.notes}</div>`; }
-
-            const html = `
-                <div class="card ${statusColor}">
-                    <div class="card-header"><div class="name">${item.name}</div><div class="position-badge">${icon} ${item.position}</div></div>
-                    <div class="meta-row"><span>${item.day} ${item.time}</span><span>Store #${item.store}</span></div>
-                    <div class="main-status" style="font-family: 'Subhead2'; font-size: 14px;">Result: ${item.status}</div>
-                    ${gmHtml}
-                    ${notesHtml}
-                </div>`;
-            list.innerHTML += html;
-        });
-    }
-
-    function switchView(viewName) {
-        document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-        if(viewName === 'onboarding') {
-            document.getElementById('onboardingList').classList.remove('hidden');
-            document.getElementById('interviewList').classList.add('hidden');
-        } else {
-            document.getElementById('onboardingList').classList.add('hidden');
-            document.getElementById('interviewList').classList.remove('hidden');
-        }
-    }
-
     if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./OneSignalSDKWorker.js')
-            .then(reg => console.log('Staffing App Service Worker registered!'))
-            .catch(err => console.error('Service Worker registration failed:', err));
-    });
-}
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./OneSignalSDKWorker.js')
+                .then(reg => console.log('Staffing App Service Worker registered!'))
+                .catch(err => console.error('Service Worker registration failed:', err));
+        });
+    }
 </script>
 </body>
 </html>

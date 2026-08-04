@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Onboarder Portal</title>
-    <link class="favicon" rel="icon" type="image/png" href="Domino's Hiring Manager Favicon Ideas (3).png">
+    <link class="favicon" rel="icon" type="image/png" href="images/Domino's Hiring Manager Favicon Ideas (3).png">
     <link rel="stylesheet" href="styles.css">
 </head>
 
@@ -32,7 +32,7 @@
 <div id="appContainer" class="hidden">
 <header>
     <div style="display: flex; align-items: center;">
-        <img src="New_Logo_v2.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+        <img src="images/New_Logo_v2.png" alt="Logo" class="logo" onerror="this.style.display='none'">
         <div>
             <h1 id="headerTitle">Hiring Manager Portal</h1>
             <div id="headerCity" class="subtitle">Checking Location...</div>
@@ -41,11 +41,37 @@
 
     <!-- CENTERED QUICK PORTAL BUTTONS (PURE BUTTONS - NO LINK TAGS) -->
     <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-        <button type="button" onclick="window.open('https://www.hralliance.net/', '_blank')" style="background: var(--crust-base); color: var(--dark-blue); font-size: 15px; padding: 7px 14px; font-family: 'Subhead1', sans-serif;">AllPay</button>
-        <button type="button" onclick="window.open('https://identity.checkr.com/u/login', '_blank')" style="background: var(--crust-base); color: var(--dark-blue); font-size: 15px; padding: 7px 14px; font-family: 'Subhead1', sans-serif;">Checkr</button>
-        <button type="button" onclick="window.open('https://www.smartrecruiters.com/account/sign-in', '_blank')" style="background: var(--crust-base); color: var(--dark-blue); font-size: 15px; padding: 7px 14px; font-family: 'Subhead1', sans-serif;">Smart Recruiters</button>
-        <button type="button" onclick="window.open('https://www.dpreporting.com/paycard/PaycardHome', '_blank')" style="background: var(--crust-base); color: var(--dark-blue); font-size: 15px; padding: 7px 14px; font-family: 'Subhead1', sans-serif;">Netspend</button>
-        <button type="button" onclick="window.open('https://www.zenput.com/reports/', '_blank')" style="background: var(--crust-base); color: var(--dark-blue); font-size: 15px; padding: 7px 14px; font-family: 'Subhead1', sans-serif;">Zenput Reports</button>
+        
+        <button type="button" onclick="window.open('https://www.hralliance.net/', '_blank')" 
+                style="display: inline-flex; align-items: center; gap: 6px; background: var(--crust-base); color: var(--dark-blue); font-size: 15px; padding: 7px 14px; font-family: 'Subhead1', sans-serif;">
+            <img src="images/icons/AllPay_Icon.png" alt="" style="width: 16px; height: 16px;">
+            AllPay
+        </button>
+
+        <button type="button" onclick="window.open('https://identity.checkr.com/u/login', '_blank')" 
+                style="display: inline-flex; align-items: center; gap: 6px; background: var(--crust-base); color: var(--dark-blue); font-size: 15px; padding: 7px 14px; font-family: 'Subhead1', sans-serif;">
+            <img src="images/icons/Checkr_Icon.png" alt="" style="width: 16px; height: 16px;">
+            Checkr
+        </button>
+
+        <button type="button" onclick="window.open('https://www.smartrecruiters.com/account/sign-in', '_blank')" 
+                style="display: inline-flex; align-items: center; gap: 6px; background: var(--crust-base); color: var(--dark-blue); font-size: 15px; padding: 7px 14px; font-family: 'Subhead1', sans-serif;">
+            <img src="images/icons/SR_Icon.png" alt="" style="width: 16px; height: 16px;">
+            Smart Recruiters
+        </button>
+
+        <button type="button" onclick="window.open('https://www.dpreporting.com/paycard/PaycardHome', '_blank')" 
+                style="display: inline-flex; align-items: center; gap: 6px; background: var(--crust-base); color: var(--dark-blue); font-size: 15px; padding: 7px 14px; font-family: 'Subhead1', sans-serif;">
+            <img src="images/icons/NS_Icon.png alt="" style="width: 16px; height: 16px;">
+            Netspend
+        </button>
+
+        <button type="button" onclick="window.open('https://www.zenput.com/reports/', '_blank')" 
+                style="display: inline-flex; align-items: center; gap: 6px; background: var(--crust-base); color: var(--dark-blue); font-size: 15px; padding: 7px 14px; font-family: 'Subhead1', sans-serif;">
+            <img src="images/icons/Zenput_Icon.png" alt="" style="width: 16px; height: 16px;">
+            Zenput Reports
+        </button>
+
     </div>
 
     <button class="secondary" onclick="handleLogout()">Log Out</button>
@@ -61,8 +87,8 @@
             </div>
             
             <!-- Workspace Switcher Toggles -->
-            <div id="dallasToggleContainer" style="margin-bottom: 8px;">
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); background: var(--crust-med); border-radius: 8px; padding: 3px; gap: 3px;">
+            <div id="workspaceToggleContainer" style="margin-bottom: 8px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(105px, 1fr)); background: var(--crust-med); border-radius: 8px; padding: 3px; gap: 3px;">
                     <button type="button" id="toggleOnb" onclick="switchView('onboarding')">Onboarding</button>
                     <button type="button" id="toggleInt" onclick="switchView('interviews')">Interviews</button>
                     <button type="button" id="toggleStf" onclick="switchView('staffing')">Hires/Terms</button>
@@ -1173,11 +1199,8 @@
                 document.getElementById('appContainer').classList.remove('hidden');
                 document.getElementById('headerCity').innerText = `${city} Workspace`;
 
-                // Feature toggles for Denver vs Dallas
-                const isDenver = city.toLowerCase() === 'denver';
-                document.getElementById('toggleInt').style.display = isDenver ? 'none' : 'block';
-                document.getElementById('toggleStf').style.display = isDenver ? 'none' : 'block';
-                document.getElementById('togglePay').style.display = isDenver ? 'none' : 'block';
+                // 🍕 Safe Feature Toggles for Denver vs Dallas
+                updateWorkspaceVisibility(city);
 
                 candidates = data.onboarding || [];
                 interviews = data.interviews || [];
@@ -1211,6 +1234,22 @@
                 document.getElementById('authContainer').classList.remove('hidden');
                 document.getElementById('appContainer').classList.add('hidden');
             });
+    }
+
+    // Helper function for safe workspace feature toggling
+    function updateWorkspaceVisibility(city) {
+        const isDenver = (city || '').toLowerCase() === 'denver';
+        
+        const toggleInt = document.getElementById('toggleInt');
+        const toggleStf = document.getElementById('toggleStf');
+        const togglePay = document.getElementById('togglePay');
+
+        // 🚫 ONLY hide Interviews for Denver
+        if (toggleInt) toggleInt.style.display = isDenver ? 'none' : 'block';
+        
+        // ✅ Staffing & Pay Cards are visible for BOTH Dallas and Denver
+        if (toggleStf) toggleStf.style.display = 'block';
+        if (togglePay) togglePay.style.display = 'block';
     }
 
     function silentSync() {
