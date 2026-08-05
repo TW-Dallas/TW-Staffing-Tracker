@@ -3469,7 +3469,7 @@
 
     function fetchNtoCalendarClasses() {
         const tbody = document.getElementById('classCalendarTableBody');
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 15px; color:#888;">Loading scheduled classes...</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color:#888; font-size: 17px;">Loading scheduled classes...</td></tr>`;
 
         const u = localStorage.getItem('onb_user');
         const p = localStorage.getItem('onb_pass');
@@ -3484,8 +3484,8 @@
         })
         .then(res => res.json())
         .then(data => {
-            if (!data.success || !data.classes) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 15px; color:#888;">No scheduled classes found.</td></tr>`;
+            if (!data.success || !data.classes || data.classes.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color:#888; font-size: 17px;">No scheduled classes found.</td></tr>`;
                 return;
             }
 
@@ -3494,14 +3494,14 @@
                 const row = document.createElement('tr');
                 row.style.borderBottom = '1px solid var(--crust-med)';
                 row.innerHTML = `
-                    <td style="padding: 8px; font-weight: bold; color: var(--dark-blue);">
-                        ${c.classDate} <br><span style="font-size: 11px; color: var(--brand-grey);">${c.classId || 'Auto ID'}</span>
+                    <td style="padding: 10px 12px; font-weight: bold; color: var(--dark-blue); font-size: 17px;">
+                        ${c.classDate} <br><span style="font-size: 13px; color: var(--brand-grey); font-weight: normal;">${c.classId || 'Auto ID'}</span>
                     </td>
-                    <td style="padding: 8px; text-align: center;">${c.startTime} - ${c.endTime}</td>
-                    <td style="padding: 8px; text-align: center;">${c.trainerName}</td>
-                    <td style="padding: 8px; text-align: center; font-weight: bold;">${c.capacity}</td>
-                    <td style="padding: 8px; text-align: center;">
-                        <button type="button" onclick="deleteNtoClassSession('${c.classId}', '${c.classDate}', ${c.rowNum})" style="background: var(--brand-red); color: white; border: none; padding: 4px 8px; font-size: 12px; border-radius: 4px; cursor: pointer;">
+                    <td style="padding: 10px 12px; text-align: center; font-size: 17px;">${c.startTime} - ${c.endTime}</td>
+                    <td style="padding: 10px 12px; text-align: center; font-size: 17px;">${c.trainerName}</td>
+                    <td style="padding: 10px 12px; text-align: center; font-weight: bold; font-size: 17px;">${c.capacity}</td>
+                    <td style="padding: 10px 12px; text-align: center;">
+                        <button type="button" onclick="deleteNtoClassSession('${c.classId}', '${c.classDate}', ${c.rowNum})" style="background: var(--brand-red); color: white; border: none; padding: 6px 12px; font-size: 14px; border-radius: 4px; cursor: pointer; font-family: 'Subhead2';">
                             🗑️ Cancel
                         </button>
                     </td>
@@ -3510,7 +3510,7 @@
             });
         })
         .catch(err => {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 15px; color: var(--brand-red);">Error loading calendar.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color: var(--brand-red); font-size: 17px;">Error loading calendar.</td></tr>`;
         });
     }
 
@@ -3599,68 +3599,70 @@
 <datalist id="time15MinList"></datalist>
 <!-- NTO CLASS CALENDAR MANAGEMENT MODAL -->
 <div id="classCalendarModal" class="brand-modal-overlay hidden">
-    <div class="brand-modal-card" style="max-width: 750px; width: 95%;">
+    <div class="brand-modal-card" style="max-width: 800px; width: 95%;">
         <div class="brand-modal-brand-stripe"></div>
-        <div class="brand-modal-content" style="padding: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--crust-med); padding-bottom: 8px; margin-bottom: 14px;">
-                <h3 style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 20px; text-transform: uppercase;">📅 NTO Class Calendar Manager</h3>
-                <button type="button" onclick="closeClassCalendarModal()" style="background: var(--brand-grey); font-size: 13px; padding: 4px 10px; color: white; border: none; border-radius: 4px; cursor: pointer;">✕ Close</button>
+        <div class="brand-modal-content" style="padding: 24px;">
+            <!-- Modal Title & Close Button -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--crust-med); padding-bottom: 10px; margin-bottom: 16px;">
+                <h3 style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 22px; text-transform: uppercase;">📅 NTO Class Calendar Manager</h3>
+                <button type="button" onclick="closeClassCalendarModal()" style="background: var(--brand-grey); font-size: 15px; padding: 6px 14px; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Subhead2';">✕ Close</button>
             </div>
 
             <!-- Form: Add New Class Session -->
-            <div style="background: var(--crust-light); border: 1.5px solid var(--crust-dark); padding: 14px; border-radius: 8px; margin-bottom: 16px;">
-                <div style="font-family: 'ExtraBold'; font-size: 15px; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 10px;">➕ Schedule New NTO Class Session</div>
+            <div style="background: var(--crust-light); border: 1.5px solid var(--crust-dark); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                <div style="font-family: 'ExtraBold'; font-size: 18px; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 12px;">➕ Schedule New NTO Class Session</div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 12px;">
                     <div>
-                        <label style="font-family: 'Subhead2'; font-size: 12px; font-weight: bold;">Class Date:</label>
-                        <input type="date" id="newClassDate" style="width: 100%; padding: 6px; font-size: 14px;">
+                        <label style="font-family: 'Subhead2'; font-size: 16px; font-weight: bold; color: var(--crust-burnt);">Class Date:</label>
+                        <input type="date" id="newClassDate" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
                     </div>
                     <div>
-                        <label style="font-family: 'Subhead2'; font-size: 12px; font-weight: bold;">Start Time:</label>
-                        <input type="text" id="newClassStart" value="6:00 PM" placeholder="e.g. 6:00 PM" style="width: 100%; padding: 6px; font-size: 14px;">
+                        <label style="font-family: 'Subhead2'; font-size: 16px; font-weight: bold; color: var(--crust-burnt);">Start Time:</label>
+                        <input type="text" id="newClassStart" value="6:00 PM" placeholder="e.g. 6:00 PM" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
                     </div>
                     <div>
-                        <label style="font-family: 'Subhead2'; font-size: 12px; font-weight: bold;">Estimated End Time:</label>
-                        <input type="text" id="newClassEnd" value="7:15 PM" placeholder="e.g. 7:15 PM" style="width: 100%; padding: 6px; font-size: 14px;">
+                        <label style="font-family: 'Subhead2'; font-size: 16px; font-weight: bold; color: var(--crust-burnt);">Est. End Time:</label>
+                        <input type="text" id="newClassEnd" value="7:15 PM" placeholder="e.g. 7:15 PM" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: flex-end;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) auto; gap: 12px; align-items: flex-end;">
                     <div>
-                        <label style="font-family: 'Subhead2'; font-size: 12px; font-weight: bold;">Trainer Name:</label>
-                        <input type="text" id="newClassTrainer" value="Mike" placeholder="e.g. Mike" style="width: 100%; padding: 6px; font-size: 14px;">
+                        <label style="font-family: 'Subhead2'; font-size: 16px; font-weight: bold; color: var(--crust-burnt);">Trainer Name:</label>
+                        <input type="text" id="newClassTrainer" value="Mike" placeholder="e.g. Mike" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
                     </div>
                     <div>
-                        <label style="font-family: 'Subhead2'; font-size: 12px; font-weight: bold;">Capacity Limit:</label>
-                        <input type="number" id="newClassCapacity" value="15" style="width: 100%; padding: 6px; font-size: 14px;">
+                        <label style="font-family: 'Subhead2'; font-size: 16px; font-weight: bold; color: var(--crust-burnt);">Capacity Limit:</label>
+                        <input type="number" id="newClassCapacity" value="15" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
                     </div>
-                    <button type="button" onclick="addNtoClassSession()" style="background: var(--brand-blue); color: white; padding: 8px 16px; font-family: 'Subhead1'; font-size: 14px; border: none; border-radius: 6px; cursor: pointer; white-space: nowrap;">
+                    <button type="button" onclick="addNtoClassSession()" style="background: var(--brand-blue); color: white; padding: 10px 20px; font-family: 'Subhead1'; font-size: 16px; border: none; border-radius: 6px; cursor: pointer; white-space: nowrap; height: 42px;">
                         ➕ Add Session
                     </button>
                 </div>
             </div>
 
             <!-- Table: Currently Scheduled Classes -->
-            <div style="font-family: 'ExtraBold'; font-size: 15px; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 8px;">Scheduled NTO Sessions</div>
-            <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--crust-dark); border-radius: 8px;">
-                <table style="width: 100%; border-collapse: collapse; font-family: 'Condensed', sans-serif; font-size: 15px; text-align: left;">
+            <div style="font-family: 'ExtraBold'; font-size: 18px; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 10px;">Scheduled NTO Sessions</div>
+            <div style="max-height: 320px; overflow-y: auto; border: 1.5px solid var(--crust-dark); border-radius: 8px;">
+                <table style="width: 100%; border-collapse: collapse; font-family: 'Condensed', sans-serif; font-size: 17px; text-align: left;">
                     <thead>
-                        <tr style="background: var(--dark-blue); color: white; position: sticky; top: 0; font-family: 'Subhead2'; font-size: 12px; text-transform: uppercase;">
-                            <th style="padding: 8px;">Class ID / Date</th>
-                            <th style="padding: 8px; text-align: center;">Times</th>
-                            <th style="padding: 8px; text-align: center;">Trainer</th>
-                            <th style="padding: 8px; text-align: center;">Cap</th>
-                            <th style="padding: 8px; text-align: center;">Action</th>
+                        <tr style="background: var(--dark-blue); color: white; position: sticky; top: 0; font-family: 'Subhead2'; font-size: 15px; text-transform: uppercase;">
+                            <th style="padding: 10px 12px;">Class ID / Date</th>
+                            <th style="padding: 10px 12px; text-align: center;">Times</th>
+                            <th style="padding: 10px 12px; text-align: center;">Trainer</th>
+                            <th style="padding: 10px 12px; text-align: center;">Cap</th>
+                            <th style="padding: 10px 12px; text-align: center;">Action</th>
                         </tr>
                     </thead>
                     <tbody id="classCalendarTableBody">
-                        <tr><td colspan="5" style="text-align:center; padding: 15px; color:#888;">Loading scheduled classes...</td></tr>
+                        <tr><td colspan="5" style="text-align:center; padding: 20px; color:#888; font-size: 17px;">Loading scheduled classes...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+</div>
 </div>
 </body>
 </html>
