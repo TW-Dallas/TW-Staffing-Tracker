@@ -359,7 +359,7 @@
                                         <option value="Phone Interview">📞 Phone Interview</option>
                                         <option value="Scheduled">📞 Scheduled</option>
                                         <option value="Completed">✓ Completed</option>
-                                        <option value="Passed to GM">👔 Passed to GM</option>
+                                        <option value="GM Interview">👔 GM Interview</option>
                                         <option value="Hired">🎉 Hired</option>
                                         <option value="No Show">❌ No Show</option>
                                         <option value="Declined">🚫 Declined</option>
@@ -2243,8 +2243,8 @@
             if (!result.success) throw new Error(result.error || "Failed to send interview email.");
             showBrandAlert("GM Interview email & calendar invite delivered successfully!", "Invite Delivered");
             
-            // Auto-update status dropdown to "Passed to GM"
-            document.getElementById('intStatus').value = "Passed to GM";
+            // Auto-update status dropdown to "GM Interview"
+            document.getElementById('intStatus').value = "GM Interview";
         })
         .catch(err => {
             showLoader(false);
