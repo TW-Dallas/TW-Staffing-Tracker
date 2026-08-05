@@ -41,7 +41,7 @@
         body { 
             font-family: 'Condensed', sans-serif; 
             background-color: var(--bg-color); 
-            background-image: url('images/Pizza_800.svg'); /* Pizza pattern background */
+            background-image: url('images/Pizza_801.svg'); /* Pizza pattern background */
             background-repeat: repeat;
             background-size: 320px;
             color: var(--text-dark); 
