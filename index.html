@@ -287,15 +287,16 @@
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxa1XNdNgwOULiYpeAoBIjTy1wv034pON4-hnR444XB07vegHhoSR56UacR7UaktTaGZg/exec?city=Dallas&username=dallas_admin&password=dallas_password_123";
     let rawData = { onboarding: [], interviews: [] };
-    let expandedCardIds = new Set(); // Track expanded cards across...
+    let expandedCardIds = new Set(); 
     let showOlderForStore = false; // Tracks if GM clicked "View Older Candidates"
 
     function toggleOlderCandidates() {
         showOlderForStore = !showOlderForStore;
         renderOnboarding();
+        if (typeof renderInterviews === 'function') renderInterviews();
     }
 
-    // Check if we should display the welcome modal (runs safely in private windows too) [0]
+    // Check if we should display the welcome modal
     (function() {
         try {
             const hideModal = localStorage.getItem('hideTrackerUpdate_v1');
@@ -317,10 +318,10 @@
         document.getElementById('updateModal').classList.add('hidden');
     }
 
-    // Perform initial loading with full-screen indicator
+    // Initial load
     fetchData(true);
 
-    // Dynamic Silent background sync timer (every 30 seconds)
+    // Silent background sync timer (every 30 seconds)
     setInterval(() => {
         fetchData(false);
     }, 30000);
@@ -411,7 +412,6 @@
             switchView(targetView);
         }
 
-        // Silent Usage Pinger
         logUsagePinger(targetStore || document.getElementById('storeFilter').value, targetDo || document.getElementById('doFilter').value, targetView || 'onboarding');
     }
 
@@ -429,7 +429,6 @@
     }
 
     function populateFilters() {
-        // Prevent clearing filters if the user is currently searching/selecting
         const activeDo = document.getElementById('doFilter').value;
         const activeStore = document.getElementById('storeFilter').value;
 
@@ -459,71 +458,98 @@
             renderOnboarding(); 
             if (typeof renderInterviews === 'function') renderInterviews(); 
         };
-        // Sync filter options into Push Subscription Modal
+
         const pushStoreSelect = document.getElementById('pushStoreSelect');
         const pushDoSelect = document.getElementById('pushDoSelect');
         if (pushStoreSelect) pushStoreSelect.innerHTML = storeSelect.innerHTML;
         if (pushDoSelect) pushDoSelect.innerHTML = doSelect.innerHTML;
 
-        // Check URL parameters for Deep Links (from push notification taps)
         checkDeepLinkParams();
     }
 
-    function refreshViews() { renderOnboarding(); renderInterviews(); }
+    function refreshViews() { 
+        showOlderForStore = false;
+        renderOnboarding(); 
+        if (typeof renderInterviews === 'function') renderInterviews(); 
+    }
 
+    // LAYER 1: PIPELINE PROGRESS & STATUS LABELS
     function getPipelineDetails(item) {
         if (item.ineligible) return { pct: 100, color: 'grey', label: 'Ineligible' };
         if (item.inactive) return { pct: 100, color: 'grey', label: 'Inactive' };
         if (item.hired) return { pct: 100, color: 'green', label: 'Hired' };
-        
-        // Active Flag Blockers
-        if (item.hasMissingDocs) return { pct: 15, color: 'red', label: 'Missing / Incorrect Docs' };
+
+        const att = (item.ntoAttendance || '').trim();
+
+        if (att === 'NTO Complete' || att === 'Attended') return { pct: 98, color: 'green', label: '🎓 NTO Complete' };
+
         if (item.incorrectEmail) return { pct: 15, color: 'red', label: 'Incorrect Email' };
-    
-        // If candidate is actively scheduled for NTO, prioritize NTO Scheduled!
-        if (item.ntoScheduled) {
-            // Live NTO Attendance Overrides (during class)
-            if (item.ntoAttendance) {
-                const att = item.ntoAttendance.trim();
-                if (att === 'In Lobby') return { pct: 92, color: 'blue', label: '🏨 In Lobby' };
-                if (att === 'In Class') return { pct: 95, color: 'blue', label: '📖 In Class' };
-                if (att === 'NTO Complete' || att === 'Attended') return { pct: 98, color: 'green', label: '🎓 NTO Complete' };
-                if (att === 'Left Early') return { pct: 90, color: 'red', label: '⚠️ Left Class Early' };
-            }
-            return { pct: 90, color: 'blue', label: 'NTO Scheduled' };
+        if (item.hasMissingDocs) return { pct: 15, color: 'red', label: 'Missing Documents' };
+        if (att === 'Left Early') return { pct: 90, color: 'red', label: 'Left Class Early' };
+        if (item.missedNto || att === 'Not in NTO' || att.includes('Incomplete')) {
+            return { pct: 90, color: 'red', label: 'Missed Orientation' };
         }
-    
-        // Only show Missed NTO if they are NOT currently scheduled for a new class
-        if (item.missedNto || (item.ntoAttendance && (item.ntoAttendance === 'Not in NTO' || item.ntoAttendance.includes('Incomplete')))) {
-            return { pct: 90, color: 'red', label: 'Missed NTO' };
+
+        if (item.ntoScheduled || item.ntoDate || att === 'In Lobby' || att === 'In Class') {
+            return { pct: 85, color: 'blue', label: 'Orientation Scheduled' };
         }
-    
-        if (item.ntoSignupLinkSent) return { pct: 75, color: 'blue', label: 'NTO Signup Sent' };
-    
+        if (item.ntoSignupLinkSent) return { pct: 70, color: 'blue', label: 'NTO Signup Sent' };
+
         if (item.onboardingSent) {
-            let basePct = 35;
-            if (item.bgcComplete) basePct += 10;
-            if (item.allPayCompleted) basePct += 10;
-            if (item.pulseFormComplete) basePct += 10;
-            return { pct: basePct, color: 'blue', label: 'Onboarding Sent' };
+            let pct = 35;
+            if (item.bgcComplete) pct += 10;
+            if (item.allPayCompleted) pct += 10;
+            if (item.pulseFormComplete) pct += 10;
+            return { pct: pct, color: 'blue', label: 'Onboarding Sent' };
         }
-        
+
         if (item.submissionReceived) return { pct: 15, color: 'blue', label: 'Submission Received' };
         return { pct: 5, color: 'grey', label: 'Awaiting Onboarding' };
     }
+
+    // LAYER 2: DEDICATED ALERT BANNERS (Live Events & Blockers)
+    function getAlertBanner(item) {
+        const att = (item.ntoAttendance || '').trim();
+
+        if (att === 'In Lobby') {
+            return `<div class="alert-banner" style="background-color: #e3f2fd; border-color: #2196f3; color: #0d47a1;">🏨 Candidate Checked In: In Lobby</div>`;
+        }
+        if (att === 'In Class') {
+            return `<div class="alert-banner" style="background-color: #e8f5e9; border-color: #4caf50; color: #1b5e20;">📖 Currently in NTO Class</div>`;
+        }
+        if (att === 'NTO Complete' || att === 'Attended') {
+            return `<div class="alert-banner" style="background-color: #e8f5e9; border-color: #28a745; color: #1b5e20;">🎓 NTO Class Completed!</div>`;
+        }
+        if (att === 'Left Early') {
+            return `<div class="alert-banner">⚠️ Candidate Left Class Early</div>`;
+        }
+        if (att === 'Not in NTO' || att.includes('Incomplete')) {
+            return `<div class="alert-banner">❌ Candidate Absent / Missed NTO</div>`;
+        }
+
+        if (item.incorrectEmail) {
+            return `<div class="alert-banner">🛑 Incorrect Email (Requires Outreach)</div>`;
+        }
+        if (item.missedNto) {
+            return `<div class="alert-banner">⚠️ Missed Orientation / NTO (Needs Approval to Reschedule)</div>`;
+        }
+        if (item.hasMissingDocs) {
+            const missingText = item.missingDocsText ? `: ${item.missingDocsText}` : ' (Paperwork Required)';
+            return `<div class="alert-banner">⚠️ Missing Documents${missingText}</div>`;
+        }
+
+        return '';
+    }
     
     function getStatusWeight(item) {
-        // 1. Ineligible & Inactive ALWAYS go to the very bottom
         if (item.ineligible) return 12;
         if (item.inactive) return 11;
     
         const isMissedNtoActive = !item.ntoScheduled && (item.missedNto || (item.ntoAttendance && (item.ntoAttendance === 'Not in NTO' || item.ntoAttendance.includes('Incomplete'))));
     
-        // 2. Active candidates needing immediate GM action float to the top
         if (item.incorrectEmail || item.hasMissingDocs || isMissedNtoActive) return 0;
         if (item.ntoAttendance === 'Left Early') return 0;
         
-        // 3. Hired Candidates
         if (item.hired) {
             const today = new Date();
             today.setHours(0,0,0,0);
@@ -532,7 +558,6 @@
             return (updateDate.getTime() === today.getTime()) ? 1 : 10;
         }
     
-        // 4. Active pipeline candidates in order of progress
         if (item.ntoScheduled || item.ntoAttendance === 'In Lobby' || item.ntoAttendance === 'In Class' || item.ntoAttendance === 'NTO Complete' || item.ntoAttendance === 'Attended') return 2;
         if (item.ntoSignupLinkSent) return 3;
         if (item.onboardingSent) return 4;
@@ -576,12 +601,9 @@
             
             if (item.missingDocsText) {
                 const textLower = item.missingDocsText.toLowerCase();
-                
-                // If it contains ID / I-9 related indicators
                 if (textLower.includes('id') || textLower.includes('license') || textLower.includes('social') || textLower.includes('ssn') || textLower.includes('birth') || textLower.includes('i-9') || textLower.includes('passport')) {
                     txt = `Hey ${item.name}! This is Domino's. We need a different form of I-9 identification. We are missing your ${item.missingDocsText}. Please reply back so we can arrange a time for you to bring that to the store or upload it!`;
                 } else {
-                    // Non-I-9 indicators (auto insurance, registration, custom, etc.)
                     txt = `Hey ${item.name}! This is Domino's. We are missing your ${item.missingDocsText} for your onboarding. Please reply back so we can get this updated and get you scheduled!`;
                 }
             }
@@ -624,42 +646,57 @@
         const doVal = document.getElementById('doFilter').value;
         const storeVal = document.getElementById('storeFilter').value;
 
-        const filtered = rawData.onboarding.filter(item => {
+        const onboardingData = rawData.onboarding || [];
+        const twoWeeksAgo = new Date();
+        twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+
+        let hiddenOlderCount = 0;
+
+        const filtered = onboardingData.filter(item => {
             const iDo = item.doName ? item.doName.toString().trim() : '';
             const iStore = item.store ? item.store.toString().trim() : '';
-            return item.store !== 'Store #' && 
-                   (doVal === 'All' || iDo === doVal) &&
-                   (storeVal === 'All' || iStore === storeVal);
+            const matchesDo = (doVal === 'All' || iDo === doVal);
+            const matchesStore = (storeVal === 'All' || iStore === storeVal);
+
+            if (item.store === 'Store #' || !matchesDo || !matchesStore) return false;
+
+            let candidateDate = item.lastUpdated ? new Date(item.lastUpdated) : null;
+            if (!candidateDate || isNaN(candidateDate.getTime())) {
+                candidateDate = item.ntoDate ? new Date(item.ntoDate) : null;
+            }
+
+            const isTerminalState = item.hired || item.inactive || item.ineligible;
+            const isOlderThanTwoWeeks = candidateDate && !isNaN(candidateDate.getTime()) && candidateDate < twoWeeksAgo;
+
+            if (isOlderThanTwoWeeks || (isTerminalState && isOlderThanTwoWeeks)) {
+                if (!showOlderForStore) {
+                    hiddenOlderCount++;
+                    return false;
+                }
+            }
+
+            return true;
         }).sort((a, b) => getStatusWeight(a) - getStatusWeight(b));
 
-        if(filtered.length === 0) { list.innerHTML = '<div class="loader">No candidates active.</div>'; return; }
+        if(filtered.length === 0 && hiddenOlderCount === 0) { 
+            list.innerHTML = '<div class="loader">No candidates active.</div>'; 
+            return; 
+        }
 
         filtered.forEach(item => {
             const icon = getPositionIcon(item.position);
-            
-        const pipe = getPipelineDetails(item);
-            
-            const isMissedNtoActive = !item.ntoScheduled && (item.missedNto || (item.ntoAttendance && (item.ntoAttendance === 'Not in NTO' || item.ntoAttendance.includes('Incomplete'))));
+            const pipe = getPipelineDetails(item);
+            const alertHtml = getAlertBanner(item); // 👈 Safely calls getAlertBanner!
 
             let cardClass = 'status-blue';
             if (item.inactive || item.ineligible) {
                 cardClass = 'status-gray';
-            } else if (item.incorrectEmail || item.hasMissingDocs || isMissedNtoActive || pipe.color === 'red') {
+            } else if (pipe.color === 'red') {
                 cardClass = 'status-red';
-            } else if (item.hired || pipe.color === 'green') {
+            } else if (pipe.color === 'green') {
                 cardClass = 'status-green';
             }
-            
-            let alertHtml = '';
-            if (item.incorrectEmail) {
-                alertHtml = `<div class="alert-banner">🛑 Incorrect Email (Requires Outreach)</div>`;
-            } else if (isMissedNtoActive) {
-                alertHtml = `<div class="alert-banner">⚠️ Missed Orientation / NTO (Needs Approval to Reschedule)</div>`;
-            } else if (item.hasMissingDocs) {
-                const missingText = item.missingDocsText ? `: ${item.missingDocsText}` : ' (Paperwork Required)';
-                alertHtml = `<div class="alert-banner">⚠️ Missing Documents${missingText}</div>`;
-            }
-            
+
             let chipsHtml = '';
             if (item.shirtSize) chipsHtml += `<span class="chip">👕 ${item.shirtSize}</span>`;
             if (item.hatStyle && (item.hatStyle.toLowerCase() === 'cap' || item.hatStyle.toLowerCase() === 'visor')) {
@@ -749,6 +786,26 @@
                 </div>`;
             list.innerHTML += html;
         });
+
+        if (storeVal !== 'All' || hiddenOlderCount > 0) {
+            const loadMoreBox = document.createElement('div');
+            loadMoreBox.style.cssText = "text-align: center; margin: 20px 0; padding: 12px;";
+
+            if (!showOlderForStore) {
+                loadMoreBox.innerHTML = `
+                    <button type="button" onclick="toggleOlderCandidates()" style="background: white; border: 2px solid var(--dark-blue); color: var(--dark-blue); font-family: 'Subhead2', sans-serif; font-size: 15px; padding: 10px 20px; border-radius: 8px; cursor: pointer; text-transform: uppercase; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+                        📂 View Older Candidates ${hiddenOlderCount > 0 ? '(' + hiddenOlderCount + ' Hidden)' : ''}
+                    </button>
+                `;
+            } else {
+                loadMoreBox.innerHTML = `
+                    <button type="button" onclick="toggleOlderCandidates()" style="background: var(--crust-med); border: 1px solid var(--crust-dark); color: var(--crust-burnt); font-family: 'Subhead2', sans-serif; font-size: 14px; padding: 8px 16px; border-radius: 8px; cursor: pointer; text-transform: uppercase;">
+                        ⬆️ Hide Older Candidates
+                    </button>
+                `;
+            }
+            list.appendChild(loadMoreBox);
+        }
     }
 
     function renderInterviews() {
@@ -770,7 +827,6 @@
 
             if (item.store === 'Store #' || !matchesDo || !matchesStore) return false;
 
-            // Filter interviews older than 14 days unless showOlderForStore is true
             const intDate = item.date ? new Date(item.date) : null;
             if (intDate && !isNaN(intDate.getTime()) && intDate < twoWeeksAgo) {
                 if (!showOlderForStore) return false;
@@ -835,12 +891,12 @@
     }
 
     if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./OneSignalSDKWorker.js')
-            .then(reg => console.log('Staffing App Service Worker registered!'))
-            .catch(err => console.error('Service Worker registration failed:', err));
-    });
-}
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./OneSignalSDKWorker.js')
+                .then(reg => console.log('Staffing App Service Worker registered!'))
+                .catch(err => console.error('Service Worker registration failed:', err));
+        });
+    }
 </script>
 </body>
 </html>
