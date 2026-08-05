@@ -62,7 +62,7 @@
 
         <button type="button" onclick="window.open('https://www.dpreporting.com/paycard/PaycardHome', '_blank')" 
                 style="display: inline-flex; align-items: center; gap: 6px; background: var(--crust-base); color: var(--dark-blue); font-size: 15px; padding: 7px 14px; font-family: 'Subhead1', sans-serif;">
-            <img src="images/icons/NS_Icon.png alt=" style="width: 16px; height: 16px;">
+            <img src="images/icons/NS_Icon.png" alt="" style="width: 16px; height: 16px;">
             Netspend
         </button>
 
@@ -549,6 +549,11 @@
                     
                     <!-- 5. NTO CLASS ATTENDANCE FORM TEMPLATE -->
                     <div id="ntoFormFields" class="hidden">
+                        <div style="display: flex; margin-bottom: 12px;">
+                            <button type="button" onclick="openClassCalendarModal()" style="background: var(--dark-blue); color: white; padding: 9px 16px; font-size: 16px; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; border: none;">
+                                📅 Manage NTO Class Schedule
+                            </button>
+                        </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Class Date</label>
@@ -2974,7 +2979,6 @@
     }
 
     // Trigger Conclude NTO Class
-    // Trigger Conclude NTO Class
     async function concludeNtoClass() {
         const classDate = document.getElementById('ntoClassDate').value;
         let rawEndTime = document.getElementById('ntoEndTime').value.trim();
@@ -3448,7 +3452,215 @@
             showBrandAlert("Error sending links: " + err.message, "Delivery Error");
         });
     }
+    // --- NTO CLASS CALENDAR MODAL FUNCTIONS ---
+    function openClassCalendarModal() {
+        document.getElementById('classCalendarModal').classList.remove('hidden');
+        // Pre-fill date picker with tomorrow's date
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById('newClassDate').value = tomorrow.toISOString().split('T')[0];
+        
+        fetchNtoCalendarClasses();
+    }
+
+    function closeClassCalendarModal() {
+        document.getElementById('classCalendarModal').classList.add('hidden');
+    }
+
+    function fetchNtoCalendarClasses() {
+        const tbody = document.getElementById('classCalendarTableBody');
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 15px; color:#888;">Loading scheduled classes...</td></tr>`;
+
+        const u = localStorage.getItem('onb_user');
+        const p = localStorage.getItem('onb_pass');
+
+        fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                username: u,
+                password: p,
+                action: 'getNtoClasses'
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success || !data.classes) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 15px; color:#888;">No scheduled classes found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.classes.forEach(c => {
+                const row = document.createElement('tr');
+                row.style.borderBottom = '1px solid var(--crust-med)';
+                row.innerHTML = `
+                    <td style="padding: 8px; font-weight: bold; color: var(--dark-blue);">
+                        ${c.classDate} <br><span style="font-size: 11px; color: var(--brand-grey);">${c.classId || 'Auto ID'}</span>
+                    </td>
+                    <td style="padding: 8px; text-align: center;">${c.startTime} - ${c.endTime}</td>
+                    <td style="padding: 8px; text-align: center;">${c.trainerName}</td>
+                    <td style="padding: 8px; text-align: center; font-weight: bold;">${c.capacity}</td>
+                    <td style="padding: 8px; text-align: center;">
+                        <button type="button" onclick="deleteNtoClassSession('${c.classId}', '${c.classDate}', ${c.rowNum})" style="background: var(--brand-red); color: white; border: none; padding: 4px 8px; font-size: 12px; border-radius: 4px; cursor: pointer;">
+                            🗑️ Cancel
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        })
+        .catch(err => {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 15px; color: var(--brand-red);">Error loading calendar.</td></tr>`;
+        });
+    }
+
+    async function addNtoClassSession() {
+        const rawDate = document.getElementById('newClassDate').value;
+        const startTime = document.getElementById('newClassStart').value.trim();
+        const endTime = document.getElementById('newClassEnd').value.trim();
+        const trainerName = document.getElementById('newClassTrainer').value.trim();
+        const capacity = document.getElementById('newClassCapacity').value;
+
+        if (!rawDate) {
+            showBrandAlert("Please select a class date.", "Missing Date");
+            return;
+        }
+
+        // Format YYYY-MM-DD to friendly string e.g. "Tuesday, January 20, 2026"
+        const dateObj = new Date(rawDate + "T00:00:00");
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const formattedDateStr = dateObj.toLocaleDateString('en-US', options);
+
+        showLoader(true, "Adding new NTO class session...");
+
+        const u = localStorage.getItem('onb_user');
+        const p = localStorage.getItem('onb_pass');
+
+        const payload = {
+            username: u,
+            password: p,
+            action: 'addNtoClass',
+            classDate: formattedDateStr,
+            startTime: startTime,
+            endTime: endTime,
+            trainerName: trainerName,
+            capacity: capacity
+        };
+
+        fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
+        .then(res => res.json())
+        .then(result => {
+            showLoader(false);
+            if (!result.success) throw new Error(result.error || "Failed to add class.");
+            showBrandAlert("New NTO class session added successfully!", "Class Added");
+            fetchNtoCalendarClasses();
+        })
+        .catch(err => {
+            showLoader(false);
+            showBrandAlert("Error adding class: " + err.message, "System Error");
+        });
+    }
+
+    async function deleteNtoClassSession(classId, classDate, rowNum) {
+        const confirmed = await showBrandConfirm(
+            `Are you sure you want to cancel/delete the class on ${classDate}?`,
+            "Cancel Class Session"
+        );
+        if (!confirmed) return;
+
+        showLoader(true, "Deleting class session...");
+
+        const u = localStorage.getItem('onb_user');
+        const p = localStorage.getItem('onb_pass');
+
+        const payload = {
+            username: u,
+            password: p,
+            action: 'deleteNtoClass',
+            classId: classId,
+            classDate: classDate,
+            rowNum: rowNum
+        };
+
+        fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
+        .then(res => res.json())
+        .then(result => {
+            showLoader(false);
+            if (!result.success) throw new Error(result.error || "Failed to delete class.");
+            showBrandAlert("Class session canceled and removed.", "Class Canceled");
+            fetchNtoCalendarClasses();
+        })
+        .catch(err => {
+            showLoader(false);
+            showBrandAlert("Error deleting class: " + err.message, "System Error");
+        });
+    }
 </script>
 <datalist id="time15MinList"></datalist>
+<!-- NTO CLASS CALENDAR MANAGEMENT MODAL -->
+<div id="classCalendarModal" class="brand-modal-overlay hidden">
+    <div class="brand-modal-card" style="max-width: 750px; width: 95%;">
+        <div class="brand-modal-brand-stripe"></div>
+        <div class="brand-modal-content" style="padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--crust-med); padding-bottom: 8px; margin-bottom: 14px;">
+                <h3 style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 20px; text-transform: uppercase;">📅 NTO Class Calendar Manager</h3>
+                <button type="button" onclick="closeClassCalendarModal()" style="background: var(--brand-grey); font-size: 13px; padding: 4px 10px; color: white; border: none; border-radius: 4px; cursor: pointer;">✕ Close</button>
+            </div>
+
+            <!-- Form: Add New Class Session -->
+            <div style="background: var(--crust-light); border: 1.5px solid var(--crust-dark); padding: 14px; border-radius: 8px; margin-bottom: 16px;">
+                <div style="font-family: 'ExtraBold'; font-size: 15px; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 10px;">➕ Schedule New NTO Class Session</div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <div>
+                        <label style="font-family: 'Subhead2'; font-size: 12px; font-weight: bold;">Class Date:</label>
+                        <input type="date" id="newClassDate" style="width: 100%; padding: 6px; font-size: 14px;">
+                    </div>
+                    <div>
+                        <label style="font-family: 'Subhead2'; font-size: 12px; font-weight: bold;">Start Time:</label>
+                        <input type="text" id="newClassStart" value="6:00 PM" placeholder="e.g. 6:00 PM" style="width: 100%; padding: 6px; font-size: 14px;">
+                    </div>
+                    <div>
+                        <label style="font-family: 'Subhead2'; font-size: 12px; font-weight: bold;">Estimated End Time:</label>
+                        <input type="text" id="newClassEnd" value="7:15 PM" placeholder="e.g. 7:15 PM" style="width: 100%; padding: 6px; font-size: 14px;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: flex-end;">
+                    <div>
+                        <label style="font-family: 'Subhead2'; font-size: 12px; font-weight: bold;">Trainer Name:</label>
+                        <input type="text" id="newClassTrainer" value="Mike" placeholder="e.g. Mike" style="width: 100%; padding: 6px; font-size: 14px;">
+                    </div>
+                    <div>
+                        <label style="font-family: 'Subhead2'; font-size: 12px; font-weight: bold;">Capacity Limit:</label>
+                        <input type="number" id="newClassCapacity" value="15" style="width: 100%; padding: 6px; font-size: 14px;">
+                    </div>
+                    <button type="button" onclick="addNtoClassSession()" style="background: var(--brand-blue); color: white; padding: 8px 16px; font-family: 'Subhead1'; font-size: 14px; border: none; border-radius: 6px; cursor: pointer; white-space: nowrap;">
+                        ➕ Add Session
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table: Currently Scheduled Classes -->
+            <div style="font-family: 'ExtraBold'; font-size: 15px; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 8px;">Scheduled NTO Sessions</div>
+            <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--crust-dark); border-radius: 8px;">
+                <table style="width: 100%; border-collapse: collapse; font-family: 'Condensed', sans-serif; font-size: 15px; text-align: left;">
+                    <thead>
+                        <tr style="background: var(--dark-blue); color: white; position: sticky; top: 0; font-family: 'Subhead2'; font-size: 12px; text-transform: uppercase;">
+                            <th style="padding: 8px;">Class ID / Date</th>
+                            <th style="padding: 8px; text-align: center;">Times</th>
+                            <th style="padding: 8px; text-align: center;">Trainer</th>
+                            <th style="padding: 8px; text-align: center;">Cap</th>
+                            <th style="padding: 8px; text-align: center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="classCalendarTableBody">
+                        <tr><td colspan="5" style="text-align:center; padding: 15px; color:#888;">Loading scheduled classes...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
