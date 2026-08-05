@@ -30,8 +30,8 @@
         }
 
         /* ==========================================================================
-           2. GLOBAL RESETS & BODY LOCK
-           ========================================================================== */
+        2. GLOBAL RESETS & BODY LOCK
+        ========================================================================== */
         html, body { 
             height: 100%; 
             overflow: hidden; 
@@ -41,10 +41,19 @@
         body { 
             font-family: 'Condensed', sans-serif; 
             background-color: var(--bg-color); 
+            background-image: url('images/Pizza_800.svg'); /* Pizza pattern background */
+            background-repeat: repeat;
+            background-size: 320px;
             color: var(--text-dark); 
             display: flex; 
             flex-direction: column; 
             font-size: 16px; 
+        }
+
+        /* Automatically removes the background image once logged in */
+        body:has(#appContainer:not(.hidden)) { 
+            background-image: none; 
+            background-color: var(--bg-color); 
         }
 
         /* ==========================================================================
@@ -100,20 +109,66 @@
         }
 
         /* ==========================================================================
-           4. AUTH / LOGIN SCREEN
-           ========================================================================== */
+        4. AUTH / LOGIN SCREEN
+        ========================================================================== */
         .auth-container { 
-            max-width: 400px; 
-            width: 100%;
-            margin: 80px auto; 
-            padding: 24px; 
+            max-width: 500px; 
+            width: 90%;
+            margin: 8vh auto; 
             background: white; 
             border-radius: var(--border-radius); 
-            box-shadow: 0 4px 12px rgba(71, 43, 16, 0.15); 
-            border-top: 6px solid var(--brand-blue); 
+            box-shadow: 0 16px 48px rgba(71, 43, 16, 0.18); 
+            border: 2px solid var(--crust-dark); 
+            position: relative; 
+            overflow: hidden; 
             box-sizing: border-box;
         }
-        .auth-container h2 { margin-top: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 20px; }
+
+        .auth-brand-stripe { 
+            background: linear-gradient(90deg, var(--brand-red) 50%, var(--brand-blue) 50%); 
+            height: 10px; 
+            width: 100%; 
+        }
+
+        .auth-inner { 
+            padding: 36px 40px; 
+        }
+
+        .auth-container h2 { 
+            margin-top: 0; 
+            font-family: 'ExtraBlack', sans-serif; 
+            font-size: 28px; 
+            text-align: center; 
+            color: var(--dark-blue); 
+            margin-bottom: 4px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+        }
+
+        .auth-subtitle { 
+            text-align: center; 
+            font-family: 'Compact', sans-serif; 
+            font-size: 17px; 
+            color: var(--crust-deep); 
+            margin-bottom: 28px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+        }
+
+        .auth-container button { 
+            width: 100%; 
+            padding: 14px; 
+            font-size: 19px; 
+            font-family: 'ExtraBold', sans-serif; 
+            background: var(--dark-blue); 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            box-shadow: 0 4px 12px rgba(0, 92, 145, 0.25); 
+        }
 
         /* ==========================================================================
            5. DASHBOARD & PANEL LAYOUTS

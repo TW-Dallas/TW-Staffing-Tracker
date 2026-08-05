@@ -13,19 +13,35 @@
 <!-- Loader Overlay -->
 <div id="loadingOverlay" class="overlay hidden">Saving Database...</div>
 
-<!-- Login Container -->
+<!-- Replicated Catering Style Login Container -->
 <div id="authContainer" class="auth-container">
-    <h2>Hiring Manager Login</h2>
-    <div class="form-group">
-        <label>Username</label>
-        <input type="text" id="loginUser" placeholder="e.g., dallas_admin">
+    <div class="auth-brand-stripe"></div>
+    <div class="auth-inner">
+        <img src="images/New_Logo_v2.png" alt="Logo" style="height: 65px; width: auto; margin: 0 auto 24px auto; display: block;" onerror="this.style.display='none'">
+        <h2>Workspace Access</h2>
+        <div class="auth-subtitle">Hiring Manager Portal</div>
+        
+        <div class="form-group" style="margin-bottom: 24px;">
+            <label>Username</label>
+            <input type="text" id="loginUser" placeholder="e.g., dallas_admin">
+        </div>
+
+        <!-- Password Input with Show/Hide Toggle -->
+        <div class="form-group" style="margin-bottom: 34px;">
+            <label>Password</label>
+            <div style="position: relative; display: flex; align-items: center;">
+                <input type="password" id="loginPass" style="padding-right: 70px;" placeholder="••••••••">
+                <span id="toggle-password" onclick="togglePasswordVisibility()" style="position: absolute; right: 14px; cursor: pointer; color: var(--brand-blue); font-family: 'Subhead2', sans-serif; font-size: 16px; font-weight: bold; user-select: none;">SHOW</span>
+            </div>
+        </div>
+
+        <div id="loginError" style="color: var(--brand-red); font-family: 'Condensed', sans-serif; font-size: 16px; margin-bottom: 18px; text-align: center;" class="hidden"></div>
+        <button onclick="handleLogin()">Sign In to Portal</button>
+
+        <div style="text-align: center; margin-top: 36px; font-size: 14px; color: var(--crust-dark); font-family: 'Compact', sans-serif; letter-spacing: 0.5px;">
+            🔒 SECURE WORKSPACE &bull; AUTHORIZED PERSONNEL ONLY
+        </div>
     </div>
-    <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="loginPass">
-    </div>
-    <div id="loginError" style="color: var(--brand-red); font-size: 14px; margin-bottom: 12px;" class="hidden"></div>
-    <button onclick="handleLogin()">Login</button>
 </div>
 
 <!-- Main App Wrapper -->
@@ -3594,6 +3610,21 @@
             showLoader(false);
             showBrandAlert("Error deleting class: " + err.message, "System Error");
         });
+    }
+    function togglePasswordVisibility() {
+        const passInput = document.getElementById('loginPass');
+        const toggleBtn = document.getElementById('toggle-password');
+        if (!passInput || !toggleBtn) return;
+
+        if (passInput.type === 'password') {
+            passInput.type = 'text';
+            toggleBtn.innerText = 'HIDE';
+            toggleBtn.style.color = 'var(--crust-dark, #c0a588)'; 
+        } else {
+            passInput.type = 'password';
+            toggleBtn.innerText = 'SHOW';
+            toggleBtn.style.color = 'var(--brand-blue, #0090e2)'; 
+        }
     }
 </script>
 <datalist id="time15MinList"></datalist>
