@@ -1232,44 +1232,58 @@
         const u = savedUser || document.getElementById('loginUser').value.trim();
         const p = savedPass || document.getElementById('loginPass').value.trim();
         const errorEl = document.getElementById('loginError');
-    
+
         if (!u || !p) return;
         showLoader(true, "Signing in...");
-        errorEl.classList.add('hidden');
-    
+        if (errorEl) errorEl.classList.add('hidden');
+
         try {
             localStorage.setItem('onb_user', u);
             localStorage.setItem('onb_pass', p);
-    
+
             const data = await apiCall('GET');
-    
+
             document.getElementById('authContainer').classList.add('hidden');
             document.getElementById('appContainer').classList.remove('hidden');
             document.getElementById('headerCity').innerText = `${getCityFromUser(u)} Workspace`;
-    
+
             updateWorkspaceVisibility(getCityFromUser(u));
-    
+
             candidates = data.onboarding || [];
             interviews = data.interviews || [];
             staffing = data.staffing || [];
             contacts = data.contacts || [];
             paycards = processPayCards(data);
-    
-            if (data.scratchpadText !== undefined) localStorage.setItem(`scratchpad_text_${u}`, data.scratchpadText);
+
+            if (data.scratchpadChecklist && data.scratchpadChecklist !== "[]") {localStorage.setItem(`scratchpad_checklist_${u}`, data.scratchpadChecklist);}
             if (data.scratchpadChecklist !== undefined) localStorage.setItem(`scratchpad_checklist_${u}`, data.scratchpadChecklist);
-    
+
             switchView('onboarding');
             initScratchpad();
             showLoader(false);
-    
+
             if (!window.syncInterval) window.syncInterval = setInterval(silentSync, 90000);
-    
+
         } catch (err) {
             showLoader(false);
-            errorEl.innerText = err.message || "Invalid login credentials.";
-            errorEl.classList.remove('hidden');
-            document.getElementById('authContainer').classList.remove('hidden');
-            document.getElementById('appContainer').classList.add('hidden');
+            
+            const isAuthError = err.message.includes("Invalid username") || err.message.includes("Unauthorized");
+            
+            if (isAuthError) {
+                localStorage.removeItem('onb_user');
+                localStorage.removeItem('onb_pass');
+                document.getElementById('authContainer').classList.remove('hidden');
+                document.getElementById('appContainer').classList.add('hidden');
+                if (errorEl) {
+                    errorEl.innerText = "Invalid username or password.";
+                    errorEl.classList.remove('hidden');
+                }
+            } else {
+                // Transient network delay: Keep dashboard visible and retry automatically
+                showBrandAlert("Server response delayed. Clicking OK will reload your dashboard.", "Connection Retry").then(() => {
+                    handleLogin(u, p);
+                });
+            }
         }
     }
     
