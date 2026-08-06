@@ -843,7 +843,6 @@
         const p = localStorage.getItem('onb_pass') || (document.getElementById('loginPass') ? document.getElementById('loginPass').value.trim() : '');
         const city = getCityFromUser(u);
 
-        // Force ALL requests (reads & writes) through POST body
         let requestPayload = {};
         if (typeof actionOrMethod === 'object') {
             requestPayload = { ...actionOrMethod };
@@ -857,12 +856,35 @@
 
         if (!requestPayload.action) requestPayload.action = 'getData';
 
-        const bodyData = { username: u, password: p, city: city, ...requestPayload };
+        const fullPayload = { username: u, password: p, city: city, ...requestPayload };
 
-        // ALWAYS USE POST - NEVER USE GET
+        // For read requests (getData, login, fetchData), use HTTP GET to avoid 302 POST->GET redirect 404 bug
+        if (fullPayload.action === 'getData' || fullPayload.action === 'login' || fullPayload.action === 'fetchData') {
+            const queryParams = new URLSearchParams(fullPayload).toString();
+            const url = `${API_URL}${API_URL.includes('?') ? '&' : '?'}${queryParams}`;
+            const response = await fetch(url);
+            const text = await response.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                throw new Error("Server returned an invalid response page. Please try again.");
+            }
+            if (data.error) {
+                if (data.error.includes("Invalid username") || data.error.includes("Unauthorized")) {
+                    localStorage.removeItem('onb_user');
+                    localStorage.removeItem('onb_pass');
+                }
+                throw new Error(data.error);
+            }
+            return data;
+        }
+
+        // For write requests (POST, delete, save, etc.), send text/plain body to avoid CORS preflight issues
         const response = await fetch(API_URL, {
             method: 'POST',
-            body: JSON.stringify(bodyData)
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(fullPayload)
         });
 
         const text = await response.text();
@@ -1245,14 +1267,45 @@
         const errorEl = document.getElementById('loginError');
 
         if (!u || !p) return;
-        showLoader(true, "Signing in...");
         if (errorEl) errorEl.classList.add('hidden');
+
+        // Instant render from localStorage cache if available
+        const cachedRaw = localStorage.getItem(`cached_workspace_data_${u}`);
+        let hasCache = false;
+        if (cachedRaw) {
+            try {
+                const cachedData = JSON.parse(cachedRaw);
+                candidates = cachedData.onboarding || [];
+                interviews = cachedData.interviews || [];
+                staffing = cachedData.staffing || [];
+                contacts = cachedData.contacts || [];
+                paycards = processPayCards(cachedData);
+                
+                document.getElementById('authContainer').classList.add('hidden');
+                document.getElementById('appContainer').classList.remove('hidden');
+                document.getElementById('headerCity').innerText = `${getCityFromUser(u)} Workspace`;
+                updateWorkspaceVisibility(getCityFromUser(u));
+                switchView('onboarding');
+                initScratchpad();
+                hasCache = true;
+            } catch (e) {
+                console.warn("Cached data parse error:", e);
+            }
+        }
+
+        if (!hasCache) {
+            showLoader(true, "Signing in...");
+        } else {
+            showLoader(true, "Syncing latest data...");
+        }
 
         try {
             localStorage.setItem('onb_user', u);
             localStorage.setItem('onb_pass', p);
 
             const data = await apiCall('GET');
+
+            localStorage.setItem(`cached_workspace_data_${u}`, JSON.stringify(data));
 
             document.getElementById('authContainer').classList.add('hidden');
             document.getElementById('appContainer').classList.remove('hidden');
@@ -1269,7 +1322,7 @@
             if (data.scratchpadChecklist && data.scratchpadChecklist !== "[]") {localStorage.setItem(`scratchpad_checklist_${u}`, data.scratchpadChecklist);}
             if (data.scratchpadChecklist !== undefined) localStorage.setItem(`scratchpad_checklist_${u}`, data.scratchpadChecklist);
 
-            switchView('onboarding');
+            renderList();
             initScratchpad();
             showLoader(false);
 
@@ -1283,14 +1336,15 @@
             if (isAuthError) {
                 localStorage.removeItem('onb_user');
                 localStorage.removeItem('onb_pass');
+                localStorage.removeItem(`cached_workspace_data_${u}`);
                 document.getElementById('authContainer').classList.remove('hidden');
                 document.getElementById('appContainer').classList.add('hidden');
                 if (errorEl) {
                     errorEl.innerText = "Invalid username or password.";
                     errorEl.classList.remove('hidden');
                 }
-            } else {
-                // Transient network delay: Keep dashboard visible and retry automatically
+            } else if (!hasCache) {
+                // Transient network delay: Keep dashboard visible if cached, or prompt retry
                 showBrandAlert("Server response delayed. Clicking OK will reload your dashboard.", "Connection Retry").then(() => {
                     handleLogin(u, p);
                 });
