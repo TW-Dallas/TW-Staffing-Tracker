@@ -843,11 +843,11 @@
         const p = localStorage.getItem('onb_pass') || (document.getElementById('loginPass') ? document.getElementById('loginPass').value.trim() : '');
         const city = getCityFromUser(u);
 
-        // Normalize request payload so 'GET' or 'getData' routes via POST
+        // Force ALL requests (reads & writes) through POST body
         let requestPayload = {};
         if (typeof actionOrMethod === 'object') {
             requestPayload = { ...actionOrMethod };
-        } else if (actionOrMethod === 'GET' || actionOrMethod === 'getData') {
+        } else if (actionOrMethod === 'GET' || actionOrMethod === 'getData' || !actionOrMethod) {
             requestPayload = { action: 'getData' };
         } else if (actionOrMethod === 'POST') {
             requestPayload = { ...payload };
@@ -859,6 +859,7 @@
 
         const bodyData = { username: u, password: p, city: city, ...requestPayload };
 
+        // ALWAYS USE POST - NEVER USE GET
         const response = await fetch(API_URL, {
             method: 'POST',
             body: JSON.stringify(bodyData)
@@ -870,7 +871,7 @@
         try {
             data = JSON.parse(text);
         } catch (e) {
-            throw new Error("Server returned an invalid non-JSON response page.");
+            throw new Error("Server returned an invalid response page. Please try again.");
         }
 
         if (data.error) {
