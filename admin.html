@@ -1840,8 +1840,8 @@
             document.getElementById('payPosition').value = item.position || '';
             document.getElementById('payStore').value = item.store || '';
             document.getElementById('payDo').value = item.doName || item.do || '';
-            document.getElementById('payNtoDate').value = item.ntoDate || '';
-            document.getElementById('payNoticeDate').value = item.noticeSentDate || '';
+            document.getElementById('payNtoDate').value = formatDateForInput(item.ntoDate);
+            document.getElementById('payNoticeDate').value = formatDateForInput(item.noticeSentDate);
             document.getElementById('checkPayReceived').checked = item.cardReceived || false;
             document.getElementById('checkPayRegistered').checked = item.registered || false;
             document.getElementById('checkPayDdReceived').checked = item.ddReceived || false;
@@ -2006,11 +2006,12 @@
         let payload = { action: action, target: currentView, id: id };
 
         if (currentView === 'paycards') {
-            payload.name = document.getElementById('payName').value.trim();
-            payload.position = document.getElementById('payPosition').value;
-            payload.store = document.getElementById('payStore').value.trim();
-            payload.doName = document.getElementById('payDo').value.trim();
-            payload.ntoDate = document.getElementById('payNtoDate').value;
+            const existingCand = candidates.find(c => c.id === id) || paycards.find(c => c.id === id) || {};
+            payload.name = document.getElementById('payName').value.trim() || existingCand.name;
+            payload.position = document.getElementById('payPosition').value || existingCand.position;
+            payload.store = document.getElementById('payStore').value.trim() || existingCand.store;
+            payload.doName = document.getElementById('payDo').value.trim() || existingCand.doName;
+            payload.ntoDate = document.getElementById('payNtoDate').value || existingCand.ntoDate;
             payload.noticeSentDate = document.getElementById('payNoticeDate').value;
             payload.cardReceived = document.getElementById('checkPayReceived').checked;
             payload.registered = document.getElementById('checkPayRegistered').checked;
@@ -2018,6 +2019,21 @@
             payload.ddEntered = document.getElementById('checkPayDdEntered').checked;
             payload.notes = document.getElementById('payNotes').value.trim();
 
+            if (existingCand.phoneNumber !== undefined) payload.phoneNumber = existingCand.phoneNumber;
+            if (existingCand.email !== undefined) payload.email = existingCand.email;
+            if (existingCand.hired !== undefined) payload.hired = existingCand.hired;
+            if (existingCand.bgcComplete !== undefined) payload.bgcComplete = existingCand.bgcComplete;
+            if (existingCand.allPayCompleted !== undefined) payload.allPayCompleted = existingCand.allPayCompleted;
+            if (existingCand.submissionReceived !== undefined) payload.submissionReceived = existingCand.submissionReceived;
+            if (existingCand.onboardingSent !== undefined) payload.onboardingSent = existingCand.onboardingSent;
+            if (existingCand.ntoSignupLinkSent !== undefined) payload.ntoSignupLinkSent = existingCand.ntoSignupLinkSent;
+            if (existingCand.ntoScheduled !== undefined) payload.ntoScheduled = existingCand.ntoScheduled;
+            if (existingCand.pulseFormComplete !== undefined) payload.pulseFormComplete = existingCand.pulseFormComplete;
+            if (existingCand.incorrectEmail !== undefined) payload.incorrectEmail = existingCand.incorrectEmail;
+            if (existingCand.ineligible !== undefined) payload.ineligible = existingCand.ineligible;
+            if (existingCand.inactive !== undefined) payload.inactive = existingCand.inactive;
+            if (existingCand.missingDocs !== undefined) payload.missingDocs = existingCand.missingDocs;
+            if (existingCand.missedNto !== undefined) payload.missedNto = existingCand.missedNto;
         } else if (currentView === 'staffing') {
             payload.name = document.getElementById('stfName').value.trim();
             payload.position = document.getElementById('stfPosition').value;
@@ -2921,15 +2937,17 @@
         });
     }
 
-    // Automatically pull candidates from Onboarding who have Pay Card Status = "Yes"
+    // Automatically pull candidates from Onboarding who have Pay Card Status = "Yes" or are Hired / Scheduled for NTO
     function processPayCards(data) {
         const onboardingList = data.onboarding || [];
         const serverPaycards = data.paycards || [];
         
-        // Find all onboarding candidates with payCard = "Yes"
+        // Find all onboarding candidates with payCard = "Yes" OR who are Hired / Scheduled for NTO
         const matchedFromOnboarding = onboardingList.filter(item => {
             const val = (item.payCard || "").toString().trim().toLowerCase();
-            return val === "yes" || val === "true" || val === "1" || val.includes("yes");
+            const hasPayCard = val === "yes" || val === "true" || val === "1" || val.includes("yes");
+            const isHiredOrNto = item.hired || item.ntoScheduled || (item.ntoDate && String(item.ntoDate).trim() !== "");
+            return hasPayCard || isHiredOrNto;
         }).map(item => {
             const existing = serverPaycards.find(p => p.id === item.id);
             return {
@@ -2938,7 +2956,7 @@
                 position: item.position,
                 store: item.store,
                 doName: item.doName,
-                ntoDate: item.ntoDate,
+                ntoDate: item.ntoDate || (existing ? existing.ntoDate : ''),
                 notes: item.notes,
                 cardReceived: existing ? existing.cardReceived : false,
                 registered: existing ? existing.registered : false,
