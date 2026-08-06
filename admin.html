@@ -837,6 +837,42 @@
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxQVuU0uQ3TdkfsBwJpZ-K1iUDXTuLgvqEayPeqZgSRLDNxHOEUsOrjaSZAujI8p_874g/exec"; 
 
+    // Add this helper near the top of your script tag:
+    async function apiCall(method = 'GET', payload = null) {
+        const u = localStorage.getItem('onb_user') || (document.getElementById('loginUser') ? document.getElementById('loginUser').value.trim() : '');
+        const p = localStorage.getItem('onb_pass') || (document.getElementById('loginPass') ? document.getElementById('loginPass').value.trim() : '');
+        const city = getCityFromUser(u);
+    
+        let url = API_URL;
+        let options = { method: method };
+    
+        if (method === 'GET') {
+            url += `?city=${city}&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`;
+        } else {
+            options.body = JSON.stringify({ username: u, password: p, city: city, ...payload });
+        }
+    
+        const response = await fetch(url, options);
+        const text = await response.text();
+    
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            throw new Error("Server returned an HTML response page. Please try again or check your deployment.");
+        }
+    
+        if (data.error) {
+            // Only erase login if server explicitly rejects credentials
+            if (data.error.includes("Invalid username") || data.error.includes("Unauthorized")) {
+                localStorage.removeItem('onb_user');
+                localStorage.removeItem('onb_pass');
+            }
+            throw new Error(data.error);
+        }
+    
+        return data;
+    }
     // OFFICIAL DOMINO'S 2026 FISCAL PERIOD BOUNDARIES
     const DOMINOS_FISCAL_2026 = [
       { period: "P01", start: "2025-12-29", end: "2026-01-25" },
@@ -1192,71 +1228,72 @@
         return 'System';
     }
 
-    function handleLogin(savedUser, savedPass) {
+    async function handleLogin(savedUser, savedPass) {
         const u = savedUser || document.getElementById('loginUser').value.trim();
         const p = savedPass || document.getElementById('loginPass').value.trim();
         const errorEl = document.getElementById('loginError');
-
+    
         if (!u || !p) return;
-
-        showLoader(true);
+        showLoader(true, "Signing in...");
         errorEl.classList.add('hidden');
-
-        const city = getCityFromUser(u);
-        
-        // Pass username & password to backend for verification
-        fetch(`${API_URL}?city=${city}&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
-                // Save verified credentials
-                localStorage.setItem('onb_user', u);
-                localStorage.setItem('onb_pass', p);
-                
-                document.getElementById('authContainer').classList.add('hidden');
-                document.getElementById('appContainer').classList.remove('hidden');
-                document.getElementById('headerCity').innerText = `${city} Workspace`;
-
-                // 🍕 Safe Feature Toggles for Denver vs Dallas
-                updateWorkspaceVisibility(city);
-
-                candidates = data.onboarding || [];
-                interviews = data.interviews || [];
-                staffing = data.staffing || [];
-                contacts = data.contacts || [];
-                paycards = processPayCards(data);
-                
-                if (data.scratchpadText !== undefined) {
-                    localStorage.setItem(`scratchpad_text_${u}`, data.scratchpadText);
-                }
-                if (data.scratchpadChecklist !== undefined) {
-                    localStorage.setItem(`scratchpad_checklist_${u}`, data.scratchpadChecklist);
-                }
-
-                switchView('onboarding');
-                initScratchpad();
-                showLoader(false);
-                
-                if (!window.syncInterval) {
-                    window.syncInterval = setInterval(silentSync, 90000);
-                }
-            })
-            .catch(err => {
-                showLoader(false);
-                // 🧹 Wipe bad/stale credentials from localStorage immediately
-                localStorage.removeItem('onb_user');
-                localStorage.removeItem('onb_pass');
-                
-                errorEl.innerText = err.message || "Invalid login credentials.";
-                errorEl.classList.remove('hidden');
-                document.getElementById('authContainer').classList.remove('hidden');
-                document.getElementById('appContainer').classList.add('hidden');
-            });
+    
+        try {
+            localStorage.setItem('onb_user', u);
+            localStorage.setItem('onb_pass', p);
+    
+            const data = await apiCall('GET');
+    
+            document.getElementById('authContainer').classList.add('hidden');
+            document.getElementById('appContainer').classList.remove('hidden');
+            document.getElementById('headerCity').innerText = `${getCityFromUser(u)} Workspace`;
+    
+            updateWorkspaceVisibility(getCityFromUser(u));
+    
+            candidates = data.onboarding || [];
+            interviews = data.interviews || [];
+            staffing = data.staffing || [];
+            contacts = data.contacts || [];
+            paycards = processPayCards(data);
+    
+            if (data.scratchpadText !== undefined) localStorage.setItem(`scratchpad_text_${u}`, data.scratchpadText);
+            if (data.scratchpadChecklist !== undefined) localStorage.setItem(`scratchpad_checklist_${u}`, data.scratchpadChecklist);
+    
+            switchView('onboarding');
+            initScratchpad();
+            showLoader(false);
+    
+            if (!window.syncInterval) window.syncInterval = setInterval(silentSync, 90000);
+    
+        } catch (err) {
+            showLoader(false);
+            errorEl.innerText = err.message || "Invalid login credentials.";
+            errorEl.classList.remove('hidden');
+            document.getElementById('authContainer').classList.remove('hidden');
+            document.getElementById('appContainer').classList.add('hidden');
+        }
     }
-
+    
+    async function silentSync() {
+        const loader = document.getElementById('loadingOverlay');
+        if (loader && !loader.classList.contains('hidden')) return;
+    
+        const u = localStorage.getItem('onb_user');
+        const p = localStorage.getItem('onb_pass');
+        if (!u || !p) return;
+    
+        try {
+            const data = await apiCall('GET');
+            candidates = data.onboarding || [];
+            interviews = data.interviews || [];
+            staffing = data.staffing || [];
+            contacts = data.contacts || [];
+            paycards = processPayCards(data);
+            renderList();
+            updateAuditMetrics();
+        } catch (err) {
+            console.warn("Silent sync skipped:", err.message);
+        }
+    }
     // Helper function for safe workspace feature toggling
     function updateWorkspaceVisibility(city) {
         const isDenver = (city || '').toLowerCase() === 'denver';
@@ -1271,31 +1308,6 @@
         // ✅ Staffing & Pay Cards are visible for BOTH Dallas and Denver
         if (toggleStf) toggleStf.style.display = 'block';
         if (togglePay) togglePay.style.display = 'block';
-    }
-
-    function silentSync() {
-        // Don't sync if the loader overlay is currently showing an active save
-        const loader = document.getElementById('loadingOverlay');
-        if (loader && !loader.classList.contains('hidden')) return;
-
-        const u = localStorage.getItem('onb_user');
-        const p = localStorage.getItem('onb_pass');
-        if (!u || !p) return;
-        
-        const city = getCityFromUser(u);
-        fetch(`${API_URL}?city=${city}&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.error) return;
-                candidates = data.onboarding || [];
-                interviews = data.interviews || [];
-                staffing = data.staffing || [];
-                contacts = data.contacts || [];
-                paycards = processPayCards(data);
-                renderList();
-                updateAuditMetrics();
-            })
-            .catch(err => console.warn("Silent sync skipped"));
     }
 
     function handleLogout() {
@@ -1904,24 +1916,16 @@
         renderList();
     } 
 
-    function saveCandidate(event) {
+    async function saveCandidate(event) {
         event.preventDefault();
-
-        const username = localStorage.getItem('onb_user');
-        const password = localStorage.getItem('onb_pass');
+    
         const id = document.getElementById('fieldId').value;
         const action = id ? 'update' : 'add';
-
+    
         showLoader(true, `Saving ${currentView} data...`);
-
-        let payload = {
-            username: username,
-            password: password,
-            action: action,
-            target: currentView, 
-            id: id
-        };
-
+    
+        let payload = { action: action, target: currentView, id: id };
+    
         if (currentView === 'paycards') {
             payload.name = document.getElementById('payName').value.trim();
             payload.position = document.getElementById('payPosition').value;
@@ -1934,7 +1938,7 @@
             payload.ddReceived = document.getElementById('checkPayDdReceived').checked;
             payload.ddEntered = document.getElementById('checkPayDdEntered').checked;
             payload.notes = document.getElementById('payNotes').value.trim();
-
+    
         } else if (currentView === 'staffing') {
             payload.name = document.getElementById('stfName').value.trim();
             payload.position = document.getElementById('stfPosition').value;
@@ -1948,7 +1952,7 @@
             payload.reasonOfAction = document.getElementById('stfReason').value.trim();
             payload.notes = document.getElementById('stfNotes').value.trim();
             payload.gmName = document.getElementById('stfGmName').value.trim();
-
+    
         } else if (currentView === 'interviews') {
             payload.name = document.getElementById('intName').value.trim();
             payload.position = document.getElementById('intPosition').value;
@@ -1965,7 +1969,7 @@
             payload.statusUpdates = document.getElementById('intStatusUpdates').value.trim();
             payload.availability = document.getElementById('intAvailability').value.trim();
             payload.notes = document.getElementById('intNotes').value.trim();
-
+    
         } else {
             payload.name = document.getElementById('fieldName').value.trim();
             payload.position = document.getElementById('fieldPosition').value;
@@ -1999,59 +2003,41 @@
             }
             payload.missingDocs = missingDocsValue;
         }
-
-        let savedNewId = null;
-
-        fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-        .then(res => res.json())
-        .then(result => {
-            if (!result.success) throw new Error(result.error || "Save failed");
-            // Store newly generated ID from Google Apps Script
-            if (result.id) {
-                savedNewId = result.id;
-                currentSelectedId = result.id;
-            }
-            // ✅ FIXED RE-FETCH CALL:
-            const city = getCityFromUser(username);
-            return fetch(`${API_URL}?city=${city}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`);
-        })
-        .then(res => res.json())
-        .then(data => {
-            candidates = data.onboarding || [];
-            interviews = data.interviews || [];
-            staffing = data.staffing || [];
-            contacts = data.contacts || []; 
-            paycards = processPayCards(data);
-
+    
+        try {
+            const result = await apiCall('POST', payload);
+            if (result.id) currentSelectedId = result.id;
+    
+            const refreshData = await apiCall('GET');
+            candidates = refreshData.onboarding || [];
+            interviews = refreshData.interviews || [];
+            staffing = refreshData.staffing || [];
+            contacts = refreshData.contacts || []; 
+            paycards = processPayCards(refreshData);
+    
             renderList();
             updateAuditMetrics();
-            
-            // Auto-select newly created or updated record across all workspace views
-            const targetId = currentSelectedId || savedNewId;
+    
+            const targetId = currentSelectedId;
             if (targetId) {
                 let savedItem = null;
                 if (currentView === 'paycards') savedItem = paycards.find(c => c.id === targetId);
                 else if (currentView === 'staffing') savedItem = staffing.find(c => c.id === targetId);
                 else if (currentView === 'interviews') savedItem = interviews.find(c => c.id === targetId);
                 else savedItem = candidates.find(c => c.id === targetId);
-
-                if (savedItem) {
-                    selectCandidate(savedItem);
-                } else {
-                    clearForm();
-                }
+    
+                if (savedItem) selectCandidate(savedItem);
+                else clearForm();
             } else {
                 clearForm();
             }
-            
+    
             showLoader(false);
-        })
-        .catch(err => {
+        } catch (err) {
             showLoader(false);
             showBrandAlert("Error saving data: " + err.message, "Database Error");
-        });
+        }
     }
-
     function getMissingOnboardingForms() {
         let missing = [];
         if (!document.getElementById('checkAllPay').checked) missing.push("Onboarding Documents (AllPay/HR Alliance)");
@@ -2065,13 +2051,13 @@
         const name = document.getElementById('fieldName').value.trim();
         const email = document.getElementById('fieldEmail').value.trim();
         const position = document.getElementById('fieldPosition').value;
-
+    
         if (!id) return;
         if (!email) {
             showBrandAlert("Cannot trigger email: Candidate has no email address.", "Missing Email");
             return;
         }
-
+    
         let confirmationMessage = "";
         let payloadMissing = "";
         let payRateInput = "";
@@ -2079,7 +2065,7 @@
         let payloadAllPayLink = "";
         let payloadCheckrLink = "";
         let payloadStoreSetupLink = "";
-
+    
         if (emailType === "welcome") {
             if (position === "DE") {
                 payRateInput = await showBrandPrompt(`Enter IN-STORE starting rate for ${name} (e.g., 9.00):`, "9.00", "In-Store Hourly Wage");
@@ -2114,18 +2100,13 @@
         } else if (emailType === "orientation") {
             confirmationMessage = `Are you sure you want to send the Orientation Registration Link to ${name} (${email})?`;
         }
-
+    
         const confirmed = await showBrandConfirm(confirmationMessage, "Confirm Email Delivery");
         if (!confirmed) return;
-
+    
         showLoader(true, `Sending email template...`);
-
-        const username = localStorage.getItem('onb_user');
-        const password = localStorage.getItem('onb_pass');
-
+    
         const payload = {
-            username: username,
-            password: password,
             action: "sendEmail",
             id: id,
             emailType: emailType,
@@ -2134,59 +2115,34 @@
             hourlyRate: payRateInput,
             roadRate: roadRateInput,
             roadPayRate: roadRateInput,
-            
-            // Multi-case payload bindings for full code.gs backend compatibility
             allPayLink: payloadAllPayLink,
-            allpayLink: payloadAllPayLink,
-            allPayUrl: payloadAllPayLink,
-            allpayUrl: payloadAllPayLink,
-            
             checkrLink: payloadCheckrLink,
-            checkrlink: payloadCheckrLink,
-            checkrUrl: payloadCheckrLink,
-            checkrurl: payloadCheckrLink,
-            
-            storeSetupLink: payloadStoreSetupLink,
-            storesetupLink: payloadStoreSetupLink,
-            storeSetupUrl: payloadStoreSetupLink,
-            storesetupUrl: payloadStoreSetupLink,
-            smartRecruitersLink: payloadStoreSetupLink,
-            smartrecruitersLink: payloadStoreSetupLink,
-            smartRecruitersUrl: payloadStoreSetupLink,
-            smartrecruitersUrl: payloadStoreSetupLink
+            storeSetupLink: payloadStoreSetupLink
         };
-
-        fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
-        .then(res => res.json())
-        .then(result => {
-            if (!result.success) throw new Error(result.error || "Email delivery failed");
-            
-            // Auto-check respective stage checkboxes in UI
+    
+        try {
+            await apiCall('POST', payload);
+    
             if (emailType === "welcome") {
                 document.getElementById('checkOnbSent').checked = true;
             } else if (emailType === "orientation") {
                 document.getElementById('checkNtoLink').checked = true;
             }
-
+    
             showBrandAlert(`Email successfully delivered!`, "Email Delivered");
-            // ✅ FIXED RE-FETCH CALL:
-            const city = getCityFromUser(username);
-            return fetch(`${API_URL}?city=${city}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`);
-        })
-        .then(res => res.json())
-        .then(data => {
-            candidates = data.onboarding || [];
-            interviews = data.interviews || [];
-            staffing = data.staffing || [];
+    
+            const refreshData = await apiCall('GET');
+            candidates = refreshData.onboarding || [];
+            interviews = refreshData.interviews || [];
+            staffing = refreshData.staffing || [];
             renderList();
             showLoader(false);
-        })
-        .catch(err => {
+        } catch (err) {
             showLoader(false);
             showBrandAlert("Error sending email: " + err.message, "Email Error");
-        });
+        }
     }
-
+    
     async function triggerGmInterviewEmail() {
         const id = document.getElementById('fieldId').value;
         const name = document.getElementById('intName').value.trim();
@@ -2195,7 +2151,7 @@
         const store = document.getElementById('intStore').value.trim();
         const gmDate = document.getElementById('intGmDate').value.trim();
         const gmTime = document.getElementById('intGmTime').value.trim();
-
+    
         if (!name || !email) {
             showBrandAlert("Candidate name and email address are required to send the interview invite.", "Missing Email or Name");
             return;
@@ -2204,24 +2160,19 @@
             showBrandAlert("Please enter the GM Interview Date and GM Time before sending.", "Missing Date/Time");
             return;
         }
-
+    
         const confirmMsg = `Send In-Person GM Interview Invite to ${name} (${email})?\n\n` +
                         `• Interview Date: ${gmDate}\n` +
                         `• Interview Time: ${gmTime}\n` +
                         `• Store #: ${store}\n\n` +
                         `(This will attach an .ics Calendar Invite & CC the Store GM)`;
-
+    
         const confirmed = await showBrandConfirm(confirmMsg, "Confirm GM Interview Email");
         if (!confirmed) return;
-
+    
         showLoader(true, "Sending GM Interview Email & Invite...");
-
-        const username = localStorage.getItem('onb_user');
-        const password = localStorage.getItem('onb_pass');
-
+    
         const payload = {
-            username: username,
-            password: password,
             action: "sendEmail",
             emailType: "sendGmInterviewEmail",
             id: id,
@@ -2235,22 +2186,18 @@
             gmDate: gmDate,
             gmTime: gmTime
         };
-
-        fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
-        .then(res => res.json())
-        .then(result => {
+    
+        try {
+            await apiCall('POST', payload);
             showLoader(false);
-            if (!result.success) throw new Error(result.error || "Failed to send interview email.");
             showBrandAlert("GM Interview email & calendar invite delivered successfully!", "Invite Delivered");
-            
-            // Auto-update status dropdown to "GM Interview"
             document.getElementById('intStatus').value = "GM Interview";
-        })
-        .catch(err => {
+        } catch (err) {
             showLoader(false);
             showBrandAlert("Error sending interview email: " + err.message, "Email Error");
-        });
+        }
     }
+        
     function portCandidateToOnboarding() {
         const name = document.getElementById('intName').value.trim();
         const position = document.getElementById('intPosition').value;
@@ -2354,16 +2301,10 @@
     }
 
     function syncNotesToBackend(username, content, mode) {
-        const password = localStorage.getItem('onb_pass');
-        fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                username: username,
-                password: password,
-                action: 'saveScratchpad',
-                scratchpadMode: mode,
-                scratchpadContent: content
-            })
+        apiCall('POST', {
+            action: 'saveScratchpad',
+            scratchpadMode: mode,
+            scratchpadContent: content
         }).catch(err => console.warn("Notes offline save active"));
     }
 
@@ -2998,31 +2939,25 @@
     async function concludeNtoClass() {
         const classDate = document.getElementById('ntoClassDate').value;
         let rawEndTime = document.getElementById('ntoEndTime').value.trim();
-
-        // 🛑 INTERACTIVE MODAL: Asks for time in popup if blank!
+    
         if (!rawEndTime) {
             rawEndTime = await showBrandPrompt("Class End Time is required! Enter the class end time below (e.g. 4:30 PM or 16:30):", "", "Class End Time Required");
-            
-            // If you click Cancel or leave it blank in the modal -> STOP!
-            if (!rawEndTime || !rawEndTime.trim()) {
-                return; // ⛔ STOP! No emails are sent.
-            }
+            if (!rawEndTime || !rawEndTime.trim()) return;
             rawEndTime = rawEndTime.trim();
         }
-
-        // Format military time (e.g. 18:30 -> 6:30 PM) for display
+    
         const endTime = formatTimeDisplayFrontEnd(rawEndTime) || rawEndTime;
-        document.getElementById('ntoEndTime').value = endTime; // Update input box text
-
+        document.getElementById('ntoEndTime').value = endTime;
+    
         const rosterElements = document.querySelectorAll('.nto-attendance-select');
         if (rosterElements.length === 0) {
             showBrandAlert("No trainees found on the roster to process.", "Class Empty");
             return;
         }
-
+    
         const rosterData = [];
         let missingSelection = false;
-
+    
         rosterElements.forEach(el => {
             if (!el.value) missingSelection = true;
             rosterData.push({
@@ -3035,55 +2970,43 @@
                 attendance: el.value
             });
         });
-
+    
         if (missingSelection) {
             showBrandAlert("Please select an attendance status for all trainees on the roster before concluding class.", "Missing Attendance Status");
             return;
         }
-
+    
         const attendedCount = rosterData.filter(r => 
             r.attendance === 'NTO Complete' || r.attendance === 'In Class' || r.attendance === 'Attended'
         ).length;
-
+    
         const confirmMsg = `Are you sure you want to conclude class and send all roster emails?\n\n` +
                         `• Class Date: ${classDate}\n` +
                         `• End Time: ${endTime}\n` +
                         `• Total Attendees: ${attendedCount} / ${rosterData.length}\n\n` +
                         `This will send 3 automated email reports (HR, Leadership, and Store/DOs).`;
-
+    
         const confirmed = await showBrandConfirm(confirmMsg, "Conclude NTO Class");
         if (!confirmed) return;
-
+    
         showLoader(true, "Processing NTO hours & sending emails...");
-
-        const username = localStorage.getItem('onb_user');
-        const password = localStorage.getItem('onb_pass');
-
-        const payload = {
-            username: username,
-            password: password,
-            action: "concludeNtoClass",
-            classDate: classDate,
-            endTime: endTime,
-            roster: rosterData
-        };
-
-        fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-        .then(res => res.json())
-        .then(result => {
+    
+        try {
+            const result = await apiCall('POST', {
+                action: "concludeNtoClass",
+                classDate: classDate,
+                endTime: endTime,
+                roster: rosterData
+            });
+    
             showLoader(false);
-            if (!result.success) throw new Error(result.error || "Failed to conclude class.");
             showBrandAlert(result.message, "Class Concluded!");
-            
-            // Auto-refresh candidates UI to reflect new "Hired" statuses
             silentSync();
-        })
-        .catch(err => {
+        } catch (err) {
             showLoader(false);
             showBrandAlert("Error concluding class: " + err.message, "System Error");
-        });
+        }
     }
-
     // Converts 18:30 or 1830 to "6:30 PM" for Frontend
     function formatTimeDisplayFrontEnd(tStr) {
         if (!tStr) return '';
@@ -3157,7 +3080,7 @@
             showBrandAlert("No trainees found on the roster to save.", "Roster Empty");
             return;
         }
-
+    
         const rosterData = [];
         rosterElements.forEach(el => {
             if (el.value) {
@@ -3170,35 +3093,23 @@
                 });
             }
         });
-
+    
         if (rosterData.length === 0) {
             showBrandAlert("Please select an attendance status for at least one trainee before saving.", "No Status Selected");
             return;
         }
-
+    
         showLoader(true, "Saving live attendance...");
-
-        const username = localStorage.getItem('onb_user');
-        const password = localStorage.getItem('onb_pass');
-
-        const payload = {
-            username: username,
-            password: password,
-            action: "saveNtoAttendance", // Pure DB update action (no emails sent)
-            classDate: classDate,
-            roster: rosterData
-        };
-
+    
         try {
-            const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
-            const result = await res.json();
+            await apiCall('POST', {
+                action: "saveNtoAttendance",
+                classDate: classDate,
+                roster: rosterData
+            });
+    
             showLoader(false);
-
-            if (!result.success) throw new Error(result.error || "Failed to save attendance.");
-            
             showBrandAlert("Live attendance updated successfully! (No emails sent)", "Attendance Saved");
-            
-            // Silently sync local state so the rest of the application stays up-to-date
             silentSync();
         } catch (err) {
             showLoader(false);
@@ -3336,137 +3247,103 @@
 
     async function deleteCurrentCandidate() {
         const id = document.getElementById('fieldId').value;
-        const name = document.getElementById('fieldName').value || 
-                    document.getElementById('intName').value || 
-                    document.getElementById('stfName').value || 
-                    "this record";
-
+        const name = document.getElementById('fieldName').value || document.getElementById('intName').value || document.getElementById('stfName').value || "this record";
         if (!id) return;
-
-        const confirmed = await showBrandConfirm(
-            `Are you sure you want to permanently delete ${name}? This will remove their record from the Google Sheet.`,
-            "Confirm Permanent Deletion"
-        );
-
+    
+        const confirmed = await showBrandConfirm(`Are you sure you want to permanently delete ${name}?`, "Confirm Permanent Deletion");
         if (!confirmed) return;
-
+    
         showLoader(true, "Deleting record from sheet...");
-
-        const username = localStorage.getItem('onb_user');
-        const password = localStorage.getItem('onb_pass');
-
-        const payload = {
-            username: username,
-            password: password,
-            action: "delete",
-            target: currentView,
-            id: id
-        };
-
-        fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-        .then(res => res.json())
-        .then(result => {
-            if (!result.success) throw new Error(result.error || "Delete failed");
-            
+    
+        try {
+            await apiCall('POST', { action: "delete", target: currentView, id: id });
             showBrandAlert(`${name} was permanently deleted.`, "Record Deleted");
-            
-            const city = getCityFromUser(username);
-            return fetch(`${API_URL}?city=${city}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`);
-        })
-        .then(res => res.json())
-        .then(data => {
+    
+            // Refresh data
+            const data = await apiCall('GET');
             candidates = data.onboarding || [];
             interviews = data.interviews || [];
             staffing = data.staffing || [];
-            contacts = data.contacts || []; 
+            contacts = data.contacts || [];
             paycards = processPayCards(data);
-
+    
             clearForm();
             renderList();
             updateAuditMetrics();
             showLoader(false);
-        })
-        .catch(err => {
+        } catch (err) {
             showLoader(false);
             showBrandAlert("Error deleting record: " + err.message, "Delete Error");
-        });
+        }
     }
-
+    
     async function triggerSendNtoMeetLinks() {
         const classDate = document.getElementById('ntoClassDate').value;
         if (!classDate) {
             showBrandAlert("Please select a class date first.", "No Date Selected");
             return;
         }
-
+    
         const classTrainees = candidates.filter(c => {
             const isScheduled = c.ntoScheduled || c.hired || c.ntoDate;
             if (!isScheduled) return false;
             return formatDateForInput(c.ntoDate) === classDate;
         });
-
+    
         if (classTrainees.length === 0) {
             showBrandAlert(`No trainees were found scheduled for ${classDate}.`, "No Trainees Scheduled");
             return;
         }
-
+    
         const traineesWithEmails = classTrainees.filter(c => c.email && c.email.trim() !== "").map(c => ({
             name: c.name,
             email: c.email.trim(),
             store: c.store,
             position: c.position || "CSR"
         }));
-
+    
         if (traineesWithEmails.length === 0) {
             showBrandAlert("Trainees exist for this date, but none have email addresses listed in the database.", "Missing Emails");
             return;
         }
-
-        const username = localStorage.getItem('onb_user') || '';
-        const isDenver = username.toLowerCase().startsWith('denver');
+    
+        const u = localStorage.getItem('onb_user') || '';
+        const isDenver = u.toLowerCase().startsWith('denver');
         const defaultMeetLink = isDenver 
             ? "https://meet.google.com/denver-nto-class" 
             : "https://meet.google.com/dallas-nto-class";
-
+    
         const meetUrl = await showBrandPrompt(
             `Confirm or paste the Google Meet URL for class on ${classDate}:`, 
             defaultMeetLink, 
             "Google Meet Class Link"
         );
-
+    
         if (!meetUrl || !meetUrl.trim()) return;
-
+    
         const confirmMsg = `Send Google Meet links to ${traineesWithEmails.length} trainee(s) for ${classDate}?\n\n` +
                            `• Meeting URL: ${meetUrl.trim()}\n` +
                            `• Recipients:\n  - ` + traineesWithEmails.map(t => `${t.name} (${t.email})`).join("\n  - ");
-
+    
         const confirmed = await showBrandConfirm(confirmMsg, "Confirm Batch Email Delivery");
         if (!confirmed) return;
-
+    
         showLoader(true, "Delivering Google Meet links...");
-
-        const password = localStorage.getItem('onb_pass');
-
-        const payload = {
-            username: username,
-            password: password,
-            action: "sendNtoMeetLinks",
-            classDate: classDate,
-            meetLink: meetUrl.trim(),
-            trainees: traineesWithEmails
-        };
-
-        fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-        .then(res => res.json())
-        .then(result => {
+    
+        try {
+            const result = await apiCall('POST', {
+                action: "sendNtoMeetLinks",
+                classDate: classDate,
+                meetLink: meetUrl.trim(),
+                trainees: traineesWithEmails
+            });
+    
             showLoader(false);
-            if (!result.success) throw new Error(result.error || "Failed to deliver links.");
             showBrandAlert(result.message, "Class Links Sent!");
-        })
-        .catch(err => {
+        } catch (err) {
             showLoader(false);
             showBrandAlert("Error sending links: " + err.message, "Delivery Error");
-        });
+        }
     }
     // --- NTO CLASS CALENDAR MODAL FUNCTIONS ---
     function openClassCalendarModal() {
@@ -3483,28 +3360,17 @@
         document.getElementById('classCalendarModal').classList.add('hidden');
     }
 
-    function fetchNtoCalendarClasses() {
+    async function fetchNtoCalendarClasses() {
         const tbody = document.getElementById('classCalendarTableBody');
         tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color:#888; font-size: 17px;">Loading scheduled classes...</td></tr>`;
-
-        const u = localStorage.getItem('onb_user');
-        const p = localStorage.getItem('onb_pass');
-
-        fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                username: u,
-                password: p,
-                action: 'getNtoClasses'
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
+    
+        try {
+            const data = await apiCall('POST', { action: 'getNtoClasses' });
             if (!data.success || !data.classes || data.classes.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color:#888; font-size: 17px;">No scheduled classes found.</td></tr>`;
                 return;
             }
-
+    
             tbody.innerHTML = '';
             data.classes.forEach(c => {
                 const row = document.createElement('tr');
@@ -3524,93 +3390,71 @@
                 `;
                 tbody.appendChild(row);
             });
-        })
-        .catch(err => {
+        } catch (err) {
             tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color: var(--brand-red); font-size: 17px;">Error loading calendar.</td></tr>`;
-        });
+        }
     }
-
+    
     async function addNtoClassSession() {
         const rawDate = document.getElementById('newClassDate').value;
         const startTime = document.getElementById('newClassStart').value.trim();
         const endTime = document.getElementById('newClassEnd').value.trim();
         const trainerName = document.getElementById('newClassTrainer').value.trim();
         const capacity = document.getElementById('newClassCapacity').value;
-
+    
         if (!rawDate) {
             showBrandAlert("Please select a class date.", "Missing Date");
             return;
         }
-
-        // Format YYYY-MM-DD to friendly string e.g. "Tuesday, January 20, 2026"
+    
         const dateObj = new Date(rawDate + "T00:00:00");
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         const formattedDateStr = dateObj.toLocaleDateString('en-US', options);
-
+    
         showLoader(true, "Adding new NTO class session...");
-
-        const u = localStorage.getItem('onb_user');
-        const p = localStorage.getItem('onb_pass');
-
-        const payload = {
-            username: u,
-            password: p,
-            action: 'addNtoClass',
-            classDate: formattedDateStr,
-            startTime: startTime,
-            endTime: endTime,
-            trainerName: trainerName,
-            capacity: capacity
-        };
-
-        fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-        .then(res => res.json())
-        .then(result => {
+    
+        try {
+            await apiCall('POST', {
+                action: 'addNtoClass',
+                classDate: formattedDateStr,
+                startTime: startTime,
+                endTime: endTime,
+                trainerName: trainerName,
+                capacity: capacity
+            });
+    
             showLoader(false);
-            if (!result.success) throw new Error(result.error || "Failed to add class.");
             showBrandAlert("New NTO class session added successfully!", "Class Added");
             fetchNtoCalendarClasses();
-        })
-        .catch(err => {
+        } catch (err) {
             showLoader(false);
             showBrandAlert("Error adding class: " + err.message, "System Error");
-        });
+        }
     }
-
+    
     async function deleteNtoClassSession(classId, classDate, rowNum) {
-        const confirmed = await showBrandConfirm(
-            `Are you sure you want to cancel/delete the class on ${classDate}?`,
-            "Cancel Class Session"
-        );
+        const confirmed = await showBrandConfirm(`Are you sure you want to cancel/delete the class on ${classDate}?`, "Cancel Class Session");
         if (!confirmed) return;
-
+    
         showLoader(true, "Deleting class session...");
-
-        const u = localStorage.getItem('onb_user');
-        const p = localStorage.getItem('onb_pass');
-
-        const payload = {
-            username: u,
-            password: p,
-            action: 'deleteNtoClass',
-            classId: classId,
-            classDate: classDate,
-            rowNum: rowNum
-        };
-
-        fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-        .then(res => res.json())
-        .then(result => {
+    
+        try {
+            await apiCall('POST', {
+                action: 'deleteNtoClass',
+                classId: classId,
+                classDate: classDate,
+                rowNum: rowNum
+            });
+    
             showLoader(false);
-            if (!result.success) throw new Error(result.error || "Failed to delete class.");
             showBrandAlert("Class session canceled and removed.", "Class Canceled");
             fetchNtoCalendarClasses();
-        })
-        .catch(err => {
+        } catch (err) {
             showLoader(false);
             showBrandAlert("Error deleting class: " + err.message, "System Error");
-        });
+        }
     }
+            
     function togglePasswordVisibility() {
         const passInput = document.getElementById('loginPass');
         const toggleBtn = document.getElementById('toggle-password');
