@@ -87,6 +87,8 @@
         .card.status-blue { border-left-color: var(--brand-blue); }
         .card.status-green { border-left-color: var(--brand-green); border-left-width: 8px; }
         .card.status-red { border-left-color: var(--brand-red); border: 2px solid var(--brand-red); } 
+        .card.status-gminterview { border-left-color: var(--dark-blue); border-left-width: 7px; background-color: #f2f7fb; }
+        .card.status-tbd { border-left-color: var(--crust-dark); border-left-width: 7px; background-color: #faf6f0; }
         .card.status-gray { border-left-color: #6c757d; opacity: 0.8; background-color: #f8f9fa; }
 
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -846,9 +848,11 @@
             const icon = getPositionIcon(item.position);
             let statusColor = 'status-blue';
             const s = item.status ? item.status.toString() : '';
-            if (s.includes('No Show') || s.includes('Canceled') || s.includes('Pass')) statusColor = 'status-red';
-            if (s.includes('2nd Interview') || s.includes('Hired') || s.includes('Completed') || s.includes('Offered')) statusColor = 'status-green';
-            if (s.includes('Reschedule') || s.includes('Withdrawn')) statusColor = 'status-gray';
+            if (s.includes('No Show') || s.includes('Canceled') || s.includes('Pass') || s.includes('Declined')) statusColor = 'status-red';
+            else if (s.includes('Hired') || s.includes('Completed')) statusColor = 'status-green';
+            else if (s.includes('To Be Determined') || s.includes('TBD') || s.includes('Hold')) statusColor = 'status-tbd';
+            else if (s.includes('GM Interview')) statusColor = 'status-gminterview';
+            else if (s.includes('Reschedule') || s.includes('Withdrawn')) statusColor = 'status-gray';
 
             let showGmBox = false;
             if (item.gmDate) {

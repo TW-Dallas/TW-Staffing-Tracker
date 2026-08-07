@@ -1738,15 +1738,28 @@
                 card.className = 'candidate-card';
                 if (item.id === currentSelectedId) card.classList.add('selected');
 
-                if (item.status === 'No Show' || item.status === 'Declined') card.classList.add('status-red');
-                else if (item.status === 'Hired' || item.status === 'Completed') card.classList.add('status-green');
-                else card.classList.add('status-blue');
+                let intStatusColor = 'var(--brand-blue)';
+                if (item.status === 'No Show' || item.status === 'Declined') {
+                    card.classList.add('status-red');
+                    intStatusColor = 'var(--brand-red)';
+                } else if (item.status === 'Hired' || item.status === 'Completed') {
+                    card.classList.add('status-green');
+                    intStatusColor = 'var(--success-green)';
+                } else if (item.status === 'To Be Determined' || item.status === 'Hold') {
+                    card.classList.add('status-tbd');
+                    intStatusColor = 'var(--crust-burnt)';
+                } else if (item.status === 'GM Interview') {
+                    card.classList.add('status-gminterview');
+                    intStatusColor = 'var(--dark-blue)';
+                } else {
+                    card.classList.add('status-blue');
+                }
 
                 card.innerHTML = `
                     <div class="card-name">${item.name}</div>
                     <div class="card-sub">
                         <span>Store #${item.store} (${item.position})</span>
-                        <span style="font-weight: bold; color: var(--dark-blue);">${item.status || 'Scheduled'}</span>
+                        <span style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: ${intStatusColor};">${item.status || 'Phone Interview'}</span>
                     </div>
                 `;
                 card.onclick = () => selectCandidate(item);

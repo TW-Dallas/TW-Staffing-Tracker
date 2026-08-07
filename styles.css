@@ -296,6 +296,8 @@
         .candidate-card.status-subrec { border-left-color: var(--brand-blue); border-left-width: 8px; background-color: #f4f9fd; }
         .candidate-card.status-processing { border-left-color: var(--med-blue); }
         .candidate-card.status-nto { border-left-color: var(--dark-blue); }
+        .candidate-card.status-gminterview { border-left-color: var(--dark-blue); border-left-width: 7px; background-color: #f2f7fb; }
+        .candidate-card.status-tbd { border-left-color: var(--crust-dark); border-left-width: 7px; background-color: #faf6f0; }
         .candidate-card.status-green { border-left-color: var(--success-green); border-left-width: 8px; }
         .candidate-card.status-red { border-left-color: var(--brand-red); border: 1.5px solid var(--brand-red); }
         .candidate-card.status-reviewing { border-left-color: var(--crust-dark); box-shadow: 0 0 8px rgba(192, 165, 136, 0.3); }
