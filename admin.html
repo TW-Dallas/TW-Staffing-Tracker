@@ -1875,10 +1875,10 @@
             document.getElementById('intEmail').value = item.email || '';
             document.getElementById('intDate').value = formatDateForInput(item.date);
             document.getElementById('intDay').value = item.day || '';
-            document.getElementById('intTime').value = item.time || '';
+            document.getElementById('intTime').value = formatTimeDisplayFrontEnd(item.time) || item.time || '';
             setSelectValueCaseInsensitive('intStatus', item.status || 'Phone Interview');
             document.getElementById('intGmDate').value = formatDateForInput(item.gmDate);
-            document.getElementById('intGmTime').value = item.gmTime || '';
+            document.getElementById('intGmTime').value = formatTimeDisplayFrontEnd(item.gmTime) || item.gmTime || '';
             document.getElementById('intStatusUpdates').value = item.statusUpdates || '';
             document.getElementById('intAvailability').value = item.availability || '';
             document.getElementById('intNotes').value = item.notes || '';
@@ -3143,10 +3143,22 @@
             showBrandAlert("Error concluding class: " + err.message, "System Error");
         }
     }
-    // Converts 18:30 or 1830 to "6:30 PM" for Frontend
+    // Converts 18:30, 1830, or Sat Dec 30 1899 13:30:00 GMT... to "1:30 PM" for Frontend
     function formatTimeDisplayFrontEnd(tStr) {
         if (!tStr) return '';
-        let str = tStr.toString().trim().toUpperCase();
+        let rawStr = tStr.toString().trim();
+        if (rawStr.includes("1899") || rawStr.includes("GMT") || rawStr.includes("Central")) {
+            const dt = new Date(rawStr);
+            if (!isNaN(dt.getTime())) {
+                let h = dt.getHours();
+                let m = dt.getMinutes();
+                let period = h >= 12 ? "PM" : "AM";
+                let displayH = h % 12 || 12;
+                let displayM = m < 10 ? "0" + m : m;
+                return `${displayH}:${displayM} ${period}`;
+            }
+        }
+        let str = rawStr.toUpperCase();
         let isPm = str.includes("PM");
         let isAm = str.includes("AM");
         let clean = str.replace(/(AM|PM|\s)/g, "");
