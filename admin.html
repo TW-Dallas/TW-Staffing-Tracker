@@ -1998,12 +1998,32 @@
     async function saveCandidate(event) {
         event.preventDefault();
 
-        const id = document.getElementById('fieldId').value;
-        const action = id ? 'update' : 'add';
+        const id = (document.getElementById('fieldId').value || '').trim();
+        
+        let targetName = '';
+        if (currentView === 'paycards') targetName = (document.getElementById('payName').value || '').trim();
+        else if (currentView === 'staffing') targetName = (document.getElementById('stfName').value || '').trim();
+        else if (currentView === 'interviews') targetName = (document.getElementById('intName').value || '').trim();
+        else targetName = (document.getElementById('fieldName').value || '').trim();
+
+        // Check if candidate already exists by ID or by Name to prevent duplicate appends
+        let existingCand = null;
+        if (id) {
+            existingCand = candidates.find(c => c.id === id) || paycards.find(c => c.id === id) || interviews.find(c => c.id === id) || staffing.find(c => c.id === id);
+        }
+        if (!existingCand && targetName) {
+            existingCand = candidates.find(c => (c.name || '').toLowerCase() === targetName.toLowerCase()) || 
+                           paycards.find(c => (c.name || '').toLowerCase() === targetName.toLowerCase()) ||
+                           interviews.find(c => (c.name || '').toLowerCase() === targetName.toLowerCase()) ||
+                           staffing.find(c => (c.name || '').toLowerCase() === targetName.toLowerCase());
+        }
+
+        const action = (id || existingCand) ? 'update' : 'add';
+        const finalId = id || (existingCand ? existingCand.id : '');
 
         showLoader(true, `Saving ${currentView} data...`);
 
-        let payload = { action: action, target: currentView, id: id };
+        let payload = { action: action, target: currentView, id: finalId };
 
         if (currentView === 'paycards') {
             const existingCand = candidates.find(c => c.id === id) || paycards.find(c => c.id === id) || {};
@@ -2231,10 +2251,16 @@
         try {
             await apiCall('POST', payload);
     
+            const currentCand = candidates.find(c => c.id === id || c.name.toLowerCase() === name.toLowerCase());
             if (emailType === "welcome") {
                 document.getElementById('checkOnbSent').checked = true;
+                if (currentCand) {
+                    currentCand.onboardingSent = true;
+                    currentCand.submissionReceived = true;
+                }
             } else if (emailType === "orientation") {
                 document.getElementById('checkNtoLink').checked = true;
+                if (currentCand) currentCand.ntoSignupLinkSent = true;
             }
     
             showBrandAlert(`Email successfully delivered!`, "Email Delivered");
