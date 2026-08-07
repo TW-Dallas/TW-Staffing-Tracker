@@ -586,25 +586,27 @@
         const phone = item.phoneNumber ? item.phoneNumber.replace(/\D/g, '') : '';
         if (!phone) return '#';
 
+        const firstName = item.name ? item.name.toString().trim().split(/\s+/)[0] : 'Team Member';
+
         if (item.incorrectEmail) {
-            const txt = `Hey ${item.name}! This is Domino's. We tried sending over your onboarding documents, but it looks like we have an incorrect email address on file. Can you please reply with your correct email so we can get you set up? Thanks!`;
+            const txt = `Hey ${firstName}! This is Domino's. We tried sending over your onboarding documents, but it looks like we have an incorrect email address on file. Can you please reply with your correct email so we can get you set up? Thanks!`;
             return `sms:${phone}?body=${encodeURIComponent(txt)}`;
         }
 
         if (item.missedNto) {
-            const txt = `Hey ${item.name}! This is Domino's. We noticed you missed your scheduled orientation (NTO). Please reply back to discuss rescheduling the class.`;
+            const txt = `Hey ${firstName}! This is Domino's. We noticed you missed your scheduled orientation (NTO). Please reply back to discuss rescheduling the class.`;
             return `sms:${phone}?body=${encodeURIComponent(txt)}`;
         }
 
         if (item.hasMissingDocs) {
-            let txt = `Hey ${item.name}! This is Domino's. We are missing some onboarding paperwork for you. Please reply back so we can help you get this updated and get you scheduled!`;
+            let txt = `Hey ${firstName}! This is Domino's. We are missing some onboarding paperwork for you. Please reply back so we can help you get this updated and get you scheduled!`;
             
             if (item.missingDocsText) {
                 const textLower = item.missingDocsText.toLowerCase();
-                if (textLower.includes('id') || textLower.includes('license') || textLower.includes('social') || textLower.includes('ssn') || textLower.includes('birth') || textLower.includes('i-9') || textLower.includes('passport')) {
-                    txt = `Hey ${item.name}! This is Domino's. We need a different form of I-9 identification. We are missing your ${item.missingDocsText}. Please reply back so we can arrange a time for you to bring that to the store or upload it!`;
+                if (textLower.includes('id') || textLower.includes('license') || textLower.includes('social') || textLower.includes('ssn') || textLower.includes('birth') || textLower.includes('i-9') || textLower.includes('passport') || textLower.includes('mismatch')) {
+                    txt = `Hey ${firstName}! This is Domino's. We need an updated document or correction for your onboarding (${item.missingDocsText}). Please reply back so we can arrange a time for you to bring that to the store or upload it!`;
                 } else {
-                    txt = `Hey ${item.name}! This is Domino's. We are missing your ${item.missingDocsText} for your onboarding. Please reply back so we can get this updated and get you scheduled!`;
+                    txt = `Hey ${firstName}! This is Domino's. We are missing your ${item.missingDocsText} for your onboarding. Please reply back so we can get this updated and get you scheduled!`;
                 }
             }
             return `sms:${phone}?body=${encodeURIComponent(txt)}`;
@@ -622,12 +624,12 @@
                 else if (missing.length === 2) missingStr = `${missing[0]} and ${missing[1]}`;
                 else missingStr = `${missing[0]}, ${missing[1]}, and ${missing[2]}`;
 
-                const txt = `Hey ${item.name}! This is Domino's. Excited to get you started! We just need you to finish your ${missingStr} so we can schedule you. The links were sent to your email. Let us know when you finish them!`;
+                const txt = `Hey ${firstName}! This is Domino's. Excited to get you started! We just need you to finish your ${missingStr} so we can schedule you. The links were sent to your email. Let us know when you finish them!`;
                 return `sms:${phone}?body=${encodeURIComponent(txt)}`;
             }
         }
 
-        const defaultTxt = `Hey ${item.name}! This is Domino's. Just checking in on your onboarding paperwork. Let us know if you have any questions!`;
+        const defaultTxt = `Hey ${firstName}! This is Domino's. Just checking in on your onboarding paperwork. Let us know if you have any questions!`;
         return `sms:${phone}?body=${encodeURIComponent(defaultTxt)}`;
     }
 
