@@ -88,6 +88,12 @@
             Zenput Reports
         </button>
 
+        <button type="button" id="btnGmapsLink" onclick="window.open('https://www.google.com/maps/@32.9643441,-96.9460107,10z/data=!4m6!1m2!10m1!1e1!11m2!2sKPYC0Az8RsWWtIWGoogskQ!3e3?entry=ttu&g_ep=EgoyMDI1MDMzMS4wIKXMDSoASAFQAw%3D%3D', '_blank')" 
+                style="display: inline-flex; align-items: center; gap: 6px; background: var(--crust-base); color: var(--dark-blue); font-size: 15px; padding: 7px 14px; font-family: 'Subhead1', sans-serif;">
+            <img src="images/icons/GMaps_Icon.png" onerror="this.onerror=null; this.src='GMaps_Icon.png';" alt="📍" style="width: 16px; height: 16px;">
+            Store Map
+        </button>
+
     </div>
 
     <button class="secondary" onclick="handleLogout()">Log Out</button>
@@ -1381,9 +1387,11 @@
         const toggleInt = document.getElementById('toggleInt');
         const toggleStf = document.getElementById('toggleStf');
         const togglePay = document.getElementById('togglePay');
+        const btnGmaps = document.getElementById('btnGmapsLink');
 
-        // 🚫 ONLY hide Interviews for Denver
+        // 🚫 ONLY hide Interviews & Dallas Store Map for Denver
         if (toggleInt) toggleInt.style.display = isDenver ? 'none' : 'block';
+        if (btnGmaps) btnGmaps.style.display = isDenver ? 'none' : 'inline-flex';
         
         // ✅ Staffing & Pay Cards are visible for BOTH Dallas and Denver
         if (toggleStf) toggleStf.style.display = 'block';
