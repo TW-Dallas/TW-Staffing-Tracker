@@ -866,7 +866,15 @@
             }
 
             let notesHtml = '';
-            if (item.notes && item.notes.trim() !== '') { notesHtml = `<div class="notes-section">📝 ${item.notes}</div>`; }
+            if (item.statusUpdates && item.statusUpdates.trim() !== '') {
+                notesHtml += `<div class="notes-section" style="border-left: 4px solid var(--brand-blue); background: var(--crust-light); margin-top: 6px; white-space: pre-wrap;">💬 Status Update:\n${item.statusUpdates}</div>`;
+            }
+            if (item.availability && item.availability.trim() !== '') {
+                notesHtml += `<div class="notes-section" style="border-left: 4px solid var(--dark-blue); margin-top: 6px; white-space: pre-wrap;">🕒 Availability:\n${item.availability}</div>`;
+            }
+            if (item.notes && item.notes.trim() !== '') {
+                notesHtml += `<div class="notes-section" style="margin-top: 6px; white-space: pre-wrap;">📝 Notes:\n${item.notes}</div>`;
+            }
 
             const html = `
                 <div class="card ${statusColor}">
