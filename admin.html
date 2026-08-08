@@ -1920,7 +1920,7 @@
             setSelectValueCaseInsensitive('fieldShirt', item.shirtSize);
             setSelectValueCaseInsensitive('fieldHat', item.hatStyle);
 
-            document.getElementById('checkSubmission').checked = item.submissionReceived || false;
+            document.getElementById('checkSubmission').checked = (item.submissionReceived === false || item.submissionReceived === "false") ? false : true;
             document.getElementById('checkOnbSent').checked = item.onboardingSent || false;
             document.getElementById('checkBgc').checked = item.bgcComplete || false;
             document.getElementById('checkAllPay').checked = item.allPayCompleted || false;
@@ -1998,6 +1998,7 @@
         document.getElementById('candidateForm').reset();
         document.getElementById('fieldId').value = '';
         document.getElementById('fieldNto').value = '';
+        document.getElementById('checkSubmission').checked = true;
         
         if (currentView === 'paycards') {
             document.getElementById('formTitle').innerText = "Pay Card & Payroll Details";
