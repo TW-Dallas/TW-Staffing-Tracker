@@ -2030,20 +2030,23 @@
         else if (currentView === 'interviews') targetName = (document.getElementById('intName').value || '').trim();
         else targetName = (document.getElementById('fieldName').value || '').trim();
 
-        // Check if candidate already exists by ID or by Name to prevent duplicate appends
+        // Check if candidate already exists in the active view by ID or Name
         let existingCand = null;
+        let activeViewList = [];
+        if (currentView === 'paycards') activeViewList = paycards;
+        else if (currentView === 'staffing') activeViewList = staffing;
+        else if (currentView === 'interviews') activeViewList = interviews;
+        else activeViewList = candidates;
+
         if (id) {
-            existingCand = candidates.find(c => c.id === id) || paycards.find(c => c.id === id) || interviews.find(c => c.id === id) || staffing.find(c => c.id === id);
+            existingCand = activeViewList.find(c => c.id === id);
         }
         if (!existingCand && targetName) {
-            existingCand = candidates.find(c => (c.name || '').toLowerCase() === targetName.toLowerCase()) || 
-                           paycards.find(c => (c.name || '').toLowerCase() === targetName.toLowerCase()) ||
-                           interviews.find(c => (c.name || '').toLowerCase() === targetName.toLowerCase()) ||
-                           staffing.find(c => (c.name || '').toLowerCase() === targetName.toLowerCase());
+            existingCand = activeViewList.find(c => (c.name || '').toLowerCase() === targetName.toLowerCase());
         }
 
         const action = (id || existingCand) ? 'update' : 'add';
-        const finalId = id || (existingCand ? existingCand.id : '');
+        const finalId = (existingCand ? existingCand.id : (id || ''));
 
         showLoader(true, `Saving ${currentView} data...`);
 
@@ -2356,7 +2359,7 @@
         }
     }
         
-    function portCandidateToOnboarding() {
+    async function portCandidateToOnboarding() {
         const name = document.getElementById('intName').value.trim();
         const position = document.getElementById('intPosition').value;
         const store = document.getElementById('intStore').value.trim();
@@ -2379,7 +2382,11 @@
         document.getElementById('fieldNotes').value = notes;
         document.getElementById('checkSubmission').checked = true;
 
-        showBrandAlert(`Successfully ported details for ${name}!`, "Candidate Ported");
+        // Auto-save candidate into Onboarding pipeline
+        const mockEvent = { preventDefault: () => {} };
+        await saveCandidate(mockEvent);
+
+        showBrandAlert(`Successfully ported and saved ${name} to Onboarding pipeline!`, "Candidate Ported & Saved");
     }
 
     function portCandidateToStaffing(source) {
