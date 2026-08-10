@@ -2304,14 +2304,14 @@
                 } catch(e) {}
             }
     
-            showBrandAlert(`Email successfully delivered!`, "Email Delivered");
+            showLoader(true, `✅ Email successfully delivered to ${name}!`);
+            setTimeout(() => showLoader(false), 3500);
     
             const refreshData = await apiCall('GET');
             candidates = refreshData.onboarding || [];
             interviews = refreshData.interviews || [];
             staffing = refreshData.staffing || [];
             renderList();
-            showLoader(false);
         } catch (err) {
             showLoader(false);
             showBrandAlert("Error sending email: " + err.message, "Email Error");
@@ -2364,8 +2364,8 @@
     
         try {
             await apiCall('POST', payload);
-            showLoader(false);
-            showBrandAlert("GM Interview email & calendar invite delivered successfully!", "Invite Delivered");
+            showLoader(true, `✅ GM Interview invite delivered to ${name}!`);
+            setTimeout(() => showLoader(false), 3500);
             document.getElementById('intStatus').value = "GM Interview";
         } catch (err) {
             showLoader(false);
