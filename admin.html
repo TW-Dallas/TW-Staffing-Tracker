@@ -2152,7 +2152,7 @@
 
             // INSTANT LOCAL MEMORY UPDATE (No second HTTP call = No 404s!)
             if (currentView === 'onboarding') {
-                let item = candidates.find(c => c.id === assignedId);
+                let item = candidates.find(c => (assignedId && c.id === assignedId) || (payload.name && (c.name || '').toLowerCase() === payload.name.toLowerCase()));
                 if (!item) {
                     item = { id: assignedId };
                     candidates.unshift(item);
