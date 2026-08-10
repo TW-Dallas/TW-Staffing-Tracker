@@ -707,7 +707,8 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 17px; border-top: 1.5px dashed var(--crust-dark); padding-top: 6px;">
                         <span>Bonus Net Gain:</span>
                         <span style="font-family: 'Compact'; font-size: 17px;">
-                            Net: <strong id="stfPeriodNet" style="color: var(--dark-blue); font-family: 'Subhead2', sans-serif; font-size: 17px;">+0</strong>
+                            Period: <strong id="stfPeriodNet" style="color: var(--dark-blue); font-family: 'Subhead2', sans-serif; font-size: 17px;">+0</strong> | 
+                            YTD: <strong id="stfYearNet" style="color: var(--success-green); font-family: 'Subhead2', sans-serif; font-size: 17px;">+0</strong>
                         </span>
                     </div>
                 </div>
@@ -2717,12 +2718,15 @@
             }
         });
 
-        // Include hires marked in onboarding for the current year
+        // Include hires marked in onboarding for week, period, and year
         (candidates || []).forEach(item => {
             if (item.hired && (!item.id || !countedHireIds.has(String(item.id)))) {
                 const d = parseCandidateDate(item.ntoDate || item.lastUpdated || item.hireDate);
-                if (d && d.getFullYear() === currentYear) {
-                    yearHires++;
+                if (d) {
+                    if (d.getFullYear() === currentYear) yearHires++;
+                    const hPeriod = getDominosFiscalPeriod(d);
+                    if (hPeriod === currentPeriod) periodHires++;
+                    if (d >= startThisWeek && d <= endThisWeek) weekHires++;
                 }
             }
         });
@@ -2734,6 +2738,7 @@
         const elStfYearHires = document.getElementById('stfYearHires');
         const elStfYearTerms = document.getElementById('stfYearTerms');
         const elStfPeriodNet = document.getElementById('stfPeriodNet');
+        const elStfYearNet = document.getElementById('stfYearNet');
 
         if (elStfWeekHires) elStfWeekHires.innerText = weekHires;
         if (elStfWeekTerms) elStfWeekTerms.innerText = weekTerms;
@@ -2742,8 +2747,10 @@
         if (elStfYearHires) elStfYearHires.innerText = yearHires;
         if (elStfYearTerms) elStfYearTerms.innerText = yearTerms;
 
-        const net = periodHires - periodTerms;
-        if (elStfPeriodNet) elStfPeriodNet.innerText = (net >= 0 ? '+' : '') + net;
+        const periodNet = periodHires - periodTerms;
+        const yearNet = yearHires - yearTerms;
+        if (elStfPeriodNet) elStfPeriodNet.innerText = (periodNet >= 0 ? '+' : '') + periodNet;
+        if (elStfYearNet) elStfYearNet.innerText = (yearNet >= 0 ? '+' : '') + yearNet;
     }
 
     function autoCalculateDayOfWeek() {
