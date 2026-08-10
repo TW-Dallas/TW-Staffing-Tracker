@@ -2286,16 +2286,22 @@
         try {
             await apiCall('POST', payload);
     
-            const currentCand = candidates.find(c => c.id === id || c.name.toLowerCase() === name.toLowerCase());
+            const currentCand = candidates.find(c => c.id === id || (c.name || '').toLowerCase() === name.toLowerCase());
             if (emailType === "welcome") {
                 document.getElementById('checkOnbSent').checked = true;
                 if (currentCand) {
                     currentCand.onboardingSent = true;
                     currentCand.submissionReceived = true;
                 }
+                try {
+                    await apiCall('POST', { action: 'update', target: 'onboarding', id: id || (currentCand ? currentCand.id : ''), name: name, onboardingSent: true, submissionReceived: true });
+                } catch(e) {}
             } else if (emailType === "orientation") {
                 document.getElementById('checkNtoLink').checked = true;
                 if (currentCand) currentCand.ntoSignupLinkSent = true;
+                try {
+                    await apiCall('POST', { action: 'update', target: 'onboarding', id: id || (currentCand ? currentCand.id : ''), name: name, ntoSignupLinkSent: true });
+                } catch(e) {}
             }
     
             showBrandAlert(`Email successfully delivered!`, "Email Delivered");
