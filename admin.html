@@ -1590,6 +1590,9 @@
     function getInterviewStatusWeight(item) {
         const s = (item && item.status ? item.status : '').toString().trim().toLowerCase();
 
+        // 6. Hired / Completed (Pushed to bottom since tracked in onboarding tab)
+        if (s.includes('hired') || s.includes('completed')) return 6;
+
         // 5. No Show
         if (s.includes('no show')) return 5;
 
@@ -1602,7 +1605,7 @@
         // 2. GM interviews
         if (s.includes('gm interview') || s.includes('gm')) return 2;
 
-        // 1. Upcoming interviews (Phone Interview, Scheduled, Completed, Hired, etc.)
+        // 1. Upcoming interviews (Phone Interview, Scheduled, active)
         return 1;
     }
 
