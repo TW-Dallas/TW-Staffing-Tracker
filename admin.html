@@ -1544,10 +1544,11 @@
         if (item.missedNto) return "⚠️ Missed NTO";
         if (item.hired) return "🎉 Hired";
         
-        if (item.ntoScheduled) {
-            const dateStr = (item.ntoDate || "").toString().trim();
-            const isValidDate = dateStr && !dateStr.toUpperCase().includes("MISSING");
-            return isValidDate ? `📅 NTO: ${item.ntoDate}` : "📅 NTO Scheduled";
+        const dateStr = (item.ntoDate || "").toString().trim();
+        const hasNtoDate = dateStr && !dateStr.toUpperCase().includes("MISSING") && dateStr.toUpperCase() !== "FALSE";
+
+        if (item.ntoScheduled || hasNtoDate) {
+            return hasNtoDate ? `📅 NTO: ${item.ntoDate}` : "📅 NTO Scheduled";
         }
         if (item.ntoSignupLinkSent) return "📨 Link Sent";
         
@@ -2038,15 +2039,25 @@
         else if (currentView === 'interviews') activeViewList = interviews;
         else activeViewList = candidates;
 
+        let isUpdate = false;
+        let finalId = '';
+
         if (id) {
             existingCand = activeViewList.find(c => c.id === id);
+            if (existingCand) {
+                isUpdate = true;
+                finalId = id;
+            }
         }
-        if (!existingCand && targetName) {
+        if (!isUpdate && targetName) {
             existingCand = activeViewList.find(c => (c.name || '').toLowerCase() === targetName.toLowerCase());
+            if (existingCand) {
+                isUpdate = true;
+                finalId = existingCand.id;
+            }
         }
 
-        const action = (id || existingCand) ? 'update' : 'add';
-        const finalId = (existingCand ? existingCand.id : (id || ''));
+        const action = isUpdate ? 'update' : 'add';
 
         showLoader(true, `Saving ${currentView} data...`);
 
