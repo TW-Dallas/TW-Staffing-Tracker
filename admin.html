@@ -1609,6 +1609,78 @@
         return 1;
     }
 
+    function parseTimeToMinutes(tStr) {
+        if (!tStr) return 0;
+        let str = tStr.toString().trim().toUpperCase();
+        let isPm = str.includes("PM");
+        let isAm = str.includes("AM");
+        let clean = str.replace(/(AM|PM|\s)/g, "");
+
+        let h = 0, m = 0;
+        if (clean.includes(":")) {
+            const parts = clean.split(":");
+            h = parseInt(parts[0], 10) || 0;
+            m = parseInt(parts[1], 10) || 0;
+        } else {
+            let num = parseInt(clean, 10) || 0;
+            if (num >= 100) {
+                h = Math.floor(num / 100);
+                m = num % 100;
+            } else {
+                h = num;
+            }
+        }
+        if (isPm && h < 12) h += 12;
+        if (isAm && h === 12) h = 0;
+        return h * 60 + m;
+    }
+
+    function getInterviewTimestamp(item) {
+        let rawDate = item.date;
+        let rawTime = item.time;
+        if (item.status === 'GM Interview' && (item.gmDate || item.gmTime)) {
+            rawDate = item.gmDate || item.date;
+            rawTime = item.gmTime || item.time;
+        }
+
+        if (!rawDate && !rawTime) return Infinity;
+
+        const dt = parseCandidateDate(rawDate);
+        const mins = parseTimeToMinutes(rawTime);
+
+        if (!dt) {
+            return mins ? mins : Infinity;
+        }
+
+        return dt.getTime() + (mins * 60 * 1000);
+    }
+
+    function getInterviewDateTimeDisplay(item) {
+        let rawD = item.date;
+        let rawT = item.time;
+        let isGm = item.status === 'GM Interview';
+        if (isGm && (item.gmDate || item.gmTime)) {
+            rawD = item.gmDate || item.date;
+            rawT = item.gmTime || item.time;
+        }
+
+        if (!rawD && !rawT) return '';
+
+        let timeFormatted = formatTimeDisplayFrontEnd(rawT) || rawT || '';
+        let dayStr = item.day ? item.day + ' ' : '';
+        let dateFormatted = rawD || '';
+
+        let parts = [];
+        if (dayStr || dateFormatted) {
+            parts.push(`📅 ${dayStr}${dateFormatted}`.trim());
+        }
+        if (timeFormatted) {
+            parts.push(`⏰ ${timeFormatted}`);
+        }
+
+        return parts.join(' ');
+    }
+
     function renderList() {
         const listContainer = document.getElementById('candidateList');
         listContainer.innerHTML = '';
@@ -1660,12 +1732,8 @@
                     const weightB = getInterviewStatusWeight(b);
                     if (weightA !== weightB) return weightA - weightB;
 
-                    const rawA = a.date || a.gmDate || a.lastUpdated;
-                    const rawB = b.date || b.gmDate || b.lastUpdated;
-                    const dateA = parseCandidateDate(rawA);
-                    const dateB = parseCandidateDate(rawB);
-                    const timeA = dateA ? dateA.getTime() : Infinity;
-                    const timeB = dateB ? dateB.getTime() : Infinity;
+                    const timeA = getInterviewTimestamp(a);
+                    const timeB = getInterviewTimestamp(b);
 
                     if (timeA !== timeB) return timeA - timeB;
                     return (a.name || '').localeCompare(b.name || '');
@@ -1811,12 +1879,15 @@
                     card.classList.add('status-blue');
                 }
 
+                const dateTimeDisplay = getInterviewDateTimeDisplay(item);
+
                 card.innerHTML = `
                     <div class="card-name">${item.name}</div>
                     <div class="card-sub">
                         <span>Store #${item.store} (${item.position})</span>
                         <span style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: ${intStatusColor};">${item.status || 'Phone Interview'}</span>
                     </div>
+                    ${dateTimeDisplay ? `<div class="card-sub" style="margin-top: 3px; color: var(--dark-blue); font-weight: 600; font-size: 13px;"><span>${dateTimeDisplay}</span></div>` : ''}
                 `;
                 card.onclick = () => selectCandidate(item);
                 listContainer.appendChild(card);
