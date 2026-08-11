@@ -1587,6 +1587,25 @@
         return 0;
     }
 
+    function getInterviewStatusWeight(item) {
+        const s = (item && item.status ? item.status : '').toString().trim().toLowerCase();
+
+        // 5. No Show
+        if (s.includes('no show')) return 5;
+
+        // 4. Declined
+        if (s.includes('declined') || s.includes('canceled') || s.includes('cancelled') || s.includes('pass') || s.includes('withdrawn')) return 4;
+
+        // 3. TBD + Hold
+        if (s.includes('to be determined') || s.includes('tbd') || s.includes('hold')) return 3;
+
+        // 2. GM interviews
+        if (s.includes('gm interview') || s.includes('gm')) return 2;
+
+        // 1. Upcoming interviews (Phone Interview, Scheduled, Completed, Hired, etc.)
+        return 1;
+    }
+
     function renderList() {
         const listContainer = document.getElementById('candidateList');
         listContainer.innerHTML = '';
@@ -1634,7 +1653,19 @@
                     if (timeA !== timeB) return timeA - timeB;
                     return (a.name || '').localeCompare(b.name || '');
                 } else if (currentView === 'interviews') {
-                    return (a.status || '').localeCompare(b.status || '');
+                    const weightA = getInterviewStatusWeight(a);
+                    const weightB = getInterviewStatusWeight(b);
+                    if (weightA !== weightB) return weightA - weightB;
+
+                    const rawA = a.date || a.gmDate || a.lastUpdated;
+                    const rawB = b.date || b.gmDate || b.lastUpdated;
+                    const dateA = parseCandidateDate(rawA);
+                    const dateB = parseCandidateDate(rawB);
+                    const timeA = dateA ? dateA.getTime() : Infinity;
+                    const timeB = dateB ? dateB.getTime() : Infinity;
+
+                    if (timeA !== timeB) return timeA - timeB;
+                    return (a.name || '').localeCompare(b.name || '');
                 } else {
                     return (a.rehireEligible || '').localeCompare(b.rehireEligible || '');
                 }
