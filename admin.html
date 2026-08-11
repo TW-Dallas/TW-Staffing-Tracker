@@ -122,12 +122,12 @@
 
             <div class="control-row">
                 <select id="sortControl" onchange="renderList()">
+                    <option value="status" selected>📊 Sort: Status / Stage</option>
+                    <option value="nto">📅 Sort: Hire Date (NTO Class)</option>
                     <option value="updated">⏰ Sort: Last Updated</option>
                     <option value="name">🔤 Sort: Name (A-Z)</option>
                     <option value="store">🏬 Sort: Store</option>
                     <option value="do">👤 Sort: DO</option>
-                    <option value="status">📊 Sort: Status / Stage</option>
-                    <option value="nto">📅 Sort: Hire Date (NTO Class)</option>
                 </select>
             </div>
 
@@ -1620,7 +1620,19 @@
             }
             if (sortBy === 'status') {
                 if (currentView === 'onboarding') {
-                    return getStatusWeight(b) - getStatusWeight(a);
+                    const weightDiff = getStatusWeight(b) - getStatusWeight(a);
+                    if (weightDiff !== 0) return weightDiff;
+
+                    // Tie-breaker within same stage: Sort by NTO date soonest first (ascending)
+                    const rawA = a.ntoDate || a.hireDate || a.date;
+                    const rawB = b.ntoDate || b.hireDate || b.date;
+                    const dateA = parseCandidateDate(rawA);
+                    const dateB = parseCandidateDate(rawB);
+                    const timeA = dateA ? dateA.getTime() : Infinity;
+                    const timeB = dateB ? dateB.getTime() : Infinity;
+
+                    if (timeA !== timeB) return timeA - timeB;
+                    return (a.name || '').localeCompare(b.name || '');
                 } else if (currentView === 'interviews') {
                     return (a.status || '').localeCompare(b.status || '');
                 } else {
@@ -1634,11 +1646,11 @@
                 const dateA = parseCandidateDate(rawA);
                 const dateB = parseCandidateDate(rawB);
 
-                const timeA = dateA ? dateA.getTime() : 0;
-                const timeB = dateB ? dateB.getTime() : 0;
+                const timeA = dateA ? dateA.getTime() : Infinity;
+                const timeB = dateB ? dateB.getTime() : Infinity;
 
                 if (timeA !== timeB) {
-                    return timeB - timeA;
+                    return timeA - timeB; // Soonest date comes FIRST!
                 }
                 return (a.name || '').localeCompare(b.name || '');
             }
