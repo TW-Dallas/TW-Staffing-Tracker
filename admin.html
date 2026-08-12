@@ -1711,10 +1711,12 @@
 
         // Sorting Comparator Logic
         const sortComparator = (a, b) => {
-            // Push "Hired" candidates to the bottom of the list for onboarding
+            // Push "Hired", "Ineligible", and "Inactive" candidates to the bottom of the list for onboarding
             if (currentView === 'onboarding') {
-                if (a.hired && !b.hired) return 1;
-                if (!a.hired && b.hired) return -1;
+                const isTermA = a.hired || a.ineligible || a.inactive;
+                const isTermB = b.hired || b.ineligible || b.inactive;
+                if (isTermA && !isTermB) return 1;
+                if (!isTermA && isTermB) return -1;
             }
 
             if (sortBy === 'name') {
@@ -1940,12 +1942,12 @@
                 const rawMissingDocs = item.missingDocs || "";
                 const isBlockedByDocs = rawMissingDocs !== "" && rawMissingDocs.toString().toUpperCase() !== "FALSE";
 
-                if (item.incorrectEmail || isBlockedByDocs || item.missedNto) {
+                if (item.ineligible || item.inactive) {
+                    card.classList.add('status-gray');
+                } else if (item.incorrectEmail || isBlockedByDocs || item.missedNto) {
                     card.classList.add('status-red');
                 } else if (item.hired) {
                     card.classList.add('status-green');
-                } else if (item.ineligible || item.inactive) {
-                    card.classList.add('status-gray');
                 } else if (item.ntoScheduled || item.ntoSignupLinkSent) {
                     card.classList.add('status-nto');
                 } else if (item.bgcComplete || item.allPayCompleted || item.pulseFormComplete) {
