@@ -2047,6 +2047,82 @@
                 listContainer.appendChild(card);
             });
 
+        } else if (currentView === 'nto') {
+            let filteredNto = candidates.filter(item => {
+                if (!matchesSearchQuery(item, searchQuery)) return false;
+                
+                // If user is searching, allow lookup of all NTO candidates
+                if (searchQuery) return true;
+
+                // Only show candidates related to NTO (NTO date, scheduled, link sent, or missed NTO)
+                const hasNtoContext = item.ntoDate || item.ntoScheduled || item.ntoSignupLinkSent || item.missedNto;
+                if (!hasNtoContext) return false;
+
+                // 10-day filter: Drop NTO classes older than 10 days ago from immediate view
+                const rawDate = item.ntoDate || item.hireDate || item.lastUpdated;
+                const itemDate = parseCandidateDate(rawDate);
+                if (itemDate && itemDate.getTime() < tenDaysAgo.getTime()) {
+                    return false;
+                }
+                return true;
+            });
+
+            // Sort NTO candidates: Soonest upcoming NTO date at the TOP!
+            filteredNto.sort((a, b) => {
+                const dateA = parseCandidateDate(a.ntoDate || a.hireDate);
+                const dateB = parseCandidateDate(b.ntoDate || b.hireDate);
+
+                const timeA = dateA ? dateA.getTime() : Infinity;
+                const timeB = dateB ? dateB.getTime() : Infinity;
+
+                if (timeA !== timeB) return timeA - timeB; // Soonest NTO date FIRST!
+
+                return (a.name || '').localeCompare(b.name || '');
+            });
+
+            if (filteredNto.length === 0) {
+                listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No NTO candidates found.</div>';
+                return;
+            }
+
+            filteredNto.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'candidate-card';
+                if (item.id === currentSelectedId) card.classList.add('selected');
+
+                let ntoStatusColor = 'var(--brand-blue)';
+                let ntoLabel = item.ntoDate ? `🎓 NTO: ${item.ntoDate}` : '📅 NTO Scheduled';
+
+                if (item.missedNto || item.ntoStatus === 'Not in NTO') {
+                    card.classList.add('status-red');
+                    ntoStatusColor = 'var(--brand-red)';
+                    ntoLabel = '⚠️ Missed NTO';
+                } else if (item.ntoStatus === 'NTO Complete' || item.hired) {
+                    card.classList.add('status-green');
+                    ntoStatusColor = 'var(--success-green)';
+                    ntoLabel = item.ntoDate ? `🎓 NTO: ${item.ntoDate} (Done)` : '🎓 NTO Complete';
+                } else if (item.ntoSignupLinkSent) {
+                    card.classList.add('status-blue');
+                    ntoStatusColor = 'var(--dark-blue)';
+                    ntoLabel = '📨 Link Sent';
+                } else {
+                    card.classList.add('status-blue');
+                }
+
+                const dayStr = item.ntoDate ? getDayOfWeekFromDateString(item.ntoDate) : '';
+
+                card.innerHTML = `
+                    <div class="card-name">${item.name}</div>
+                    <div class="card-sub">
+                        <span>Store #${item.store} (${item.position || 'CSR'})</span>
+                        <span style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: ${ntoStatusColor};">${ntoLabel}</span>
+                    </div>
+                    ${item.ntoDate ? `<div class="card-sub" style="margin-top: 3px; color: var(--dark-blue); font-weight: 600; font-size: 13px;"><span>📅 ${dayStr ? dayStr + ' ' : ''}${item.ntoDate}</span></div>` : ''}
+                `;
+                card.onclick = () => selectCandidate(item);
+                listContainer.appendChild(card);
+            });
+
         } else {
             let filteredCandidates = candidates.filter(item => {
                 if (searchQuery && !matchesSearchQuery(item, searchQuery)) return false;
