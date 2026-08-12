@@ -1059,8 +1059,18 @@
         }
     }
 
-    function getInterviewPriorityTier(item, today) {
-        const status = (item.status || '').toString().trim();
+    function getInterviewPriorityTier(item, today, onboardingNameSet) {
+        let status = (item.status || '').toString().trim();
+        const cleanName = item.name ? item.name.toString().trim().toLowerCase() : '';
+
+        // Auto-detect if candidate was ported to Onboarding pipeline
+        if (cleanName && onboardingNameSet && onboardingNameSet.has(cleanName)) {
+            const sLower = status.toLowerCase();
+            if (!sLower.includes('hired') && !sLower.includes('no show') && !sLower.includes('declined') && !sLower.includes('hold')) {
+                status = 'Position Offered';
+            }
+        }
+
         const gmDateObj = parseInterviewDateTime(item.gmDate, item.gmTime);
         const phoneDateObj = parseInterviewDateTime(item.date, item.time);
         
@@ -1071,6 +1081,11 @@
         }
 
         const isPast = effectiveDate ? (effectiveDate.getTime() < today.getTime()) : false;
+
+        // Position Offered (Ported) -> Completed Tier
+        if (status.includes('Position Offered') || status.includes('Offered')) {
+            return { tier: 6, date: effectiveDate, isUpcoming: false };
+        }
 
         // Tier 1: Upcoming GM Interview
         if (status.includes('GM Interview') && !isPast) return { tier: 1, date: effectiveDate, isUpcoming: true };
@@ -1099,9 +1114,9 @@
         return { tier: 6, date: effectiveDate, isUpcoming: false };
     }
 
-    function compareInterviews(a, b, today) {
-        const priorityA = getInterviewPriorityTier(a, today);
-        const priorityB = getInterviewPriorityTier(b, today);
+    function compareInterviews(a, b, today, onboardingNameSet) {
+        const priorityA = getInterviewPriorityTier(a, today, onboardingNameSet);
+        const priorityB = getInterviewPriorityTier(b, today, onboardingNameSet);
 
         if (priorityA.tier !== priorityB.tier) {
             return priorityA.tier - priorityB.tier;
@@ -1146,6 +1161,14 @@
         const storeVal = document.getElementById('storeFilter').value;
 
         const interviewsData = rawData.interviews || [];
+        const onboardingData = rawData.onboarding || [];
+        const onboardingNameSet = new Set();
+        onboardingData.forEach(onb => {
+            if (onb.name) {
+                onboardingNameSet.add(onb.name.toString().trim().toLowerCase());
+            }
+        });
+
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -1162,7 +1185,7 @@
 
             if (item.store === 'Store #' || !matchesDo || !matchesStore) return false;
 
-            const priorityInfo = getInterviewPriorityTier(item, today);
+            const priorityInfo = getInterviewPriorityTier(item, today, onboardingNameSet);
             const intDate = priorityInfo.date;
 
             if (intDate && intDate < sevenDaysAgo) {
@@ -1173,7 +1196,7 @@
             }
 
             return true;
-        }).sort((a, b) => compareInterviews(a, b, today));
+        }).sort((a, b) => compareInterviews(a, b, today, onboardingNameSet));
 
         if (filtered.length === 0 && hiddenOlderCount === 0) { 
             list.innerHTML = '<div class="loader">No interviews scheduled.</div>'; 
@@ -1184,8 +1207,11 @@
             const icon = getPositionIcon(item.position);
             let statusColor = 'status-blue';
             const s = item.status ? item.status.toString() : '';
+            const cleanName = item.name ? item.name.toString().trim().toLowerCase() : '';
+            const isInOnboarding = cleanName && onboardingNameSet.has(cleanName);
+
             if (s.includes('No Show') || s.includes('Canceled') || s.includes('Pass') || s.includes('Declined')) statusColor = 'status-red';
-            else if (s.includes('Hired') || s.includes('Completed') || s.includes('Position Offered') || s.includes('Offered')) statusColor = 'status-green';
+            else if (s.includes('Hired') || s.includes('Completed') || s.includes('Position Offered') || s.includes('Offered') || isInOnboarding) statusColor = 'status-green';
             else if (s.includes('To Be Determined') || s.includes('TBD') || s.includes('Hold')) statusColor = 'status-tbd';
             else if (s.includes('GM Interview')) statusColor = 'status-gminterview';
             else if (s.includes('Reschedule') || s.includes('Withdrawn')) statusColor = 'status-gray';
@@ -1204,7 +1230,7 @@
             }
 
             let displayResult = item.status;
-            if (s.toLowerCase().includes('position offered') || s.toLowerCase().includes('offered')) {
+            if ((isInOnboarding || s.toLowerCase().includes('position offered') || s.toLowerCase().includes('offered')) && !s.toLowerCase().includes('hired') && !s.toLowerCase().includes('no show') && !s.toLowerCase().includes('declined') && !s.toLowerCase().includes('hold')) {
                 displayResult = '🤝 Position Offered';
             } else if (s.toLowerCase().includes('hired')) {
                 displayResult = '🎉 Hired';
