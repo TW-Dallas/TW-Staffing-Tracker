@@ -1141,16 +1141,51 @@
         return timeB - timeA;
     }
 
+    function getDayOfWeekFromDateString(dateStr) {
+        if (!dateStr) return '';
+        let str = dateStr.toString().trim();
+        if (!str) return '';
+        str = str.split('T')[0].split(' ')[0];
+        let year, month, day;
+        if (str.includes('-')) {
+            let parts = str.split('-');
+            if (parts[0].length === 4) {
+                year = parseInt(parts[0], 10);
+                month = parseInt(parts[1], 10) - 1;
+                day = parseInt(parts[2], 10);
+            } else {
+                month = parseInt(parts[0], 10) - 1;
+                day = parseInt(parts[1], 10);
+                year = parseInt(parts[2], 10);
+            }
+        } else if (str.includes('/')) {
+            let parts = str.split('/');
+            month = parseInt(parts[0], 10) - 1;
+            day = parseInt(parts[1], 10);
+            year = parseInt(parts[2], 10);
+            if (year < 100) year += 2000;
+        } else {
+            return '';
+        }
+        if (isNaN(year) || isNaN(month) || isNaN(day)) return '';
+        const d = new Date(Date.UTC(year, month, day));
+        if (isNaN(d.getTime())) return '';
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        return days[d.getUTCDay()];
+    }
+
     function formatInterviewCardDate(item) {
         let text = '';
         const phoneDateFormatted = formatDisplayDate(item.date);
         const gmDateFormatted = formatDisplayDate(item.gmDate);
 
         if (gmDateFormatted) {
-            text += `<div style="font-family: 'Subhead2', sans-serif; font-size: 14px; color: var(--dark-blue); font-weight: bold; margin-top: 2px;">👔 GM Interview: ${gmDateFormatted}${item.gmTime ? ' @ ' + item.gmTime : ''}</div>`;
+            const gmDayStr = item.gmDay || getDayOfWeekFromDateString(item.gmDate);
+            text += `<div style="font-family: 'Subhead2', sans-serif; font-size: 14px; color: var(--dark-blue); font-weight: bold; margin-top: 2px;">👔 GM Interview: ${gmDateFormatted}${gmDayStr ? ' (' + gmDayStr + ')' : ''}${item.gmTime ? ' @ ' + item.gmTime : ''}</div>`;
         }
         if (phoneDateFormatted) {
-            text += `<div style="font-family: 'Condensed', sans-serif; font-size: 14px; color: var(--crust-burnt);">📞 Phone Interview: ${phoneDateFormatted}${item.day ? ' (' + item.day + ')' : ''}${item.time ? ' @ ' + item.time : ''}</div>`;
+            const phoneDayStr = item.day || getDayOfWeekFromDateString(item.date);
+            text += `<div style="font-family: 'Condensed', sans-serif; font-size: 14px; color: var(--crust-burnt);">📞 Phone Interview: ${phoneDateFormatted}${phoneDayStr ? ' (' + phoneDayStr + ')' : ''}${item.time ? ' @ ' + item.time : ''}</div>`;
         }
 
         if (!text) {

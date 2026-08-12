@@ -376,10 +376,25 @@
                                 <!-- Column 2: GM Date -->
                                 <div class="form-group" style="flex: 1;">
                                     <label>GM Date</label>
-                                    <input type="date" id="intGmDate" placeholder="MM/DD/YYYY">
+                                    <input type="date" id="intGmDate" placeholder="MM/DD/YYYY" oninput="autoCalculateGmDayOfWeek()">
                                 </div>
 
-                                <!-- Column 3: GM Time -->
+                                <!-- Column 3: GM Day of Week -->
+                                <div class="form-group" style="flex: 1;">
+                                    <label>GM Day</label>
+                                    <select id="intGmDay">
+                                        <option value="">Select Day</option>
+                                        <option value="Monday">Monday</option>
+                                        <option value="Tuesday">Tuesday</option>
+                                        <option value="Wednesday">Wednesday</option>
+                                        <option value="Thursday">Thursday</option>
+                                        <option value="Friday">Friday</option>
+                                        <option value="Saturday">Saturday</option>
+                                        <option value="Sunday">Sunday</option>
+                                    </select>
+                                </div>
+
+                                <!-- Column 4: GM Time -->
                                 <div class="form-group" style="flex: 1;">
                                     <label>GM Time</label>
                                     <input type="text" id="intGmTime" list="time15MinList" placeholder="e.g., 2:00 PM">
@@ -1674,6 +1689,57 @@
         return dt.getTime() + (mins * 60 * 1000);
     }
 
+    function getDayOfWeekFromDateString(dateStr) {
+        if (!dateStr) return '';
+        let str = dateStr.toString().trim();
+        if (!str) return '';
+        str = str.split('T')[0].split(' ')[0];
+        let year, month, day;
+        if (str.includes('-')) {
+            let parts = str.split('-');
+            if (parts[0].length === 4) {
+                year = parseInt(parts[0], 10);
+                month = parseInt(parts[1], 10) - 1;
+                day = parseInt(parts[2], 10);
+            } else {
+                month = parseInt(parts[0], 10) - 1;
+                day = parseInt(parts[1], 10);
+                year = parseInt(parts[2], 10);
+            }
+        } else if (str.includes('/')) {
+            let parts = str.split('/');
+            month = parseInt(parts[0], 10) - 1;
+            day = parseInt(parts[1], 10);
+            year = parseInt(parts[2], 10);
+            if (year < 100) year += 2000;
+        } else {
+            return '';
+        }
+        if (isNaN(year) || isNaN(month) || isNaN(day)) return '';
+        const d = new Date(Date.UTC(year, month, day));
+        if (isNaN(d.getTime())) return '';
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        return days[d.getUTCDay()];
+    }
+
+    function autoCalculateDayOfWeek() {
+        const dateVal = document.getElementById('intDate').value;
+        const daySelect = document.getElementById('intDay');
+        if (dateVal && daySelect) {
+            const calculated = getDayOfWeekFromDateString(dateVal);
+            if (calculated) daySelect.value = calculated;
+        }
+    }
+
+    function autoCalculateGmDayOfWeek() {
+        const dateVal = document.getElementById('intGmDate').value;
+        const daySelect = document.getElementById('intGmDay');
+        if (dateVal && daySelect) {
+            const calculated = getDayOfWeekFromDateString(dateVal);
+            if (calculated) daySelect.value = calculated;
+        }
+    }
+
     function getInterviewDateTimeDisplay(item) {
         let rawD = item.date;
         let rawT = item.time;
@@ -1686,7 +1752,9 @@
         if (!rawD && !rawT) return '';
 
         let timeFormatted = formatTimeDisplayFrontEnd(rawT) || rawT || '';
-        let dayStr = item.day ? item.day + ' ' : '';
+        let calcDay = getDayOfWeekFromDateString(rawD);
+        let dayVal = isGm ? (item.gmDay || (item.gmDate ? calcDay : '') || item.day || '') : (item.day || calcDay || '');
+        let dayStr = dayVal ? dayVal.trim() + ' ' : '';
         let dateFormatted = rawD || '';
 
         let parts = [];
@@ -2036,10 +2104,12 @@
             document.getElementById('intPhone').value = item.phoneNumber || '';
             document.getElementById('intEmail').value = item.email || '';
             document.getElementById('intDate').value = formatDateForInput(item.date);
-            document.getElementById('intDay').value = item.day || '';
+            document.getElementById('intDay').value = item.day || getDayOfWeekFromDateString(item.date) || '';
             document.getElementById('intTime').value = formatTimeDisplayFrontEnd(item.time) || item.time || '';
             setSelectValueCaseInsensitive('intStatus', item.status || 'Phone Interview');
             document.getElementById('intGmDate').value = formatDateForInput(item.gmDate);
+            const gmDayElem = document.getElementById('intGmDay');
+            if (gmDayElem) gmDayElem.value = item.gmDay || getDayOfWeekFromDateString(item.gmDate) || '';
             document.getElementById('intGmTime').value = formatTimeDisplayFrontEnd(item.gmTime) || item.gmTime || '';
             document.getElementById('intStatusUpdates').value = item.statusUpdates || '';
             document.getElementById('intAvailability').value = item.availability || '';
@@ -2252,10 +2322,12 @@
             payload.phoneNumber = document.getElementById('intPhone').value.trim();
             payload.email = document.getElementById('intEmail').value.trim();
             payload.date = document.getElementById('intDate').value.trim();
-            payload.day = document.getElementById('intDay').value;
+            payload.day = document.getElementById('intDay').value || getDayOfWeekFromDateString(payload.date);
             payload.time = document.getElementById('intTime').value.trim();
             payload.status = document.getElementById('intStatus').value;
             payload.gmDate = document.getElementById('intGmDate').value.trim();
+            const gmDayElemSave = document.getElementById('intGmDay');
+            payload.gmDay = (gmDayElemSave ? gmDayElemSave.value : '') || getDayOfWeekFromDateString(payload.gmDate);
             payload.gmTime = document.getElementById('intGmTime').value.trim();
             payload.statusUpdates = document.getElementById('intStatusUpdates').value.trim();
             payload.availability = document.getElementById('intAvailability').value.trim();
