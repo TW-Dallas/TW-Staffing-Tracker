@@ -10,8 +10,15 @@
 </head>
 
 <body>
-<!-- Loader Overlay -->
-<div id="loadingOverlay" class="overlay hidden">Saving Database...</div>
+<!-- Sleek Non-Blocking Centered 3-Dot Loader Toast -->
+<div id="loadingOverlay" class="hidden" style="position: fixed; top: 24px; left: 50%; transform: translateX(-50%); z-index: 99999; pointer-events: none; display: flex; align-items: center; gap: 12px; background: #ffffff; border: 2.5px solid var(--brand-blue); border-radius: 40px; padding: 10px 24px; box-shadow: 0 10px 30px rgba(0, 144, 226, 0.35);">
+    <div class="dot-spinner-group" style="display: flex; align-items: center; gap: 6px;">
+        <span class="dot-spinner dot-1"></span>
+        <span class="dot-spinner dot-2"></span>
+        <span class="dot-spinner dot-3"></span>
+    </div>
+    <span id="loadingOverlayText" style="font-family: 'Subhead1', sans-serif; font-size: 16px; font-weight: bold; color: var(--dark-blue); white-space: nowrap;">Accessing Database...</span>
+</div>
 
 <!-- Replicated Catering Style Login Container -->
 <div id="authContainer" class="auth-container">
@@ -1439,9 +1446,15 @@
 
     function showLoader(show, text = "Accessing Database...") {
         const loader = document.getElementById('loadingOverlay');
-        loader.innerText = text;
-        if (show) loader.classList.remove('hidden');
-        else loader.classList.add('hidden');
+        const loaderText = document.getElementById('loadingOverlayText');
+        if (loaderText) loaderText.innerText = text;
+        if (show) {
+            loader.style.display = 'flex';
+            loader.classList.remove('hidden');
+        } else {
+            loader.style.display = 'none';
+            loader.classList.add('hidden');
+        }
     }
 
     function switchView(view) {
