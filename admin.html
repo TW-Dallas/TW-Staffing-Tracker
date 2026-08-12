@@ -3236,7 +3236,7 @@
                     <div style="font-family: 'Condensed', sans-serif; font-size: 16px; color: var(--text-dark); margin-top: 2px;">Store #${item.store} • ${item.position || 'CSR'} • Date: ${item.ntoDate || 'N/A'}</div>
                 </div>
                 <div style="flex: 1.2;">
-                    <select class="nto-attendance-select" data-id="${item.id || ''}" data-name="${item.name}" data-store="${item.store}" data-position="${item.position || 'CSR'}" data-shirt="${item.shirtSize || ''}" data-hat="${item.hatStyle || ''}" data-paycard="${item.payCard || ''}" style="width: 100%; padding: 8px 10px; font-size: 18px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1px solid var(--crust-dark);">
+                    <select class="nto-attendance-select" data-id="${escapeText(item.id || '')}" data-name="${escapeText(item.name || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(item.shirtSize || '')}" data-hat="${escapeText(item.hatStyle || '')}" data-paycard="${escapeText(item.payCard || '')}" data-ntodate="${escapeText(item.ntoDate || '')}" style="width: 100%; padding: 8px 10px; font-size: 18px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1px solid var(--crust-dark);">
                         <option value="" ${!savedStatus ? 'selected' : ''} disabled>Select Status...</option>
                         <option value="In Lobby" ${savedStatus === 'In Lobby' ? 'selected' : ''}>🏨 In Lobby (Checked In)</option>
                         <option value="In Class" ${savedStatus === 'In Class' ? 'selected' : ''}>📖 In Class</option>                        
@@ -3276,13 +3276,18 @@
         rosterElements.forEach(el => {
             if (!el.value) missingSelection = true;
             rosterData.push({
-                name: el.getAttribute('data-name'),
-                store: el.getAttribute('data-store'),
-                position: el.getAttribute('data-position'),
-                shirtSize: el.getAttribute('data-shirt'),
-                hatStyle: el.getAttribute('data-hat'),
-                payCard: el.getAttribute('data-paycard'),
-                attendance: el.value
+                id: el.getAttribute('data-id') || '',
+                name: el.getAttribute('data-name') || '',
+                store: el.getAttribute('data-store') || '',
+                position: el.getAttribute('data-position') || 'CSR',
+                shirtSize: el.getAttribute('data-shirt') || '',
+                hatStyle: el.getAttribute('data-hat') || '',
+                payCard: el.getAttribute('data-paycard') || '',
+                ntoDate: el.getAttribute('data-ntodate') || '',
+                attendance: el.value || '',
+                ntoAttendance: el.value || '',
+                ntoStatus: el.value || '',
+                liveStatus: el.value || ''
             });
         });
     
@@ -3412,11 +3417,18 @@
         rosterElements.forEach(el => {
             if (el.value) {
                 rosterData.push({
-                    id: el.getAttribute('data-id'),
-                    name: el.getAttribute('data-name'),
-                    store: el.getAttribute('data-store'),
-                    position: el.getAttribute('data-position'),
-                    attendance: el.value
+                    id: el.getAttribute('data-id') || '',
+                    name: el.getAttribute('data-name') || '',
+                    store: el.getAttribute('data-store') || '',
+                    position: el.getAttribute('data-position') || 'CSR',
+                    shirtSize: el.getAttribute('data-shirt') || '',
+                    hatStyle: el.getAttribute('data-hat') || '',
+                    payCard: el.getAttribute('data-paycard') || '',
+                    ntoDate: el.getAttribute('data-ntodate') || '',
+                    attendance: el.value || '',
+                    ntoAttendance: el.value || '',
+                    ntoStatus: el.value || '',
+                    liveStatus: el.value || ''
                 });
             }
         });
