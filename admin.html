@@ -2526,10 +2526,19 @@
         const phone = document.getElementById('intPhone').value.trim();
         const email = document.getElementById('intEmail').value.trim();
         const notes = document.getElementById('intNotes').value.trim();
+        const intRowIdx = document.getElementById('intRowIndex')?.value;
 
         if (!name) {
             showBrandAlert("Please select or fill out an interview candidate first.", "No Candidate Selected");
             return;
+        }
+
+        // Auto-update Interview status to Hired if editing an existing interview row
+        if (intRowIdx) {
+            const intStatusEl = document.getElementById('intStatus');
+            if (intStatusEl) intStatusEl.value = 'Hired';
+            const mockEventInt = { preventDefault: () => {} };
+            await saveInterviewCandidate(mockEventInt);
         }
 
         switchView('onboarding');
@@ -2546,7 +2555,7 @@
         const mockEvent = { preventDefault: () => {} };
         await saveCandidate(mockEvent);
 
-        showBrandAlert(`Successfully ported and saved ${name} to Onboarding pipeline!`, "Candidate Ported & Saved");
+        showBrandAlert(`Successfully ported ${name} to Onboarding and set Interview status to 🎉 Hired!`, "Candidate Ported & Saved");
     }
 
     function portCandidateToStaffing(source) {

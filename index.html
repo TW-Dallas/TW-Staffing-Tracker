@@ -1203,11 +1203,14 @@
                 notesHtml += `<div class="notes-section" style="margin-top: 6px; white-space: pre-wrap;">📝 Notes:\n${item.notes}</div>`;
             }
 
+            const isHired = s.toLowerCase().includes('hired');
+            const displayResult = isHired ? '🎉 Hired (New Hire Forms Submitted)' : item.status;
+
             const html = `
                 <div class="card ${statusColor}">
                     <div class="card-header"><div class="name">${item.name}</div><div class="position-badge">${icon} ${item.position}</div></div>
                     <div class="meta-row"><span>Store #${item.store}</span><span>DO: ${item.doName}</span></div>
-                    <div class="main-status" style="font-family: 'Subhead2'; font-size: 14px; margin-top: 4px;">Result: <strong>${item.status}</strong></div>
+                    <div class="main-status" style="font-family: 'Subhead2'; font-size: 14px; margin-top: 4px;">Result: <strong>${displayResult}</strong></div>
                     ${dateHtml}
                     ${notesHtml}
                 </div>`;
