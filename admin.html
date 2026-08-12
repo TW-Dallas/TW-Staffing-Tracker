@@ -1648,7 +1648,14 @@
 
     function parseCandidateDate(val) {
         if (!val) return null;
-        if (val instanceof Date) return val;
+        if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
+        
+        if (typeof val === 'number' || /^\d{5}$/.test(String(val).trim())) {
+            const num = typeof val === 'number' ? val : parseFloat(val);
+            const d = new Date(Math.round((num - 25569) * 86400 * 1000));
+            return isNaN(d.getTime()) ? null : d;
+        }
+
         let str = val.toString().trim();
         if (!str) return null;
         str = str.split('T')[0].split(' ')[0];
@@ -1671,10 +1678,13 @@
             year = parseInt(parts[2], 10);
             if (year < 100) year += 2000;
         } else {
-            const d = new Date(str);
+            const d = new Date(val);
             return isNaN(d.getTime()) ? null : d;
         }
-        if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
+        if (isNaN(year) || isNaN(month) || isNaN(day)) {
+            const fallback = new Date(val);
+            return isNaN(fallback.getTime()) ? null : fallback;
+        }
         const d = new Date(year, month, day);
         return isNaN(d.getTime()) ? null : d;
     }
