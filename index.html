@@ -1030,15 +1030,23 @@
             const storesInDo = doGroups[doName];
             const firstStore = storesInDo[0] || {};
             const doEmail = firstStore.doEmail || '';
+            const doCell = firstStore.doCell || '';
 
             html += `
                 <div style="background: white; border-radius: 12px; border: 1.5px solid var(--crust-med); overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.03);">
                     <div style="background: var(--dark-blue); color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                         <div>
                             <div style="font-family: 'Subhead1', sans-serif; font-size: 18px; font-weight: bold; text-transform: uppercase;">👤 DO: ${doName}</div>
-                            ${doEmail ? `<div style="font-family: 'Condensed'; font-size: 14px; opacity: 0.9;">✉️ ${doEmail}</div>` : ''}
+                            <div style="display: flex; gap: 12px; font-family: 'Condensed'; font-size: 14px; opacity: 0.95; flex-wrap: wrap; margin-top: 2px;">
+                                ${doCell ? `<div>📱 ${doCell}</div>` : ''}
+                                ${doEmail ? `<div>✉️ ${doEmail}</div>` : ''}
+                            </div>
                         </div>
-                        ${doEmail ? `<a href="mailto:${doEmail}" style="background: rgba(255,255,255,0.2); color: white; border-radius: 6px; padding: 6px 12px; font-family: 'Condensed'; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${mailSvg} Email DO</a>` : ''}
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            ${doCell ? `<a href="tel:${doCell}" style="background: rgba(255,255,255,0.25); color: white; border-radius: 6px; padding: 6px 12px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${phoneSvg} Call DO</a>` : ''}
+                            ${doCell ? `<a href="sms:${doCell}" style="background: rgba(255,255,255,0.25); color: white; border-radius: 6px; padding: 6px 12px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${smsSvg} Text DO</a>` : ''}
+                            ${doEmail ? `<a href="mailto:${doEmail}" style="background: rgba(255,255,255,0.2); color: white; border-radius: 6px; padding: 6px 12px; font-family: 'Condensed'; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${mailSvg} Email DO</a>` : ''}
+                        </div>
                     </div>
                     <div style="padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             `;

@@ -390,7 +390,7 @@ function getContactsData(ss, sheetName) {
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return [];
   
-  const values = sheet.getRange(2, 1, lastRow - 1, 9).getValues();
+  const values = sheet.getRange(2, 1, lastRow - 1, 10).getValues();
   return values.map(row => ({
     doName: String(row[0] || "").trim(),
     store: String(row[1] || "").trim(),
@@ -400,7 +400,8 @@ function getContactsData(ss, sheetName) {
     gmPhone: String(row[5] || "").trim(),
     storeEmail: String(row[6] || "").trim(),
     doEmail: String(row[7] || "").trim(),
-    ipAddress: String(row[8] || "").trim()
+    ipAddress: String(row[8] || "").trim(),
+    doCell: String(row[9] || "").trim()
   })).filter(c => c.store !== "");
 }
 
