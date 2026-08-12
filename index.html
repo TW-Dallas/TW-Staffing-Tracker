@@ -288,6 +288,29 @@
     </div>
 </div>
 
+<!-- Nudge SMS Preview & Copy Modal -->
+<div id="nudgePreviewModal" class="brand-modal-overlay hidden">
+    <div class="brand-modal-card" style="max-width: 500px;">
+        <div class="brand-modal-brand-stripe"></div>
+        <div class="brand-modal-content" style="padding: 22px;">
+            <h3 style="margin-top: 0; margin-bottom: 8px; color: var(--dark-blue); font-family: 'Subhead1', sans-serif; font-size: 20px; text-transform: uppercase;">💬 Nudge SMS Preview</h3>
+            <p id="nudgeRecipientName" style="font-size: 15px; color: var(--crust-burnt); margin-top: 0; margin-bottom: 12px; font-family: 'Subhead2'; font-weight: bold;"></p>
+            
+            <div style="background: #f8fafc; border: 1.5px solid var(--crust-med); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+                <textarea id="nudgeTextPreview" readonly style="width: 100%; height: 110px; border: none; background: transparent; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.45; color: var(--crust-burnt); resize: none; outline: none;"></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; border-top: 1.5px solid var(--crust-med); padding-top: 14px;">
+                <button type="button" onclick="closeNudgeModal()" style="background: var(--crust-med); color: var(--crust-burnt); border: none; padding: 8px 16px; border-radius: 6px; font-family: 'Subhead2'; font-size: 15px; cursor: pointer;">Close</button>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" onclick="copyNudgeText(this)" style="background: var(--brand-green); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-family: 'Subhead2'; font-size: 15px; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">📋 Copy Text</button>
+                    <a id="nudgeOpenSmsLink" href="#" style="background: var(--brand-blue); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-family: 'Subhead2'; font-size: 15px; text-transform: uppercase; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">📱 Open SMS</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxQVuU0uQ3TdkfsBwJpZ-K1iUDXTuLgvqEayPeqZgSRLDNxHOEUsOrjaSZAujI8p_874g/exec?city=Dallas&username=dallas_admin&password=dallas_password_123";
     let rawData = { onboarding: [], interviews: [] };
@@ -653,20 +676,15 @@
         return match ? `(${match[1]}) ${match[2]}-${match[3]}` : phone;
     }
 
-    function buildSmsUrl(item) {
-        const phone = item.phoneNumber ? item.phoneNumber.replace(/\D/g, '') : '';
-        if (!phone) return '#';
-
+    function extractSmsText(item) {
         const firstName = item.name ? item.name.toString().trim().split(/\s+/)[0] : 'Team Member';
 
         if (item.incorrectEmail) {
-            const txt = `Hey ${firstName}! This is Domino's. We tried sending over your onboarding documents, but it looks like we have an incorrect email address on file. Can you please reply with your correct email so we can get you set up? Thanks!`;
-            return `sms:${phone}?body=${encodeURIComponent(txt)}`;
+            return `Hey ${firstName}! This is Domino's. We tried sending over your onboarding documents, but it looks like we have an incorrect email address on file. Can you please reply with your correct email so we can get you set up? Thanks!`;
         }
 
         if (item.missedNto) {
-            const txt = `Hey ${firstName}! This is Domino's. We noticed you missed your scheduled orientation (NTO). Please reply back to discuss rescheduling the class.`;
-            return `sms:${phone}?body=${encodeURIComponent(txt)}`;
+            return `Hey ${firstName}! This is Domino's. We noticed you missed your scheduled orientation (NTO). Please reply back to discuss rescheduling the class.`;
         }
 
         if (item.hasMissingDocs) {
@@ -680,7 +698,7 @@
                     txt = `Hey ${firstName}! This is Domino's. We are missing your ${item.missingDocsText} for your onboarding. Please reply back so we can get this updated and get you scheduled!`;
                 }
             }
-            return `sms:${phone}?body=${encodeURIComponent(txt)}`;
+            return txt;
         }
 
         if (item.onboardingSent && !item.hired) {
@@ -695,13 +713,49 @@
                 else if (missing.length === 2) missingStr = `${missing[0]} and ${missing[1]}`;
                 else missingStr = `${missing[0]}, ${missing[1]}, and ${missing[2]}`;
 
-                const txt = `Hey ${firstName}! This is Domino's. Excited to get you started! We just need you to finish your ${missingStr} so we can schedule you. The links were sent to your email. Let us know when you finish them!`;
-                return `sms:${phone}?body=${encodeURIComponent(txt)}`;
+                return `Hey ${firstName}! This is Domino's. Excited to get you started! We just need you to finish your ${missingStr} so we can schedule you. The links were sent to your email. Let us know when you finish them!`;
             }
         }
 
-        const defaultTxt = `Hey ${firstName}! This is Domino's. Just checking in on your onboarding paperwork. Let us know if you have any questions!`;
-        return `sms:${phone}?body=${encodeURIComponent(defaultTxt)}`;
+        return `Hey ${firstName}! This is Domino's. Just checking in on your onboarding paperwork. Let us know if you have any questions!`;
+    }
+
+    function buildSmsUrl(item) {
+        const phone = item.phoneNumber ? item.phoneNumber.replace(/\D/g, '') : '';
+        if (!phone) return '#';
+        const txt = extractSmsText(item);
+        return `sms:${phone}?body=${encodeURIComponent(txt)}`;
+    }
+
+    function handleNudgeClick(event, itemId) {
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+        const item = (rawData.onboarding || []).find(x => String(x.id) === String(itemId));
+        if (!item) return;
+
+        if (!isMobile) {
+            event.preventDefault();
+            const text = extractSmsText(item);
+            const url = buildSmsUrl(item);
+            
+            document.getElementById('nudgeRecipientName').innerText = `To: ${item.name} (${formatPhone(item.phoneNumber)})`;
+            document.getElementById('nudgeTextPreview').value = text;
+            document.getElementById('nudgeOpenSmsLink').href = url;
+            document.getElementById('nudgePreviewModal').classList.remove('hidden');
+        }
+    }
+
+    function closeNudgeModal() {
+        document.getElementById('nudgePreviewModal').classList.add('hidden');
+    }
+
+    function copyNudgeText(btn) {
+        const textarea = document.getElementById('nudgeTextPreview');
+        if (!textarea) return;
+        navigator.clipboard.writeText(textarea.value).then(() => {
+            const orig = btn.innerText;
+            btn.innerText = '✔ Copied!';
+            setTimeout(() => { btn.innerText = orig; }, 2000);
+        });
     }
 
     function toggleCard(cardElement, itemId) {
@@ -861,7 +915,7 @@
                         ${item.phoneNumber ? `
                             <div class="action-container">
                                 <a href="tel:${item.phoneNumber}" class="action-btn btn-call">📞 Call Phone</a>
-                                <a href="${smsUrl}" class="action-btn btn-nudge">💬 Nudge SMS</a>
+                                <a href="${smsUrl}" onclick="handleNudgeClick(event, '${item.id}')" class="action-btn btn-nudge">💬 Nudge SMS</a>
                             </div>
                         ` : ''}
                         
