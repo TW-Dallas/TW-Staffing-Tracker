@@ -676,6 +676,51 @@
         return match ? `(${match[1]}) ${match[2]}-${match[3]}` : phone;
     }
 
+    function formatMissingDocsForSms(rawText) {
+        if (!rawText) return "required onboarding paperwork";
+
+        const t = rawText.toLowerCase();
+
+        const hasA = t.includes("list a");
+        const hasB = t.includes("list b");
+        const hasC = t.includes("list c");
+        const hasIns = t.includes("insurance");
+        const hasReg = t.includes("registration");
+        const hasInsp = t.includes("inspection");
+        const hasMismatch = t.includes("mismatch");
+
+        const idCount = (hasA ? 1 : 0) + (hasB ? 1 : 0) + (hasC ? 1 : 0);
+
+        if (hasMismatch) {
+            return "updated ID (due to a document mismatch)";
+        }
+        if (idCount > 1) {
+            return "required ID documents";
+        }
+        if (hasA) {
+            return "List A document (such as a Passport or Permanent Resident card)";
+        }
+        if (hasB) {
+            return "photo ID (Driver's License or State ID)";
+        }
+        if (hasC) {
+            return "Social Security card or Birth Certificate";
+        }
+
+        const vehicleParts = [];
+        if (hasIns) vehicleParts.push("Auto Insurance");
+        if (hasReg) vehicleParts.push("Vehicle Registration");
+        if (hasInsp) vehicleParts.push("in-person Vehicle Inspection");
+
+        if (vehicleParts.length > 0) {
+            if (vehicleParts.length === 1) return vehicleParts[0];
+            if (vehicleParts.length === 2) return `${vehicleParts[0]} and ${vehicleParts[1]}`;
+            return `${vehicleParts[0]}, ${vehicleParts[1]}, and ${vehicleParts[2]}`;
+        }
+
+        return rawText.trim();
+    }
+
     function extractSmsText(item) {
         const firstName = item.name ? item.name.toString().trim().split(/\s+/)[0] : 'Team Member';
 
@@ -688,17 +733,11 @@
         }
 
         if (item.hasMissingDocs) {
-            let txt = `Hey ${firstName}! This is Domino's. We are missing some onboarding paperwork for you. Please reply back so we can help you get this updated and get you scheduled!`;
-            
-            if (item.missingDocsText) {
-                const textLower = item.missingDocsText.toLowerCase();
-                if (textLower.includes('id') || textLower.includes('license') || textLower.includes('social') || textLower.includes('ssn') || textLower.includes('birth') || textLower.includes('i-9') || textLower.includes('passport') || textLower.includes('mismatch')) {
-                    txt = `Hey ${firstName}! This is Domino's. We need an updated document or correction for your onboarding (${item.missingDocsText}). Please reply back so we can arrange a time for you to bring that to the store or upload it!`;
-                } else {
-                    txt = `Hey ${firstName}! This is Domino's. We are missing your ${item.missingDocsText} for your onboarding. Please reply back so we can get this updated and get you scheduled!`;
-                }
+            const formattedDoc = formatMissingDocsForSms(item.missingDocsText);
+            if (formattedDoc.includes('Inspection')) {
+                return `Hey ${firstName}! This is Domino's. We still need your ${formattedDoc} to complete your onboarding. Please reply back so we can arrange a time for your inspection! Thanks!`;
             }
-            return txt;
+            return `Hey ${firstName}! This is Domino's. We still need your ${formattedDoc} to complete your onboarding. Please reply back so we can help you get that submitted or bring it by the store! Thanks!`;
         }
 
         if (item.onboardingSent && !item.hired) {
