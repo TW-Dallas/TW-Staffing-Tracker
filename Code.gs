@@ -51,6 +51,34 @@ function formatCellDate(val) {
   return str;
 }
 
+function formatCellDateTime(val) {
+  if (!val) return "";
+  let d = null;
+  if (val instanceof Date) {
+    d = val;
+  } else {
+    var str = String(val).trim();
+    if (!str) return "";
+    if (/^\d{5}(\.\d+)?$/.test(str)) {
+      var num = parseFloat(str);
+      d = new Date(Math.round((num - 25569) * 86400 * 1000));
+    } else {
+      d = new Date(str);
+    }
+  }
+  if (!d || isNaN(d.getTime())) return String(val).trim();
+  
+  const m = d.getMonth() + 1;
+  const day = d.getDate();
+  const yr = d.getFullYear();
+  let hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  return `${m}/${day}/${yr} ${hours}:${minutes} ${ampm}`;
+}
+
 function authenticateUser(rawUsername, rawPassword) {
   if (!rawUsername || !rawPassword) return null;
   const username = rawUsername.toString().trim().toLowerCase();
@@ -255,7 +283,7 @@ function getOnboardingData(ss, sheetName) {
         notes: String(row[6] || "").trim(),
         shirtSize: String(row[7] || "").trim(),
         payCard: String(row[8] || "").trim(),
-        lastUpdated: formatCellDate(row[9]),
+        lastUpdated: formatCellDateTime(row[9]),
         phoneNumber: String(row[10] || "").trim(),
         email: String(row[11] || "").trim(),
         submissionReceived: isTrue(row[12]),
