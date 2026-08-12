@@ -733,7 +733,15 @@
         }
 
         if (item.hasMissingDocs) {
-            const formattedDoc = formatMissingDocsForSms(item.missingDocsText);
+            const rawDoc = item.missingDocsText || '';
+            const rawLower = rawDoc.toLowerCase();
+            const isCorrection = rawLower.includes('dob') || rawLower.includes('date of birth') || rawLower.includes('ssn') || rawLower.includes('correct') || rawLower.includes('mismatch') || rawLower.includes('spelling') || rawLower.includes('i-9') || rawLower.includes('name');
+
+            if (isCorrection && !rawLower.includes('list a') && !rawLower.includes('list b') && !rawLower.includes('list c')) {
+                return `Hey ${firstName}! This is Domino's. We need a quick correction for your onboarding paperwork: ${rawDoc}. Please reply back so we can help you get this updated! Thanks!`;
+            }
+
+            const formattedDoc = formatMissingDocsForSms(rawDoc);
             if (formattedDoc.includes('Inspection')) {
                 return `Hey ${firstName}! This is Domino's. We still need your ${formattedDoc} to complete your onboarding. Please reply back so we can arrange a time for your inspection! Thanks!`;
             }
