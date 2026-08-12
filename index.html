@@ -521,8 +521,8 @@
         var str = val.toString().trim();
         if (/^\d{5}$/.test(str)) {
             var num = parseInt(str, 10);
-            var date = new Date((num - (25567 + 2)) * 86400 * 1000);
-            return (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
+            var date = new Date(Math.round((num - 25569) * 86400 * 1000));
+            return (date.getUTCMonth() + 1) + '/' + date.getUTCDate() + '/' + date.getUTCFullYear();
         }
         return str;
     }

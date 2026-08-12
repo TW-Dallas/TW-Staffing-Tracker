@@ -42,7 +42,13 @@ function formatCellDate(val) {
     if (isNaN(val.getTime())) return "";
     return (val.getMonth() + 1) + "/" + val.getDate() + "/" + val.getFullYear();
   }
-  return String(val).trim();
+  var str = String(val).trim();
+  if (/^\d{5}$/.test(str)) {
+    var num = parseInt(str, 10);
+    var d = new Date(Math.round((num - 25569) * 86400 * 1000));
+    return (d.getUTCMonth() + 1) + "/" + d.getUTCDate() + "/" + d.getUTCFullYear();
+  }
+  return str;
 }
 
 function authenticateUser(rawUsername, rawPassword) {
