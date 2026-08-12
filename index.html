@@ -833,8 +833,8 @@
                 <div class="card ${cardClass} ${isCurrentlyExpanded ? 'expanded' : ''}" onclick="toggleCard(this, '${item.id}')">
                     <div class="card-header">
                         <div class="name-phone-group" style="display: flex; flex-direction: column;">
-                            <div class="name" style="display: flex; align-items: center; gap: 4px;">
-                                ${item.name} ${(item.ddEntered || item.allPayCompleted) ? '<span title="Payroll / Pay Card Complete" style="color: #2e7d32; font-weight: bold; font-size: 16px;">✔</span>' : ''} <span class="expand-chevron">▼</span>
+                            <div class="name" style="display: flex; align-items: center;">
+                                ${item.name} <span class="expand-chevron">▼</span>
                             </div>
                         </div>
                         <div class="position-badge">${icon} ${item.position}</div>
