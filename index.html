@@ -1185,7 +1185,7 @@
             let statusColor = 'status-blue';
             const s = item.status ? item.status.toString() : '';
             if (s.includes('No Show') || s.includes('Canceled') || s.includes('Pass') || s.includes('Declined')) statusColor = 'status-red';
-            else if (s.includes('Hired') || s.includes('Completed')) statusColor = 'status-green';
+            else if (s.includes('Hired') || s.includes('Completed') || s.includes('Position Offered') || s.includes('Offered')) statusColor = 'status-green';
             else if (s.includes('To Be Determined') || s.includes('TBD') || s.includes('Hold')) statusColor = 'status-tbd';
             else if (s.includes('GM Interview')) statusColor = 'status-gminterview';
             else if (s.includes('Reschedule') || s.includes('Withdrawn')) statusColor = 'status-gray';
@@ -1203,8 +1203,12 @@
                 notesHtml += `<div class="notes-section" style="margin-top: 6px; white-space: pre-wrap;">📝 Notes:\n${item.notes}</div>`;
             }
 
-            const isHired = s.toLowerCase().includes('hired');
-            const displayResult = isHired ? '🎉 Hired (New Hire Forms Submitted)' : item.status;
+            let displayResult = item.status;
+            if (s.toLowerCase().includes('position offered') || s.toLowerCase().includes('offered')) {
+                displayResult = '🤝 Position Offered';
+            } else if (s.toLowerCase().includes('hired')) {
+                displayResult = '🎉 Hired';
+            }
 
             const html = `
                 <div class="card ${statusColor}">

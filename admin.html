@@ -365,6 +365,7 @@
                                         <option value="Phone Interview">📞 Phone Interview</option>
                                         <option value="To Be Determined">⏳ To Be Determined (TBD)</option>
                                         <option value="GM Interview">👔 GM Interview</option>
+                                        <option value="Position Offered">🤝 Position Offered</option>
                                         <option value="Hired">🎉 Hired</option>
                                         <option value="No Show">❌ No Show</option>
                                         <option value="Declined">🚫 Declined</option>
@@ -2533,10 +2534,10 @@
             return;
         }
 
-        // Auto-update Interview status to Hired if editing an existing interview row
+        // Auto-update Interview status to Position Offered if editing an existing interview row
         if (intRowIdx) {
             const intStatusEl = document.getElementById('intStatus');
-            if (intStatusEl) intStatusEl.value = 'Hired';
+            if (intStatusEl) intStatusEl.value = 'Position Offered';
             const mockEventInt = { preventDefault: () => {} };
             await saveInterviewCandidate(mockEventInt);
         }
@@ -2555,7 +2556,7 @@
         const mockEvent = { preventDefault: () => {} };
         await saveCandidate(mockEvent);
 
-        showBrandAlert(`Successfully ported ${name} to Onboarding and set Interview status to 🎉 Hired!`, "Candidate Ported & Saved");
+        showBrandAlert(`Successfully ported ${name} to Onboarding and set Interview status to 🤝 Position Offered!`, "Candidate Ported & Saved");
     }
 
     function portCandidateToStaffing(source) {
