@@ -563,27 +563,40 @@
     function getStatusWeight(item) {
         if (item.ineligible) return 12;
         if (item.inactive) return 11;
-    
+
         const att = (item.ntoAttendance || item.ntoStatus || item['NTO Status'] || item.liveStatus || item.status || '').trim();
         const isMissedNtoActive = !item.ntoScheduled && (item.missedNto || (att && (att === 'Not in NTO' || att.includes('Incomplete'))));
-    
-        if (item.incorrectEmail || item.hasMissingDocs || isMissedNtoActive) return 0;
-        if (att === 'Left Early') return 0;
-        
+
         if (item.hired) {
             const today = new Date();
             today.setHours(0,0,0,0);
-            const updateDate = new Date(item.lastUpdated); 
+            const updateDate = item.lastUpdated ? new Date(item.lastUpdated) : new Date(0); 
             updateDate.setHours(0,0,0,0);
             return (updateDate.getTime() === today.getTime()) ? 1 : 10;
         }
-    
+
         if (item.ntoScheduled || att === 'In Lobby' || att === 'In Class' || att === 'NTO Complete' || att === 'Attended') return 2;
         if (item.ntoSignupLinkSent) return 3;
         if (item.onboardingSent) return 4;
         if (item.submissionReceived) return 5;
-        
+        if (item.incorrectEmail || item.hasMissingDocs || isMissedNtoActive || att === 'Left Early') return 7;
+
         return 6;
+    }
+
+    function compareCandidates(a, b) {
+        const weightA = getStatusWeight(a);
+        const weightB = getStatusWeight(b);
+        if (weightA !== weightB) {
+            return weightA - weightB;
+        }
+
+        const timeA = a.lastUpdated ? new Date(a.lastUpdated).getTime() : 0;
+        const timeB = b.lastUpdated ? new Date(b.lastUpdated).getTime() : 0;
+        const validA = !isNaN(timeA) ? timeA : 0;
+        const validB = !isNaN(timeB) ? timeB : 0;
+
+        return validB - validA;
     }
     
     function getPositionIcon(position) {
@@ -698,7 +711,7 @@
             }
 
             return true;
-        }).sort((a, b) => getStatusWeight(a) - getStatusWeight(b));
+        }).sort(compareCandidates);
 
         if(filtered.length === 0 && hiddenOlderCount === 0) { 
             list.innerHTML = '<div class="loader">No candidates active.</div>'; 
