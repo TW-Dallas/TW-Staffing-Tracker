@@ -2430,7 +2430,8 @@
             document.getElementById('intName').value = item.name || '';
             document.getElementById('intPosition').value = item.position || 'CSR';
             document.getElementById('intStore').value = item.store || '';
-            document.getElementById('intDo').value = item.doName || '';
+            const intDoElem = document.getElementById('intDo');
+            if (intDoElem) intDoElem.value = item.doName || '';
             document.getElementById('intPhone').value = item.phoneNumber || '';
             document.getElementById('intEmail').value = item.email || '';
             document.getElementById('intDate').value = formatDateForInput(item.date);
@@ -2648,7 +2649,8 @@
             payload.name = document.getElementById('intName').value.trim();
             payload.position = document.getElementById('intPosition').value;
             payload.store = document.getElementById('intStore').value.trim();
-            payload.doName = document.getElementById('intDo').value.trim();
+            const intDoElem = document.getElementById('intDo');
+            payload.doName = intDoElem ? intDoElem.value.trim() : (existingCand ? existingCand.doName || '' : '');
             payload.phoneNumber = document.getElementById('intPhone').value.trim();
             payload.email = document.getElementById('intEmail').value.trim();
             payload.date = document.getElementById('intDate').value.trim();
