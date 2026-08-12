@@ -3176,11 +3176,11 @@
                 doName: item.doName,
                 ntoDate: item.ntoDate || (existing ? existing.ntoDate : ''),
                 notes: item.notes,
-                cardReceived: existing ? existing.cardReceived : false,
-                registered: existing ? existing.registered : false,
-                ddReceived: existing ? existing.ddReceived : false,
-                ddEntered: existing ? existing.ddEntered : false,
-                noticeSentDate: existing ? existing.noticeSentDate : ''
+                cardReceived: item.cardReceived !== undefined ? item.cardReceived : (existing ? existing.cardReceived : false),
+                registered: item.registered !== undefined ? item.registered : (existing ? existing.registered : false),
+                ddReceived: item.ddReceived !== undefined ? item.ddReceived : (existing ? existing.ddReceived : false),
+                ddEntered: item.ddEntered !== undefined ? item.ddEntered : (existing ? existing.ddEntered : false),
+                noticeSentDate: item.noticeSentDate !== undefined ? item.noticeSentDate : (existing ? existing.noticeSentDate : '')
             };
         });
 

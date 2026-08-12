@@ -228,7 +228,7 @@ function getOnboardingData(ss, sheetName) {
   }
 
   // ULTRA-FAST READ: getValues()
-  const displayValues = sheet.getRange(2, 1, lastRow - 1, 27).getValues();
+  const displayValues = sheet.getRange(2, 1, lastRow - 1, 32).getValues();
   const isTrue = (val) => val === true || (val && String(val).toUpperCase() === "TRUE");
 
   const seenKeys = new Set();
@@ -302,7 +302,12 @@ function getOnboardingData(ss, sheetName) {
         pulseFormComplete: isTrue(row[24]),
         hatStyle: String(row[25] || "").trim(),
         missedNto: isTrue(row[26]),
-        ntoAttendance: resolvedAtt
+        ntoAttendance: resolvedAtt,
+        cardReceived: isTrue(row[27]),
+        registered: isTrue(row[28]),
+        ddReceived: isTrue(row[29]),
+        ddEntered: isTrue(row[30]),
+        noticeSentDate: formatCellDate(row[31])
       });
     }
   }
@@ -623,6 +628,11 @@ function doPost(e) {
         params.ineligible || false, params.inactive || false, params.missingDocs || false,
         params.pulseFormComplete || false, params.hatStyle || "", params.missedNto || false
       ]]);
+      sheet.getRange(nextRow, 28, 1, 5).setValues([[
+        params.cardReceived || false, params.registered || false,
+        params.ddReceived || false, params.ddEntered || false,
+        params.noticeSentDate || ""
+      ]]);
 
       if (params.submissionReceived || params.submissionReceived === undefined) {
         sendPushNotification(params.store, params.doName, "📄 Interview Guide Reviewed", params.name + "'s guide reviewed & added to onboarding pipeline!", "?store=" + params.store + "&view=onboarding");
@@ -701,6 +711,12 @@ function doPost(e) {
       const updatedHatStyle = strVal(params.hatStyle, existingRow[25]);
       const updatedMissedNto = boolVal(params.missedNto, existingRow[26]);
 
+      const updatedCardReceived = boolVal(params.cardReceived, existingRow[27]);
+      const updatedRegistered = boolVal(params.registered, existingRow[28]);
+      const updatedDdReceived = boolVal(params.ddReceived, existingRow[29]);
+      const updatedDdEntered = boolVal(params.ddEntered, existingRow[30]);
+      const updatedNoticeSentDate = val(params.noticeSentDate, existingRow[31]);
+
       // Update Name, Position, and Store # (Cols B, C, D) so Store transfers & edits persist
       sheet.getRange(sheetRow, 2, 1, 3).setValues([[ updatedName, updatedPosition, updatedStore ]]);
       sheet.getRange(sheetRow, 7, 1, 6).setValues([[
@@ -713,6 +729,9 @@ function doPost(e) {
         updatedHired, updatedIncorrectEmail, false,
         updatedIneligible, updatedInactive, updatedMissingDocs,
         updatedPulseForm, updatedHatStyle, updatedMissedNto
+      ]]);
+      sheet.getRange(sheetRow, 28, 1, 5).setValues([[
+        updatedCardReceived, updatedRegistered, updatedDdReceived, updatedDdEntered, updatedNoticeSentDate
       ]]);
 
       if (params.missingDocs && params.missingDocs !== "FALSE") {
