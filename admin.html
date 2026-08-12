@@ -2067,15 +2067,44 @@
                 return true;
             });
 
-            // Sort NTO candidates: Soonest upcoming NTO date at the TOP!
+            const todayStart = new Date();
+            todayStart.setHours(0,0,0,0);
+
+            function getNtoBucketPriority(item) {
+                const dateObj = parseCandidateDate(item.ntoDate);
+                if (dateObj) {
+                    const checkDate = new Date(dateObj);
+                    checkDate.setHours(0,0,0,0);
+                    if (checkDate.getTime() >= todayStart.getTime()) {
+                        return 1; // Upcoming or Today (Top Priority)
+                    }
+                    return 3; // Past NTO Date (Sinks to Bottom)
+                }
+                if (item.ntoSignupLinkSent || item.ntoScheduled) {
+                    return 2; // Pending Scheduling (Middle Priority)
+                }
+                return 3;
+            }
+
+            // Sort NTO candidates: Upcoming (soonest first) -> Pending -> Past (most recent first)
             filteredNto.sort((a, b) => {
-                const dateA = parseCandidateDate(a.ntoDate || a.hireDate);
-                const dateB = parseCandidateDate(b.ntoDate || b.hireDate);
+                const priorityA = getNtoBucketPriority(a);
+                const priorityB = getNtoBucketPriority(b);
 
-                const timeA = dateA ? dateA.getTime() : Infinity;
-                const timeB = dateB ? dateB.getTime() : Infinity;
+                if (priorityA !== priorityB) {
+                    return priorityA - priorityB;
+                }
 
-                if (timeA !== timeB) return timeA - timeB; // Soonest NTO date FIRST!
+                const dateA = parseCandidateDate(a.ntoDate);
+                const dateB = parseCandidateDate(b.ntoDate);
+                const timeA = dateA ? dateA.getTime() : 0;
+                const timeB = dateB ? dateB.getTime() : 0;
+
+                if (priorityA === 1) {
+                    if (timeA !== timeB) return timeA - timeB; // Upcoming ascending
+                } else if (priorityA === 3) {
+                    if (timeA !== timeB) return timeB - timeA; // Past descending
+                }
 
                 return (a.name || '').localeCompare(b.name || '');
             });
@@ -2091,22 +2120,30 @@
                 if (item.id === currentSelectedId) card.classList.add('selected');
 
                 let ntoStatusColor = 'var(--brand-blue)';
-                let ntoLabel = item.ntoDate ? `🎓 NTO: ${item.ntoDate}` : '📅 NTO Scheduled';
+                let ntoLabel = '';
 
-                if (item.missedNto || item.ntoStatus === 'Not in NTO') {
+                const isCompleted = item.ntoStatus === 'NTO Complete' || item.ntoStatus === 'In Class';
+                const isMissed = item.missedNto || item.ntoStatus === 'Not in NTO' || item.ntoStatus === 'Left Early';
+
+                if (isMissed) {
                     card.classList.add('status-red');
                     ntoStatusColor = 'var(--brand-red)';
                     ntoLabel = '⚠️ Missed NTO';
-                } else if (item.ntoStatus === 'NTO Complete' || item.hired) {
+                } else if (isCompleted) {
                     card.classList.add('status-green');
                     ntoStatusColor = 'var(--success-green)';
                     ntoLabel = item.ntoDate ? `🎓 NTO: ${item.ntoDate} (Done)` : '🎓 NTO Complete';
+                } else if (item.ntoDate) {
+                    card.classList.add('status-blue');
+                    ntoStatusColor = 'var(--dark-blue)';
+                    ntoLabel = `🎓 NTO: ${item.ntoDate}`;
                 } else if (item.ntoSignupLinkSent) {
                     card.classList.add('status-blue');
                     ntoStatusColor = 'var(--dark-blue)';
                     ntoLabel = '📨 Link Sent';
                 } else {
                     card.classList.add('status-blue');
+                    ntoLabel = '📅 NTO Scheduled';
                 }
 
                 const dayStr = item.ntoDate ? getDayOfWeekFromDateString(item.ntoDate) : '';
