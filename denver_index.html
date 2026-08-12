@@ -530,12 +530,16 @@
         }
 
         if (item.ntoScheduled || item.ntoAttendance === 'In Lobby' || item.ntoAttendance === 'In Class' || item.ntoAttendance === 'NTO Complete' || item.ntoAttendance === 'Attended') return 2;
-        if (item.ntoSignupLinkSent) return 3;
-        if (item.onboardingSent) return 4;
-        if (item.submissionReceived) return 5;
         if (item.incorrectEmail || item.hasMissingDocs || isMissedNtoActive || item.ntoAttendance === 'Left Early') return 7;
 
-        return 6;
+        // All active pipeline candidates share Weight 3 so they sort strictly by lastUpdated descending (most recent highest)
+        return 3;
+    }
+
+    function parseDateTimestamp(val) {
+        if (!val) return 0;
+        const d = new Date(val);
+        return isNaN(d.getTime()) ? 0 : d.getTime();
     }
 
     function compareCandidates(a, b) {
@@ -545,12 +549,10 @@
             return weightA - weightB;
         }
 
-        const timeA = a.lastUpdated ? new Date(a.lastUpdated).getTime() : 0;
-        const timeB = b.lastUpdated ? new Date(b.lastUpdated).getTime() : 0;
-        const validA = !isNaN(timeA) ? timeA : 0;
-        const validB = !isNaN(timeB) ? timeB : 0;
+        const timeA = parseDateTimestamp(a.lastUpdated);
+        const timeB = parseDateTimestamp(b.lastUpdated);
 
-        return validB - validA;
+        return timeB - timeA;
     }
     
     function formatDisplayDateTime(val) {
