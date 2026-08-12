@@ -567,23 +567,33 @@
         const att = (item.ntoAttendance || item.ntoStatus || item['NTO Status'] || item.liveStatus || item.status || '').trim();
         const isMissedNtoActive = !item.ntoScheduled && (item.missedNto || (att && (att === 'Not in NTO' || att.includes('Incomplete'))));
 
-        if (item.hired) {
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            let hireDate = item.ntoDate ? new Date(item.ntoDate) : null;
-            if (!hireDate || isNaN(hireDate.getTime())) {
-                hireDate = item.lastUpdated ? new Date(item.lastUpdated) : new Date(0);
-            }
-            if (!isNaN(hireDate.getTime())) {
-                hireDate.setHours(0,0,0,0);
-            }
-            return (hireDate && hireDate.getTime() === today.getTime()) ? 1 : 10;
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        let ntoDateObj = item.ntoDate ? new Date(item.ntoDate) : null;
+        if (ntoDateObj && !isNaN(ntoDateObj.getTime())) {
+            ntoDateObj.setHours(0,0,0,0);
+        } else {
+            ntoDateObj = null;
         }
 
-        if (item.ntoScheduled || att === 'In Lobby' || att === 'In Class' || att === 'NTO Complete' || att === 'Attended') return 2;
+        const isNtoInPast = ntoDateObj && ntoDateObj.getTime() < today.getTime();
+        const isNtoToday = ntoDateObj && ntoDateObj.getTime() === today.getTime();
+
+        if (item.hired && isNtoToday) return 1;
+
+        // Upcoming NTO Scheduled or in class today
+        if (!isNtoInPast && (item.ntoScheduled || att === 'In Lobby' || att === 'In Class' || isNtoToday)) {
+            return 2;
+        }
+
+        // Past Completed NTO / Hired > 24h Ago
+        if (item.hired || (isNtoInPast && (att === 'NTO Complete' || att === 'Attended' || item.allPayCompleted || item.pulseFormComplete))) {
+            return 10;
+        }
+
         if (item.incorrectEmail || item.hasMissingDocs || isMissedNtoActive || att === 'Left Early') return 7;
 
-        // All active pipeline candidates share Weight 3 so they sort strictly by lastUpdated descending (most recent highest)
+        // Active Pipeline Candidates (most recent highest)
         return 3;
     }
 

@@ -1574,11 +1574,22 @@
         const isBlockedByDocs = rawMissingDocs !== "" && rawMissingDocs.toUpperCase() !== "FALSE";
         const isBlocked = isBlockedByDocs || item.incorrectEmail || item.missedNto;
 
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        let ntoDateObj = item.ntoDate ? new Date(item.ntoDate) : null;
+        if (ntoDateObj && !isNaN(ntoDateObj.getTime())) {
+            ntoDateObj.setHours(0,0,0,0);
+        } else {
+            ntoDateObj = null;
+        }
+        const isNtoInPast = ntoDateObj && ntoDateObj.getTime() < today.getTime();
+        const isNtoToday = ntoDateObj && ntoDateObj.getTime() === today.getTime();
+
         // Clean Submissions (Ready for action) -> TOP PRIORITY (Weight 10)
         if (item.submissionReceived && !item.onboardingSent && !isBlocked) return 10;
 
-        // Clean Active Pipeline Stages
-        if (item.ntoScheduled && !isBlocked) return 8;
+        // Clean Active Pipeline Stages (Upcoming NTO / Today)
+        if (!isNtoInPast && (item.ntoScheduled || isNtoToday) && !isBlocked) return 8;
         if (item.ntoSignupLinkSent && !isBlocked) return 7;
         if (item.bgcComplete && item.allPayCompleted && item.pulseFormComplete && !isBlocked) return 6;
         if ((item.bgcComplete || item.allPayCompleted || item.pulseFormComplete) && !isBlocked) return 5;
@@ -1587,7 +1598,8 @@
         // Blocked Candidates (Missing Docs / Incorrect Email / Missed NTO) -> Grouped below active queue (Weight 3)
         if (isBlocked) return 3;
 
-        if (item.hired) return 1;
+        // Hired / Past NTO Completed Candidates -> Bottom of active view (Weight 1)
+        if (item.hired || (isNtoInPast && !isBlocked)) return 1;
         return 0;
     }
 
