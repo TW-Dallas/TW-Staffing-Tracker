@@ -516,8 +516,21 @@
         return { pct: 5, color: 'grey', label: 'Awaiting Onboarding' };
     }
 
+    function formatDisplayDate(val) {
+        if (!val) return '';
+        var str = val.toString().trim();
+        if (/^\d{5}$/.test(str)) {
+            var num = parseInt(str, 10);
+            var date = new Date((num - (25567 + 2)) * 86400 * 1000);
+            return (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
+        }
+        return str;
+    }
+
     // LAYER 2: DEDICATED ALERT BANNERS (Live Events & Blockers)
     function getAlertBanner(item) {
+        if (item.hired || item.inactive || item.ineligible) return '';
+
         const att = (item.ntoAttendance || item.ntoStatus || item['NTO Status'] || item.liveStatus || item.status || '').trim();
 
         if (att === 'In Lobby') {
@@ -717,7 +730,7 @@
                 chipsHtml += `<span class="chip">🧢 ${hatVal}</span>`;
             }
             if (payCardVal) chipsHtml += `<span class="chip">💳 Pay Card Required</span>`;
-            if (ntoDateVal) chipsHtml += `<span class="chip chip-nto">📅 NTO: ${ntoDateVal}</span>`;
+            if (ntoDateVal) chipsHtml += `<span class="chip chip-nto">📅 NTO: ${formatDisplayDate(ntoDateVal)}</span>`;
 
             let checklistHtml = '';
             if (!item.inactive && !item.ineligible && !item.hired) {
