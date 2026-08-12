@@ -324,10 +324,9 @@
                             <div class="form-group" style="flex: 1;">
                                 <label>Position</label>
                                 <select id="intPosition">
-                                    <option value="">Select Position</option>
+                                    <option value="DE">🚗 DE</option>
                                     <option value="CSR">🍕 CSR</option>
                                     <option value="BIKE">🚲 BIKE</option>
-                                    <option value="DE">🚗 DE</option>
                                     <option value="MIT">🎓 MIT</option>
                                 </select>
                             </div>
@@ -2526,6 +2525,7 @@
             document.getElementById('stfName').focus();
         } else if (currentView === 'interviews') {
             document.getElementById('formTitle').innerText = "Add New Interview";
+            document.getElementById('intPosition').value = 'DE';
             document.getElementById('intName').focus();
         } else {
             document.getElementById('formTitle').innerText = "Add New Candidate";
