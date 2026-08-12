@@ -309,13 +309,12 @@
                             🚀 Port Candidate to Onboarding
                         </button>
 
-                        <div class="form-group">
-                            <label>Candidate Name</label>
-                            <input type="text" id="intName">
-                        </div>
-                        
-                        <div class="form-row flex-three">
-                            <div class="form-group">
+                        <div class="form-row" style="display: flex; gap: 8px;">
+                            <div class="form-group" style="flex: 2.2;">
+                                <label>Candidate Name</label>
+                                <input type="text" id="intName">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
                                 <label>Position</label>
                                 <select id="intPosition">
                                     <option value="">Select Position</option>
@@ -325,13 +324,9 @@
                                     <option value="MIT">🎓 MIT</option>
                                 </select>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" style="flex: 0.8;">
                                 <label>Store #</label>
-                                <input type="text" id="intStore">
-                            </div>
-                            <div class="form-group">
-                                <label>DO Name</label>
-                                <input type="text" id="intDo">
+                                <input type="text" id="intStore" placeholder="####">
                             </div>
                         </div>
 
@@ -424,19 +419,19 @@
                                 </div>
                             </div>
 
-                        <div class="form-row" style="display: flex; gap: 12px;">
-                            <div class="form-group" style="flex: 1;">
-                                <label>Status Updates</label>
-                                <textarea id="intStatusUpdates" placeholder="Recent updates on interview progression..." style="height: 90px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4;"></textarea>
-                            </div>
+                        <div class="form-row" style="display: flex; gap: 12px; margin-top: 8px;">
                             <div class="form-group" style="flex: 1;">
                                 <label>Availability</label>
-                                <textarea id="intAvailability" placeholder="Enter availability details here..." style="height: 90px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4;"></textarea>
+                                <textarea id="intAvailability" placeholder="Enter availability details here..." style="height: 80px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4;"></textarea>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>Feedback & Notes</label>
+                                <textarea id="intNotes" placeholder="Write any specific interview notes here..." style="height: 80px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4;"></textarea>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label>Feedback & Notes</label>
-                            <textarea id="intNotes" placeholder="Write any specific interview notes here..."></textarea>
+                        <div class="form-group" style="margin-top: 6px;">
+                            <label>Status Updates</label>
+                            <textarea id="intStatusUpdates" placeholder="Recent updates on interview progression..." style="height: 55px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4;"></textarea>
                         </div>
                     </div> <!-- Closes #interviewFormFields -->
 
