@@ -570,9 +570,14 @@
         if (item.hired) {
             const today = new Date();
             today.setHours(0,0,0,0);
-            const updateDate = item.lastUpdated ? new Date(item.lastUpdated) : new Date(0); 
-            updateDate.setHours(0,0,0,0);
-            return (updateDate.getTime() === today.getTime()) ? 1 : 10;
+            let hireDate = item.ntoDate ? new Date(item.ntoDate) : null;
+            if (!hireDate || isNaN(hireDate.getTime())) {
+                hireDate = item.lastUpdated ? new Date(item.lastUpdated) : new Date(0);
+            }
+            if (!isNaN(hireDate.getTime())) {
+                hireDate.setHours(0,0,0,0);
+            }
+            return (hireDate && hireDate.getTime() === today.getTime()) ? 1 : 10;
         }
 
         if (item.ntoScheduled || att === 'In Lobby' || att === 'In Class' || att === 'NTO Complete' || att === 'Attended') return 2;
@@ -695,9 +700,9 @@
 
             if (item.store === 'Store #' || !matchesDo || !matchesStore) return false;
 
-            let candidateDate = item.lastUpdated ? new Date(item.lastUpdated) : null;
+            let candidateDate = item.ntoDate ? new Date(item.ntoDate) : null;
             if (!candidateDate || isNaN(candidateDate.getTime())) {
-                candidateDate = item.ntoDate ? new Date(item.ntoDate) : null;
+                candidateDate = item.lastUpdated ? new Date(item.lastUpdated) : null;
             }
 
             const isTerminalState = item.hired || item.inactive || item.ineligible;
