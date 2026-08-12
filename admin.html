@@ -3429,8 +3429,8 @@
                     <div style="font-family: 'Subhead2', sans-serif; font-size: 19px; color: var(--dark-blue);">${item.name}</div>
                     <div style="font-family: 'Condensed', sans-serif; font-size: 16px; color: var(--text-dark); margin-top: 2px;">Store #${item.store} • ${item.position || 'CSR'} • Date: ${ntoDateVal || 'N/A'}</div>
                 </div>
-                <div style="flex: 1.2;">
-                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" style="width: 100%; padding: 8px 10px; font-size: 18px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1px solid var(--crust-dark);">
+                <div style="flex: 1.2; display: flex; gap: 8px; align-items: center;">
+                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" style="flex: 1; padding: 8px 10px; font-size: 18px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1px solid var(--crust-dark);">
                         <option value="" ${!savedStatus ? 'selected' : ''} disabled>Select Status...</option>
                         <option value="In Lobby" ${savedStatus === 'In Lobby' ? 'selected' : ''}>🏨 In Lobby (Checked In)</option>
                         <option value="In Class" ${savedStatus === 'In Class' ? 'selected' : ''}>📖 In Class</option>                        
@@ -3438,10 +3438,63 @@
                         <option value="Left Early" ${savedStatus === 'Left Early' ? 'selected' : ''}>⚠️ Left Early</option>
                         <option value="NTO Complete" ${savedStatus === 'NTO Complete' ? 'selected' : ''}>🎓 NTO Complete</option>
                     </select>
+                    <button type="button" onclick="sendSingleNtoMeetLink('${escapeText(item.name || '')}', '${escapeText(item.email || '')}')" style="background: var(--brand-blue); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 15px; font-family: 'Subhead2', sans-serif; cursor: pointer; white-space: nowrap;" title="Send Google Meet link to this candidate only">
+                        ✉️ Send Link
+                    </button>
                 </div>
             `;
             container.appendChild(row);
         });
+    }
+
+    async function sendSingleNtoMeetLink(name, email) {
+        const classDate = document.getElementById('ntoClassDate').value;
+        if (!classDate) {
+            showBrandAlert("Please select a class date first.", "No Date Selected");
+            return;
+        }
+
+        let targetEmail = (email || '').trim();
+        if (!targetEmail) {
+            targetEmail = await showBrandPrompt(`Enter email address for ${name}:`, "", "Missing Email Address");
+            if (!targetEmail || !targetEmail.trim()) return;
+            targetEmail = targetEmail.trim();
+        }
+
+        const u = localStorage.getItem('onb_user') || '';
+        const isDenver = u.toLowerCase().startsWith('denver');
+        const defaultMeetLink = isDenver 
+            ? "https://meet.google.com/denver-nto-class" 
+            : "https://meet.google.com/dallas-nto-class";
+
+        const meetUrl = await showBrandPrompt(
+            `Confirm or paste Google Meet URL for ${name} (${classDate}):`, 
+            defaultMeetLink, 
+            "Google Meet Class Link"
+        );
+
+        if (!meetUrl || !meetUrl.trim()) return;
+
+        const confirmMsg = `Send Google Meet class link directly to ${name} (${targetEmail}) for ${classDate}?\n\n• Link: ${meetUrl.trim()}`;
+        const confirmed = await showBrandConfirm(confirmMsg, "Confirm Single Email Delivery");
+        if (!confirmed) return;
+
+        showLoader(true, `Sending Google Meet link to ${name}...`);
+
+        try {
+            const result = await apiCall('POST', {
+                action: "sendNtoMeetLinks",
+                classDate: classDate,
+                meetLink: meetUrl.trim(),
+                trainees: [{ name: name, email: targetEmail }]
+            });
+
+            showLoader(false);
+            showBrandAlert(`✅ Google Meet class link sent directly to ${name} (${targetEmail})!`, "Link Sent");
+        } catch (err) {
+            showLoader(false);
+            showBrandAlert("Error sending link: " + err.message, "Delivery Error");
+        }
     }
 
     // Trigger Conclude NTO Class
