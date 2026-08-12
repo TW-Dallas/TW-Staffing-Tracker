@@ -2735,6 +2735,10 @@
                 Object.assign(item, payload);
             }
 
+            delete unsavedDrafts[assignedId];
+            if (finalId) delete unsavedDrafts[finalId];
+            updateBatchDraftBanner();
+
             currentSelectedId = assignedId;
             renderList();
             updateAuditMetrics();
