@@ -1037,6 +1037,107 @@
         }
     }
 
+    let showOlderInterviews = false;
+
+    function toggleOlderInterviews() {
+        showOlderInterviews = !showOlderInterviews;
+        renderInterviews();
+    }
+
+    function parseInterviewDateTime(dateStr, timeStr) {
+        if (!dateStr) return null;
+        try {
+            let formattedDate = dateStr;
+            if (dateStr instanceof Date) {
+                formattedDate = (dateStr.getMonth() + 1) + '/' + dateStr.getDate() + '/' + dateStr.getFullYear();
+            }
+            const fullStr = formattedDate + (timeStr ? ' ' + timeStr : '');
+            const d = new Date(fullStr);
+            return isNaN(d.getTime()) ? null : d;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function getInterviewPriorityTier(item, today) {
+        const status = (item.status || '').toString().trim();
+        const gmDateObj = parseInterviewDateTime(item.gmDate, item.gmTime);
+        const phoneDateObj = parseInterviewDateTime(item.date, item.time);
+        
+        let effectiveDate = gmDateObj || phoneDateObj;
+        if (!effectiveDate && item.lastUpdated) {
+            const d = new Date(item.lastUpdated);
+            if (!isNaN(d.getTime())) effectiveDate = d;
+        }
+
+        const isPast = effectiveDate ? (effectiveDate.getTime() < today.getTime()) : false;
+
+        // Tier 1: Upcoming GM Interview
+        if (status.includes('GM Interview') && !isPast) return { tier: 1, date: effectiveDate, isUpcoming: true };
+
+        // Tier 2: Upcoming Phone Interview / TBD
+        if ((status.includes('Phone Interview') || status.includes('To Be Determined') || status.includes('TBD')) && !isPast) {
+            return { tier: 2, date: effectiveDate, isUpcoming: true };
+        }
+
+        // Tier 3: Past Phone Interview
+        if ((status.includes('Phone Interview') || status.includes('To Be Determined') || status.includes('TBD')) && isPast) {
+            return { tier: 3, date: effectiveDate, isUpcoming: false };
+        }
+
+        // Tier 4: Past GM Interview
+        if (status.includes('GM Interview') && isPast) {
+            return { tier: 4, date: effectiveDate, isUpcoming: false };
+        }
+
+        // Tier 5: Holds
+        if (status.includes('Hold')) {
+            return { tier: 5, date: effectiveDate, isUpcoming: false };
+        }
+
+        // Tier 6: Declined, No Show, Ineligible, Hired, etc.
+        return { tier: 6, date: effectiveDate, isUpcoming: false };
+    }
+
+    function compareInterviews(a, b, today) {
+        const priorityA = getInterviewPriorityTier(a, today);
+        const priorityB = getInterviewPriorityTier(b, today);
+
+        if (priorityA.tier !== priorityB.tier) {
+            return priorityA.tier - priorityB.tier;
+        }
+
+        const timeA = priorityA.date ? priorityA.date.getTime() : 0;
+        const timeB = priorityB.date ? priorityB.date.getTime() : 0;
+
+        // Upcoming Tiers (1 & 2): Sort soonest first (ascending)
+        if (priorityA.isUpcoming) {
+            return timeA - timeB;
+        }
+
+        // Past / Terminal Tiers (3, 4, 5, 6): Sort most recent past first (descending)
+        return timeB - timeA;
+    }
+
+    function formatInterviewCardDate(item) {
+        let text = '';
+        const phoneDateFormatted = formatDisplayDate(item.date);
+        const gmDateFormatted = formatDisplayDate(item.gmDate);
+
+        if (gmDateFormatted) {
+            text += `<div style="font-family: 'Subhead2', sans-serif; font-size: 14px; color: var(--dark-blue); font-weight: bold; margin-top: 2px;">👔 GM Interview: ${gmDateFormatted}${item.gmTime ? ' @ ' + item.gmTime : ''}</div>`;
+        }
+        if (phoneDateFormatted) {
+            text += `<div style="font-family: 'Condensed', sans-serif; font-size: 14px; color: var(--crust-burnt);">📞 Phone Interview: ${phoneDateFormatted}${item.day ? ' (' + item.day + ')' : ''}${item.time ? ' @ ' + item.time : ''}</div>`;
+        }
+
+        if (!text) {
+            text = `<div style="font-family: 'Condensed', sans-serif; font-size: 14px; color: var(--text-light);">${item.day || ''} ${item.time || ''}</div>`;
+        }
+
+        return text;
+    }
+
     function renderInterviews() {
         const list = document.getElementById('interviewList');
         if (!list) return;
@@ -1045,8 +1146,13 @@
         const storeVal = document.getElementById('storeFilter').value;
 
         const interviewsData = rawData.interviews || [];
-        const twoWeeksAgo = new Date();
-        twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const sevenDaysAgo = new Date(today);
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+        let hiddenOlderCount = 0;
 
         const filtered = interviewsData.filter(item => {
             const iDo = item.doName ? item.doName.toString().trim() : '';
@@ -1056,16 +1162,21 @@
 
             if (item.store === 'Store #' || !matchesDo || !matchesStore) return false;
 
-            const intDate = item.date ? new Date(item.date) : null;
-            if (intDate && !isNaN(intDate.getTime()) && intDate < twoWeeksAgo) {
-                if (!showOlderForStore) return false;
+            const priorityInfo = getInterviewPriorityTier(item, today);
+            const intDate = priorityInfo.date;
+
+            if (intDate && intDate < sevenDaysAgo) {
+                if (!showOlderInterviews) {
+                    hiddenOlderCount++;
+                    return false;
+                }
             }
 
             return true;
-        });
+        }).sort((a, b) => compareInterviews(a, b, today));
 
-        if (filtered.length === 0) { 
-            list.innerHTML = '<div class="loader">No interviews scheduled in the last 2 weeks.</div>'; 
+        if (filtered.length === 0 && hiddenOlderCount === 0) { 
+            list.innerHTML = '<div class="loader">No interviews scheduled.</div>'; 
             return; 
         }
 
@@ -1079,20 +1190,7 @@
             else if (s.includes('GM Interview')) statusColor = 'status-gminterview';
             else if (s.includes('Reschedule') || s.includes('Withdrawn')) statusColor = 'status-gray';
 
-            let showGmBox = false;
-            if (item.gmDate) {
-                try {
-                    const dateStr = item.gmDate + (item.gmTime ? ' ' + item.gmTime : '');
-                    const apptDate = new Date(dateStr);
-                    const now = new Date();
-                    if (!isNaN(apptDate.getTime())) { showGmBox = apptDate > now; }
-                } catch(e) { showGmBox = false; }
-            }
-
-            let gmHtml = '';
-            if (showGmBox) {
-                gmHtml = `<div class="gm-appt-box"><div class="gm-appt-label">GM Interview Scheduled</div><div class="gm-appt-time">📅 ${item.gmDate} @ ${item.gmTime}</div></div>`;
-            }
+            const dateHtml = formatInterviewCardDate(item);
 
             let notesHtml = '';
             if (item.statusUpdates && item.statusUpdates.trim() !== '') {
@@ -1108,13 +1206,33 @@
             const html = `
                 <div class="card ${statusColor}">
                     <div class="card-header"><div class="name">${item.name}</div><div class="position-badge">${icon} ${item.position}</div></div>
-                    <div class="meta-row"><span>${item.day || ''} ${item.time || ''}</span><span>Store #${item.store}</span></div>
-                    <div class="main-status" style="font-family: 'Subhead2'; font-size: 14px;">Result: ${item.status}</div>
-                    ${gmHtml}
+                    <div class="meta-row"><span>Store #${item.store}</span><span>DO: ${item.doName}</span></div>
+                    <div class="main-status" style="font-family: 'Subhead2'; font-size: 14px; margin-top: 4px;">Result: <strong>${item.status}</strong></div>
+                    ${dateHtml}
                     ${notesHtml}
                 </div>`;
             list.innerHTML += html;
         });
+
+        if (storeVal !== 'All' || hiddenOlderCount > 0 || showOlderInterviews) {
+            const loadMoreBox = document.createElement('div');
+            loadMoreBox.style.cssText = "text-align: center; margin: 20px 0; padding: 12px;";
+
+            if (!showOlderInterviews) {
+                loadMoreBox.innerHTML = `
+                    <button type="button" onclick="toggleOlderInterviews()" style="background: white; border: 2px solid var(--dark-blue); color: var(--dark-blue); font-family: 'Subhead2', sans-serif; font-size: 15px; padding: 10px 20px; border-radius: 8px; cursor: pointer; text-transform: uppercase; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+                        📂 View Older Interviews ${hiddenOlderCount > 0 ? '(' + hiddenOlderCount + ' Hidden)' : ''}
+                    </button>
+                `;
+            } else {
+                loadMoreBox.innerHTML = `
+                    <button type="button" onclick="toggleOlderInterviews()" style="background: var(--crust-med); border: 1px solid var(--crust-dark); color: var(--crust-burnt); font-family: 'Subhead2', sans-serif; font-size: 14px; padding: 8px 16px; border-radius: 8px; cursor: pointer; text-transform: uppercase;">
+                        ⬆️ Hide Older Interviews
+                    </button>
+                `;
+            }
+            list.appendChild(loadMoreBox);
+        }
     }
 
     function switchView(viewName) {
