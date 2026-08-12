@@ -3483,12 +3483,57 @@
         return matchedFromOnboarding;
     }
 
+    function getNextUpcomingNtoClassDate() {
+        const todayStart = new Date();
+        todayStart.setHours(0,0,0,0);
+
+        const upcomingDates = [];
+        candidates.forEach(c => {
+            if (c.ntoDate) {
+                const dt = parseCandidateDate(c.ntoDate);
+                if (dt) {
+                    const checkDt = new Date(dt);
+                    checkDt.setHours(0,0,0,0);
+                    if (checkDt.getTime() >= todayStart.getTime()) {
+                        const formatted = formatDateForInput(c.ntoDate);
+                        if (formatted) {
+                            upcomingDates.push({
+                                dateObj: checkDt,
+                                isoDate: formatted
+                            });
+                        }
+                    }
+                }
+            }
+        });
+
+        if (upcomingDates.length > 0) {
+            upcomingDates.sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
+            return upcomingDates[0].isoDate;
+        }
+
+        return '';
+    }
+
     // Render NTO Class View inside UI with matched 18px/19px site font sizing
     function renderNtoClassView() {
         const dateInput = document.getElementById('ntoClassDate');
+        
+        // Auto-select the next upcoming class date if date field is empty or if today has 0 trainees
         if (!dateInput.value) {
+            const nextClassDate = getNextUpcomingNtoClassDate();
+            dateInput.value = nextClassDate || new Date().toISOString().split('T')[0];
+        } else {
             const todayYyyyMmDd = new Date().toISOString().split('T')[0];
-            dateInput.value = todayYyyyMmDd;
+            if (dateInput.value === todayYyyyMmDd) {
+                const todayTrainees = candidates.filter(c => (c.ntoScheduled || c.hired || c.ntoDate) && formatDateForInput(c.ntoDate) === todayYyyyMmDd);
+                if (todayTrainees.length === 0) {
+                    const nextClassDate = getNextUpcomingNtoClassDate();
+                    if (nextClassDate) {
+                        dateInput.value = nextClassDate;
+                    }
+                }
+            }
         }
         
         const selectedDate = dateInput.value;
