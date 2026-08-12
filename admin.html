@@ -1789,7 +1789,9 @@
 
         let timeFormatted = formatTimeDisplayFrontEnd(rawT) || rawT || '';
         let calcDay = getDayOfWeekFromDateString(rawD);
-        let dayVal = isGm ? (item.gmDay || (item.gmDate ? calcDay : '') || item.day || '') : (item.day || calcDay || '');
+        let rawGmDay = (item.gmDay && !item.gmDay.includes('INT-ID')) ? item.gmDay : '';
+        let rawPhoneDay = (item.day && !item.day.includes('INT-ID')) ? item.day : '';
+        let dayVal = isGm ? (rawGmDay || calcDay || rawPhoneDay || '') : (rawPhoneDay || calcDay || '');
         let dayStr = dayVal ? dayVal.trim() + ' ' : '';
         let dateFormatted = rawD || '';
 
