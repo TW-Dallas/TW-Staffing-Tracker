@@ -1023,7 +1023,22 @@
             doGroups[doKey].push(s);
         });
 
-        let html = `<div style="display: flex; flex-direction: column; gap: 16px;">`;
+        let html = `
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <!-- TRAINING CENTER OFFICES HEADER -->
+                <div style="background: white; border-radius: 12px; border: 1.5px solid var(--crust-med); padding: 14px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.03);">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; font-family: 'Condensed', sans-serif;">
+                        <div style="background: #f8fafc; border-left: 4px solid var(--brand-blue); padding: 10px 12px; border-radius: 6px;">
+                            <div style="font-family: 'Subhead2'; font-size: 16px; color: var(--dark-blue); font-weight: bold;">📍 Mesquite Training Center</div>
+                            <div style="font-size: 14px; color: var(--crust-burnt); margin-top: 2px;">519 N Galloway Avenue<br>Mesquite, TX 75149</div>
+                        </div>
+                        <div style="background: #f8fafc; border-left: 4px solid var(--brand-blue); padding: 10px 12px; border-radius: 6px;">
+                            <div style="font-family: 'Subhead2'; font-size: 16px; color: var(--dark-blue); font-weight: bold;">📍 McKinney Training Center</div>
+                            <div style="font-size: 14px; color: var(--crust-burnt); margin-top: 2px;">4550 Eldorado Pkwy<br>McKinney, TX 75070</div>
+                        </div>
+                    </div>
+                </div>
+        `;
 
         const doNames = Object.keys(doGroups).sort();
         doNames.forEach(doName => {
@@ -1045,7 +1060,7 @@
                         <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                             ${doCell ? `<a href="tel:${doCell}" style="background: rgba(255,255,255,0.25); color: white; border-radius: 6px; padding: 6px 12px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${phoneSvg} Call DO</a>` : ''}
                             ${doCell ? `<a href="sms:${doCell}" style="background: rgba(255,255,255,0.25); color: white; border-radius: 6px; padding: 6px 12px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${smsSvg} Text DO</a>` : ''}
-                            ${doEmail ? `<a href="mailto:${doEmail}" style="background: rgba(255,255,255,0.2); color: white; border-radius: 6px; padding: 6px 12px; font-family: 'Condensed'; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${mailSvg} Email DO</a>` : ''}
+                            ${doEmail ? `<a href="mailto:${doEmail}" style="background: rgba(255,255,255,0.25); color: white; border-radius: 6px; padding: 6px 12px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${mailSvg} Email DO</a>` : ''}
                         </div>
                     </div>
                     <div style="padding: 12px; display: flex; flex-direction: column; gap: 10px;">
@@ -1067,8 +1082,8 @@
                         <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; padding-top: 6px; border-top: 1px dashed var(--crust-med);">
                             ${st.gmPhone ? `<a href="tel:${st.gmPhone}" style="background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; padding: 5px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${phoneSvg} Call GM</a>` : ''}
                             ${st.gmPhone ? `<a href="sms:${st.gmPhone}" style="background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; padding: 5px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${smsSvg} Text GM</a>` : ''}
-                            ${st.storePhone ? `<a href="tel:${st.storePhone}" style="background: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; padding: 5px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${phoneSvg} Store Line</a>` : ''}
-                            ${st.storeEmail ? `<a href="mailto:${st.storeEmail}" style="background: #f3e5f5; color: #7b1fa2; border: 1px solid #e1bee7; padding: 5px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${mailSvg} Email Store</a>` : ''}
+                            ${st.storePhone ? `<a href="tel:${st.storePhone}" style="background: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; padding: 5px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${phoneSvg} Store Line</a>` : ''}
+                            ${st.storeEmail ? `<a href="mailto:${st.storeEmail}" style="background: #f3e5f5; color: #7b1fa2; border: 1px solid #e1bee7; padding: 5px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${mailSvg} Email Store</a>` : ''}
                         </div>
                     </div>
                 `;
@@ -1076,6 +1091,14 @@
 
             html += `</div></div>`;
         });
+
+        // ALWAYS RENDER ADMIN & CORPORATE CONTACTS SECTION
+        html += `
+            <div style="margin-top: 12px;">
+                <h3 style="font-family: 'Subhead1', sans-serif; font-size: 20px; color: var(--dark-blue); margin-bottom: 12px; text-transform: uppercase; border-bottom: 2px solid var(--brand-blue); padding-bottom: 6px;">
+                    🏢 Admin & Corporate Contacts
+                </h3>
+        `;
 
         if (adminContacts.length > 0) {
             const adminCategoryGroups = {};
@@ -1085,18 +1108,11 @@
                 adminCategoryGroups[catKey].push(ac);
             });
 
-            html += `
-                <div style="margin-top: 12px;">
-                    <h3 style="font-family: 'Subhead1', sans-serif; font-size: 20px; color: var(--dark-blue); margin-bottom: 12px; text-transform: uppercase; border-bottom: 2px solid var(--brand-blue); padding-bottom: 6px;">
-                        🏢 Admin & Corporate Contacts
-                    </h3>
-            `;
-
             Object.keys(adminCategoryGroups).forEach(catName => {
                 const items = adminCategoryGroups[catName];
                 html += `
                     <div style="background: white; border-radius: 12px; border: 1.5px solid var(--crust-med); margin-bottom: 14px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.03);">
-                        <div style="background: var(--crust-burnt); color: white; padding: 10px 16px; font-family: 'Subhead2', sans-serif; font-size: 17px;">
+                        <div style="background: var(--crust-burnt); color: white; padding: 10px 16px; font-family: 'Subhead2', sans-serif; font-size: 17px; font-weight: bold;">
                             ${catName}
                         </div>
                         <div style="padding: 12px; display: flex; flex-direction: column; gap: 10px;">
@@ -1117,7 +1133,7 @@
                             <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--crust-med);">
                                 ${ac.phone ? `<a href="tel:${ac.phone}" style="background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; padding: 5px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${phoneSvg} Call (${ac.phone})</a>` : ''}
                                 ${ac.phone ? `<a href="sms:${ac.phone}" style="background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; padding: 5px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${smsSvg} Text</a>` : ''}
-                                ${ac.email ? `<a href="mailto:${ac.email}" style="background: #f3e5f5; color: #7b1fa2; border: 1px solid #e1bee7; padding: 5px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${mailSvg} Email (${ac.email})</a>` : ''}
+                                ${ac.email ? `<a href="mailto:${ac.email}" style="background: #f3e5f5; color: #7b1fa2; border: 1px solid #e1bee7; padding: 5px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${mailSvg} Email (${ac.email})</a>` : ''}
                             </div>
                         </div>
                     `;
@@ -1125,11 +1141,15 @@
 
                 html += `</div></div>`;
             });
-
-            html += `</div>`;
+        } else {
+            html += `
+                <div style="background: white; border-radius: 12px; border: 1.5px dashed var(--crust-dark); padding: 18px; text-align: center; color: var(--crust-burnt); font-family: 'Condensed', sans-serif; font-size: 16px;">
+                    ℹ️ Admin Contacts will automatically populate here as entries are added to the <strong>Dallas Admin Info</strong> tab in your Google Sheet.
+                </div>
+            `;
         }
 
-        html += `</div>`;
+        html += `</div></div>`;
         container.innerHTML = html;
     }
 
