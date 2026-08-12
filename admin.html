@@ -3146,15 +3146,26 @@
         });
     }
 
-    // Automatically pull candidates from Onboarding who have Pay Card Status = "Yes" (Col I in Dallas Info / Roster)
+    // Automatically pull candidates from Onboarding who have Pay Card Status = "Yes" AND have attended/completed NTO
     function processPayCards(data) {
         const onboardingList = data.onboarding || [];
         const serverPaycards = data.paycards || [];
         
-        // Find all onboarding candidates with payCard = "Yes"
+        // Find all onboarding candidates with payCard = "Yes" AND who have attended NTO / are Hired
         const matchedFromOnboarding = onboardingList.filter(item => {
             const val = (item.payCard || "").toString().trim().toLowerCase();
-            return val === "yes" || val === "true" || val === "1" || val.includes("yes");
+            const hasPayCard = val === "yes" || val === "true" || val === "1" || val.includes("yes");
+            if (!hasPayCard) return false;
+
+            const att = (item.ntoAttendance || "").toString().trim().toLowerCase();
+            const hasAttendedNto = item.hired || 
+                                   att === "nto complete" || 
+                                   att === "attended" || 
+                                   att === "in class" || 
+                                   att === "in lobby" ||
+                                   (att !== "" && !att.includes("not") && !att.includes("missed") && !att.includes("no show") && !att.includes("incomplete"));
+
+            return hasAttendedNto;
         }).map(item => {
             const existing = serverPaycards.find(p => p.id === item.id);
             return {
