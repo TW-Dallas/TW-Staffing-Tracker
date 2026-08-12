@@ -1646,6 +1646,39 @@
         return 1;
     }
 
+    function parseCandidateDate(val) {
+        if (!val) return null;
+        if (val instanceof Date) return val;
+        let str = val.toString().trim();
+        if (!str) return null;
+        str = str.split('T')[0].split(' ')[0];
+        let year, month, day;
+        if (str.includes('-')) {
+            let parts = str.split('-');
+            if (parts[0].length === 4) {
+                year = parseInt(parts[0], 10);
+                month = parseInt(parts[1], 10) - 1;
+                day = parseInt(parts[2], 10);
+            } else {
+                month = parseInt(parts[0], 10) - 1;
+                day = parseInt(parts[1], 10);
+                year = parseInt(parts[2], 10);
+            }
+        } else if (str.includes('/')) {
+            let parts = str.split('/');
+            month = parseInt(parts[0], 10) - 1;
+            day = parseInt(parts[1], 10);
+            year = parseInt(parts[2], 10);
+            if (year < 100) year += 2000;
+        } else {
+            const d = new Date(str);
+            return isNaN(d.getTime()) ? null : d;
+        }
+        if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
+        const d = new Date(year, month, day);
+        return isNaN(d.getTime()) ? null : d;
+    }
+
     function parseTimeToMinutes(tStr) {
         if (!tStr) return 0;
         let str = tStr.toString().trim().toUpperCase();
