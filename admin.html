@@ -2383,7 +2383,11 @@
     }
 
     function selectCandidate(item) {
-        captureCurrentFormDraft();
+        if (!item || !item.id) return;
+        try {
+            captureCurrentFormDraft();
+        } catch(e) {}
+        
         currentSelectedId = item.id;
         renderList();
 
@@ -2405,7 +2409,7 @@
             document.getElementById('checkPayRegistered').checked = item.registered || false;
             document.getElementById('checkPayDdReceived').checked = item.ddReceived || false;
             document.getElementById('checkPayDdEntered').checked = item.ddEntered || false;
-            document.getElementById('payNotes').value = item.notes || '';
+            document.getElementById('payNotes').value = displayNotes;
 
         } else if (currentView === 'staffing') {
             document.getElementById('fieldId').value = item.id;
@@ -2421,13 +2425,13 @@
             setSelectValueCaseInsensitive('stfRehire', item.rehireEligible || 'Yes');
             setSelectValueCaseInsensitive('stfCause', item.causeOfAction || '');
             setSelectValueCaseInsensitive('stfReason', item.reasonOfAction || '');
-            document.getElementById('stfNotes').value = item.notes || '';
+            document.getElementById('stfNotes').value = displayNotes;
             document.getElementById('stfGmName').value = item.gmName || item.gm || '';
 
         } else if (currentView === 'interviews') {
             document.getElementById('fieldId').value = item.id;
             document.getElementById('intName').value = item.name || '';
-            document.getElementById('intPosition').value = item.position || 'CSR';
+            document.getElementById('intPosition').value = item.position || 'DE';
             document.getElementById('intStore').value = item.store || '';
             const intDoElem = document.getElementById('intDo');
             if (intDoElem) intDoElem.value = item.doName || '';
@@ -2441,9 +2445,9 @@
             const gmDayElem = document.getElementById('intGmDay');
             if (gmDayElem) gmDayElem.value = item.gmDay || getDayOfWeekFromDateString(item.gmDate) || '';
             document.getElementById('intGmTime').value = formatTimeDisplayFrontEnd(item.gmTime) || item.gmTime || '';
-            document.getElementById('intStatusUpdates').value = item.statusUpdates || '';
+            document.getElementById('intStatusUpdates').value = (draftPayload && draftPayload.statusUpdates !== undefined) ? draftPayload.statusUpdates : (item.statusUpdates || '');
             document.getElementById('intAvailability').value = item.availability || '';
-            document.getElementById('intNotes').value = item.notes || '';
+            document.getElementById('intNotes').value = displayNotes;
             document.getElementById('emailQuickActions').classList.add('hidden');
 
         } else {
