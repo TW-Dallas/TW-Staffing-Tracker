@@ -3146,17 +3146,15 @@
         });
     }
 
-    // Automatically pull candidates from Onboarding who have Pay Card Status = "Yes" or are Hired / Scheduled for NTO
+    // Automatically pull candidates from Onboarding who have Pay Card Status = "Yes" (Col I in Dallas Info / Roster)
     function processPayCards(data) {
         const onboardingList = data.onboarding || [];
         const serverPaycards = data.paycards || [];
         
-        // Find all onboarding candidates with payCard = "Yes" OR who are Hired / Scheduled for NTO
+        // Find all onboarding candidates with payCard = "Yes"
         const matchedFromOnboarding = onboardingList.filter(item => {
             const val = (item.payCard || "").toString().trim().toLowerCase();
-            const hasPayCard = val === "yes" || val === "true" || val === "1" || val.includes("yes");
-            const isHiredOrNto = item.hired || item.ntoScheduled || (item.ntoDate && String(item.ntoDate).trim() !== "");
-            return hasPayCard || isHiredOrNto;
+            return val === "yes" || val === "true" || val === "1" || val.includes("yes");
         }).map(item => {
             const existing = serverPaycards.find(p => p.id === item.id);
             return {
