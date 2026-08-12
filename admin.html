@@ -989,7 +989,7 @@
     let currentSelectedId = null;
     let currentView = 'onboarding'; 
     
-    let scratchpadMode = 'text';
+    let scratchpadMode = 'list';
     let checklistItemsData = [];
     let scratchpadTimeout = null;
     window.hasApiMetrics = false;
@@ -2554,7 +2554,7 @@
     /* --- SCRATCHPAD ENGINE --- */
     function initScratchpad() {
         const username = localStorage.getItem('onb_user');
-        scratchpadMode = localStorage.getItem(`scratchpad_mode_${username}`) || 'text';
+        scratchpadMode = localStorage.getItem(`scratchpad_mode_${username}`) || 'list';
         
         const savedText = localStorage.getItem(`scratchpad_text_${username}`) || '';
         document.getElementById('scratchpad').value = savedText;
