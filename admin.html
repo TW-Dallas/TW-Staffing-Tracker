@@ -3560,7 +3560,7 @@
                         <span style="font-family: 'ExtraBold'; font-size: 20px; color: var(--dark-blue);">Store #${item.store}</span>
                         <span style="font-family: 'Subhead2'; font-size: 16px; color: var(--text-light); margin-left: 10px;">DO: <strong>${item.doName}</strong></span>
                     </div>
-                    <button type="button" onclick="copyToClipboard('${escapeText(item.store + ' - ' + item.manager + ' - ' + item.storePhone)}', this)" title="Copy summary" style="background: var(--crust-med); color: var(--crust-burnt); padding: 4px 8px; font-size: 13px; border-radius: 4px;">
+                    <button type="button" onclick="copyToClipboard('${escapeText(item.store + ' - ' + (item.manager || '') + ' - ' + (item.gmPhone || item.storePhone || ''))}', this)" title="Copy summary" style="background: var(--crust-med); color: var(--crust-burnt); padding: 4px 8px; font-size: 13px; border-radius: 4px;">
                         ${copySvg} <span style="font-size: 12px;">Copy Summary</span>
                     </button>
                 </div>
