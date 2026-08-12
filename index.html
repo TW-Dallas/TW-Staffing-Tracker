@@ -481,7 +481,7 @@
         if (item.inactive) return { pct: 100, color: 'grey', label: 'Inactive' };
         if (item.hired) return { pct: 100, color: 'green', label: 'Hired' };
 
-        const att = (item.ntoAttendance || '').trim();
+        const att = (item.ntoAttendance || item.ntoStatus || item['NTO Status'] || item.liveStatus || item.status || '').trim();
 
         if (att === 'NTO Complete' || att === 'Attended') return { pct: 98, color: 'green', label: '🎓 NTO Complete' };
 
@@ -492,7 +492,7 @@
             return { pct: 90, color: 'red', label: 'Missed Orientation' };
         }
 
-        if (item.ntoScheduled || item.ntoDate || att === 'In Lobby' || att === 'In Class') {
+        if (item.ntoScheduled || item.ntoDate || item.date || att === 'In Lobby' || att === 'In Class') {
             return { pct: 85, color: 'blue', label: 'Orientation Scheduled' };
         }
         if (item.ntoSignupLinkSent) return { pct: 70, color: 'blue', label: 'NTO Signup Sent' };
@@ -511,7 +511,7 @@
 
     // LAYER 2: DEDICATED ALERT BANNERS (Live Events & Blockers)
     function getAlertBanner(item) {
-        const att = (item.ntoAttendance || '').trim();
+        const att = (item.ntoAttendance || item.ntoStatus || item['NTO Status'] || item.liveStatus || item.status || '').trim();
 
         if (att === 'In Lobby') {
             return `<div class="alert-banner" style="background-color: #e3f2fd; border-color: #2196f3; color: #0d47a1;">🏨 Candidate Checked In: In Lobby</div>`;
@@ -547,10 +547,11 @@
         if (item.ineligible) return 12;
         if (item.inactive) return 11;
     
-        const isMissedNtoActive = !item.ntoScheduled && (item.missedNto || (item.ntoAttendance && (item.ntoAttendance === 'Not in NTO' || item.ntoAttendance.includes('Incomplete'))));
+        const att = (item.ntoAttendance || item.ntoStatus || item['NTO Status'] || item.liveStatus || item.status || '').trim();
+        const isMissedNtoActive = !item.ntoScheduled && (item.missedNto || (att && (att === 'Not in NTO' || att.includes('Incomplete'))));
     
         if (item.incorrectEmail || item.hasMissingDocs || isMissedNtoActive) return 0;
-        if (item.ntoAttendance === 'Left Early') return 0;
+        if (att === 'Left Early') return 0;
         
         if (item.hired) {
             const today = new Date();
@@ -560,7 +561,7 @@
             return (updateDate.getTime() === today.getTime()) ? 1 : 10;
         }
     
-        if (item.ntoScheduled || item.ntoAttendance === 'In Lobby' || item.ntoAttendance === 'In Class' || item.ntoAttendance === 'NTO Complete' || item.ntoAttendance === 'Attended') return 2;
+        if (item.ntoScheduled || att === 'In Lobby' || att === 'In Class' || att === 'NTO Complete' || att === 'Attended') return 2;
         if (item.ntoSignupLinkSent) return 3;
         if (item.onboardingSent) return 4;
         if (item.submissionReceived) return 5;
@@ -702,12 +703,17 @@
             }
 
             let chipsHtml = '';
-            if (item.shirtSize) chipsHtml += `<span class="chip">👕 ${item.shirtSize}</span>`;
-            if (item.hatStyle && (item.hatStyle.toLowerCase() === 'cap' || item.hatStyle.toLowerCase() === 'visor')) {
-                chipsHtml += `<span class="chip">🧢 ${item.hatStyle}</span>`;
+            const shirtVal = item.shirtSize || item.shirt || item.Shirt || '';
+            const hatVal = item.hatStyle || item.capVisor || item['Cap/Visor'] || item.hat || item.Hat || '';
+            const payCardVal = item.payCard || item.paycard || item.Paycard || '';
+            const ntoDateVal = item.ntoDate || item.date || item.Date || '';
+
+            if (shirtVal) chipsHtml += `<span class="chip">👕 ${shirtVal}</span>`;
+            if (hatVal && (hatVal.toLowerCase() === 'cap' || hatVal.toLowerCase() === 'visor')) {
+                chipsHtml += `<span class="chip">🧢 ${hatVal}</span>`;
             }
-            if (item.payCard) chipsHtml += `<span class="chip">💳 Pay Card Required</span>`;
-            if (item.ntoDate) chipsHtml += `<span class="chip chip-nto">📅 NTO: ${item.ntoDate}</span>`;
+            if (payCardVal) chipsHtml += `<span class="chip">💳 Pay Card Required</span>`;
+            if (ntoDateVal) chipsHtml += `<span class="chip chip-nto">📅 NTO: ${ntoDateVal}</span>`;
 
             let checklistHtml = '';
             if (!item.inactive && !item.ineligible && !item.hired) {
