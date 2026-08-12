@@ -226,6 +226,7 @@
     <div class="view-toggle">
         <button class="view-btn active" onclick="switchView('onboarding')">Pipeline</button>
         <button class="view-btn" onclick="switchView('interviews')">Interviews</button>
+        <button class="view-btn" onclick="switchView('contacts')">Contacts</button>
     </div>
 </div>
 
@@ -233,6 +234,7 @@
     <div id="loader" class="loader">Accessing Database...</div>
     <div id="onboardingList"></div>
     <div id="interviewList" class="hidden"></div>
+    <div id="contactsList" class="hidden"></div>
 </div>
 
 <!-- Push Notification Store Setup Modal -->
@@ -972,14 +974,155 @@
 
     function switchView(viewName) {
         document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-        if(viewName === 'onboarding') {
-            document.getElementById('onboardingList').classList.remove('hidden');
-            document.getElementById('interviewList').classList.add('hidden');
-        } else {
-            document.getElementById('onboardingList').classList.add('hidden');
-            document.getElementById('interviewList').classList.remove('hidden');
+        if (window.event && window.event.target) window.event.target.classList.add('active');
+        
+        const onbEl = document.getElementById('onboardingList');
+        const intEl = document.getElementById('interviewList');
+        const cntEl = document.getElementById('contactsList');
+        if (onbEl) onbEl.classList.add('hidden');
+        if (intEl) intEl.classList.add('hidden');
+        if (cntEl) cntEl.classList.add('hidden');
+
+        if (viewName === 'onboarding') {
+            if (onbEl) onbEl.classList.remove('hidden');
+        } else if (viewName === 'interviews') {
+            if (intEl) intEl.classList.remove('hidden');
+        } else if (viewName === 'contacts') {
+            if (cntEl) cntEl.classList.remove('hidden');
+            renderContactsDirectory();
         }
+    }
+
+    function renderContactsDirectory() {
+        const container = document.getElementById('contactsList');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const doVal = document.getElementById('doFilter')?.value || 'All';
+        const storeVal = document.getElementById('storeFilter')?.value || 'All';
+
+        const storeContacts = rawData.contacts || [];
+        const adminContacts = rawData.adminContacts || [];
+
+        const phoneSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>`;
+        const smsSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`;
+        const mailSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
+
+        let filteredStores = storeContacts.filter(item => {
+            const iDo = item.doName ? item.doName.toString().trim() : '';
+            const iStore = item.store ? item.store.toString().trim() : '';
+            const matchesDo = (doVal === 'All' || iDo === doVal);
+            const matchesStore = (storeVal === 'All' || iStore === storeVal);
+            return matchesDo && matchesStore;
+        });
+
+        const doGroups = {};
+        filteredStores.forEach(s => {
+            const doKey = s.doName || 'Other District';
+            if (!doGroups[doKey]) doGroups[doKey] = [];
+            doGroups[doKey].push(s);
+        });
+
+        let html = `<div style="display: flex; flex-direction: column; gap: 16px;">`;
+
+        const doNames = Object.keys(doGroups).sort();
+        doNames.forEach(doName => {
+            const storesInDo = doGroups[doName];
+            const firstStore = storesInDo[0] || {};
+            const doEmail = firstStore.doEmail || '';
+
+            html += `
+                <div style="background: white; border-radius: 12px; border: 1.5px solid var(--crust-med); overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.03);">
+                    <div style="background: var(--dark-blue); color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                        <div>
+                            <div style="font-family: 'Subhead1', sans-serif; font-size: 18px; font-weight: bold; text-transform: uppercase;">👤 DO: ${doName}</div>
+                            ${doEmail ? `<div style="font-family: 'Condensed'; font-size: 14px; opacity: 0.9;">✉️ ${doEmail}</div>` : ''}
+                        </div>
+                        ${doEmail ? `<a href="mailto:${doEmail}" style="background: rgba(255,255,255,0.2); color: white; border-radius: 6px; padding: 6px 12px; font-family: 'Condensed'; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${mailSvg} Email DO</a>` : ''}
+                    </div>
+                    <div style="padding: 12px; display: flex; flex-direction: column; gap: 10px;">
+            `;
+
+            storesInDo.sort((a, b) => parseInt(a.store, 10) - parseInt(b.store, 10)).forEach(st => {
+                html += `
+                    <div style="background: var(--crust-light); border: 1px solid var(--crust-med); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-family: 'ExtraBold', sans-serif; font-size: 18px; color: var(--dark-blue);">Store #${st.store}</span>
+                            <span style="font-family: 'Subhead2', sans-serif; font-size: 15px; color: var(--crust-burnt);">GM: <strong>${st.manager || 'N/A'}</strong></span>
+                        </div>
+                        
+                        <div style="font-family: 'Condensed', sans-serif; font-size: 14px; color: var(--text-light); display: flex; flex-direction: column; gap: 2px;">
+                            ${st.address ? `<div>📍 ${st.address}</div>` : ''}
+                            ${st.ipAddress ? `<div>🌐 IP: ${st.ipAddress}</div>` : ''}
+                        </div>
+
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; padding-top: 6px; border-top: 1px dashed var(--crust-med);">
+                            ${st.gmPhone ? `<a href="tel:${st.gmPhone}" style="background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; padding: 5px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${phoneSvg} Call GM</a>` : ''}
+                            ${st.gmPhone ? `<a href="sms:${st.gmPhone}" style="background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; padding: 5px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${smsSvg} Text GM</a>` : ''}
+                            ${st.storePhone ? `<a href="tel:${st.storePhone}" style="background: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; padding: 5px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${phoneSvg} Store Line</a>` : ''}
+                            ${st.storeEmail ? `<a href="mailto:${st.storeEmail}" style="background: #f3e5f5; color: #7b1fa2; border: 1px solid #e1bee7; padding: 5px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${mailSvg} Email Store</a>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div></div>`;
+        });
+
+        if (adminContacts.length > 0) {
+            const adminCategoryGroups = {};
+            adminContacts.forEach(ac => {
+                const catKey = ac.category || 'General Support';
+                if (!adminCategoryGroups[catKey]) adminCategoryGroups[catKey] = [];
+                adminCategoryGroups[catKey].push(ac);
+            });
+
+            html += `
+                <div style="margin-top: 12px;">
+                    <h3 style="font-family: 'Subhead1', sans-serif; font-size: 20px; color: var(--dark-blue); margin-bottom: 12px; text-transform: uppercase; border-bottom: 2px solid var(--brand-blue); padding-bottom: 6px;">
+                        🏢 Admin & Corporate Contacts
+                    </h3>
+            `;
+
+            Object.keys(adminCategoryGroups).forEach(catName => {
+                const items = adminCategoryGroups[catName];
+                html += `
+                    <div style="background: white; border-radius: 12px; border: 1.5px solid var(--crust-med); margin-bottom: 14px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.03);">
+                        <div style="background: var(--crust-burnt); color: white; padding: 10px 16px; font-family: 'Subhead2', sans-serif; font-size: 17px;">
+                            ${catName}
+                        </div>
+                        <div style="padding: 12px; display: flex; flex-direction: column; gap: 10px;">
+                `;
+
+                items.forEach(ac => {
+                    html += `
+                        <div style="background: var(--crust-light); border: 1px solid var(--crust-med); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 4px;">
+                                <div>
+                                    <span style="font-family: 'Subhead2', sans-serif; font-size: 17px; color: var(--crust-burnt); font-weight: bold;">${ac.name}</span>
+                                    ${ac.title ? `<div style="font-family: 'Condensed', sans-serif; font-size: 14px; color: var(--text-light);">${ac.title}</div>` : ''}
+                                </div>
+                            </div>
+
+                            ${ac.notes ? `<div style="font-family: 'Condensed', sans-serif; font-size: 13px; color: var(--dark-blue); background: #eef6fc; padding: 4px 8px; border-radius: 4px; margin-top: 2px;">📌 ${ac.notes}</div>` : ''}
+
+                            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--crust-med);">
+                                ${ac.phone ? `<a href="tel:${ac.phone}" style="background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; padding: 5px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${phoneSvg} Call (${ac.phone})</a>` : ''}
+                                ${ac.phone ? `<a href="sms:${ac.phone}" style="background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; padding: 5px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${smsSvg} Text</a>` : ''}
+                                ${ac.email ? `<a href="mailto:${ac.email}" style="background: #f3e5f5; color: #7b1fa2; border: 1px solid #e1bee7; padding: 5px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${mailSvg} Email (${ac.email})</a>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div></div>`;
+            });
+
+            html += `</div>`;
+        }
+
+        html += `</div>`;
+        container.innerHTML = html;
     }
 
     if ('serviceWorker' in navigator) {

@@ -986,6 +986,7 @@
     let staffing = [];
     let paycards = [];
     let contacts = []; 
+    let adminContacts = [];
     let currentSelectedId = null;
     let currentView = 'onboarding'; 
     
@@ -1325,6 +1326,7 @@
             interviews = data.interviews || [];
             staffing = data.staffing || [];
             contacts = data.contacts || [];
+            adminContacts = data.adminContacts || [];
             paycards = processPayCards(data);
 
             if (data.scratchpadText !== undefined && data.scratchpadText !== null) {
@@ -3617,6 +3619,64 @@
 
             container.appendChild(card);
         });
+
+        if (adminContacts.length > 0) {
+            const copySvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+            
+            const adminHeader = document.createElement('div');
+            adminHeader.style.cssText = `margin-top: 20px; font-family: 'Subhead1', sans-serif; font-size: 20px; color: var(--dark-blue); text-transform: uppercase; border-bottom: 2px solid var(--brand-blue); padding-bottom: 6px;`;
+            adminHeader.innerText = `🏢 Admin & Corporate Contacts`;
+            container.appendChild(adminHeader);
+
+            const adminCategoryGroups = {};
+            adminContacts.forEach(ac => {
+                const catKey = ac.category || 'General Support';
+                if (!adminCategoryGroups[catKey]) adminCategoryGroups[catKey] = [];
+                adminCategoryGroups[catKey].push(ac);
+            });
+
+            Object.keys(adminCategoryGroups).forEach(catName => {
+                const catCard = document.createElement('div');
+                catCard.style.cssText = `
+                    background: var(--crust-base);
+                    border: 1.5px solid var(--crust-dark);
+                    border-left: 6px solid var(--brand-burnt);
+                    border-radius: 8px;
+                    padding: 12px 14px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                `;
+
+                let itemsHtml = `<div style="font-family: 'Subhead2', sans-serif; font-size: 18px; color: var(--crust-burnt); border-bottom: 1px solid var(--crust-med); padding-bottom: 4px;">${catName}</div>`;
+                
+                adminCategoryGroups[catName].forEach(ac => {
+                    itemsHtml += `
+                        <div style="display: flex; flex-direction: column; gap: 4px; padding: 6px 0; border-bottom: 1px dashed var(--crust-med);">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>${ac.name}</strong> ${ac.title ? `<span style="color: var(--text-light); font-size: 14px;">(${ac.title})</span>` : ''}
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 15px;">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <strong>Phone:</strong> ${ac.phone || 'N/A'}
+                                    ${ac.phone ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${ac.phone}', this)" title="Copy Phone">${copySvg}</button>` : ''}
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <strong>Email:</strong> ${ac.email || 'N/A'}
+                                    ${ac.email ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(ac.email)}', this)" title="Copy Email">${copySvg}</button>` : ''}
+                                </div>
+                            </div>
+                            ${ac.notes ? `<div style="font-size: 13px; color: var(--dark-blue); background: #eef6fc; padding: 4px 8px; border-radius: 4px; margin-top: 2px;">📌 ${ac.notes}</div>` : ''}
+                        </div>
+                    `;
+                });
+
+                catCard.innerHTML = itemsHtml;
+                container.appendChild(catCard);
+            });
+        }
     }
 
     // Clipboard Copy Helper with Visual Feedback

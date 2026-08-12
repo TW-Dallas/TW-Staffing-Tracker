@@ -404,6 +404,25 @@ function getContactsData(ss, sheetName) {
   })).filter(c => c.store !== "");
 }
 
+function getAdminContactsData(ss, sheetName) {
+  if (!ss) ss = SpreadsheetApp.openById(SHEET_ID);
+  const prefix = sheetName ? (sheetName.toLowerCase().includes("denver") ? "Denver" : "Dallas") : "Dallas";
+  const adminSheetName = prefix + " Admin Info";
+  const sheet = ss.getSheetByName(adminSheetName);
+  
+  if (!sheet || sheet.getLastRow() < 2) return [];
+  
+  const values = sheet.getRange(2, 1, sheet.getLastRow() - 1, 6).getValues();
+  return values.map(row => ({
+    category: String(row[0] || "").trim(),
+    name: String(row[1] || "").trim(),
+    title: String(row[2] || "").trim(),
+    phone: String(row[3] || "").trim(),
+    email: String(row[4] || "").trim(),
+    notes: String(row[5] || "").trim()
+  })).filter(c => c.name !== "" || c.category !== "" || c.title !== "");
+}
+
 function getScratchpadData(ss, sheetName) {
   if (!ss) ss = SpreadsheetApp.openById(SHEET_ID);
   const prefix = sheetName ? (sheetName.toLowerCase().includes("denver") ? "Denver" : "Dallas") : "Dallas";
@@ -454,6 +473,7 @@ function doPost(e) {
       const data = {};
       data.onboarding = getOnboardingData(ss, user.sheet);
       data.contacts = getContactsData(ss, user.sheet);
+      data.adminContacts = getAdminContactsData(ss, user.sheet);
       data.interviews = (user.key.startsWith("dallas")) ? getInterviewData(ss) : [];
       data.staffing = getStaffingDataAndBackfillIDs(ss, user.staffingSheet);
 
