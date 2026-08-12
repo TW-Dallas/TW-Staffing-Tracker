@@ -1995,7 +1995,7 @@
                 if (searchQuery) return true;
 
                 // Drop interview from immediate view after 10 days, but allow search lookup
-                const rawDate = item.gmDate || item.date || item.lastUpdated;
+                const rawDate = (item.status === 'GM Interview' && item.gmDate) ? item.gmDate : (item.date || item.gmDate || item.lastUpdated);
                 const itemDate = parseCandidateDate(rawDate);
                 if (itemDate && itemDate.getTime() < tenDaysAgo.getTime()) {
                     return false;
