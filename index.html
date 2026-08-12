@@ -721,6 +721,47 @@
         return rawText.trim();
     }
 
+    function formatCorrectionText(rawDoc) {
+        if (!rawDoc) return "onboarding paperwork in AllPay";
+
+        const lower = rawDoc.toLowerCase();
+        
+        // 1. Internal GM Flags Safety Check (Filter out internal store notes from candidate SMS)
+        if (lower.includes("availability") || lower.includes("pay rate") || lower.includes("rate") || lower.includes("gm approval") || lower.includes("start date")) {
+            return null;
+        }
+
+        // 2. Specific I-9 & AllPay Form Corrections
+        const hasI9 = lower.includes("i-9") || lower.includes("i9");
+        const hasDob = lower.includes("dob") || lower.includes("date of birth") || lower.includes("birth");
+        const hasSsn = lower.includes("ssn") || lower.includes("social");
+        const hasAddress = lower.includes("address");
+        const hasName = lower.includes("spelling") || lower.includes("name");
+        const hasW4 = lower.includes("w-4") || lower.includes("w4") || lower.includes("tax");
+        const hasDd = lower.includes("direct deposit") || lower.includes("bank");
+
+        if (hasDob && hasI9) return "date of birth on your I-9 Form in AllPay";
+        if (hasSsn && hasI9) return "Social Security number on your I-9 Form in AllPay";
+        if (hasAddress && hasI9) return "address on your I-9 Form in AllPay";
+        if (hasName && hasI9) return "name spelling on your I-9 Form in AllPay";
+        if (hasI9) return "information on your I-9 Form in AllPay";
+
+        if (hasW4) return "tax information on your W-4 Form in AllPay";
+        if (hasDd) return "banking details on your Direct Deposit Form in AllPay";
+
+        let clean = rawDoc
+            .replace(/\bDOB\b/gi, "date of birth")
+            .replace(/\bSSN\b/gi, "Social Security number")
+            .replace(/\bi-9\b/gi, "I-9 Form in AllPay")
+            .replace(/\bi9\b/gi, "I-9 Form in AllPay")
+            .trim();
+
+        if (!clean.toLowerCase().includes("allpay")) {
+            clean += " in AllPay";
+        }
+        return clean;
+    }
+
     function extractSmsText(item) {
         const firstName = item.name ? item.name.toString().trim().split(/\s+/)[0] : 'Team Member';
 
@@ -735,10 +776,13 @@
         if (item.hasMissingDocs) {
             const rawDoc = item.missingDocsText || '';
             const rawLower = rawDoc.toLowerCase();
-            const isCorrection = rawLower.includes('dob') || rawLower.includes('date of birth') || rawLower.includes('ssn') || rawLower.includes('correct') || rawLower.includes('mismatch') || rawLower.includes('spelling') || rawLower.includes('i-9') || rawLower.includes('name');
+            const isCorrection = rawLower.includes('dob') || rawLower.includes('date of birth') || rawLower.includes('ssn') || rawLower.includes('correct') || rawLower.includes('mismatch') || rawLower.includes('spelling') || rawLower.includes('i-9') || rawLower.includes('i9') || rawLower.includes('w-4') || rawLower.includes('w4') || rawLower.includes('address');
 
             if (isCorrection && !rawLower.includes('list a') && !rawLower.includes('list b') && !rawLower.includes('list c')) {
-                return `Hey ${firstName}! This is Domino's. We need a quick correction for your onboarding paperwork: ${rawDoc}. Please reply back so we can help you get this updated! Thanks!`;
+                const correctionMsg = formatCorrectionText(rawDoc);
+                if (correctionMsg) {
+                    return `Hey ${firstName}! This is Domino's. We need a quick correction to your ${correctionMsg}. Please reply back so we can help you get this updated! Thanks!`;
+                }
             }
 
             const formattedDoc = formatMissingDocsForSms(rawDoc);
