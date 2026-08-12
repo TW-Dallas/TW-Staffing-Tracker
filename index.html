@@ -273,8 +273,9 @@
                 We upgraded your Hiring Tracker to make onboarding new team members even smoother! Here is what's new:
             </p>
             <ul style="font-size: 17px; line-height: 1.5; color: var(--crust-deep); padding-left: 20px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 10px; font-family: 'Condensed';">
+                <li>💬 <strong>Improved SMS Nudge Wording:</strong> Smart candidate texting now formats clear, candidate-friendly messages for missing documents, AllPay I-9 form corrections, and covered driver insurance clauses.</li>
+                <li>📅 <strong>Updated Interview Sorting:</strong> Priority tier sorting brings upcoming GM & Phone interviews to the top, groups "Position Offered" candidates, and cleans up past interviews.</li>
                 <li>📞 <strong>New Contacts Directory:</strong> Tap the <em>Contacts</em> tab to access 1-tap call, text & email for GM/DO cell phones, store lines, Market Leader, Training Centers, and Admin contacts!</li>
-                <li>💬 <strong>Smart Nudge Texts:</strong> Tapping "Nudge SMS" automatically drafts a text based on exactly what missing items a candidate needs.</li>
                 <li>🔔 <strong>Push Notifications:</strong> Select your Store or District to receive real-time alerts for interviews, onboarding progress, and hires.</li>
                 <li>📲 <strong>Add to Home Screen:</strong> Save as an app for 1-tap access! On iPhone, tap Safari's Share button ➔ <em>Add to Home Screen</em>. Android: tap <em>Install</em> when prompted.</li>
             </ul>
@@ -326,7 +327,7 @@
     // Check if we should display the welcome modal
     (function() {
         try {
-            const hideModal = localStorage.getItem('hideTrackerUpdate_v2');
+            const hideModal = localStorage.getItem('hideTrackerUpdate_v3');
             if (hideModal !== 'true') {
                 document.getElementById('updateModal').classList.remove('hidden');
             }
@@ -339,7 +340,7 @@
         const dontShowAgain = document.getElementById('hideUpdateCheckbox').checked;
         if (dontShowAgain) {
             try {
-                localStorage.setItem('hideTrackerUpdate_v2', 'true');
+                localStorage.setItem('hideTrackerUpdate_v3', 'true');
             } catch (e) {}
         }
         document.getElementById('updateModal').classList.add('hidden');
