@@ -993,6 +993,15 @@
         }
     }
 
+    function escapeText(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'")
+            .replace(/"/g, '&quot;')
+            .replace(/\n/g, ' ');
+    }
+
     function openMapLink(address) {
         if (!address) return;
         const encoded = encodeURIComponent(address);
