@@ -408,9 +408,23 @@ function getContactsData(ss, sheetName) {
 function getAdminContactsData(ss, sheetName) {
   if (!ss) ss = SpreadsheetApp.openById(SHEET_ID);
   const prefix = sheetName ? (sheetName.toLowerCase().includes("denver") ? "Denver" : "Dallas") : "Dallas";
-  const adminSheetName = prefix + " Admin Info";
-  const sheet = ss.getSheetByName(adminSheetName);
   
+  let sheet = ss.getSheetByName(prefix + " Admin Info") 
+           || ss.getSheetByName("Dallas Admin Info")
+           || ss.getSheetByName(prefix + " Admin Contacts")
+           || ss.getSheetByName("Admin Info");
+
+  if (!sheet) {
+    const sheets = ss.getSheets();
+    for (let i = 0; i < sheets.length; i++) {
+      const name = sheets[i].getName().trim().toLowerCase();
+      if (name.includes("admin info") || name.includes("admin contacts")) {
+        sheet = sheets[i];
+        break;
+      }
+    }
+  }
+
   if (!sheet || sheet.getLastRow() < 2) return [];
   
   const values = sheet.getRange(2, 1, sheet.getLastRow() - 1, 6).getValues();
@@ -421,7 +435,7 @@ function getAdminContactsData(ss, sheetName) {
     phone: String(row[3] || "").trim(),
     email: String(row[4] || "").trim(),
     notes: String(row[5] || "").trim()
-  })).filter(c => c.name !== "" || c.category !== "" || c.title !== "");
+  })).filter(c => c.name !== "" || c.category !== "" || c.title !== "" || c.phone !== "");
 }
 
 function getScratchpadData(ss, sheetName) {
