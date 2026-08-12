@@ -169,6 +169,7 @@ function doGet(e) {
     const data = {};
     data.onboarding = getOnboardingData(ss, sheetName);
     data.contacts = getContactsData(ss, sheetName);
+    data.adminContacts = getAdminContactsData(ss, sheetName);
     data.interviews = (city.toLowerCase() === "dallas") ? getInterviewData(ss) : [];
     data.staffing = getStaffingDataAndBackfillIDs(ss, user.staffingSheet);
 
