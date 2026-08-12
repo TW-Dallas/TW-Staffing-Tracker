@@ -4207,6 +4207,15 @@
                 return;
             }
     
+            // Sort classes descending by date (furthest out / latest class at TOP)
+            data.classes.sort((a, b) => {
+                const dtA = parseCandidateDate(a.classDate);
+                const dtB = parseCandidateDate(b.classDate);
+                const timeA = dtA ? dtA.getTime() : 0;
+                const timeB = dtB ? dtB.getTime() : 0;
+                return timeB - timeA;
+            });
+
             tbody.innerHTML = '';
             data.classes.forEach(c => {
                 const row = document.createElement('tr');
