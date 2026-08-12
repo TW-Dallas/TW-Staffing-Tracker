@@ -1327,8 +1327,12 @@
             contacts = data.contacts || [];
             paycards = processPayCards(data);
 
-            if (data.scratchpadChecklist && data.scratchpadChecklist !== "[]") {localStorage.setItem(`scratchpad_checklist_${u}`, data.scratchpadChecklist);}
-            if (data.scratchpadChecklist !== undefined) localStorage.setItem(`scratchpad_checklist_${u}`, data.scratchpadChecklist);
+            if (data.scratchpadText !== undefined && data.scratchpadText !== null) {
+                localStorage.setItem(`scratchpad_text_${u}`, data.scratchpadText);
+            }
+            if (data.scratchpadChecklist !== undefined && data.scratchpadChecklist !== null) {
+                localStorage.setItem(`scratchpad_checklist_${u}`, data.scratchpadChecklist);
+            }
 
             renderList();
             initScratchpad();
