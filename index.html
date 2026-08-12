@@ -273,10 +273,10 @@
                 We upgraded your Hiring Tracker to make onboarding new team members even smoother! Here is what's new:
             </p>
             <ul style="font-size: 17px; line-height: 1.5; color: var(--crust-deep); padding-left: 20px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 10px; font-family: 'Condensed';">
-                <li>📱 <strong>Tap to Expand:</strong> Tap any candidate's card to view their onboarding checklist, assets, and action items.</li>
-                <li>💬 <strong>Smart Nudge Texts:</strong> Tapping "Nudge SMS" now automatically drafts a text based on exactly what they are missing.</li>
+                <li>📞 <strong>New Contacts Directory:</strong> Tap the <em>Contacts</em> tab to access 1-tap call, text & email for GM/DO cell phones, store lines, Market Leader, Training Centers, and Admin contacts!</li>
+                <li>💬 <strong>Smart Nudge Texts:</strong> Tapping "Nudge SMS" automatically drafts a text based on exactly what missing items a candidate needs.</li>
+                <li>🔔 <strong>Push Notifications:</strong> Select your Store or District to receive real-time alerts for interviews, onboarding progress, and hires.</li>
                 <li>📲 <strong>Add to Home Screen:</strong> Save as an app for 1-tap access! On iPhone, tap Safari's Share button ➔ <em>Add to Home Screen</em>. Android: tap <em>Install</em> when prompted.</li>
-                <li>🎨 <strong>Clean Design:</strong> Cleaned up fonts and layouts for faster mobile reading.</li>
             </ul>
             <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1.5px solid var(--crust-med); padding-top: 14px;">
                 <label style="display: flex; align-items: center; gap: 8px; font-size: 16px; font-family: 'Condensed'; color: var(--crust-deep); cursor: pointer;">
@@ -303,7 +303,7 @@
     // Check if we should display the welcome modal
     (function() {
         try {
-            const hideModal = localStorage.getItem('hideTrackerUpdate_v1');
+            const hideModal = localStorage.getItem('hideTrackerUpdate_v2');
             if (hideModal !== 'true') {
                 document.getElementById('updateModal').classList.remove('hidden');
             }
@@ -316,7 +316,7 @@
         const dontShowAgain = document.getElementById('hideUpdateCheckbox').checked;
         if (dontShowAgain) {
             try {
-                localStorage.setItem('hideTrackerUpdate_v1', 'true');
+                localStorage.setItem('hideTrackerUpdate_v2', 'true');
             } catch (e) {}
         }
         document.getElementById('updateModal').classList.add('hidden');
