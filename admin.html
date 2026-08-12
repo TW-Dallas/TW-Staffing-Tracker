@@ -1777,6 +1777,9 @@
 
         const sortBy = document.getElementById('sortControl').value;
         const searchQuery = document.getElementById('searchControl').value.toLowerCase().trim();
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
         const tenDaysAgo = new Date();
         tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
         tenDaysAgo.setHours(0, 0, 0, 0);
