@@ -1081,11 +1081,7 @@
         }
 
         const isPast = effectiveDate ? (effectiveDate.getTime() < today.getTime()) : false;
-
-        // Position Offered (Ported) -> Completed Tier
-        if (status.includes('Position Offered') || status.includes('Offered')) {
-            return { tier: 6, date: effectiveDate, isUpcoming: false };
-        }
+        const sLower = status.toLowerCase();
 
         // Tier 1: Upcoming GM Interview
         if (status.includes('GM Interview') && !isPast) return { tier: 1, date: effectiveDate, isUpcoming: true };
@@ -1106,12 +1102,22 @@
         }
 
         // Tier 5: Holds
-        if (status.includes('Hold')) {
+        if (sLower.includes('hold')) {
             return { tier: 5, date: effectiveDate, isUpcoming: false };
         }
 
-        // Tier 6: Declined, No Show, Ineligible, Hired, etc.
-        return { tier: 6, date: effectiveDate, isUpcoming: false };
+        // Tier 6: Position Offered
+        if (sLower.includes('position offered') || sLower.includes('offered')) {
+            return { tier: 6, date: effectiveDate, isUpcoming: false };
+        }
+
+        // Tier 7: Hired
+        if (sLower.includes('hired')) {
+            return { tier: 7, date: effectiveDate, isUpcoming: false };
+        }
+
+        // Tier 8: Declined, No Show, Canceled, Pass (Terminal Red Tier at the very bottom)
+        return { tier: 8, date: effectiveDate, isUpcoming: false };
     }
 
     function compareInterviews(a, b, today, onboardingNameSet) {
