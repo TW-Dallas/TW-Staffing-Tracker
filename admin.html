@@ -2620,10 +2620,17 @@
             return;
         }
     
+        const interviewerContact = await showBrandPrompt("Who should the candidate ask for upon arrival? (Leave blank to default to 'the Manager on Duty')", "", "Point of Contact");
+        if (interviewerContact === null) return;
+
+        const rawContact = (interviewerContact || "").trim();
+        const contactDisplay = rawContact ? (rawContact.toLowerCase().includes("manager on duty") ? "the Manager on Duty" : `${rawContact} or the Manager on Duty`) : "the Manager on Duty";
+
         const confirmMsg = `Send In-Person GM Interview Invite to ${name} (${email})?\n\n` +
                         `• Interview Date: ${gmDate}\n` +
                         `• Interview Time: ${gmTime}\n` +
-                        `• Store #: ${store}\n\n` +
+                        `• Store #: ${store}\n` +
+                        `• Ask For: ${contactDisplay}\n\n` +
                         `(This will attach an .ics Calendar Invite & CC the Store GM)`;
     
         const confirmed = await showBrandConfirm(confirmMsg, "Confirm GM Interview Email");
@@ -2643,7 +2650,8 @@
             store: store,
             storeNum: store,
             gmDate: gmDate,
-            gmTime: gmTime
+            gmTime: gmTime,
+            interviewerContact: rawContact
         };
     
         try {
