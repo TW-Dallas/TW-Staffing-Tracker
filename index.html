@@ -1070,21 +1070,6 @@
 
         let html = `
             <div style="display: flex; flex-direction: column; gap: 14px;">
-                <!-- FEATURED MARKET LEADER HEADER -->
-                ${leadershipContacts.map(lc => `
-                    <div style="background: var(--dark-blue); color: white; border-radius: 12px; padding: 12px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-family: 'Condensed', sans-serif;">
-                        <div>
-                            <div style="font-family: 'Subhead2', sans-serif; font-size: 19px; font-weight: bold; color: white;">⭐ ${lc.name} <span style="font-family: 'Condensed'; font-size: 15px; opacity: 0.9; font-weight: normal;">— ${lc.title || 'Market Leader'}</span></div>
-                            ${lc.email ? `<div style="font-size: 14px; opacity: 0.95; margin-top: 2px;">✉️ ${lc.email}</div>` : ''}
-                        </div>
-                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                            ${lc.phone ? `<a href="tel:${lc.phone}" style="background: rgba(255,255,255,0.25); color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">${phoneSvg} Call</a>` : ''}
-                            ${lc.phone ? `<a href="sms:${lc.phone}" style="background: rgba(255,255,255,0.25); color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">${smsSvg} Text</a>` : ''}
-                            ${lc.email ? `<a href="mailto:${lc.email}" style="background: rgba(255,255,255,0.25); color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">${mailSvg} Email</a>` : ''}
-                        </div>
-                    </div>
-                `).join('')}
-
                 <!-- COLLAPSIBLE TRAINING CENTERS BANNER -->
                 <div style="background: white; border-radius: 12px; border: 1.5px solid var(--crust-med); overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.03);">
                     <button type="button" onclick="toggleTrainingCenters(this)" style="width: 100%; background: var(--crust-light); border: none; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-family: 'Subhead2', sans-serif; font-size: 16px; color: var(--dark-blue); font-weight: bold;">
@@ -1114,6 +1099,21 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- FEATURED MARKET LEADER HEADER -->
+                ${leadershipContacts.map(lc => `
+                    <div style="background: var(--dark-blue); color: white; border-radius: 12px; padding: 12px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-family: 'Condensed', sans-serif;">
+                        <div>
+                            <div style="font-family: 'Subhead2', sans-serif; font-size: 19px; font-weight: bold; color: white;">⭐ ${lc.name} <span style="font-family: 'Condensed'; font-size: 15px; opacity: 0.9; font-weight: normal;">— ${lc.title || 'Market Leader'}</span></div>
+                            ${lc.email ? `<div style="font-size: 14px; opacity: 0.95; margin-top: 2px;">✉️ ${lc.email}</div>` : ''}
+                        </div>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            ${lc.phone ? `<a href="tel:${lc.phone}" style="background: rgba(255,255,255,0.25); color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">${phoneSvg} Call</a>` : ''}
+                            ${lc.phone ? `<a href="sms:${lc.phone}" style="background: rgba(255,255,255,0.25); color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">${smsSvg} Text</a>` : ''}
+                            ${lc.email ? `<a href="mailto:${lc.email}" style="background: rgba(255,255,255,0.25); color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">${mailSvg} Email</a>` : ''}
+                        </div>
+                    </div>
+                `).join('')}
         `;
 
         const doNames = Object.keys(doGroups).sort();
