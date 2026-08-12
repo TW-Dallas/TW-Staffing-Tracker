@@ -1023,18 +1023,30 @@
             doGroups[doKey].push(s);
         });
 
+        const mapSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`;
+
         let html = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
                 <!-- TRAINING CENTER OFFICES HEADER -->
                 <div style="background: white; border-radius: 12px; border: 1.5px solid var(--crust-med); padding: 14px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.03);">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; font-family: 'Condensed', sans-serif;">
-                        <div style="background: #f8fafc; border-left: 4px solid var(--brand-blue); padding: 10px 12px; border-radius: 6px;">
-                            <div style="font-family: 'Subhead2'; font-size: 16px; color: var(--dark-blue); font-weight: bold;">📍 Mesquite Training Center</div>
-                            <div style="font-size: 14px; color: var(--crust-burnt); margin-top: 2px;">519 N Galloway Avenue<br>Mesquite, TX 75149</div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; font-family: 'Condensed', sans-serif;">
+                        <div style="background: #f8fafc; border-left: 4px solid var(--brand-blue); padding: 10px 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <div>
+                                <div style="font-family: 'Subhead2'; font-size: 16px; color: var(--dark-blue); font-weight: bold;">📍 Mesquite Training Center</div>
+                                <div style="font-size: 14px; color: var(--crust-burnt); margin-top: 2px;">519 N Galloway Avenue, Mesquite, TX 75149</div>
+                            </div>
+                            <a href="https://maps.google.com/?q=${encodeURIComponent('519 N Galloway Avenue, Mesquite, TX 75149')}" target="_blank" rel="noopener noreferrer" style="background: #eef6fc; color: var(--dark-blue); border: 1px solid #b3d7f2; padding: 5px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                                ${mapSvg} Directions
+                            </a>
                         </div>
-                        <div style="background: #f8fafc; border-left: 4px solid var(--brand-blue); padding: 10px 12px; border-radius: 6px;">
-                            <div style="font-family: 'Subhead2'; font-size: 16px; color: var(--dark-blue); font-weight: bold;">📍 McKinney Training Center</div>
-                            <div style="font-size: 14px; color: var(--crust-burnt); margin-top: 2px;">4550 Eldorado Pkwy<br>McKinney, TX 75070</div>
+                        <div style="background: #f8fafc; border-left: 4px solid var(--brand-blue); padding: 10px 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <div>
+                                <div style="font-family: 'Subhead2'; font-size: 16px; color: var(--dark-blue); font-weight: bold;">📍 McKinney Training Center</div>
+                                <div style="font-size: 14px; color: var(--crust-burnt); margin-top: 2px;">4550 Eldorado Pkwy, McKinney, TX 75070</div>
+                            </div>
+                            <a href="https://maps.google.com/?q=${encodeURIComponent('4550 Eldorado Pkwy, McKinney, TX 75070')}" target="_blank" rel="noopener noreferrer" style="background: #eef6fc; color: var(--dark-blue); border: 1px solid #b3d7f2; padding: 5px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                                ${mapSvg} Directions
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -1074,8 +1086,14 @@
                             <span style="font-family: 'Subhead2', sans-serif; font-size: 15px; color: var(--crust-burnt);">GM: <strong>${st.manager || 'N/A'}</strong></span>
                         </div>
                         
-                        <div style="font-family: 'Condensed', sans-serif; font-size: 14px; color: var(--text-light); display: flex; flex-direction: column; gap: 2px;">
-                            ${st.address ? `<div>📍 ${st.address}</div>` : ''}
+                        <div style="font-family: 'Condensed', sans-serif; font-size: 14px; color: var(--text-light); display: flex; flex-direction: column; gap: 4px;">
+                            ${st.address ? `
+                                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                    <span>📍 ${st.address}</span>
+                                    <a href="https://maps.google.com/?q=${encodeURIComponent(st.address)}" target="_blank" rel="noopener noreferrer" style="color: var(--brand-blue); font-size: 13px; font-weight: bold; text-decoration: underline; display: inline-flex; align-items: center; gap: 2px;">
+                                        ${mapSvg} Map
+                                    </a>
+                                </div>` : ''}
                             ${st.ipAddress ? `<div>🌐 IP: ${st.ipAddress}</div>` : ''}
                         </div>
 

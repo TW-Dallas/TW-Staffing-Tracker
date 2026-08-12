@@ -3604,7 +3604,10 @@
                     </div>
                     <div>
                         <strong>Address:</strong> ${item.address || 'N/A'}
-                        ${item.address ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.address)}', this)" title="Copy Address">${copySvg}</button>` : ''}
+                        ${item.address ? `
+                            <button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.address)}', this)" title="Copy Address">${copySvg}</button>
+                            <a href="https://maps.google.com/?q=${encodeURIComponent(item.address)}" target="_blank" rel="noopener noreferrer" style="color: var(--brand-blue); font-size: 13px; font-weight: bold; margin-left: 4px;">[Map]</a>
+                        ` : ''}
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px;">
                         <strong>Store Phone:</strong> ${item.storePhone || 'N/A'}
