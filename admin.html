@@ -3671,7 +3671,7 @@
                                     ${ac.email ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(ac.email)}', this)" title="Copy Email">${copySvg}</button>` : ''}
                                 </div>
                             </div>
-                            ${ac.notes ? `<div style="font-size: 13px; color: var(--dark-blue); background: #eef6fc; padding: 4px 8px; border-radius: 4px; margin-top: 2px;">📌 ${ac.notes}</div>` : ''}
+                            ${ac.notes ? `<div style="font-size: 13px; color: var(--dark-blue); background: #eef6fc; padding: 4px 8px; border-radius: 4px; margin-top: 2px; white-space: pre-wrap;">📌 ${ac.notes}</div>` : ''}
                         </div>
                     `;
                 });

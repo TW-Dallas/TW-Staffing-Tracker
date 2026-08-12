@@ -1015,6 +1015,19 @@
         }
     }
 
+    function toggleTrainingCenters(btn) {
+        const content = document.getElementById('trainingCentersContent');
+        const chevron = document.getElementById('tcChevron');
+        if (!content) return;
+        if (content.style.display === 'none' || !content.style.display) {
+            content.style.display = 'flex';
+            if (chevron) chevron.style.transform = 'rotate(180deg)';
+        } else {
+            content.style.display = 'none';
+            if (chevron) chevron.style.transform = 'rotate(0deg)';
+        }
+    }
+
     function renderContactsDirectory() {
         const container = document.getElementById('contactsList');
         if (!container) return;
@@ -1026,11 +1039,14 @@
         const storeContacts = rawData.contacts || [];
         const adminContacts = rawData.adminContacts || [];
 
-        const leadershipContacts = adminContacts.filter(ac => {
+        const isLeadership = ac => {
             const cat = (ac.category || '').toLowerCase();
             const title = (ac.title || '').toLowerCase();
             return cat.includes('leadership') || cat.includes('market leader') || title.includes('market leader');
-        });
+        };
+
+        const leadershipContacts = adminContacts.filter(isLeadership);
+        const nonLeadershipContacts = adminContacts.filter(ac => !isLeadership(ac));
 
         const phoneSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>`;
         const smsSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`;
@@ -1053,42 +1069,50 @@
         });
 
         let html = `
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-                <!-- TRAINING CENTER OFFICES & MARKET LEADER HEADER -->
-                <div style="background: white; border-radius: 12px; border: 1.5px solid var(--crust-med); padding: 14px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.03);">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; font-family: 'Condensed', sans-serif;">
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+                <!-- FEATURED MARKET LEADER HEADER -->
+                ${leadershipContacts.map(lc => `
+                    <div style="background: var(--dark-blue); color: white; border-radius: 12px; padding: 12px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-family: 'Condensed', sans-serif;">
+                        <div>
+                            <div style="font-family: 'Subhead2', sans-serif; font-size: 19px; font-weight: bold; color: white;">⭐ ${lc.name} <span style="font-family: 'Condensed'; font-size: 15px; opacity: 0.9; font-weight: normal;">— ${lc.title || 'Market Leader'}</span></div>
+                            ${lc.email ? `<div style="font-size: 14px; opacity: 0.95; margin-top: 2px;">✉️ ${lc.email}</div>` : ''}
+                        </div>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            ${lc.phone ? `<a href="tel:${lc.phone}" style="background: rgba(255,255,255,0.25); color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">${phoneSvg} Call</a>` : ''}
+                            ${lc.phone ? `<a href="sms:${lc.phone}" style="background: rgba(255,255,255,0.25); color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">${smsSvg} Text</a>` : ''}
+                            ${lc.email ? `<a href="mailto:${lc.email}" style="background: rgba(255,255,255,0.25); color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">${mailSvg} Email</a>` : ''}
+                        </div>
+                    </div>
+                `).join('')}
+
+                <!-- COLLAPSIBLE TRAINING CENTERS BANNER -->
+                <div style="background: white; border-radius: 12px; border: 1.5px solid var(--crust-med); overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.03);">
+                    <button type="button" onclick="toggleTrainingCenters(this)" style="width: 100%; background: var(--crust-light); border: none; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-family: 'Subhead2', sans-serif; font-size: 16px; color: var(--dark-blue); font-weight: bold;">
+                        <span>📍 Training Centers (Mesquite & McKinney)</span>
+                        <span id="tcChevron" style="transition: transform 0.2s ease; font-size: 14px; color: var(--crust-burnt);">▼</span>
+                    </button>
+                    
+                    <div id="trainingCentersContent" style="display: none; padding: 12px; border-top: 1px solid var(--crust-med); flex-direction: column; gap: 10px;">
                         <div style="background: #f8fafc; border-left: 4px solid var(--brand-blue); padding: 10px 12px; border-radius: 6px; display: flex; flex-direction: column; gap: 4px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-                                <div style="font-family: 'Subhead2'; font-size: 16px; color: var(--dark-blue); font-weight: bold;">📍 Mesquite Training Center</div>
+                                <div style="font-family: 'Subhead2'; font-size: 15px; color: var(--dark-blue); font-weight: bold;">📍 Mesquite Training Center</div>
                                 <button type="button" onclick="openMapLink('519 N Galloway Ave, Mesquite, TX 75149')" style="background: #eef6fc; color: var(--dark-blue); border: 1px solid #b3d7f2; padding: 4px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; flex-shrink: 0;">
                                     ${mapSvg} Directions
                                 </button>
                             </div>
-                            <div style="font-size: 14px; color: var(--crust-burnt);">519 N Galloway Ave, Mesquite, TX 75149</div>
+                            <div style="font-size: 14px; color: var(--crust-burnt); font-family: 'Condensed';">519 N Galloway Ave, Mesquite, TX 75149</div>
                         </div>
+
                         <div style="background: #f8fafc; border-left: 4px solid var(--brand-blue); padding: 10px 12px; border-radius: 6px; display: flex; flex-direction: column; gap: 4px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-                                <div style="font-family: 'Subhead2'; font-size: 16px; color: var(--dark-blue); font-weight: bold;">📍 McKinney Training Center</div>
+                                <div style="font-family: 'Subhead2'; font-size: 15px; color: var(--dark-blue); font-weight: bold;">📍 McKinney Training Center</div>
                                 <button type="button" onclick="openMapLink('4550 Eldorado Pkwy, McKinney, TX 75070')" style="background: #eef6fc; color: var(--dark-blue); border: 1px solid #b3d7f2; padding: 4px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; flex-shrink: 0;">
                                     ${mapSvg} Directions
                                 </button>
                             </div>
-                            <div style="font-size: 14px; color: var(--crust-burnt);">4550 Eldorado Pkwy, McKinney, TX 75070</div>
+                            <div style="font-size: 14px; color: var(--crust-burnt); font-family: 'Condensed';">4550 Eldorado Pkwy, McKinney, TX 75070</div>
                         </div>
                     </div>
-                    ${leadershipContacts.map(lc => `
-                        <div style="background: var(--dark-blue); color: white; border-radius: 8px; padding: 10px 14px; margin-top: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; font-family: 'Condensed', sans-serif;">
-                            <div>
-                                <span style="font-family: 'Subhead2'; font-size: 17px; font-weight: bold;">⭐ ${lc.name} ${lc.title ? `- ${lc.title}` : '- Market Leader'}</span>
-                                ${lc.email ? `<span style="font-size: 14px; opacity: 0.9; margin-left: 8px;">✉️ ${lc.email}</span>` : ''}
-                            </div>
-                            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                                ${lc.phone ? `<a href="tel:${lc.phone}" style="background: rgba(255,255,255,0.25); color: white; padding: 4px 10px; border-radius: 6px; font-size: 13px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">${phoneSvg} Call</a>` : ''}
-                                ${lc.phone ? `<a href="sms:${lc.phone}" style="background: rgba(255,255,255,0.25); color: white; padding: 4px 10px; border-radius: 6px; font-size: 13px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">${smsSvg} Text</a>` : ''}
-                                ${lc.email ? `<a href="mailto:${lc.email}" style="background: rgba(255,255,255,0.25); color: white; padding: 4px 10px; border-radius: 6px; font-size: 13px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">${mailSvg} Email</a>` : ''}
-                            </div>
-                        </div>
-                    `).join('')}
                 </div>
         `;
 
@@ -1150,7 +1174,7 @@
             html += `</div></div>`;
         });
 
-        // ALWAYS RENDER ADMIN & CORPORATE CONTACTS SECTION
+        // ALWAYS RENDER ADMIN & CORPORATE CONTACTS SECTION (Excludes Leadership since featured at top)
         html += `
             <div style="margin-top: 12px;">
                 <h3 style="font-family: 'Subhead1', sans-serif; font-size: 20px; color: var(--dark-blue); margin-bottom: 12px; text-transform: uppercase; border-bottom: 2px solid var(--brand-blue); padding-bottom: 6px;">
@@ -1158,9 +1182,9 @@
                 </h3>
         `;
 
-        if (adminContacts.length > 0) {
+        if (nonLeadershipContacts.length > 0) {
             const adminCategoryGroups = {};
-            adminContacts.forEach(ac => {
+            nonLeadershipContacts.forEach(ac => {
                 const catKey = ac.category || 'General Support';
                 if (!adminCategoryGroups[catKey]) adminCategoryGroups[catKey] = [];
                 adminCategoryGroups[catKey].push(ac);
@@ -1186,7 +1210,7 @@
                                 </div>
                             </div>
 
-                            ${ac.notes ? `<div style="font-family: 'Condensed', sans-serif; font-size: 13px; color: var(--dark-blue); background: #eef6fc; padding: 4px 8px; border-radius: 4px; margin-top: 2px;">📌 ${ac.notes}</div>` : ''}
+                            ${ac.notes ? `<div style="font-family: 'Condensed', sans-serif; font-size: 13px; color: var(--dark-blue); background: #eef6fc; padding: 4px 8px; border-radius: 4px; margin-top: 2px; white-space: pre-wrap;">📌 ${ac.notes}</div>` : ''}
 
                             <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--crust-med);">
                                 ${ac.phone ? `<a href="tel:${ac.phone}" style="background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; padding: 5px 10px; border-radius: 6px; font-family: 'Condensed'; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${phoneSvg} Call (${ac.phone})</a>` : ''}
