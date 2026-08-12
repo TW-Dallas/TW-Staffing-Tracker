@@ -695,10 +695,10 @@
             return "updated ID (due to a document mismatch)";
         }
         if (idCount > 1) {
-            return "required ID documents";
+            return "required I-9 documents";
         }
         if (hasA) {
-            return "List A document (such as a Passport or Permanent Resident card)";
+            return "proof of work authorization (such as an Employment Authorization Card or Permanent Resident Card)";
         }
         if (hasB) {
             return "photo ID (Driver's License or State ID)";
@@ -708,7 +708,7 @@
         }
 
         const vehicleParts = [];
-        if (hasIns) vehicleParts.push("Auto Insurance");
+        if (hasIns) vehicleParts.push("Auto Insurance (showing your name listed as a covered driver)");
         if (hasReg) vehicleParts.push("Vehicle Registration");
         if (hasInsp) vehicleParts.push("in-person Vehicle Inspection");
 
