@@ -136,6 +136,21 @@
 
         <!-- Middle Panel: Form Area -->
         <div class="form-panel" id="formPanel">
+            <!-- BATCH SAVE DRAFT BANNER -->
+            <div id="batchDraftBanner" style="display: none; background: #fff3cd; border: 1.5px solid #ffeeba; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; align-items: center; justify-content: space-between;">
+                <div style="font-family: 'Subhead2', sans-serif; font-size: 15px; color: #856404; display: flex; align-items: center; gap: 6px;">
+                    <span>💾</span> <strong id="batchDraftCount">0</strong> candidate edits pending
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" onclick="batchSaveAllCandidateEdits()" style="background: var(--success-green); color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 14px; font-family: 'Subhead2', sans-serif; cursor: pointer;">
+                        💾 Save All Batch
+                    </button>
+                    <button type="button" onclick="discardAllBatchDrafts()" style="background: var(--crust-med); color: var(--crust-burnt); border: none; padding: 6px 12px; border-radius: 6px; font-size: 13px; cursor: pointer;">
+                        Discard
+                    </button>
+                </div>
+            </div>
+
             <h2 id="formTitle" style="margin-top: 0; font-family: 'ExtraBold', sans-serif; font-size: 20px; color: var(--dark-blue); margin-bottom: 8px;">Candidate details</h2>
             <form id="candidateForm" onsubmit="saveCandidate(event)">
                 <!-- Hidden inputs for ID and NTO Date -->
@@ -2235,11 +2250,140 @@
         }
     }
 
+    let unsavedDrafts = {};
+
+    function updateBatchDraftBanner() {
+        const banner = document.getElementById('batchDraftBanner');
+        const countEl = document.getElementById('batchDraftCount');
+        const keys = Object.keys(unsavedDrafts);
+        if (keys.length > 0) {
+            if (banner) banner.style.display = 'flex';
+            if (countEl) countEl.innerText = keys.length;
+        } else {
+            if (banner) banner.style.display = 'none';
+        }
+    }
+
+    function captureCurrentFormDraft() {
+        if (!currentSelectedId) return;
+        
+        let payload = { target: currentView, id: currentSelectedId };
+        let activeViewList = candidates;
+        if (currentView === 'staffing') activeViewList = staffing;
+        else if (currentView === 'interviews') activeViewList = interviews;
+        else if (currentView === 'paycards') activeViewList = paycards;
+
+        const existing = activeViewList.find(c => c.id === currentSelectedId);
+        if (!existing) return;
+
+        if (currentView === 'onboarding') {
+            const notesEl = document.getElementById('fieldNotes');
+            const phoneEl = document.getElementById('fieldPhone');
+            const emailEl = document.getElementById('fieldEmail');
+
+            const notes = notesEl ? notesEl.value.trim() : '';
+            const phone = phoneEl ? phoneEl.value.trim() : '';
+            const email = emailEl ? emailEl.value.trim() : '';
+            
+            let isChanged = (notes !== (existing.notes || '')) ||
+                            (phone !== (existing.phoneNumber || '')) ||
+                            (email !== (existing.email || ''));
+            if (isChanged) {
+                payload.name = existing.name;
+                payload.notes = notes;
+                payload.phoneNumber = phone;
+                payload.email = email;
+                unsavedDrafts[currentSelectedId] = payload;
+            }
+        } else if (currentView === 'interviews') {
+            const notesEl = document.getElementById('intNotes');
+            const updatesEl = document.getElementById('intStatusUpdates');
+            const notes = notesEl ? notesEl.value.trim() : '';
+            const statusUpdates = updatesEl ? updatesEl.value.trim() : '';
+
+            let isChanged = (notes !== (existing.notes || '')) || (statusUpdates !== (existing.statusUpdates || ''));
+            if (isChanged) {
+                payload.name = existing.name;
+                payload.store = existing.store;
+                payload.notes = notes;
+                payload.statusUpdates = statusUpdates;
+                unsavedDrafts[currentSelectedId] = payload;
+            }
+        } else if (currentView === 'staffing') {
+            const notesEl = document.getElementById('stfNotes');
+            const notes = notesEl ? notesEl.value.trim() : '';
+
+            let isChanged = (notes !== (existing.notes || ''));
+            if (isChanged) {
+                payload.name = existing.name;
+                payload.store = existing.store;
+                payload.notes = notes;
+                unsavedDrafts[currentSelectedId] = payload;
+            }
+        }
+
+        updateBatchDraftBanner();
+    }
+
+    async function batchSaveAllCandidateEdits() {
+        captureCurrentFormDraft();
+        const drafts = Object.values(unsavedDrafts);
+        if (drafts.length === 0) {
+            showBrandAlert("No unsaved candidate edits found to save.", "No Edits");
+            return;
+        }
+
+        const confirmMsg = `Save and push batch updates for ${drafts.length} candidate(s)?`;
+        const confirmed = await showBrandConfirm(confirmMsg, "Confirm Batch Save");
+        if (!confirmed) return;
+
+        showLoader(true, `Saving ${drafts.length} candidate updates...`);
+
+        try {
+            const result = await apiCall('POST', {
+                action: 'batchUpdate',
+                target: currentView,
+                updates: drafts
+            });
+
+            unsavedDrafts = {};
+            updateBatchDraftBanner();
+
+            showLoader(false);
+            showBrandAlert(result.message || `Successfully saved ${drafts.length} updates!`, "Batch Save Complete");
+
+            // Refresh data
+            const refreshData = await apiCall('GET');
+            candidates = refreshData.onboarding || [];
+            interviews = refreshData.interviews || [];
+            staffing = refreshData.staffing || [];
+            contacts = refreshData.contacts || [];
+            paycards = processPayCards(refreshData);
+            renderList();
+        } catch (err) {
+            showLoader(false);
+            showBrandAlert("Error saving batch updates: " + err.message, "Batch Save Error");
+        }
+    }
+
+    function discardAllBatchDrafts() {
+        unsavedDrafts = {};
+        updateBatchDraftBanner();
+        if (currentSelectedId) {
+            const item = candidates.find(c => c.id === currentSelectedId) || interviews.find(c => c.id === currentSelectedId) || staffing.find(c => c.id === currentSelectedId);
+            if (item) selectCandidate(item);
+        }
+    }
+
     function selectCandidate(item) {
+        captureCurrentFormDraft();
         currentSelectedId = item.id;
         renderList();
 
-        document.getElementById('formTitle').innerText = `Edit: ${item.name}`;
+        const draftPayload = unsavedDrafts[item.id];
+        const displayNotes = (draftPayload && draftPayload.notes !== undefined) ? draftPayload.notes : (item.notes || '');
+
+        document.getElementById('formTitle').innerText = draftPayload ? `Edit: ${item.name} (Draft Loaded)` : `Edit: ${item.name}`;
         document.getElementById('btnCancel').innerText = "Cancel Edit";
 
         if (currentView === 'paycards') {
@@ -2299,11 +2443,11 @@
             document.getElementById('fieldName').value = item.name || '';
             document.getElementById('fieldPosition').value = item.position || '';
             document.getElementById('fieldStore').value = item.store || '';
-            document.getElementById('fieldPhone').value = item.phoneNumber || '';
-            document.getElementById('fieldEmail').value = item.email || '';
+            document.getElementById('fieldPhone').value = (draftPayload && draftPayload.phoneNumber !== undefined) ? draftPayload.phoneNumber : (item.phoneNumber || '');
+            document.getElementById('fieldEmail').value = (draftPayload && draftPayload.email !== undefined) ? draftPayload.email : (item.email || '');
             document.getElementById('fieldNto').value = item.ntoDate || '';
             document.getElementById('fieldPayCard').value = item.payCard || '';
-            document.getElementById('fieldNotes').value = item.notes || '';
+            document.getElementById('fieldNotes').value = displayNotes;
 
             setSelectValueCaseInsensitive('fieldShirt', item.shirtSize);
             setSelectValueCaseInsensitive('fieldHat', item.hatStyle);
