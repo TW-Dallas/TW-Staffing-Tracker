@@ -3538,7 +3538,8 @@
                 const matchesDo = item.doName.toLowerCase().includes(searchQuery);
                 const matchesGm = item.manager.toLowerCase().includes(searchQuery);
                 const matchesPhone = item.storePhone.includes(searchQuery) || item.gmPhone.includes(searchQuery);
-                return matchesStore || matchesDo || matchesGm || matchesPhone;
+                const matchesIp = (item.ipAddress || '').toLowerCase().includes(searchQuery);
+                return matchesStore || matchesDo || matchesGm || matchesPhone || matchesIp;
             }
             return true;
         });
@@ -3606,6 +3607,10 @@
                     <div style="display: flex; align-items: center; gap: 6px;">
                         <strong>Store Phone:</strong> ${item.storePhone || 'N/A'}
                         ${item.storePhone ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${item.storePhone}', this)" title="Copy Store Phone">${copySvg}</button>` : ''}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; grid-column: span 2;">
+                        <strong>IP Address:</strong> ${item.ipAddress || 'N/A'}
+                        ${item.ipAddress ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.ipAddress)}', this)" title="Copy IP Address">${copySvg}</button>` : ''}
                     </div>
                 </div>
             `;
