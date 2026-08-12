@@ -483,7 +483,7 @@
 
         const att = (item.ntoAttendance || item.ntoStatus || item['NTO Status'] || item.liveStatus || item.status || '').trim();
 
-        if (att === 'NTO Complete' || att === 'Attended') return { pct: 98, color: 'green', label: '🎓 NTO Complete' };
+        if (att === 'NTO Complete' || att === 'Attended') return { pct: 100, color: 'green', label: 'Hired' };
 
         if (item.incorrectEmail) return { pct: 15, color: 'red', label: 'Incorrect Email' };
         if (item.hasMissingDocs) return { pct: 15, color: 'red', label: 'Missing Documents' };
@@ -492,7 +492,14 @@
             return { pct: 90, color: 'red', label: 'Missed Orientation' };
         }
 
-        if (item.ntoScheduled || item.ntoDate || item.date || att === 'In Lobby' || att === 'In Class') {
+        if (att === 'In Lobby') {
+            return { pct: 85, color: 'blue', label: 'In Lobby (Checked In)' };
+        }
+        if (att === 'In Class') {
+            return { pct: 85, color: 'blue', label: 'In Class' };
+        }
+
+        if (item.ntoScheduled || item.ntoDate || item.date) {
             return { pct: 85, color: 'blue', label: 'Orientation Scheduled' };
         }
         if (item.ntoSignupLinkSent) return { pct: 70, color: 'blue', label: 'NTO Signup Sent' };
@@ -518,9 +525,6 @@
         }
         if (att === 'In Class') {
             return `<div class="alert-banner" style="background-color: #e8f5e9; border-color: #4caf50; color: #1b5e20;">📖 Currently in NTO Class</div>`;
-        }
-        if (att === 'NTO Complete' || att === 'Attended') {
-            return `<div class="alert-banner" style="background-color: #e8f5e9; border-color: #28a745; color: #1b5e20;">🎓 NTO Class Completed!</div>`;
         }
         if (att === 'Left Early') {
             return `<div class="alert-banner">⚠️ Candidate Left Class Early</div>`;
