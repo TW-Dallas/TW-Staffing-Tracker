@@ -4211,11 +4211,13 @@
             data.classes.forEach(c => {
                 const row = document.createElement('tr');
                 row.style.borderBottom = '1px solid var(--crust-med)';
+                const startDisp = formatTimeDisplayFrontEnd(c.startTime) || c.startTime;
+                const endDisp = formatTimeDisplayFrontEnd(c.endTime) || c.endTime;
                 row.innerHTML = `
                     <td style="padding: 10px 12px; font-weight: bold; color: var(--dark-blue); font-size: 17px;">
                         ${c.classDate} <br><span style="font-size: 13px; color: var(--brand-grey); font-weight: normal;">${c.classId || 'Auto ID'}</span>
                     </td>
-                    <td style="padding: 10px 12px; text-align: center; font-size: 17px;">${c.startTime} - ${c.endTime}</td>
+                    <td style="padding: 10px 12px; text-align: center; font-size: 17px;">${startDisp} - ${endDisp}</td>
                     <td style="padding: 10px 12px; text-align: center; font-size: 17px;">${c.trainerName}</td>
                     <td style="padding: 10px 12px; text-align: center; font-weight: bold; font-size: 17px;">${c.capacity}</td>
                     <td style="padding: 10px 12px; text-align: center;">
