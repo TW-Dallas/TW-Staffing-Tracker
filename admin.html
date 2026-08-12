@@ -1624,17 +1624,20 @@
     function getInterviewStatusWeight(item) {
         const s = (item && item.status ? item.status : '').toString().trim().toLowerCase();
 
-        // 6. Hired / Completed (Pushed to bottom since tracked in onboarding tab)
-        if (s.includes('hired') || s.includes('completed')) return 6;
+        // 7. Hired / Completed (Pushed to bottom since tracked in onboarding tab)
+        if (s.includes('hired') || s.includes('completed')) return 7;
 
-        // 5. No Show
-        if (s.includes('no show')) return 5;
+        // 6. No Show
+        if (s.includes('no show')) return 6;
 
-        // 4. Declined
-        if (s.includes('declined') || s.includes('canceled') || s.includes('cancelled') || s.includes('pass') || s.includes('withdrawn')) return 4;
+        // 5. Declined
+        if (s.includes('declined') || s.includes('canceled') || s.includes('cancelled') || s.includes('pass') || s.includes('withdrawn')) return 5;
 
-        // 3. TBD + Hold
-        if (s.includes('to be determined') || s.includes('tbd') || s.includes('hold')) return 3;
+        // 4. TBD + Hold
+        if (s.includes('to be determined') || s.includes('tbd') || s.includes('hold')) return 4;
+
+        // 3. Position Offered (Dropped below Phone & GM Interviews)
+        if (s.includes('position offered') || s.includes('offered')) return 3;
 
         // 2. GM interviews
         if (s.includes('gm interview') || s.includes('gm')) return 2;
@@ -1774,8 +1777,9 @@
 
         const sortBy = document.getElementById('sortControl').value;
         const searchQuery = document.getElementById('searchControl').value.toLowerCase().trim();
-        const oneWeekAgo = new Date();
-        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        const tenDaysAgo = new Date();
+        tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+        tenDaysAgo.setHours(0, 0, 0, 0);
 
         // Sorting Comparator Logic
         const sortComparator = (a, b) => {
@@ -1938,7 +1942,18 @@
             });
 
         } else if (currentView === 'interviews') {
-            let filteredInterviews = interviews.filter(item => matchesSearchQuery(item, searchQuery));
+            let filteredInterviews = interviews.filter(item => {
+                if (!matchesSearchQuery(item, searchQuery)) return false;
+                if (searchQuery) return true;
+
+                // Drop interview from immediate view after 10 days, but allow search lookup
+                const rawDate = item.gmDate || item.date || item.lastUpdated;
+                const itemDate = parseCandidateDate(rawDate);
+                if (itemDate && itemDate.getTime() < tenDaysAgo.getTime()) {
+                    return false;
+                }
+                return true;
+            });
             filteredInterviews.sort(sortComparator);
 
             if (filteredInterviews.length === 0) {
