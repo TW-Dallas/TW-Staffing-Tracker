@@ -1,4 +1,4 @@
-const CACHE_NAME = 'staffing-cache-v2';
+const CACHE_NAME = 'staffing-cache-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
