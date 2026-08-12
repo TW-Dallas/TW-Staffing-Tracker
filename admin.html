@@ -3169,6 +3169,11 @@
             const hasPayCard = val === "yes" || val === "true" || val === "1" || val.includes("yes");
             if (!hasPayCard) return false;
 
+            // Exclude candidates who have completed Pay Card / Payroll setup
+            const existing = serverPaycards.find(p => p.id === item.id);
+            const isCompleted = item.allPayCompleted || item.ddEntered || (existing && (existing.ddEntered || existing.allPayCompleted));
+            if (isCompleted) return false;
+
             const att = (item.ntoAttendance || "").toString().trim().toLowerCase();
             const hasAttendedNto = item.hired || 
                                    att === "nto complete" || 

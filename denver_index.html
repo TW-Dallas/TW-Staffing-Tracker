@@ -723,7 +723,13 @@
             if (item.hatStyle && (item.hatStyle.toLowerCase() === 'cap' || item.hatStyle.toLowerCase() === 'visor')) {
                 chipsHtml += `<span class="chip">🧢 ${item.hatStyle}</span>`;
             }
-            if (item.payCard) chipsHtml += `<span class="chip">💳 Pay Card Required</span>`;
+            if (item.payCard) {
+                if (item.ddEntered || item.allPayCompleted) {
+                    chipsHtml += `<span class="chip" style="background: #e6f4ea; color: #137333; border: 1px solid #ceead6; font-weight: bold;">💳 Pay Card: Complete ✔</span>`;
+                } else {
+                    chipsHtml += `<span class="chip">💳 Pay Card Required</span>`;
+                }
+            }
             if (item.ntoDate) chipsHtml += `<span class="chip chip-nto">📅 NTO: ${item.ntoDate}</span>`;
 
             let checklistHtml = '';
@@ -772,8 +778,8 @@
                 <div class="card ${cardClass} ${isCurrentlyExpanded ? 'expanded' : ''}" onclick="toggleCard(this, '${item.id}')">
                     <div class="card-header">
                         <div class="name-phone-group" style="display: flex; flex-direction: column;">
-                            <div class="name" style="display: flex; align-items: center;">
-                                ${item.name} <span class="expand-chevron">▼</span>
+                            <div class="name" style="display: flex; align-items: center; gap: 4px;">
+                                ${item.name} ${(item.ddEntered || item.allPayCompleted) ? '<span title="Payroll / Pay Card Complete" style="color: #2e7d32; font-weight: bold; font-size: 16px;">✔</span>' : ''} <span class="expand-chevron">▼</span>
                             </div>
                         </div>
                         <div class="position-badge">${icon} ${item.position}</div>
