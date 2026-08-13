@@ -631,6 +631,11 @@
             return `sms:${phone}?body=${encodeURIComponent(txt)}`;
         }
 
+        if (item.ntoSignupLinkSent && !item.ntoScheduled && !item.ntoDate && !item.date && !item.hired) {
+            const txt = `Hey ${firstName}! This is Domino's. Friendly reminder to sign up for your online orientation class! The registration link was sent to your email. Please check your spam or junk folder if you don't see it in your inbox. Let us know if you have any questions!`;
+            return `sms:${phone}?body=${encodeURIComponent(txt)}`;
+        }
+
         if (item.onboardingSent && !item.hired) {
             const missing = [];
             if (!item.bgcComplete) missing.push("background check");

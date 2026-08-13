@@ -793,6 +793,10 @@
             return `Hey ${firstName}! This is Domino's. We still need your ${formattedDoc} to complete your onboarding. Please reply back so we can help you get that submitted or bring it by the store! Thanks!`;
         }
 
+        if (item.ntoSignupLinkSent && !item.ntoScheduled && !item.ntoDate && !item.date && !item.hired) {
+            return `Hey ${firstName}! This is Domino's. Friendly reminder to sign up for your online orientation class! The registration link was sent to your email. Please check your spam or junk folder if you don't see it in your inbox. Let us know if you have any questions!`;
+        }
+
         if (item.onboardingSent && !item.hired) {
             const missing = [];
             if (!item.bgcComplete) missing.push("background check");
