@@ -471,11 +471,16 @@
             align-items: center;
             justify-content: center;
             z-index: 2000;
+            padding: 16px;
+            box-sizing: border-box;
         }
         .brand-modal-card {
             background: var(--card-bg);
             width: 95%;
-            max-width: 440px;
+            max-width: 480px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
             border-radius: var(--border-radius);
             box-shadow: 0 16px 48px rgba(71, 43, 16, 0.25);
             border: 2px solid var(--crust-dark);
@@ -486,8 +491,15 @@
             background: linear-gradient(90deg, var(--brand-red) 50%, var(--brand-blue) 50%);
             height: 8px;
             width: 100%;
+            flex-shrink: 0;
         }
-        .brand-modal-content { padding: 24px; }
+        .brand-modal-content {
+            padding: 24px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            max-height: calc(90vh - 8px);
+            box-sizing: border-box;
+        }
         .brand-modal-content h3 {
             margin-top: 0;
             margin-bottom: 12px;
