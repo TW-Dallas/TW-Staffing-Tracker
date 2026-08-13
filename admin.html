@@ -3758,7 +3758,7 @@
                     <div style="font-family: 'Condensed', sans-serif; font-size: 16px; color: var(--text-dark); margin-top: 2px;">Store #${item.store} • ${item.position || 'CSR'} • Date: ${ntoDateVal || 'N/A'}</div>
                 </div>
                 <div style="flex: 1.2; display: flex; gap: 8px; align-items: center;">
-                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" style="flex: 1; padding: 8px 10px; font-size: 18px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1px solid var(--crust-dark);">
+                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" style="flex: 1; padding: 8px 10px; font-size: 18px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1px solid var(--crust-dark);">
                         <option value="" ${!savedStatus ? 'selected' : ''} disabled>Select Status...</option>
                         <option value="In Lobby" ${savedStatus === 'In Lobby' ? 'selected' : ''}>🏨 In Lobby (Checked In)</option>
                         <option value="In Class" ${savedStatus === 'In Class' ? 'selected' : ''}>📖 In Class</option>                        
@@ -3855,6 +3855,7 @@
                 id: el.getAttribute('data-id') || '',
                 classId: el.getAttribute('data-id') || '',
                 name: el.getAttribute('data-name') || '',
+                email: el.getAttribute('data-email') || '',
                 store: el.getAttribute('data-store') || '',
                 position: el.getAttribute('data-position') || 'CSR',
                 shirtSize: el.getAttribute('data-shirt') || '',
@@ -4007,6 +4008,7 @@
                 rosterData.push({
                     id: el.getAttribute('data-id') || '',
                     name: el.getAttribute('data-name') || '',
+                    email: el.getAttribute('data-email') || '',
                     store: el.getAttribute('data-store') || '',
                     position: el.getAttribute('data-position') || 'CSR',
                     shirtSize: el.getAttribute('data-shirt') || '',
