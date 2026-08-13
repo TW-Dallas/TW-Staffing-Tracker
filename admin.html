@@ -1900,6 +1900,19 @@
 
                     if (timeA !== timeB) return timeA - timeB;
                     return (a.name || '').localeCompare(b.name || '');
+                } else if (currentView === 'paycards') {
+                    const completeA = (a.ddEntered || a.registered) ? 1 : 0;
+                    const completeB = (b.ddEntered || b.registered) ? 1 : 0;
+                    if (completeA !== completeB) return completeA - completeB; // Action Needed first!
+                    
+                    const rawA = a.ntoDate || a.hireDate || a.date;
+                    const rawB = b.ntoDate || b.hireDate || b.date;
+                    const dateA = parseCandidateDate(rawA);
+                    const dateB = parseCandidateDate(rawB);
+                    const timeA = dateA ? dateA.getTime() : Infinity;
+                    const timeB = dateB ? dateB.getTime() : Infinity;
+                    if (timeA !== timeB) return timeA - timeB;
+                    return (a.name || '').localeCompare(b.name || '');
                 } else {
                     return (a.rehireEligible || '').localeCompare(b.rehireEligible || '');
                 }
@@ -2619,6 +2632,7 @@
             payload.ddReceived = document.getElementById('checkPayDdReceived').checked;
             payload.ddEntered = document.getElementById('checkPayDdEntered').checked;
             payload.notes = document.getElementById('payNotes').value.trim();
+            payload.payCard = existingCand.payCard || 'Yes';
 
             if (existingCand.phoneNumber !== undefined) payload.phoneNumber = existingCand.phoneNumber;
             if (existingCand.email !== undefined) payload.email = existingCand.email;
@@ -3592,31 +3606,21 @@
         });
     }
 
-    // Automatically pull candidates from Onboarding who have Pay Card Status = "Yes" AND have attended/completed NTO
+    // Automatically pull candidates from Onboarding who have Pay Card Status = "Yes"
     function processPayCards(data) {
         const onboardingList = data.onboarding || [];
         const serverPaycards = data.paycards || [];
         
-        // Find all onboarding candidates with payCard = "Yes" AND who have attended NTO / are Hired
+        // Find all onboarding candidates with payCard = "Yes" (excluding inactive/ineligible)
         const matchedFromOnboarding = onboardingList.filter(item => {
-            const val = (item.payCard || "").toString().trim().toLowerCase();
+            const val = (item.payCard || item.paycard || item.Paycard || "").toString().trim().toLowerCase();
             const hasPayCard = val === "yes" || val === "true" || val === "1" || val.includes("yes");
             if (!hasPayCard) return false;
 
-            // Exclude candidates who have completed Pay Card / Payroll setup
-            const existing = serverPaycards.find(p => p.id === item.id);
-            const isCompleted = item.allPayCompleted || item.ddEntered || (existing && (existing.ddEntered || existing.allPayCompleted));
-            if (isCompleted) return false;
+            // Exclude candidates explicitly marked inactive or ineligible
+            if (item.ineligible || item.inactive) return false;
 
-            const att = (item.ntoAttendance || "").toString().trim().toLowerCase();
-            const hasAttendedNto = item.hired || 
-                                   att === "nto complete" || 
-                                   att === "attended" || 
-                                   att === "in class" || 
-                                   att === "in lobby" ||
-                                   (att !== "" && !att.includes("not") && !att.includes("missed") && !att.includes("no show") && !att.includes("incomplete"));
-
-            return hasAttendedNto;
+            return true;
         }).map(item => {
             const existing = serverPaycards.find(p => p.id === item.id);
             return {
@@ -3631,7 +3635,11 @@
                 registered: item.registered !== undefined ? item.registered : (existing ? existing.registered : false),
                 ddReceived: item.ddReceived !== undefined ? item.ddReceived : (existing ? existing.ddReceived : false),
                 ddEntered: item.ddEntered !== undefined ? item.ddEntered : (existing ? existing.ddEntered : false),
-                noticeSentDate: item.noticeSentDate !== undefined ? item.noticeSentDate : (existing ? existing.noticeSentDate : '')
+                noticeSentDate: item.noticeSentDate !== undefined ? item.noticeSentDate : (existing ? existing.noticeSentDate : ''),
+                payCard: item.payCard || (existing ? existing.payCard : 'Yes'),
+                phoneNumber: item.phoneNumber,
+                email: item.email,
+                hired: item.hired
             };
         });
 
