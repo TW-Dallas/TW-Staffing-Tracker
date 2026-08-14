@@ -3058,8 +3058,10 @@
                    `Phone: ${phone}\n` +
                    `Email: ${email}`;
         } else if (templateType === 'gm_noshow_check') {
+            const dayText = gmDay !== '{Day of the week}' ? `on ${gmDay}` : '';
+            const dayPhrase = dayText ? ` ${dayText}` : '';
             text = `~ ${position} Interview Follow-Up ~\n\n` +
-                   `Hey! Did ${name} show up for their ${position} interview on ${gmDay}, ${gmDateShort} at ${gmTime}, or were they a no show?\n\n` +
+                   `Hey! Did ${name} show up for their ${position} interview${dayPhrase}, or were they a no show?\n\n` +
                    `Phone: ${phone}`;
         } else if (templateType === 'phone_confirmed') {
             text = `~ ${position} Phone Interview Confirmed ~\n\n` +
