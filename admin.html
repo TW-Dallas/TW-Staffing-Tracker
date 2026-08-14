@@ -3139,42 +3139,76 @@
     }
         
     async function portCandidateToOnboarding() {
+        const intId = (document.getElementById('fieldId')?.value || currentSelectedId || '').trim();
         const name = document.getElementById('intName').value.trim();
         const position = document.getElementById('intPosition').value;
         const store = document.getElementById('intStore').value.trim();
         const phone = document.getElementById('intPhone').value.trim();
         const email = document.getElementById('intEmail').value.trim();
         const notes = document.getElementById('intNotes').value.trim();
-        const intRowIdx = document.getElementById('intRowIndex')?.value;
+        const availability = document.getElementById('intAvailability')?.value.trim() || '';
+        const statusUpdates = document.getElementById('intStatusUpdates')?.value.trim() || '';
 
         if (!name) {
             showBrandAlert("Please select or fill out an interview candidate first.", "No Candidate Selected");
             return;
         }
 
-        // Auto-update Interview status to Position Offered if editing an existing interview row
-        if (intRowIdx) {
-            const intStatusEl = document.getElementById('intStatus');
-            if (intStatusEl) intStatusEl.value = 'Position Offered';
-            const mockEventInt = { preventDefault: () => {} };
-            await saveInterviewCandidate(mockEventInt);
+        showLoader(true, `Porting ${name} to Onboarding...`);
+
+        try {
+            // 1. Auto-update Interview status to 'Position Offered' in local array & database
+            const intCandidate = interviews.find(c => (intId && c.id === intId) || (name && (c.name || '').toLowerCase() === name.toLowerCase()));
+            const targetIntId = intCandidate ? intCandidate.id : intId;
+            
+            if (targetIntId || intCandidate) {
+                if (intCandidate) {
+                    intCandidate.status = 'Position Offered';
+                }
+                const interviewPayload = {
+                    action: targetIntId ? 'update' : 'add',
+                    target: 'interviews',
+                    id: targetIntId,
+                    name: name,
+                    position: position,
+                    store: store,
+                    phoneNumber: phone,
+                    email: email,
+                    status: 'Position Offered',
+                    notes: notes,
+                    availability: availability,
+                    statusUpdates: statusUpdates,
+                    date: intCandidate?.date || document.getElementById('intDate')?.value || '',
+                    day: intCandidate?.day || document.getElementById('intDay')?.value || '',
+                    time: intCandidate?.time || document.getElementById('intTime')?.value || '',
+                    gmDate: intCandidate?.gmDate || document.getElementById('intGmDate')?.value || '',
+                    gmDay: intCandidate?.gmDay || document.getElementById('intGmDay')?.value || '',
+                    gmTime: intCandidate?.gmTime || document.getElementById('intGmTime')?.value || '',
+                    doName: intCandidate?.doName || document.getElementById('intDo')?.value || ''
+                };
+                await apiCall('POST', interviewPayload);
+            }
+
+            // 2. Switch to Onboarding view & populate fields
+            switchView('onboarding');
+            document.getElementById('fieldId').value = '';
+            document.getElementById('fieldName').value = name;
+            document.getElementById('fieldPosition').value = position;
+            document.getElementById('fieldStore').value = store;
+            document.getElementById('fieldPhone').value = phone;
+            document.getElementById('fieldEmail').value = email;
+            document.getElementById('fieldNotes').value = notes;
+            document.getElementById('checkSubmission').checked = true;
+
+            // 3. Auto-save candidate into Onboarding pipeline
+            const mockEvent = { preventDefault: () => {} };
+            await saveCandidate(mockEvent);
+
+            showBrandAlert(`Successfully ported ${name} to Onboarding and set Interview status to 🤝 Position Offered!`, "Candidate Ported & Saved");
+        } catch (err) {
+            showLoader(false);
+            showBrandAlert("Error during porting: " + err.message, "Porting Error");
         }
-
-        switchView('onboarding');
-        document.getElementById('fieldId').value = '';
-        document.getElementById('fieldName').value = name;
-        document.getElementById('fieldPosition').value = position;
-        document.getElementById('fieldStore').value = store;
-        document.getElementById('fieldPhone').value = phone;
-        document.getElementById('fieldEmail').value = email;
-        document.getElementById('fieldNotes').value = notes;
-        document.getElementById('checkSubmission').checked = true;
-
-        // Auto-save candidate into Onboarding pipeline
-        const mockEvent = { preventDefault: () => {} };
-        await saveCandidate(mockEvent);
-
-        showBrandAlert(`Successfully ported ${name} to Onboarding and set Interview status to 🤝 Position Offered!`, "Candidate Ported & Saved");
     }
 
     function portCandidateToStaffing(source) {
