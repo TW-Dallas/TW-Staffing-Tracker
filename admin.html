@@ -435,9 +435,32 @@
                                 <textarea id="intNotes" placeholder="Write any specific interview notes here..." style="height: 80px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4;"></textarea>
                             </div>
                         </div>
-                        <div class="form-group" style="margin-top: 6px;">
-                            <label>Status Updates</label>
-                            <textarea id="intStatusUpdates" placeholder="Recent updates on interview progression..." style="height: 55px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4;"></textarea>
+                        <div class="form-row" style="display: flex; gap: 12px; margin-top: 8px; align-items: stretch;">
+                            <div class="form-group" style="flex: 1; display: flex; flex-direction: column;">
+                                <label>Status Updates</label>
+                                <textarea id="intStatusUpdates" placeholder="Recent updates on interview progression..." style="flex: 1; min-height: 115px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4;"></textarea>
+                            </div>
+                            <div class="form-group" style="flex: 1.25; display: flex; flex-direction: column; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px; box-sizing: border-box;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 6px;">
+                                    <label style="font-family: 'ExtraBold', sans-serif; font-size: 13px; color: var(--dark-blue); text-transform: uppercase; margin: 0; display: flex; align-items: center; gap: 4px; white-space: nowrap;">
+                                        <span>💬 GM Text Generator</span>
+                                    </label>
+                                    <select id="smsTemplateSelect" onchange="updateSmsPreview()" style="font-size: 12px; padding: 3px 6px; height: 28px; font-family: 'Subhead1', sans-serif; border-radius: 4px; border: 1px solid #94a3b8; background: white; cursor: pointer; flex: 1; max-width: 220px;">
+                                        <option value="gm_confirmed">🏪 Store Interview Confirmed</option>
+                                        <option value="phone_confirmed">📞 Phone Interview Confirmed</option>
+                                        <option value="custom_status">📋 Candidate Status Update</option>
+                                    </select>
+                                </div>
+                                <textarea id="smsPreviewBox" placeholder="Select or fill candidate details to generate text message..." style="flex: 1; min-height: 110px; font-family: 'Courier New', Courier, monospace; font-size: 12.5px; line-height: 1.35; background: white; border: 1px solid #cbd5e1; border-radius: 4px; padding: 8px; color: #0f172a; resize: vertical; box-sizing: border-box;"></textarea>
+                                <div style="display: flex; gap: 6px; margin-top: 8px;">
+                                    <button type="button" id="btnCopySms" onclick="copySmsToClipboard()" style="flex: 1; background: var(--brand-blue, #0078d4); color: white; border: none; border-radius: 6px; padding: 7px 10px; font-size: 13px; font-weight: bold; font-family: 'Subhead1', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s;">
+                                        <span>📋 Copy GM Text</span>
+                                    </button>
+                                    <button type="button" onclick="openGoogleMessages()" title="Open Google Messages Web in new tab" style="background: white; border: 1px solid #cbd5e1; color: #334155; border-radius: 6px; padding: 7px 10px; font-size: 13px; font-weight: bold; font-family: 'Subhead1', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; white-space: nowrap;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'">
+                                        💬 Messages Web
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div> <!-- Closes #interviewFormFields -->
 
@@ -1030,6 +1053,7 @@
     window.addEventListener('DOMContentLoaded', () => {
         // Generate 15-minute time options on page startup
         generateTimeOptions();
+        initSmsTemplateListeners();
 
         const savedUser = localStorage.getItem('onb_user');
         const savedPass = localStorage.getItem('onb_pass');
@@ -1797,6 +1821,7 @@
             const calculated = getDayOfWeekFromDateString(dateVal);
             if (calculated) daySelect.value = calculated;
         }
+        updateSmsPreview();
     }
 
     function autoCalculateGmDayOfWeek() {
@@ -1806,6 +1831,7 @@
             const calculated = getDayOfWeekFromDateString(dateVal);
             if (calculated) daySelect.value = calculated;
         }
+        updateSmsPreview();
     }
 
     function getInterviewDateTimeDisplay(item) {
@@ -2462,6 +2488,7 @@
             document.getElementById('intAvailability').value = item.availability || '';
             document.getElementById('intNotes').value = displayNotes;
             document.getElementById('emailQuickActions').classList.add('hidden');
+            updateSmsPreview();
 
         } else {
             document.getElementById('fieldId').value = item.id;
@@ -2544,6 +2571,7 @@
             document.getElementById('formTitle').innerText = "Add New Interview";
             document.getElementById('intPosition').value = 'DE';
             document.getElementById('intName').focus();
+            updateSmsPreview();
         } else {
             document.getElementById('formTitle').innerText = "Add New Candidate";
             document.getElementById('checkSubmission').checked = true;
@@ -2573,6 +2601,7 @@
         document.getElementById('emailQuickActions').classList.add('hidden');
         document.getElementById('missingDocsContainer').classList.add('hidden');
         currentSelectedId = null;
+        updateSmsPreview();
         renderList();
     } 
 
@@ -2954,6 +2983,162 @@
             showLoader(false);
             showBrandAlert("Error sending interview email: " + err.message, "Email Error");
         }
+    }
+
+    /* --- DYNAMIC SMS / TEXT MESSAGE TEMPLATE GENERATOR --- */
+    function formatShortDateMDY(dateStr) {
+        if (!dateStr) return '';
+        let raw = dateStr.toString().trim();
+        if (!raw) return '';
+        
+        // YYYY-MM-DD
+        if (raw.includes('-')) {
+            let parts = raw.split('-');
+            if (parts.length === 3) {
+                let y = parts[0];
+                let m = parseInt(parts[1], 10);
+                let d = parseInt(parts[2], 10);
+                if (!isNaN(m) && !isNaN(d)) {
+                    let shortYear = y.length === 4 ? y.slice(2) : y;
+                    return `${m}/${d}/${shortYear}`;
+                }
+            }
+        }
+        
+        // MM/DD/YYYY or M/D/YY
+        if (raw.includes('/')) {
+            let parts = raw.split('/');
+            if (parts.length >= 2) {
+                let m = parseInt(parts[0], 10);
+                let d = parseInt(parts[1], 10);
+                let y = parts[2] ? parts[2].trim() : '';
+                if (y.length === 4) y = y.slice(2);
+                if (!isNaN(m) && !isNaN(d)) {
+                    return `${m}/${d}/${y || (new Date().getFullYear().toString().slice(2))}`;
+                }
+            }
+        }
+        
+        return raw;
+    }
+
+    function updateSmsPreview() {
+        const previewEl = document.getElementById('smsPreviewBox');
+        if (!previewEl) return;
+        
+        const templateType = document.getElementById('smsTemplateSelect')?.value || 'gm_confirmed';
+        
+        const name = document.getElementById('intName')?.value.trim() || '{First name, Last name}';
+        const position = document.getElementById('intPosition')?.value || '{Position}';
+        const store = document.getElementById('intStore')?.value.trim() || '{Store}';
+        const phone = document.getElementById('intPhone')?.value.trim() || '{Candidate number}';
+        const email = document.getElementById('intEmail')?.value.trim() || '{Candidate email}';
+        
+        // GM / Store Interview details
+        const gmDateRaw = document.getElementById('intGmDate')?.value.trim() || '';
+        const gmDateShort = formatShortDateMDY(gmDateRaw) || '{M/D/YY}';
+        const gmDay = document.getElementById('intGmDay')?.value.trim() || (gmDateRaw ? getDayOfWeekFromDateString(gmDateRaw) : '') || '{Day of the week}';
+        const gmTimeRaw = document.getElementById('intGmTime')?.value.trim() || '';
+        const gmTime = (gmTimeRaw ? (formatTimeDisplayFrontEnd(gmTimeRaw) || gmTimeRaw) : '') || '{H:MM AM/PM}';
+        
+        // Phone Interview details (for alternative templates)
+        const phoneDateRaw = document.getElementById('intDate')?.value.trim() || '';
+        const phoneDateShort = formatShortDateMDY(phoneDateRaw) || '{M/D/YY}';
+        const phoneDay = document.getElementById('intDay')?.value.trim() || (phoneDateRaw ? getDayOfWeekFromDateString(phoneDateRaw) : '') || '{Day of the week}';
+        const phoneTimeRaw = document.getElementById('intTime')?.value.trim() || '';
+        const phoneTime = (phoneTimeRaw ? (formatTimeDisplayFrontEnd(phoneTimeRaw) || phoneTimeRaw) : '') || '{H:MM AM/PM}';
+        
+        const status = document.getElementById('intStatus')?.value || 'Phone Interview';
+        
+        let text = '';
+        
+        if (templateType === 'gm_confirmed') {
+            text = `~ ${position} Interview Confirmed ~\n\n` +
+                   `Date: ${gmDay}, ${gmDateShort}\n` +
+                   `Time: ${gmTime}\n` +
+                   `Name: ${name}\n` +
+                   `Phone: ${phone}\n` +
+                   `Email: ${email}`;
+        } else if (templateType === 'phone_confirmed') {
+            text = `~ ${position} Phone Interview Confirmed ~\n\n` +
+                   `Date: ${phoneDay}, ${phoneDateShort}\n` +
+                   `Time: ${phoneTime}\n` +
+                   `Name: ${name}\n` +
+                   `Phone: ${phone}`;
+        } else if (templateType === 'custom_status') {
+            text = `~ ${position} Candidate Update ~\n\n` +
+                   `Candidate: ${name}\n` +
+                   `Store: #${store}\n` +
+                   `Status: ${status}\n` +
+                   `Phone: ${phone}\n` +
+                   `Email: ${email}`;
+        }
+        
+        previewEl.value = text;
+    }
+
+    async function copySmsToClipboard() {
+        const previewEl = document.getElementById('smsPreviewBox');
+        if (!previewEl || !previewEl.value.trim()) {
+            showBrandAlert("No text message preview available to copy.", "Empty Message");
+            return;
+        }
+        
+        const textToCopy = previewEl.value;
+        const copyBtn = document.getElementById('btnCopySms');
+        
+        let copySuccess = false;
+        
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(textToCopy);
+                copySuccess = true;
+            } else {
+                previewEl.select();
+                previewEl.setSelectionRange(0, 99999);
+                copySuccess = document.execCommand('copy');
+            }
+        } catch (err) {
+            try {
+                previewEl.select();
+                previewEl.setSelectionRange(0, 99999);
+                copySuccess = document.execCommand('copy');
+            } catch (fallbackErr) {
+                copySuccess = false;
+            }
+        }
+        
+        if (copySuccess && copyBtn) {
+            const originalHtml = copyBtn.innerHTML;
+            const originalBg = copyBtn.style.background;
+            copyBtn.innerHTML = "<span>✅ Copied to Clipboard!</span>";
+            copyBtn.style.background = "#107c41";
+            setTimeout(() => {
+                copyBtn.innerHTML = originalHtml;
+                copyBtn.style.background = originalBg;
+            }, 2200);
+        } else if (!copySuccess) {
+            showBrandAlert("Unable to copy to clipboard automatically. Please highlight the text in the preview box to copy.", "Copy Failed");
+        }
+    }
+
+    function openGoogleMessages() {
+        window.open('https://messages.google.com/web', '_blank', 'noopener,noreferrer');
+    }
+
+    function initSmsTemplateListeners() {
+        const fieldIds = [
+            'intName', 'intPosition', 'intStore', 'intPhone', 'intEmail',
+            'intDate', 'intDay', 'intTime', 'intGmDate', 'intGmDay', 'intGmTime', 'intStatus'
+        ];
+        fieldIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', updateSmsPreview);
+                el.addEventListener('change', updateSmsPreview);
+            }
+        });
+        updateSmsPreview();
     }
         
     async function portCandidateToOnboarding() {
