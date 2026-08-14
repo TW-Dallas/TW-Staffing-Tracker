@@ -742,7 +742,7 @@
                 chipsHtml += `<span class="chip">🧢 ${item.hatStyle}</span>`;
             }
             if (item.payCard) {
-                if (item.ddEntered || item.allPayCompleted) {
+                if (item.ddEntered) {
                     chipsHtml += `<span class="chip" style="background: #e6f4ea; color: #137333; border: 1px solid #ceead6; font-weight: bold;">💳 Pay Card: Complete ✔</span>`;
                 } else {
                     chipsHtml += `<span class="chip">💳 Pay Card Required</span>`;
