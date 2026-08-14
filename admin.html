@@ -435,28 +435,26 @@
                                 <textarea id="intNotes" placeholder="Write any specific interview notes here..." style="height: 80px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4;"></textarea>
                             </div>
                         </div>
-                        <div class="form-row" style="display: flex; gap: 12px; margin-top: 8px; align-items: stretch;">
+                        <div class="form-row" style="display: flex; gap: 12px; margin-top: 8px; align-items: flex-start;">
                             <div class="form-group" style="flex: 1; display: flex; flex-direction: column;">
                                 <label>Status Updates</label>
-                                <textarea id="intStatusUpdates" placeholder="Recent updates on interview progression..." style="flex: 1; min-height: 115px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4;"></textarea>
+                                <textarea id="intStatusUpdates" placeholder="Recent updates on interview progression..." style="height: 105px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4; resize: none;"></textarea>
                             </div>
-                            <div class="form-group" style="flex: 1.25; display: flex; flex-direction: column; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px; box-sizing: border-box;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 6px;">
-                                    <label style="font-family: 'ExtraBold', sans-serif; font-size: 13px; color: var(--dark-blue); text-transform: uppercase; margin: 0; display: flex; align-items: center; gap: 4px; white-space: nowrap;">
-                                        <span>💬 GM Text Generator</span>
-                                    </label>
-                                    <select id="smsTemplateSelect" onchange="updateSmsPreview()" style="font-size: 12px; padding: 3px 6px; height: 28px; font-family: 'Subhead1', sans-serif; border-radius: 4px; border: 1px solid #94a3b8; background: white; cursor: pointer; flex: 1; max-width: 220px;">
+                            <div class="form-group" style="flex: 1.25; display: flex; flex-direction: column;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                                    <label style="margin-bottom: 0;">GM Text Template</label>
+                                    <select id="smsTemplateSelect" onchange="updateSmsPreview()" style="font-size: 14px; padding: 3px 8px; height: 30px; font-family: 'Subhead1', sans-serif; border-radius: 6px; border: 1px solid var(--crust-dark); background: white; cursor: pointer; width: auto; max-width: 250px;">
                                         <option value="gm_confirmed">🏪 Store Interview Confirmed</option>
+                                        <option value="gm_noshow_check">❓ Attendance / No Show Check</option>
                                         <option value="phone_confirmed">📞 Phone Interview Confirmed</option>
-                                        <option value="custom_status">📋 Candidate Status Update</option>
                                     </select>
                                 </div>
-                                <textarea id="smsPreviewBox" placeholder="Select or fill candidate details to generate text message..." style="flex: 1; min-height: 110px; font-family: 'Courier New', Courier, monospace; font-size: 12.5px; line-height: 1.35; background: white; border: 1px solid #cbd5e1; border-radius: 4px; padding: 8px; color: #0f172a; resize: vertical; box-sizing: border-box;"></textarea>
-                                <div style="display: flex; gap: 6px; margin-top: 8px;">
-                                    <button type="button" id="btnCopySms" onclick="copySmsToClipboard()" style="flex: 1; background: var(--brand-blue, #0078d4); color: white; border: none; border-radius: 6px; padding: 7px 10px; font-size: 13px; font-weight: bold; font-family: 'Subhead1', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s;">
+                                <textarea id="smsPreviewBox" placeholder="Select or fill candidate details to generate text message..." style="height: 105px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4; resize: none; background: white; border: 1px solid var(--crust-dark); border-radius: 8px; padding: 8px 11px; box-sizing: border-box;"></textarea>
+                                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                                    <button type="button" id="btnCopySms" onclick="copySmsToClipboard()" style="flex: 1; background: var(--brand-blue); color: white; height: 36px; font-size: 15px; border: none; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s;">
                                         <span>📋 Copy GM Text</span>
                                     </button>
-                                    <button type="button" onclick="openGoogleMessages()" title="Open Google Messages Web in new tab" style="background: white; border: 1px solid #cbd5e1; color: #334155; border-radius: 6px; padding: 7px 10px; font-size: 13px; font-weight: bold; font-family: 'Subhead1', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; white-space: nowrap;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'">
+                                    <button type="button" onclick="openGoogleMessages()" title="Open Google Messages Web in new tab" style="background: white; border: 1px solid var(--crust-dark); color: var(--dark-blue); height: 36px; padding: 0 14px; font-size: 14px; font-family: 'Subhead1', sans-serif; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; white-space: nowrap;" onmouseover="this.style.background='var(--crust-light)'" onmouseout="this.style.background='white'">
                                         💬 Messages Web
                                     </button>
                                 </div>
@@ -3059,19 +3057,16 @@
                    `Name: ${name}\n` +
                    `Phone: ${phone}\n` +
                    `Email: ${email}`;
+        } else if (templateType === 'gm_noshow_check') {
+            text = `~ ${position} Interview Follow-Up ~\n\n` +
+                   `Hey! Did ${name} show up for their ${position} interview on ${gmDay}, ${gmDateShort} at ${gmTime}, or were they a no show?\n\n` +
+                   `Phone: ${phone}`;
         } else if (templateType === 'phone_confirmed') {
             text = `~ ${position} Phone Interview Confirmed ~\n\n` +
                    `Date: ${phoneDay}, ${phoneDateShort}\n` +
                    `Time: ${phoneTime}\n` +
                    `Name: ${name}\n` +
                    `Phone: ${phone}`;
-        } else if (templateType === 'custom_status') {
-            text = `~ ${position} Candidate Update ~\n\n` +
-                   `Candidate: ${name}\n` +
-                   `Store: #${store}\n` +
-                   `Status: ${status}\n` +
-                   `Phone: ${phone}\n` +
-                   `Email: ${email}`;
         }
         
         previewEl.value = text;
