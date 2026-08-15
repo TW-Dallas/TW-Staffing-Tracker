@@ -482,32 +482,34 @@
                                 </div>
                             </div>
 
-                            <div class="form-row" style="display: flex; gap: 12px; margin-top: 8px;">
-                                <div class="form-group" style="flex: 1;">
+                            <div class="form-row" style="display: flex; gap: 12px; margin-top: 6px;">
+                                <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                     <label>Availability</label>
                                     <textarea id="intAvailability" placeholder="Enter availability details here..."
                                         style="height: 80px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4;"></textarea>
                                 </div>
-                                <div class="form-group" style="flex: 1;">
+                                <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                     <label>Feedback & Notes</label>
                                     <textarea id="intNotes" placeholder="Write any specific interview notes here..."
                                         style="height: 80px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4;"></textarea>
                                 </div>
                             </div>
                             <div class="form-row"
-                                style="display: flex; gap: 12px; margin-top: 8px; align-items: flex-start;">
+                                style="display: flex; gap: 12px; margin-top: 6px; align-items: flex-start;">
                                 <div class="form-group" style="flex: 1; display: flex; flex-direction: column;">
-                                    <label>Status Updates</label>
+                                    <div style="display: flex; align-items: center; height: 28px; margin-bottom: 3px;">
+                                        <label style="margin-bottom: 0;">Status Updates</label>
+                                    </div>
                                     <textarea id="intStatusUpdates"
                                         placeholder="Recent updates on interview progression..."
-                                        style="height: 105px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4; resize: none;"></textarea>
+                                        style="height: 105px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4; resize: none; box-sizing: border-box;"></textarea>
                                 </div>
                                 <div class="form-group" style="flex: 1.25; display: flex; flex-direction: column;">
                                     <div
-                                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                                        style="display: flex; justify-content: space-between; align-items: center; height: 28px; margin-bottom: 3px;">
                                         <label style="margin-bottom: 0;">GM Text Template</label>
                                         <select id="smsTemplateSelect" onchange="updateSmsPreview()"
-                                            style="font-size: 14px; padding: 3px 8px; height: 30px; font-family: 'Subhead1', sans-serif; border-radius: 6px; border: 1px solid var(--crust-dark); background: white; cursor: pointer; width: auto; max-width: 250px;">
+                                            style="font-size: 13.5px; padding: 1px 8px; height: 28px; font-family: 'Subhead1', sans-serif; border-radius: 6px; border: 1px solid var(--crust-dark); background: white; cursor: pointer; width: auto; max-width: 250px; box-sizing: border-box;">
                                             <option value="gm_confirmed">🏪 Store Interview Confirmed</option>
                                             <option value="gm_noshow_check">❓ Attendance / No Show Check</option>
                                             <option value="phone_confirmed">📞 Phone Interview Confirmed</option>

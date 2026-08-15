@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Carta de Bienvenida - Revisión en Español (Domino's Team Wow)</title>
+    <style>
+        body {
+            background-color: #e9ecef;
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .action-bar {
+            max-width: 600px;
+            margin: 0 auto 15px auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-copy {
+            background: #0090e2;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+        .btn-copy:hover {
+            background: #005c91;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="action-bar">
+        <span style="font-size: 13px; color: #555; font-weight: bold;">📧 Plantilla con Estilos Inline para Gmail / Docs</span>
+        <button class="btn-copy" onclick="copyFormattedEmail()" id="copyBtn">
+            📋 Copiar Correo con Encabezado Azul para Gmail
+        </button>
+    </div>
+
+    <!-- EMAIL CONTAINER WITH FULL INLINE STYLES (Gmail Preserves Inline Styles) -->
+    <div id="emailContainer" style="font-family: Arial, Helvetica, sans-serif; background-color: #fefaf6; padding: 12px; color: #472b10; max-width: 600px; margin: 0 auto;">
+        
+        <!-- Domino's Blue Brand Header -->
+        <div style="background-color: #0090e2; padding: 18px 15px; text-align: center; border-bottom: 5px solid #ff0000; border-radius: 8px 8px 0 0;">
+            <img src="https://raw.githubusercontent.com/TW-Dallas/TW-Career-Path/main/New_Logo_v2.png" alt="Team Wow Logo" style="max-width: 180px; height: auto; display: block; margin: 0 auto;">
+        </div>
+
+        <!-- Main Body Card -->
+        <div style="padding: 24px; background-color: #ffffff; border-radius: 0 0 8px 8px; border: 2px solid #f0decc; border-top: none; line-height: 1.6;">
+            
+            <p style="font-size: 15px; margin-top: 0; font-weight: bold; color: #472b10;">Hola Carlos,</p>
+            <p style="font-size: 14px; color: #472b10; margin-bottom: 12px;">¡Estamos encantados de darte la bienvenida a <strong>Team Wow!</strong></p>
+            <p style="font-size: 14px; color: #472b10; margin-bottom: 20px;">A continuación encontrarás los detalles finales de tu puesto, compensación y las normas de uniforme mientras te preparas para tu primer día en la tienda.</p>
+            
+            <!-- Table 1: Offer Summary -->
+            <div style="background-color: #faf2e9; padding: 14px; border-radius: 6px; margin: 20px 0; border: 1.5px solid #f0decc;">
+                <h3 style="margin-top: 0; font-size: 14px; color: #005c91; border-bottom: 1.5px solid #f0decc; padding-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Detalles de la Oferta y de la Tienda</h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                    <tr>
+                        <td style="padding: 7px 8px; border-bottom: 1px solid #f0decc; font-weight: bold; color: #005c91; width: 170px;">Puesto:</td>
+                        <td style="padding: 7px 8px; border-bottom: 1px solid #f0decc; color: #333;">Representante de Servicio al Cliente <em>(o Experto de Entrega)</em></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 7px 8px; border-bottom: 1px solid #f0decc; font-weight: bold; color: #005c91;">Número de Tienda:</td>
+                        <td style="padding: 7px 8px; border-bottom: 1px solid #f0decc; color: #333;">Tienda #6812</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 7px 8px; border-bottom: 1px solid #f0decc; font-weight: bold; color: #005c91;">Ubicación de Trabajo:</td>
+                        <td style="padding: 7px 8px; border-bottom: 1px solid #f0decc; color: #333;">1234 Main St, Dallas, TX 75201</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 7px 8px; border-bottom: 1px solid #f0decc; font-weight: bold; color: #005c91;">Teléfono de la Tienda:</td>
+                        <td style="padding: 7px 8px; border-bottom: 1px solid #f0decc; color: #333;">(214) 555-0199 <em>(o se entregará en orientación)</em></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 7px 8px; border-bottom: 1px solid #f0decc; font-weight: bold; color: #005c91;">Gerente General (GM):</td>
+                        <td style="padding: 7px 8px; border-bottom: 1px solid #f0decc; color: #333;">Alex Rivera</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 7px 8px; border-bottom: 1px solid #f0decc; font-weight: bold; color: #005c91;">Teléfono del GM:</td>
+                        <td style="padding: 7px 8px; border-bottom: 1px solid #f0decc; color: #333;">(214) 555-0123 <em>(o se entregará en orientación)</em></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 7px 8px; border-bottom: 1px solid #f0decc; font-weight: bold; color: #005c91;">Salario Inicial:</td>
+                        <td style="padding: 7px 8px; border-bottom: 1px solid #f0decc; color: #333;">$12.00/hr <em>(Para Repartidores: $12.00/hr en tienda • $10.00/hr en ruta)</em></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 7px 8px; border-bottom: 1px solid #f0decc; font-weight: bold; color: #005c91;">Reembolso de Millas:</td>
+                        <td style="padding: 7px 8px; border-bottom: 1px solid #f0decc; color: #333;">$0.58 por milla <em>(Solo para Repartidores)</em></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 7px 8px; font-weight: bold; color: #005c91;">Calendario de Pago:</td>
+                        <td style="padding: 7px 8px; color: #333;">Quincenal los viernes, mediante depósito directo o tarjeta de pago (Pay Card).</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Action Required Notice -->
+            <div style="background-color: #faf2e9; padding: 14px; border-radius: 6px; margin: 20px 0; border: 1.5px solid #f0decc;">
+                <h3 style="margin-top: 0; font-size: 14px; color: #005c91; border-bottom: 1.5px solid #f0decc; padding-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Próximos Pasos – Completa los 3 Formularios Requeridos</h3>
+                <ol style="font-size: 13px; padding-left: 20px; margin-bottom: 0; color: #472b10; line-height: 1.5;">
+                    <li style="margin-bottom: 8px;"><strong>Documentos de Contratación (AllPay / HR Alliance):</strong> Enviados por <span style="font-weight: bold; color: #005c91;">mensaje de texto y correo electrónico</span> desde <em style="color: #6c757d;">reply@hralliance.net</em></li>
+                    <li style="margin-bottom: 8px;"><strong>Revisión de Antecedentes (Checkr):</strong> Enviada por <span style="font-weight: bold; color: #005c91;">correo electrónico</span> desde <em style="color: #6c757d;">support@checkr.com</em></li>
+                    <li><strong>Formulario de Registro en el Sistema de la Tienda:</strong> Enviado por <span style="font-weight: bold; color: #005c91;">correo electrónico</span> a través de <em style="color: #6c757d;">SmartRecruiters</em></li>
+                </ol>
+            </div>
+
+            <!-- Important Reminders Alert -->
+            <div style="background-color: #fff8e1; border-left: 4px solid #ffb300; padding: 12px; border-radius: 4px; font-size: 13px; color: #5d4037; margin: 20px 0;">
+                <strong style="display: block; margin-bottom: 4px; color: #c62828;">Recordatorios Importantes:</strong>
+                <ul style="margin: 0; padding-left: 18px; line-height: 1.5;">
+                    <li>Debes completar <strong>los tres</strong> formularios para poder avanzar con tu proceso.</li>
+                    <li>Revisa tus carpetas de <strong>Correo No Deseado / Spam</strong> si no ves estos correos.</li>
+                    <li>Usa tus <strong>iniciales</strong> para todas las firmas electrónicas.</li>
+                </ul>
+            </div>
+
+            <!-- Virtual Orientation Requirement Notice -->
+            <div style="background-color: #e3f2fd; border: 1.5px solid #0090e2; padding: 14px; border-radius: 6px; margin: 20px 0; font-size: 13.5px; color: #004085; line-height: 1.5;">
+                <h4 style="margin: 0 0 6px 0; font-size: 14px; color: #005c91; text-transform: uppercase;">Requisito de Clase de Orientación Virtual</h4>
+                <p style="margin: 0 0 8px 0;">Una vez que hayas completado los tres formularios anteriores, deberás asistir a una <strong>Clase de Orientación en Línea</strong> en vivo antes de comenzar a trabajar en la tienda.</p>
+                <p style="margin: 0;"><strong>Siguiente Paso:</strong> Simplemente responde directamente a este correo de bienvenida para informarnos que has completado todos los formularios. ¡Al recibir tu respuesta, te enviaremos un correo con el enlace para registrarte en tu clase de orientación virtual!</p>
+            </div>
+
+            <!-- Responsibilities Card -->
+            <div style="background-color: #ffffff; padding: 14px; border-radius: 6px; margin: 20px 0; border: 1.5px solid #f0decc;">
+                <h3 style="margin-top: 0; font-size: 14px; color: #005c91; border-bottom: 1.5px solid #f0decc; padding-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Responsabilidades Principales del Puesto</h3>
+                
+                <p style="font-weight: bold; font-size: 13px; color: #005c91; margin: 10px 0 6px 0;">Para Servicio al Cliente (CSR):</p>
+                <ul style="padding-left: 20px; margin: 0; font-size: 13px; color: #472b10; line-height: 1.5;">
+                    <li style="margin-bottom: 6px;"><strong>Servicio al Cliente:</strong> Brindar una atención excepcional al atender pedidos en el mostrador y para llevar.</li>
+                    <li style="margin-bottom: 6px;"><strong>Limpieza de la Tienda:</strong> Mantener la higiene de las instalaciones y del equipo de preparación, incluyendo el lavado de platos.</li>
+                    <li style="margin-bottom: 6px;"><strong>Gestión de Pedidos:</strong> Recibir y procesar con prontitud los pedidos telefónicos y en mostrador.</li>
+                    <li style="margin-bottom: 6px;"><strong>Preparación de Alimentos:</strong> Preparar pizzas, acompañamientos y productos siguiendo los altos estándares de Domino's.</li>
+                    <li style="margin-bottom: 4px;"><strong>Días Laborales Obligatorios:</strong> Halloween, Super Bowl, Víspera de Año Nuevo y San Valentín.</li>
+                </ul>
+
+                <p style="font-weight: bold; font-size: 13px; color: #005c91; margin: 16px 0 6px 0;">Para Repartidores (DE / Drivers):</p>
+                <ul style="padding-left: 20px; margin: 0; font-size: 13px; color: #472b10; line-height: 1.5;">
+                    <li style="margin-bottom: 6px;"><strong>Entrega Segura y Puntual:</strong> Transportar los pedidos de manera segura a los domicilios u oficinas de los clientes, respetando estrictamente las normas de tránsito.</li>
+                    <li style="margin-bottom: 6px;"><strong>Estándares del Vehículo:</strong> Mantener un vehículo limpio, confiable y asegurado, portando el letrero de Domino's en el auto durante tus turnos.</li>
+                    <li style="margin-bottom: 6px;"><strong>Servicio al Cliente:</strong> Brindar un servicio cordial y de excelencia en la puerta del cliente.</li>
+                    <li style="margin-bottom: 6px;"><strong>Apoyo en Tienda:</strong> Ayudar al equipo con la preparación de pedidos, limpieza y atención entre viajes de entrega.</li>
+                    <li style="margin-bottom: 4px;"><strong>Días Laborales Obligatorios:</strong> Halloween, Super Bowl, Víspera de Año Nuevo y San Valentín.</li>
+                </ul>
+            </div>
+
+            <!-- Uniform Guidelines Card -->
+            <div style="background-color: #ffffff; padding: 14px; border-radius: 6px; margin: 20px 0; border: 1.5px solid #f0decc;">
+                <h3 style="margin-top: 0; font-size: 14px; color: #005c91; border-bottom: 1.5px solid #f0decc; padding-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Guía de Uniforme y Presentación Personal</h3>
+                <ul style="padding-left: 20px; margin: 0; font-size: 13px; color: #472b10; line-height: 1.5;">
+                    <li style="margin-bottom: 6px;"><strong>Playeras / Camisas:</strong> Usar la playera oficial y limpia de Domino's. Las camisetas interiores deben ser lisas en color gris, blanco o negro.</li>
+                    <li style="margin-bottom: 6px;"><strong>Pantalones (Aprobados):</strong> Se permiten pantalones de mezclilla azul (jeans), mezclilla negra, pantalones negros de vestir o joggers oficiales de Domino's. <em>No se permiten pants deportivos, licras, telas atléticas ni shorts cortos.</em></li>
+                    <li style="margin-bottom: 6px;"><strong>Zapatos y Calcetines:</strong> Es obligatorio usar calcetines. Los zapatos deben cubrir completamente el pie (sin puntas abiertas ni sandalias). <em>Nota: No se requiere suela antiderrapante.</em></li>
+                    <li style="margin-bottom: 6px;"><strong>Gorra y Cabello:</strong> Usar la gorra aprobada de Domino's. El cabello que toque el cuello debe estar recogido hacia atrás de los hombros.</li>
+                    <li style="margin-bottom: 6px;"><strong>Uñas y Joyería:</strong> Las uñas deben medir menos de 1/4 de pulgada. Si tienes uñas largas o artificiales, deberás usar guantes para preparar alimentos. No se permiten relojes ni pulseras al preparar alimentos; se aceptan anillos de banda lisa simple.</li>
+                    <li style="margin-bottom: 4px;"><strong>Vello Facial y Piercings:</strong> El vello facial debe mantenerse recortado y limpio (menos de 1 pulgada). Los piercings faciales deben limitarse a un broche simple o aro pequeño.</li>
+                </ul>
+            </div>
+
+            <p style="font-size: 14px; text-align: center; font-weight: bold; color: #005c91; margin: 24px 0 10px 0;">¡Esperamos verte pronto en tu tienda! ¡Bienvenido(a) al equipo!</p>
+
+            <!-- Signature -->
+            <div style="margin-top: 20px; border-top: 1px dashed #f0decc; padding-top: 15px; text-align: left;">
+                <img src="https://raw.githubusercontent.com/TW-Dallas/TW-Career-Path/main/Signature.png" alt="Mike Jacobs Signature" style="max-width: 340px; height: auto; display: block;">
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function copyFormattedEmail() {
+            const el = document.getElementById('emailContainer');
+            const range = document.createRange();
+            range.selectNodeContents(el);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+            
+            try {
+                document.execCommand('copy');
+                sel.removeAllRanges();
+                const btn = document.getElementById('copyBtn');
+                btn.innerHTML = "✅ ¡Copiado con Encabezado Azul y Logo!";
+                btn.style.background = "#005c91";
+                setTimeout(() => {
+                    btn.innerHTML = "📋 Copiar Correo con Encabezado Azul para Gmail";
+                    btn.style.background = "#0090e2";
+                }, 3000);
+            } catch (err) {
+                alert("Por favor selecciona el contenido manualmente y presiona Ctrl+C.");
+            }
+        }
+    </script>
+</body>
+</html>
