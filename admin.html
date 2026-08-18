@@ -331,9 +331,6 @@
                                     </div>
                                 </div>
 
-                                <label class="checkbox-item flag-box flag-incorrect">
-                                    <input type="checkbox" id="checkMissedNto"> ⚠️ Missed NTO
-                                </label>
                                 <label class="checkbox-item flag-box flag-inactive">
                                     <input type="checkbox" id="checkIneligible"> 🚫 Ineligible / Rejected
                                 </label>
@@ -2897,7 +2894,7 @@
                 payload.ineligible = document.getElementById('checkIneligible').checked;
                 payload.inactive = document.getElementById('checkInactive').checked;
                 payload.pulseFormComplete = document.getElementById('checkPulseForm').checked;
-                payload.missedNto = document.getElementById('checkMissedNto').checked;
+                payload.missedNto = document.getElementById('checkMissedNto') ? document.getElementById('checkMissedNto').checked : (existingCand ? (existingCand.missedNto || false) : false);
 
                 let missingDocsValue = "FALSE";
                 if (document.getElementById('checkMissingDocs').checked) {
