@@ -4921,6 +4921,8 @@
             const isDenver = u.toLowerCase().startsWith('denver');
             document.getElementById('newClassTrainer').value = isDenver ? 'Richard' : 'Mike';
             document.getElementById('newClassCapacity').value = isDenver ? 10 : 15;
+            document.getElementById('newClassStart').value = '';
+            document.getElementById('newClassEnd').value = '';
 
             fetchNtoCalendarClasses();
         }
@@ -5003,6 +5005,9 @@
                     trainerName: trainerName,
                     capacity: capacity
                 });
+
+                document.getElementById('newClassStart').value = '';
+                document.getElementById('newClassEnd').value = '';
 
                 showLoader(false);
                 showBrandAlert("New NTO class session added successfully!", "Class Added");
@@ -5182,14 +5187,14 @@
                             <label
                                 style="font-family: 'Subhead2'; font-size: 16px; font-weight: bold; color: var(--crust-burnt);">Start
                                 Time:</label>
-                            <input type="text" id="newClassStart" list="time15MinList" value="6:00 PM" placeholder="e.g. 6:00 PM"
+                            <input type="text" id="newClassStart" list="time15MinList" value="" placeholder="e.g. 6:00 PM"
                                 style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
                         </div>
                         <div>
                             <label
                                 style="font-family: 'Subhead2'; font-size: 16px; font-weight: bold; color: var(--crust-burnt);">Est.
                                 End Time:</label>
-                            <input type="text" id="newClassEnd" list="time15MinList" value="7:15 PM" placeholder="e.g. 7:15 PM"
+                            <input type="text" id="newClassEnd" list="time15MinList" value="" placeholder="e.g. 7:15 PM"
                                 style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
                         </div>
                     </div>
