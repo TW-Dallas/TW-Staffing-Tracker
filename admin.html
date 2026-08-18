@@ -4534,8 +4534,24 @@
                         cand.ntoAttendance = r.attendance;
                         cand.ntoStatus = r.attendance;
                         cand.liveStatus = r.attendance;
+                        if (r.attendance === "NTO Complete" || r.attendance === "Attended") {
+                            cand.hired = true;
+                            cand.missedNto = false;
+                        } else if (r.attendance === "Not in NTO") {
+                            cand.hired = false;
+                            cand.missedNto = true;
+                        } else if (!r.attendance) {
+                            cand.hired = false;
+                            cand.missedNto = false;
+                        } else {
+                            cand.hired = false;
+                        }
                     }
                 });
+
+                renderNtoClassView();
+                renderList();
+                updateAuditMetrics();
 
                 showLoader(false);
                 showBrandAlert("Live attendance updated successfully! (No emails sent)", "Attendance Saved");
