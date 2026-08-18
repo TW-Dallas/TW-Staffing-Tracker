@@ -472,7 +472,7 @@
             return { pct: 90, color: 'red', label: 'Missed Orientation' };
         }
 
-        if (item.ntoScheduled || item.ntoDate || att === 'In Lobby' || att === 'In Class') {
+        if (item.ntoScheduled || item.ntoDate || att === 'In Class') {
             return { pct: 85, color: 'blue', label: 'Orientation Scheduled' };
         }
         if (item.ntoSignupLinkSent) return { pct: 70, color: 'blue', label: 'NTO Signup Sent' };
@@ -493,9 +493,6 @@
     function getAlertBanner(item) {
         const att = (item.ntoAttendance || '').trim();
 
-        if (att === 'In Lobby') {
-            return `<div class="alert-banner" style="background-color: #e3f2fd; border-color: #2196f3; color: #0d47a1;">🏨 Candidate Checked In: In Lobby</div>`;
-        }
         if (att === 'In Class') {
             return `<div class="alert-banner" style="background-color: #e8f5e9; border-color: #4caf50; color: #1b5e20;">📖 Currently in NTO Class</div>`;
         }
@@ -545,7 +542,7 @@
         if (item.hired && isNtoToday) return 1;
 
         // Upcoming NTO Scheduled or in class today
-        if (!isNtoInPast && (item.ntoScheduled || att === 'In Lobby' || att === 'In Class' || isNtoToday)) {
+        if (!isNtoInPast && (item.ntoScheduled || att === 'In Class' || isNtoToday)) {
             return 2;
         }
 
