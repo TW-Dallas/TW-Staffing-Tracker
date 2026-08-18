@@ -4916,6 +4916,11 @@
             tomorrow.setDate(tomorrow.getDate() + 1);
             document.getElementById('newClassDate').value = tomorrow.toISOString().split('T')[0];
 
+            const u = localStorage.getItem('onb_user') || (document.getElementById('loginUser') ? document.getElementById('loginUser').value.trim() : '');
+            const isDenver = u.toLowerCase().startsWith('denver');
+            document.getElementById('newClassTrainer').value = isDenver ? 'Richard' : 'Mike';
+            document.getElementById('newClassCapacity').value = isDenver ? 10 : 15;
+
             fetchNtoCalendarClasses();
         }
 
