@@ -4242,7 +4242,7 @@
                 row.className = 'nto-roster-row';
                 row.style.cssText = "display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--crust-med); gap: 12px;";
 
-                const savedStatus = item.ntoAttendance || item.ntoStatus || item['NTO Status'] || item.liveStatus || item.status || '';
+                const savedStatus = (item.ntoAttendance || '').trim();
                 const shirtVal = item.shirtSize || item.shirt || item.Shirt || '';
                 const hatVal = item.hatStyle || item.capVisor || item['Cap/Visor'] || item.hat || item.Hat || '';
                 const payCardVal = item.payCard || item.paycard || item.Paycard || '';
