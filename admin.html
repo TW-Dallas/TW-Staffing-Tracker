@@ -299,30 +299,38 @@
 
                                 <!-- SMART EXPANDABLE MISSING DOCUMENTS CHECKLIST -->
                                 <div id="missingDocsContainer" class="hidden"
-                                    style="grid-column: span 3; background: white; padding: 12px; border-radius: 8px; border: 1.5px solid var(--brand-red); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; box-sizing: border-box; font-family: 'Condensed', sans-serif;">
+                                    style="grid-column: span 3; background: white; padding: 12px; border-radius: 8px; border: 1.5px solid var(--brand-red); display: grid; grid-template-columns: 1fr 1fr; gap: 12px; box-sizing: border-box; font-family: 'Condensed', sans-serif;">
                                     <div
                                         style="grid-column: span 2; font-family: 'Subhead2'; font-size: 11px; color: var(--dark-red); text-transform: uppercase; font-weight: bold; border-bottom: 1px solid var(--crust-med); padding-bottom: 2px; margin-bottom: 4px;">
                                         Select Missing Documents</div>
-                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                            class="doc-chk"
-                                            value="List A ID (Passport, I-551 Permanent Resident Card, or I-766 Employment Authorization Card)">
-                                        ✈️ List A ID (Passport, I-551, I-766)</label>
-                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                            class="doc-chk" value="List B ID (Driver's License, State ID, School ID)">
-                                        🪪 List B ID (DL, State ID, School ID)</label>
-                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                            class="doc-chk" value="List C ID (Social Security Card, Birth Certificate)">
-                                        💳 List C ID (Social Security Card, Birth Cert)</label>
-                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                            class="doc-chk" value="Vehicle Inspection"> 🚗 Vehicle Inspection</label>
-                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                            class="doc-chk"
-                                            value="Auto Insurance ID (Driver name must be listed as a covered driver)">
-                                        📄 Auto Insurance ID</label>
-                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                            class="doc-chk" value="Auto Registration"> 🏷️ Auto Registration</label>
-                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                            class="doc-chk" value="Document Mismatch"> ✖️ Document Mismatch</label>
+                                    
+                                    <!-- Left Column: I-9 & ID Verification -->
+                                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                                        <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
+                                                class="doc-chk"
+                                                value="List A ID (Passport, I-551 Permanent Resident Card, or I-766 Employment Authorization Card)">
+                                            ✈️ List A ID (Passport, I-551, I-766)</label>
+                                        <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
+                                                class="doc-chk" value="List B ID (Driver's License, State ID, School ID)">
+                                            🪪 List B ID (DL, State ID, School ID)</label>
+                                        <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
+                                                class="doc-chk" value="List C ID (Social Security Card, Birth Certificate)">
+                                            💳 List C ID (Social Security Card, Birth Cert)</label>
+                                        <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
+                                                class="doc-chk" value="Document Mismatch"> ✖️ Document Mismatch</label>
+                                    </div>
+
+                                    <!-- Right Column: Vehicle / Driver Requirements -->
+                                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                                        <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
+                                                class="doc-chk" value="Vehicle Inspection"> 🚗 Vehicle Inspection</label>
+                                        <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
+                                                class="doc-chk" value="Auto Registration"> 🏷️ Auto Registration</label>
+                                        <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
+                                                class="doc-chk"
+                                                value="Auto Insurance ID (Driver name must be listed as a covered driver)">
+                                            📄 Auto Insurance ID</label>
+                                    </div>
 
                                     <div
                                         style="grid-column: span 2; display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
