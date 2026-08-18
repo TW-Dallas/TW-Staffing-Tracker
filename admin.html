@@ -292,6 +292,10 @@
                                     <input type="checkbox" id="checkMissingDocs" onchange="toggleMissingDocsSelector()">
                                     ⚠️ Missing/Incorrect Docs
                                 </label>
+                                <label class="checkbox-item flag-box flag-incorrect">
+                                    <input type="checkbox" id="checkAllPayError" onchange="toggleAllPayErrorSelector()">
+                                    ⚠️ AllPay Error
+                                </label>
 
                                 <!-- SMART EXPANDABLE MISSING DOCUMENTS CHECKLIST -->
                                 <div id="missingDocsContainer" class="hidden"
@@ -327,6 +331,27 @@
                                             Missing Document:</span>
                                         <input type="text" id="customMissingDoc"
                                             placeholder="e.g. Voided Check, Profile Signature"
+                                            style="width: 100%; font-size: 13px; padding: 4px;">
+                                    </div>
+                                </div>
+
+                                <!-- SMART EXPANDABLE ALLPAY ERROR DETAILS -->
+                                <div id="allPayErrorContainer" class="hidden"
+                                    style="grid-column: span 3; background: white; padding: 12px; border-radius: 8px; border: 1.5px solid var(--brand-red); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; box-sizing: border-box; font-family: 'Condensed', sans-serif;">
+                                    <div
+                                        style="grid-column: span 2; font-family: 'Subhead2'; font-size: 11px; color: var(--dark-red); text-transform: uppercase; font-weight: bold; border-bottom: 1px solid var(--crust-med); padding-bottom: 2px; margin-bottom: 4px;">
+                                        Select AllPay Error Details</div>
+                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
+                                            class="allpay-err-chk" value="Incorrect DOB on I-9"> 🎂 Incorrect DOB on I-9</label>
+                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
+                                            class="allpay-err-chk" value="Incorrect SSN on I-9"> 💳 Incorrect SSN on I-9</label>
+                                    <div
+                                        style="grid-column: span 2; display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+                                        <span
+                                            style="font-size: 11px; font-family: 'Subhead2'; color: var(--dark-red); text-transform: uppercase; font-weight: bold;">Custom
+                                            / Other AllPay Error:</span>
+                                        <input type="text" id="customAllPayError"
+                                            placeholder="e.g. Missing Signature, Address Mismatch"
                                             style="width: 100%; font-size: 13px; padding: 4px;">
                                     </div>
                                 </div>
@@ -967,8 +992,16 @@
                     <div id="reminderStoreSetupGroup" class="form-group hidden">
                         <label
                             style="font-family: 'Subhead2', sans-serif; font-size: 13px; font-weight: bold; color: var(--dark-blue);">SmartRecruiters
-                            Setup Link:</label>
+                            / Pulse Setup Link:</label>
                         <input type="text" id="reminderStoreSetupInput" placeholder="Paste system setup link here...">
+                    </div>
+                    <div id="reminderAttachmentGroup" class="form-group" style="margin-top: 4px; background: #fdfaf7; border: 1.5px dashed var(--crust-dark); padding: 10px; border-radius: 8px;">
+                        <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; font-weight: bold; color: var(--dark-blue); display: flex; align-items: center; justify-content: space-between;">
+                            <span>📎 Attach PDF / Document (Optional):</span>
+                            <span id="attachedFileStatus" style="font-size: 12px; color: var(--brand-blue); font-weight: bold;"></span>
+                        </label>
+                        <input type="file" id="reminderFileInput" accept="application/pdf,image/*" style="margin-top: 6px; font-size: 14px; width: 100%;">
+                        <div style="font-size: 11px; color: var(--brand-grey); margin-top: 4px;">Upload a downloaded AllPay I-9 PDF or doc from your computer to attach directly to the email.</div>
                     </div>
                 </div>
 
@@ -1398,7 +1431,7 @@
             });
         }
 
-        function showBrandReminderPrompt(missingFormsArray) {
+        function showBrandReminderPrompt(missingFormsArray, allPayErrorText) {
             return new Promise((resolve) => {
                 const modal = document.getElementById('brandModal');
                 const titleEl = document.getElementById('brandModalTitle');
@@ -1411,13 +1444,32 @@
                 const allPayGroup = document.getElementById('reminderAllPayGroup');
                 const checkrGroup = document.getElementById('reminderCheckrGroup');
                 const storeGroup = document.getElementById('reminderStoreSetupGroup');
+                const fileInput = document.getElementById('reminderFileInput');
+                const fileStatus = document.getElementById('attachedFileStatus');
 
                 document.getElementById('reminderAllPayInput').value = "";
                 document.getElementById('reminderCheckrInput').value = "";
                 document.getElementById('reminderStoreSetupInput').value = "";
+                if (fileInput) fileInput.value = "";
+                if (fileStatus) fileStatus.innerText = "";
 
-                titleEl.innerText = "Send Reminder Links";
-                msgEl.innerText = "Paste direct urls below (optional). Blank entries will display standard default help instructions.";
+                if (fileInput) {
+                    fileInput.onchange = function() {
+                        if (fileInput.files && fileInput.files[0]) {
+                            fileStatus.innerText = `✓ ${fileInput.files[0].name}`;
+                        } else {
+                            fileStatus.innerText = "";
+                        }
+                    };
+                }
+
+                if (allPayErrorText) {
+                    titleEl.innerText = "Send AllPay I-9 Correction Notice";
+                    msgEl.innerText = `Correction Notice: ${allPayErrorText}. You can attach the downloaded AllPay PDF directly or paste links below (optional).`;
+                } else {
+                    titleEl.innerText = "Send Reminder Links & Documents";
+                    msgEl.innerText = "Paste direct URLs or attach a PDF/document below (optional). Blank entries will display standard default instructions.";
+                }
 
                 inputContainer.classList.add('hidden');
                 reminderForm.classList.remove('hidden');
@@ -1426,12 +1478,12 @@
                 confirmBtn.innerText = "Send Email";
                 cancelBtn.innerText = "Cancel";
 
-                const normalizedItems = missingFormsArray.map(item => item.toLowerCase().trim());
+                const normalizedItems = (missingFormsArray || []).map(item => item.toLowerCase().trim());
 
                 // Clean substring matching to prevent naming configuration bugs
-                const hasAllPay = normalizedItems.some(item => item.includes("allpay") || item.includes("hr alliance") || item.includes("onboarding documents"));
+                const hasAllPay = !!allPayErrorText || normalizedItems.some(item => item.includes("allpay") || item.includes("hr alliance") || item.includes("onboarding documents"));
                 const hasCheckr = normalizedItems.some(item => item.includes("checkr") || item.includes("background check"));
-                const hasStoreSetup = normalizedItems.some(item => item.includes("smartrecruiters") || item.includes("system setup") || item.includes("setup form"));
+                const hasStoreSetup = normalizedItems.some(item => item.includes("smartrecruiters") || item.includes("system setup") || item.includes("setup form") || item.includes("pulse"));
 
                 if (hasAllPay) {
                     allPayGroup.classList.remove('hidden');
@@ -1453,11 +1505,34 @@
 
                 modal.classList.remove('hidden');
 
-                const handleConfirm = () => {
+                const handleConfirm = async () => {
+                    let fileData = null;
+                    let fileName = null;
+                    let fileMimeType = null;
+
+                    if (fileInput && fileInput.files && fileInput.files[0]) {
+                        const file = fileInput.files[0];
+                        fileName = file.name;
+                        fileMimeType = file.type;
+                        try {
+                            fileData = await new Promise((res, rej) => {
+                                const reader = new FileReader();
+                                reader.onload = () => res(reader.result);
+                                reader.onerror = (e) => rej(e);
+                                reader.readAsDataURL(file);
+                            });
+                        } catch (err) {
+                            console.error("Error reading attached file:", err);
+                        }
+                    }
+
                     const links = {
                         allPayLink: document.getElementById('reminderAllPayInput').value.trim(),
                         checkrLink: document.getElementById('reminderCheckrInput').value.trim(),
-                        storeSetupLink: document.getElementById('reminderStoreSetupInput').value.trim()
+                        storeSetupLink: document.getElementById('reminderStoreSetupInput').value.trim(),
+                        fileData: fileData,
+                        fileName: fileName,
+                        fileMimeType: fileMimeType
                     };
                     modal.classList.add('hidden');
                     cleanup();
@@ -2640,7 +2715,7 @@
                 document.getElementById('intDate').value = formatDateForInput(item.date);
                 document.getElementById('intDay').value = item.day || getDayOfWeekFromDateString(item.date) || '';
                 document.getElementById('intTime').value = formatTimeDisplayFrontEnd(item.time) || item.time || '';
-                setSelectValueCaseInsensitive('intStatus', item.status || 'Phone Interview');
+                document.getElementById('intStatus').value = item.status || 'Phone Interview';
                 document.getElementById('intGmDate').value = formatDateForInput(item.gmDate);
                 const gmDayElem = document.getElementById('intGmDay');
                 if (gmDayElem) gmDayElem.value = item.gmDay || getDayOfWeekFromDateString(item.gmDate) || '';
@@ -2676,7 +2751,7 @@
                 document.getElementById('checkIneligible').checked = item.ineligible || false;
                 document.getElementById('checkInactive').checked = item.inactive || false;
                 document.getElementById('checkPulseForm').checked = item.pulseFormComplete || false;
-                document.getElementById('checkMissedNto').checked = item.missedNto || false;
+                if (document.getElementById('checkMissedNto')) document.getElementById('checkMissedNto').checked = item.missedNto || false;
 
                 const rawMissingDocs = (item.missingDocs || "").toString().trim();
                 if (rawMissingDocs && rawMissingDocs.toUpperCase() !== "FALSE") {
@@ -2707,6 +2782,37 @@
                     document.getElementById('missingDocsContainer').classList.add('hidden');
                     document.querySelectorAll('.doc-chk').forEach(c => c.checked = false);
                     document.getElementById('customMissingDoc').value = '';
+                }
+
+                const rawAllPayError = (item.allPayError || "").toString().trim();
+                if (rawAllPayError && rawAllPayError.toUpperCase() !== "FALSE") {
+                    document.getElementById('checkAllPayError').checked = true;
+                    document.getElementById('allPayErrorContainer').classList.remove('hidden');
+
+                    let remainingErrText = rawAllPayError;
+
+                    document.querySelectorAll('.allpay-err-chk').forEach(chk => {
+                        if (chk.value && rawAllPayError.toLowerCase().includes(chk.value.toLowerCase())) {
+                            chk.checked = true;
+                            const escapedVal = chk.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                            remainingErrText = remainingErrText.replace(new RegExp(escapedVal, 'gi'), '');
+                        } else {
+                            chk.checked = false;
+                        }
+                    });
+
+                    remainingErrText = remainingErrText
+                        .replace(/TRUE/gi, '')
+                        .replace(/^[,\s|]+|[,\s|]+$/g, '')
+                        .replace(/,\s*,/g, ',')
+                        .trim();
+
+                    document.getElementById('customAllPayError').value = remainingErrText;
+                } else {
+                    document.getElementById('checkAllPayError').checked = false;
+                    document.getElementById('allPayErrorContainer').classList.add('hidden');
+                    document.querySelectorAll('.allpay-err-chk').forEach(c => c.checked = false);
+                    document.getElementById('customAllPayError').value = '';
                 }
 
                 document.getElementById('emailQuickActions').classList.remove('hidden');
@@ -2761,6 +2867,9 @@
             document.getElementById('btnCancel').innerText = "Clear / Deselect";
             document.getElementById('emailQuickActions').classList.add('hidden');
             document.getElementById('missingDocsContainer').classList.add('hidden');
+            document.getElementById('allPayErrorContainer').classList.add('hidden');
+            document.querySelectorAll('.allpay-err-chk').forEach(c => c.checked = false);
+            document.getElementById('customAllPayError').value = '';
             currentSelectedId = null;
             updateSmsPreview();
             renderList();
@@ -2777,7 +2886,6 @@
             else if (currentView === 'interviews') targetName = (document.getElementById('intName').value || '').trim();
             else targetName = (document.getElementById('fieldName').value || '').trim();
 
-            // Check if candidate already exists in the active view by ID or Name
             let existingCand = null;
             let activeViewList = [];
             if (currentView === 'paycards') activeViewList = paycards;
@@ -2785,73 +2893,43 @@
             else if (currentView === 'interviews') activeViewList = interviews;
             else activeViewList = candidates;
 
-            let isUpdate = false;
-            let finalId = '';
-
             if (id) {
-                existingCand = activeViewList.find(c => c.id === id);
-                if (existingCand) {
-                    isUpdate = true;
-                    finalId = id;
-                }
+                existingCand = activeViewList.find(c => String(c.id || '').trim().toLowerCase() === id.toLowerCase());
             }
-            if (!isUpdate && targetName) {
-                existingCand = activeViewList.find(c => (c.name || '').toLowerCase() === targetName.toLowerCase());
-                if (existingCand) {
-                    isUpdate = true;
-                    finalId = existingCand.id;
-                }
+            if (!existingCand && targetName) {
+                existingCand = activeViewList.find(c => (c.name || '').trim().toLowerCase() === targetName.toLowerCase());
             }
 
-            const action = isUpdate ? 'update' : 'add';
-
-            showLoader(true, `Saving ${currentView} data...`);
-
-            let payload = { action: action, target: currentView, id: finalId };
+            const finalId = id || (existingCand ? existingCand.id : '');
+            let payload = { action: finalId ? 'update' : 'add', target: currentView };
+            if (finalId) payload.id = finalId;
 
             if (currentView === 'paycards') {
-                const existingCand = candidates.find(c => c.id === id) || paycards.find(c => c.id === id) || {};
-                payload.name = document.getElementById('payName').value.trim() || existingCand.name;
-                payload.position = document.getElementById('payPosition').value || existingCand.position;
-                payload.store = document.getElementById('payStore').value.trim() || existingCand.store;
-                payload.doName = document.getElementById('payDo').value.trim() || existingCand.doName;
-                payload.ntoDate = document.getElementById('payNtoDate').value || existingCand.ntoDate;
-                payload.noticeSentDate = document.getElementById('payNoticeDate').value;
+                payload.name = document.getElementById('payName').value.trim();
+                payload.position = document.getElementById('payPosition').value;
+                payload.store = document.getElementById('payStore').value.trim();
+                payload.doName = document.getElementById('payDo').value.trim();
+                payload.ntoDate = document.getElementById('payNtoDate').value.trim();
+                payload.noticeSentDate = document.getElementById('payNoticeDate').value.trim();
                 payload.cardReceived = document.getElementById('checkPayReceived').checked;
                 payload.registered = document.getElementById('checkPayRegistered').checked;
                 payload.ddReceived = document.getElementById('checkPayDdReceived').checked;
                 payload.ddEntered = document.getElementById('checkPayDdEntered').checked;
                 payload.notes = document.getElementById('payNotes').value.trim();
-                payload.payCard = existingCand.payCard || 'Yes';
 
-                if (existingCand.phoneNumber !== undefined) payload.phoneNumber = existingCand.phoneNumber;
-                if (existingCand.email !== undefined) payload.email = existingCand.email;
-                if (existingCand.hired !== undefined) payload.hired = existingCand.hired;
-                if (existingCand.bgcComplete !== undefined) payload.bgcComplete = existingCand.bgcComplete;
-                if (existingCand.allPayCompleted !== undefined) payload.allPayCompleted = existingCand.allPayCompleted;
-                if (existingCand.submissionReceived !== undefined) payload.submissionReceived = existingCand.submissionReceived;
-                if (existingCand.onboardingSent !== undefined) payload.onboardingSent = existingCand.onboardingSent;
-                if (existingCand.ntoSignupLinkSent !== undefined) payload.ntoSignupLinkSent = existingCand.ntoSignupLinkSent;
-                if (existingCand.ntoScheduled !== undefined) payload.ntoScheduled = existingCand.ntoScheduled;
-                if (existingCand.pulseFormComplete !== undefined) payload.pulseFormComplete = existingCand.pulseFormComplete;
-                if (existingCand.incorrectEmail !== undefined) payload.incorrectEmail = existingCand.incorrectEmail;
-                if (existingCand.ineligible !== undefined) payload.ineligible = existingCand.ineligible;
-                if (existingCand.inactive !== undefined) payload.inactive = existingCand.inactive;
-                if (existingCand.missingDocs !== undefined) payload.missingDocs = existingCand.missingDocs;
-                if (existingCand.missedNto !== undefined) payload.missedNto = existingCand.missedNto;
             } else if (currentView === 'staffing') {
                 payload.name = document.getElementById('stfName').value.trim();
                 payload.position = document.getElementById('stfPosition').value;
                 payload.store = document.getElementById('stfStore').value.trim();
                 payload.doName = document.getElementById('stfDo').value.trim();
-                payload.hireDate = document.getElementById('stfHireDate').value;
-                payload.termDate = document.getElementById('stfTermDate').value;
-                payload.period = document.getElementById('stfPeriod').value;
-                payload.rehireEligible = document.getElementById('stfRehire').value;
-                payload.causeOfAction = document.getElementById('stfCause').value;
-                payload.reasonOfAction = document.getElementById('stfReason').value.trim();
+                payload.period = document.getElementById('stfPeriod').value.trim();
+                payload.hireDate = document.getElementById('stfHireDate').value.trim();
+                payload.termDate = document.getElementById('stfTermDate').value.trim();
+                payload.termReason = document.getElementById('stfReason').value.trim();
+                payload.termSubReason = document.getElementById('stfSubReason').value.trim();
+                payload.gmName = document.getElementById('stfGm').value.trim();
+                payload.ssnLast4 = document.getElementById('stfSsnLast4').value.trim();
                 payload.notes = document.getElementById('stfNotes').value.trim();
-                payload.gmName = document.getElementById('stfGmName').value.trim();
 
             } else if (currentView === 'interviews') {
                 payload.name = document.getElementById('intName').value.trim();
@@ -2905,6 +2983,16 @@
                     missingDocsValue = checkedDocs.length > 0 ? checkedDocs.join(', ') : "TRUE";
                 }
                 payload.missingDocs = missingDocsValue;
+
+                let allPayErrorValue = "FALSE";
+                if (document.getElementById('checkAllPayError').checked) {
+                    const checkedErrors = [];
+                    document.querySelectorAll('.allpay-err-chk:checked').forEach(c => checkedErrors.push(c.value));
+                    const customErrVal = document.getElementById('customAllPayError').value.trim();
+                    if (customErrVal) checkedErrors.push(customErrVal);
+                    allPayErrorValue = checkedErrors.length > 0 ? checkedErrors.join(', ') : "TRUE";
+                }
+                payload.allPayError = allPayErrorValue;
             }
 
             try {
@@ -2986,6 +3074,10 @@
             let payloadAllPayLink = "";
             let payloadCheckrLink = "";
             let payloadStoreSetupLink = "";
+            let payloadFileData = null;
+            let payloadFileName = null;
+            let payloadFileMimeType = null;
+            let payloadAllPayErrorText = "";
 
             if (emailType === "welcome") {
                 if (position === "DE") {
@@ -3003,21 +3095,43 @@
                     confirmationMessage = `Send Dynamic Welcome Email & Offer to ${name} at $${payRateInput}/hr?\n\n(This will automatically CC the store and BCC the DO)`;
                 }
             } else if (emailType === "reminder") {
-                const missing = getMissingOnboardingForms();
-                if (missing.length === 0) {
+                const isAllPayErrorChecked = document.getElementById('checkAllPayError') ? document.getElementById('checkAllPayError').checked : false;
+                let activeAllPayErrors = [];
+                if (isAllPayErrorChecked) {
+                    document.querySelectorAll('.allpay-err-chk:checked').forEach(c => activeAllPayErrors.push(c.value));
+                    const customErrVal = document.getElementById('customAllPayError') ? document.getElementById('customAllPayError').value.trim() : '';
+                    if (customErrVal) activeAllPayErrors.push(customErrVal);
+                    if (activeAllPayErrors.length === 0) activeAllPayErrors.push("I-9 Corrections Required");
+                }
+                const allPayErrorText = activeAllPayErrors.join(", ");
+
+                let missing = getMissingOnboardingForms();
+                if (isAllPayErrorChecked && !missing.includes("Onboarding Documents (AllPay/HR Alliance)")) {
+                    missing.unshift("Onboarding Documents (AllPay/HR Alliance - I-9 Error)");
+                }
+
+                if (missing.length === 0 && !isAllPayErrorChecked) {
                     showBrandAlert("All onboarding forms are currently marked as completed.", "Reminder Cancelled");
                     return;
                 }
 
-                const links = await showBrandReminderPrompt(missing);
-                if (links === null) return;
+                const promptResult = await showBrandReminderPrompt(missing, allPayErrorText);
+                if (promptResult === null) return;
 
                 payloadMissing = missing.join(", ");
-                payloadAllPayLink = links.allPayLink;
-                payloadCheckrLink = links.checkrLink;
-                payloadStoreSetupLink = links.storeSetupLink;
+                payloadAllPayLink = promptResult.allPayLink;
+                payloadCheckrLink = promptResult.checkrLink;
+                payloadStoreSetupLink = promptResult.storeSetupLink;
+                payloadFileData = promptResult.fileData;
+                payloadFileName = promptResult.fileName;
+                payloadFileMimeType = promptResult.fileMimeType;
+                payloadAllPayErrorText = allPayErrorText;
 
-                confirmationMessage = `Are you sure you want to send the Onboarding Reminder to ${name} (${email}) for:\n\n• ${missing.join("\n• ")}`;
+                if (isAllPayErrorChecked) {
+                    confirmationMessage = `Send I-9 Correction Notice to ${name} (${email}) for:\n\n• ${allPayErrorText}${promptResult.fileName ? `\n• 📎 Attached: ${promptResult.fileName}` : ''}`;
+                } else {
+                    confirmationMessage = `Are you sure you want to send the Onboarding Reminder to ${name} (${email}) for:\n\n• ${missing.join("\n• ")}${promptResult.fileName ? `\n• 📎 Attached: ${promptResult.fileName}` : ''}`;
+                }
             } else if (emailType === "orientation") {
                 confirmationMessage = `Are you sure you want to send the Orientation Registration Link to ${name} (${email})?`;
             }
@@ -3045,7 +3159,11 @@
                 roadPayRate: roadRateInput,
                 allPayLink: payloadAllPayLink,
                 checkrLink: payloadCheckrLink,
-                storeSetupLink: payloadStoreSetupLink
+                storeSetupLink: payloadStoreSetupLink,
+                fileData: payloadFileData,
+                fileName: payloadFileName,
+                fileMimeType: payloadFileMimeType,
+                allPayErrorText: payloadAllPayErrorText
             };
 
             try {

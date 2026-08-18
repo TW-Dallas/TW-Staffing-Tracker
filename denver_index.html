@@ -467,6 +467,7 @@
 
         if (item.incorrectEmail) return { pct: 15, color: 'red', label: 'Incorrect Email' };
         if (item.hasMissingDocs) return { pct: 15, color: 'red', label: 'Missing Documents' };
+        if (item.hasAllPayError || (item.allPayError && item.allPayError !== 'FALSE')) return { pct: 15, color: 'red', label: 'AllPay Error' };
         if (att === 'Left Early') return { pct: 90, color: 'red', label: 'Left Class Early' };
         if (item.missedNto || att === 'Not in NTO' || att.includes('Incomplete')) {
             return { pct: 90, color: 'red', label: 'Missed Orientation' };
@@ -515,6 +516,10 @@
         if (item.hasMissingDocs) {
             const missingText = item.missingDocsText ? `: ${item.missingDocsText}` : ' (Paperwork Required)';
             return `<div class="alert-banner">⚠️ Missing Documents${missingText}</div>`;
+        }
+        if (item.hasAllPayError || (item.allPayError && item.allPayError !== 'FALSE')) {
+            const errText = item.allPayErrorText || (item.allPayError && item.allPayError !== 'TRUE' ? item.allPayError : 'I-9 Correction Required');
+            return `<div class="alert-banner" style="background-color: #fff3e0; border-color: #ff9800; color: #e65100;">⚠️ AllPay Error: ${errText}</div>`;
         }
 
         return '';
