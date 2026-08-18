@@ -759,22 +759,28 @@
                         <!-- 6. CONTACTS DIRECTORY TEMPLATE -->
                         <div id="contactsFormFields" class="hidden">
                             <!-- Controls Row: Filter by DO & Quick Search -->
-                            <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
-                                <div style="flex: 1; min-width: 160px;">
+                            <div style="display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: flex-end;">
+                                <div style="flex: 2; min-width: 200px;">
+                                    <label
+                                        style="font-family: 'Subhead2'; font-size: 14px; color: var(--text-dark);">Search Store / GM / IP / Address:</label>
+                                    <input type="text" id="contactSearchInput" placeholder="🔍 Type Store #, GM Name, IP, Address..." oninput="renderContactsView()"
+                                        style="padding: 7px 10px; font-size: 16px; border-radius: 6px; border: 1.5px solid var(--crust-dark); width: 100%; box-sizing: border-box; background: white; margin-top: 4px;">
+                                </div>
+                                <div style="flex: 1; min-width: 140px;">
                                     <label
                                         style="font-family: 'Subhead2'; font-size: 14px; color: var(--text-dark);">Filter
-                                        by DO Name:</label>
+                                        by DO:</label>
                                     <select id="contactDoFilter" onchange="renderContactsView()"
-                                        style="padding: 6px; font-size: 16px;">
+                                        style="padding: 7px; font-size: 16px; width: 100%; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white; margin-top: 4px;">
                                         <option value="ALL">All DOs</option>
                                     </select>
                                 </div>
-                                <div style="flex: 1; min-width: 160px;">
+                                <div style="flex: 1; min-width: 140px;">
                                     <label
                                         style="font-family: 'Subhead2'; font-size: 14px; color: var(--text-dark);">Sort
                                         Directory By:</label>
                                     <select id="contactSortFilter" onchange="renderContactsView()"
-                                        style="padding: 6px; font-size: 16px;">
+                                        style="padding: 7px; font-size: 16px; width: 100%; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white; margin-top: 4px;">
                                         <option value="store_asc">🏬 Store # (Numerical)</option>
                                         <option value="do_asc">👤 DO Name (Alphabetical)</option>
                                     </select>
@@ -4439,7 +4445,7 @@
             select.value = current || 'ALL';
         }
 
-        // Render Contact Rows with SVG Copy Buttons
+        // Render Contact Rows with SVG Copy Buttons and Quick Edit
         function renderContactsView() {
             const container = document.getElementById('contactsGridContainer');
             if (!container) return;
@@ -4447,17 +4453,19 @@
 
             const doFilter = document.getElementById('contactDoFilter')?.value || 'ALL';
             const sortBy = document.getElementById('contactSortFilter')?.value || 'store_asc';
-            const searchQuery = (document.getElementById('searchControl')?.value || '').toLowerCase().trim();
+            const searchQuery = (document.getElementById('contactSearchInput')?.value || document.getElementById('searchControl')?.value || '').toLowerCase().trim();
 
             let filtered = contacts.filter(item => {
                 if (doFilter !== 'ALL' && item.doName !== doFilter) return false;
                 if (searchQuery) {
-                    const matchesStore = item.store.toLowerCase().includes(searchQuery);
-                    const matchesDo = item.doName.toLowerCase().includes(searchQuery);
-                    const matchesGm = item.manager.toLowerCase().includes(searchQuery);
-                    const matchesPhone = item.storePhone.includes(searchQuery) || item.gmPhone.includes(searchQuery);
-                    const matchesIp = (item.ipAddress || '').toLowerCase().includes(searchQuery);
-                    return matchesStore || matchesDo || matchesGm || matchesPhone || matchesIp;
+                    const matchesStore = String(item.store || '').toLowerCase().includes(searchQuery);
+                    const matchesDo = String(item.doName || '').toLowerCase().includes(searchQuery);
+                    const matchesGm = String(item.manager || '').toLowerCase().includes(searchQuery);
+                    const matchesPhone = String(item.storePhone || '').includes(searchQuery) || String(item.gmPhone || '').includes(searchQuery) || String(item.doCell || '').includes(searchQuery);
+                    const matchesEmail = String(item.storeEmail || '').toLowerCase().includes(searchQuery) || String(item.doEmail || '').toLowerCase().includes(searchQuery);
+                    const matchesAddress = String(item.address || '').toLowerCase().includes(searchQuery);
+                    const matchesIp = String(item.ipAddress || '').toLowerCase().includes(searchQuery);
+                    return matchesStore || matchesDo || matchesGm || matchesPhone || matchesEmail || matchesAddress || matchesIp;
                 }
                 return true;
             });
@@ -4468,10 +4476,10 @@
                     const numA = parseInt(a.store, 10);
                     const numB = parseInt(b.store, 10);
                     if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
-                    return a.store.localeCompare(b.store);
+                    return String(a.store).localeCompare(String(b.store));
                 }
                 if (sortBy === 'do_asc') {
-                    const doComp = a.doName.localeCompare(b.doName);
+                    const doComp = String(a.doName).localeCompare(String(b.doName));
                     if (doComp !== 0) return doComp;
                     return parseInt(a.store, 10) - parseInt(b.store, 10);
                 }
@@ -4479,7 +4487,7 @@
             });
 
             if (filtered.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding: 24px; color: var(--brand-grey); font-size: 18px;">No store contacts matched your search or filter.</div>`;
+                container.innerHTML = `<div style="text-align:center; padding: 30px; color: var(--brand-grey); font-size: 18px; font-family: 'Subhead2';">🔍 No store contacts matched "${escapeText(searchQuery)}".</div>`;
                 return;
             }
 
@@ -4494,23 +4502,29 @@
                 display: flex;
                 flex-direction: column;
                 gap: 6px;
+                box-shadow: 0 2px 5px rgba(71,43,16,0.06);
             `;
 
                 // SVG Overlapping Squares Icon
                 const copySvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
 
                 card.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--crust-med); padding-bottom: 6px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid var(--crust-med); padding-bottom: 8px;">
                     <div>
-                        <span style="font-family: 'ExtraBold'; font-size: 20px; color: var(--dark-blue);">Store #${item.store}</span>
+                        <span style="font-family: 'ExtraBold'; font-size: 21px; color: var(--dark-blue);">Store #${item.store}</span>
                         <span style="font-family: 'Subhead2'; font-size: 16px; color: var(--text-light); margin-left: 10px;">DO: <strong>${item.doName}</strong></span>
                     </div>
-                    <button type="button" onclick="copyToClipboard('${escapeText(item.store + ' - ' + (item.manager || '') + ' - ' + (item.gmPhone || item.storePhone || ''))}', this)" title="Copy summary" style="background: var(--crust-med); color: var(--crust-burnt); padding: 4px 8px; font-size: 13px; border-radius: 4px;">
-                        ${copySvg} <span style="font-size: 12px;">Copy Summary</span>
-                    </button>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <button type="button" onclick="openEditContactModal('${escapeText(item.store)}')" title="Edit Store & GM Details" style="background: var(--brand-blue); color: white; border: none; padding: 5px 12px; font-size: 13px; font-family: 'Subhead2'; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
+                            ✏️ Edit Info
+                        </button>
+                        <button type="button" onclick="copyToClipboard('${escapeText(item.store + ' - ' + (item.manager || '') + ' - ' + (item.gmPhone || item.storePhone || ''))}', this)" title="Copy summary" style="background: var(--crust-med); color: var(--crust-burnt); padding: 5px 10px; font-size: 13px; font-family: 'Subhead2'; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                            ${copySvg} <span style="font-size: 12px;">Copy</span>
+                        </button>
+                    </div>
                 </div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 16px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 16px; margin-top: 4px;">
                     <div>
                         <strong>General Manager:</strong> ${item.manager || 'N/A'}
                     </div>
@@ -4529,8 +4543,16 @@
                         <strong>Store Phone:</strong> ${item.storePhone || 'N/A'}
                         ${item.storePhone ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${item.storePhone}', this)" title="Copy Store Phone">${copySvg}</button>` : ''}
                     </div>
-                    <div style="display: flex; align-items: center; gap: 6px; grid-column: span 2;">
-                        <strong>IP Address:</strong> ${item.ipAddress || 'N/A'}
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <strong>Store Email:</strong> ${item.storeEmail || 'N/A'}
+                        ${item.storeEmail ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.storeEmail)}', this)" title="Copy Store Email">${copySvg}</button>` : ''}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <strong>DO Email / Cell:</strong> ${item.doEmail || item.doCell ? `${item.doEmail || ''} ${item.doCell ? `(${item.doCell})` : ''}` : 'N/A'}
+                        ${item.doEmail ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.doEmail)}', this)" title="Copy DO Email">${copySvg}</button>` : ''}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; grid-column: span 2; background: #fff8e1; border: 1px solid #ffe082; padding: 6px 10px; border-radius: 6px; margin-top: 2px;">
+                        <strong style="color: #b78103;">🌐 Network IP:</strong> <span style="font-family: monospace; font-weight: bold; color: #472b10;">${item.ipAddress || 'Not Assigned'}</span>
                         ${item.ipAddress ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.ipAddress)}', this)" title="Copy IP Address">${copySvg}</button>` : ''}
                     </div>
                 </div>
@@ -4865,6 +4887,99 @@
                 toggleBtn.style.color = 'var(--brand-blue, #0090e2)';
             }
         }
+
+        /* --- EDIT STORE CONTACT MODAL HANDLERS --- */
+        function openEditContactModal(storeNum) {
+            const contact = contacts.find(c => String(c.store) === String(storeNum));
+            if (!contact) {
+                showBrandAlert("Store #" + storeNum + " not found in directory.", "Not Found");
+                return;
+            }
+
+            document.getElementById('editContactStore').value = contact.store || '';
+            document.getElementById('editContactStoreDisplay').value = `Store #${contact.store}`;
+            document.getElementById('editContactDo').value = contact.doName || '';
+            document.getElementById('editContactGm').value = contact.manager || '';
+            document.getElementById('editContactGmPhone').value = contact.gmPhone || '';
+            document.getElementById('editContactStorePhone').value = contact.storePhone || '';
+            document.getElementById('editContactStoreEmail').value = contact.storeEmail || '';
+            document.getElementById('editContactDoEmail').value = contact.doEmail || '';
+            document.getElementById('editContactDoCell').value = contact.doCell || '';
+            document.getElementById('editContactAddress').value = contact.address || '';
+            document.getElementById('editContactIp').value = contact.ipAddress || '';
+
+            document.getElementById('editContactModalTitle').innerText = `🏬 Edit Store #${contact.store} Info`;
+            document.getElementById('editContactModal').classList.remove('hidden');
+        }
+
+        function closeEditContactModal() {
+            document.getElementById('editContactModal').classList.add('hidden');
+        }
+
+        async function saveStoreContact() {
+            const store = document.getElementById('editContactStore').value.trim();
+            if (!store) return;
+
+            const doName = document.getElementById('editContactDo').value.trim();
+            const manager = document.getElementById('editContactGm').value.trim();
+            const gmPhone = document.getElementById('editContactGmPhone').value.trim();
+            const storePhone = document.getElementById('editContactStorePhone').value.trim();
+            const storeEmail = document.getElementById('editContactStoreEmail').value.trim();
+            const doEmail = document.getElementById('editContactDoEmail').value.trim();
+            const doCell = document.getElementById('editContactDoCell').value.trim();
+            const address = document.getElementById('editContactAddress').value.trim();
+            const ipAddress = document.getElementById('editContactIp').value.trim();
+
+            showLoader(true, `Updating Store #${store} details in database...`);
+
+            try {
+                await apiCall('POST', {
+                    target: 'contacts',
+                    action: 'updateContact',
+                    store: store,
+                    doName: doName,
+                    manager: manager,
+                    gmPhone: gmPhone,
+                    storePhone: storePhone,
+                    storeEmail: storeEmail,
+                    doEmail: doEmail,
+                    doCell: doCell,
+                    address: address,
+                    ipAddress: ipAddress
+                });
+
+                // Update in local memory
+                const idx = contacts.findIndex(c => String(c.store) === String(store));
+                if (idx !== -1) {
+                    contacts[idx] = {
+                        ...contacts[idx],
+                        doName, manager, gmPhone, storePhone, storeEmail, doEmail, doCell, address, ipAddress
+                    };
+                }
+
+                // Update local storage cache
+                const u = localStorage.getItem('onb_user');
+                if (u) {
+                    try {
+                        const raw = localStorage.getItem(`cached_workspace_data_${u}`);
+                        if (raw) {
+                            const cached = JSON.parse(raw);
+                            cached.contacts = contacts;
+                            localStorage.setItem(`cached_workspace_data_${u}`, JSON.stringify(cached));
+                        }
+                    } catch(e) {}
+                }
+
+                showLoader(false);
+                closeEditContactModal();
+                showBrandAlert(`Store #${store} information saved successfully!`, "Contact Updated");
+                populateContactsDoFilter();
+                renderContactsView();
+            } catch (err) {
+                showLoader(false);
+                showBrandAlert("Error updating store contact: " + err.message, "Update Failed");
+            }
+        }
     </script>
     <datalist id="time15MinList"></datalist>
     <!-- NTO CLASS CALENDAR MANAGEMENT MODAL -->
@@ -4967,6 +5082,84 @@
             </div>
         </div>
     </div>
+
+    <!-- EDIT STORE CONTACT MODAL -->
+    <div id="editContactModal" class="brand-modal-overlay hidden">
+        <div class="brand-modal-card" style="max-width: 650px; width: 95%;">
+            <div class="brand-modal-brand-stripe"></div>
+            <div class="brand-modal-content" style="padding: 24px;">
+                <!-- Modal Title & Close Button -->
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--crust-med); padding-bottom: 10px; margin-bottom: 16px;">
+                    <h3 id="editContactModalTitle" style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 22px; text-transform: uppercase;">
+                        🏬 Edit Store Contact Info
+                    </h3>
+                    <button type="button" onclick="closeEditContactModal()" style="background: var(--brand-grey); font-size: 15px; padding: 6px 14px; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Subhead2';">✕ Close</button>
+                </div>
+
+                <form id="editContactForm" onsubmit="event.preventDefault(); saveStoreContact();">
+                    <input type="hidden" id="editContactStore">
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                        <div>
+                            <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">Store #:</label>
+                            <input type="text" id="editContactStoreDisplay" disabled style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; background: var(--crust-light); font-weight: bold;">
+                        </div>
+                        <div>
+                            <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">District Owner (DO):</label>
+                            <input type="text" id="editContactDo" placeholder="e.g. Aaron" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                        <div>
+                            <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">General Manager (GM) Name:</label>
+                            <input type="text" id="editContactGm" placeholder="e.g. Michael Nezvensky" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">GM Phone Number:</label>
+                            <input type="text" id="editContactGmPhone" placeholder="e.g. (720) 492-3007" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                        <div>
+                            <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">Store Landline Phone:</label>
+                            <input type="text" id="editContactStorePhone" placeholder="e.g. (303) 703-9494" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">Store Email:</label>
+                            <input type="text" id="editContactStoreEmail" placeholder="e.g. 6200@team-wow.com" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                        <div>
+                            <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">DO Email:</label>
+                            <input type="text" id="editContactDoEmail" placeholder="e.g. aaron@team-wow.com" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">DO Cell Phone:</label>
+                            <input type="text" id="editContactDoCell" placeholder="e.g. (303) 555-1234" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 14px;">
+                        <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">Store Physical Address:</label>
+                        <input type="text" id="editContactAddress" placeholder="e.g. 6709 W Coal Mine, Littleton 80123" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">🌐 Network IP Address (Router / WAN / Equipment IP):</label>
+                        <input type="text" id="editContactIp" placeholder="e.g. 192.168.1.1 or Static WAN IP" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; font-family: monospace; font-weight: bold; color: #005c91;">
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1.5px solid var(--crust-med); padding-top: 14px;">
+                        <button type="button" onclick="closeEditContactModal()" style="background: var(--crust-med); color: var(--crust-burnt); border: none; padding: 10px 18px; border-radius: 6px; font-family: 'Subhead2'; font-size: 16px; cursor: pointer;">Cancel</button>
+                        <button type="submit" style="background: var(--brand-blue); color: white; border: none; padding: 10px 22px; border-radius: 6px; font-family: 'Subhead1'; font-size: 16px; text-transform: uppercase; cursor: pointer;">💾 Save Contact Info</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </body>
 
