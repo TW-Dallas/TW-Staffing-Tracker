@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <link class="favicon" rel="icon" type="image/png" href="images/tile_blue.png">
@@ -10,12 +11,41 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
     <style>
-        @font-face { font-family: 'ExtraBlack'; src: url('fonts/Dominos Sans Header 1.ttf') format('truetype'); font-weight: bold; }
-        @font-face { font-family: 'ExtraBold'; src: url('fonts/Dominos Sans Header 2.ttf') format('truetype'); font-weight: normal; }
-        @font-face { font-family: 'Subhead1'; src: url('fonts/Dominos Sans Subhead 1.ttf') format('truetype'); font-weight: normal; }
-        @font-face { font-family: 'Subhead2'; src: url('fonts/Dominos Sans Subhead 2.ttf') format('truetype'); font-weight: normal; }
-        @font-face { font-family: 'Body'; src: url('fonts/Dominos Sans Body.ttf') format('truetype'); font-weight: normal; }
-        @font-face { font-family: 'Condensed'; src: url('fonts/Dominos Sans Body Condensed.ttf') format('truetype'); font-weight: normal; }
+        @font-face {
+            font-family: 'ExtraBlack';
+            src: url('fonts/Dominos Sans Header 1.ttf') format('truetype');
+            font-weight: bold;
+        }
+
+        @font-face {
+            font-family: 'ExtraBold';
+            src: url('fonts/Dominos Sans Header 2.ttf') format('truetype');
+            font-weight: normal;
+        }
+
+        @font-face {
+            font-family: 'Subhead1';
+            src: url('fonts/Dominos Sans Subhead 1.ttf') format('truetype');
+            font-weight: normal;
+        }
+
+        @font-face {
+            font-family: 'Subhead2';
+            src: url('fonts/Dominos Sans Subhead 2.ttf') format('truetype');
+            font-weight: normal;
+        }
+
+        @font-face {
+            font-family: 'Body';
+            src: url('fonts/Dominos Sans Body.ttf') format('truetype');
+            font-weight: normal;
+        }
+
+        @font-face {
+            font-family: 'Condensed';
+            src: url('fonts/Dominos Sans Body Condensed.ttf') format('truetype');
+            font-weight: normal;
+        }
 
         :root {
             --brand-red: #ff0000;
@@ -35,127 +65,420 @@
             --brand-green: #28a745;
         }
 
-        body { font-family: 'Condensed', sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; color: var(--crust-burnt); }
-        header { 
-            background-color: #005c91; 
-            color: white; 
-            padding: 12px 16px; 
-            padding-top: calc(12px + env(safe-area-inset-top, 0px)); 
-            position: sticky; 
-            top: 0; 
-            z-index: 100; 
-            box-shadow: 0 4px 12px rgba(71, 43, 16, 0.15); 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-        }        
-        .logo { height: 32px; width: auto; }
-        h1 { margin: 0; font-family: 'ExtraBlack', serif; font-size: 22px; text-transform: uppercase; line-height: 1.1; }
-        .subtitle { font-family: 'Condensed', sans-serif; font-size: 13px; opacity: 0.9; line-height: 1.2; }
-
-        /* --- CONTROLS --- */
-        .controls { padding: 12px 16px; background: white; border-bottom: 2px solid var(--crust-med); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: flex-start; }
-        select { padding: 8px; border-radius: 8px; border: 1px solid var(--crust-dark); background: var(--crust-light); font-family: 'Subhead2', sans-serif; font-size: 16px; color: var(--crust-burnt); width: 250px; }
-
-        @media (max-width: 600px) {
-            .controls { gap: 8px; justify-content: space-between; }
-            select { width: 48%; min-width: 0; flex: 0 0 48%; margin-bottom: 0; }
+        body {
+            font-family: 'Condensed', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            color: var(--crust-burnt);
         }
 
-        .container { padding: 16px; max-width: 900px; margin: 0 auto; }
-        
+        header {
+            background-color: #005c91;
+            color: white;
+            padding: 12px 16px;
+            padding-top: calc(12px + env(safe-area-inset-top, 0px));
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(71, 43, 16, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            height: 32px;
+            width: auto;
+        }
+
+        h1 {
+            margin: 0;
+            font-family: 'ExtraBlack', serif;
+            font-size: 22px;
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+
+        .subtitle {
+            font-family: 'Condensed', sans-serif;
+            font-size: 13px;
+            opacity: 0.9;
+            line-height: 1.2;
+        }
+
+        /* --- CONTROLS --- */
+        .controls {
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 2px solid var(--crust-med);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        select {
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid var(--crust-dark);
+            background: var(--crust-light);
+            font-family: 'Subhead2', sans-serif;
+            font-size: 16px;
+            color: var(--crust-burnt);
+            width: 250px;
+        }
+
+        @media (max-width: 600px) {
+            .controls {
+                gap: 8px;
+                justify-content: space-between;
+            }
+
+            select {
+                width: 48%;
+                min-width: 0;
+                flex: 0 0 48%;
+                margin-bottom: 0;
+            }
+        }
+
+        .container {
+            padding: 16px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
         /* --- CARD STYLES --- */
-        .card { 
-            background: var(--card-bg); 
-            border-radius: var(--border-radius); 
-            padding: 14px 16px; 
-            margin-bottom: 12px; 
-            box-shadow: 0 4px 6px rgba(71, 43, 16, 0.05); 
-            border-left: 6px solid transparent; 
-            position: relative; 
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 6px rgba(71, 43, 16, 0.05);
+            border-left: 6px solid transparent;
+            position: relative;
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        .card:hover { transform: translateY(-1px); box-shadow: 0 6px 12px rgba(71, 43, 16, 0.08); }
-        
-        /* Status Borders */
-        .card.status-blue { border-left-color: var(--brand-blue); }
-        .card.status-green { border-left-color: var(--brand-green); border-left-width: 8px; }
-        .card.status-red { border-left-color: var(--brand-red); border: 2px solid var(--brand-red); } 
-        .card.status-gray { border-left-color: #6c757d; opacity: 0.8; background-color: #f8f9fa; }
 
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .name { font-family: 'Subhead2', sans-serif; font-size: 18px; color: var(--crust-burnt); }
-        .position-badge { font-family: 'Subhead2', sans-serif; font-size: 14px; padding: 5px 10px; border-radius: 12px; background: var(--crust-light); color: #005c91; border: 1px solid var(--crust-med); display: flex; align-items: center; gap: 4px; }
-        
-        .meta-row { display: flex; justify-content: space-between; font-family: 'Condensed', sans-serif; font-size: 15px; color: var(--crust-deep); margin-bottom: 6px; }
+        .card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 12px rgba(71, 43, 16, 0.08);
+        }
+
+        /* Status Borders */
+        .card.status-blue {
+            border-left-color: var(--brand-blue);
+        }
+
+        .card.status-green {
+            border-left-color: var(--brand-green);
+            border-left-width: 8px;
+        }
+
+        .card.status-red {
+            border-left-color: var(--brand-red);
+            border: 2px solid var(--brand-red);
+        }
+
+        .card.status-gray {
+            border-left-color: #6c757d;
+            opacity: 0.8;
+            background-color: #f8f9fa;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .name {
+            font-family: 'Subhead2', sans-serif;
+            font-size: 18px;
+            color: var(--crust-burnt);
+        }
+
+        .position-badge {
+            font-family: 'Subhead2', sans-serif;
+            font-size: 14px;
+            padding: 5px 10px;
+            border-radius: 12px;
+            background: var(--crust-light);
+            color: #005c91;
+            border: 1px solid var(--crust-med);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Condensed', sans-serif;
+            font-size: 15px;
+            color: var(--crust-deep);
+            margin-bottom: 6px;
+        }
 
         /* --- PIPELINE VISUALS --- */
-        .pipeline-container { margin-top: 10px; margin-bottom: 6px; }
-        .pipeline-track { background: #eee; height: 10px; border-radius: 5px; overflow: hidden; width: 100%; }
-        .pipeline-fill { height: 100%; transition: width 0.5s ease; background: var(--brand-blue); }
-        .pipeline-fill.green { background: var(--brand-green); }
-        .pipeline-fill.red { background: var(--brand-red); }
-        .pipeline-fill.grey { background: #6c757d; }
+        .pipeline-container {
+            margin-top: 10px;
+            margin-bottom: 6px;
+        }
 
-        .status-text { font-family: 'Subhead2', sans-serif; font-size: 16px; color: var(--brand-blue); display: flex; justify-content: space-between; align-items: center; }
-        .status-text.red { color: var(--brand-red); }
-        .status-text.green { color: var(--brand-green); }
-        .status-text.grey { color: #6c757d; }
+        .pipeline-track {
+            background: #eee;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .pipeline-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+            background: var(--brand-blue);
+        }
+
+        .pipeline-fill.green {
+            background: var(--brand-green);
+        }
+
+        .pipeline-fill.red {
+            background: var(--brand-red);
+        }
+
+        .pipeline-fill.grey {
+            background: #6c757d;
+        }
+
+        .status-text {
+            font-family: 'Subhead2', sans-serif;
+            font-size: 16px;
+            color: var(--brand-blue);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-text.red {
+            color: var(--brand-red);
+        }
+
+        .status-text.green {
+            color: var(--brand-green);
+        }
+
+        .status-text.grey {
+            color: #6c757d;
+        }
 
         /* --- ALERT BANNER --- */
-        .alert-banner { background-color: #ffebee; border: 1px solid var(--brand-red); color: var(--dark-red); padding: 10px; border-radius: 6px; font-size: 15px; margin-top: 8px; font-family: 'Subhead2', sans-serif; display: flex; align-items: center; gap: 6px; }
+        .alert-banner {
+            background-color: #ffebee;
+            border: 1px solid var(--brand-red);
+            color: var(--dark-red);
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 15px;
+            margin-top: 8px;
+            font-family: 'Subhead2', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
         /* --- EXPANDABLE SECTIONS --- */
-        .card-details { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
-        .card.expanded .card-details { max-height: 1000px; }
-        .expand-chevron { font-size: 16px; color: var(--crust-dark); transition: transform 0.2s ease; margin-left: 8px; }
-        .card.expanded .expand-chevron { transform: rotate(180deg); }
+        .card-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .card.expanded .card-details {
+            max-height: 1000px;
+        }
+
+        .expand-chevron {
+            font-size: 16px;
+            color: var(--crust-dark);
+            transition: transform 0.2s ease;
+            margin-left: 8px;
+        }
+
+        .card.expanded .expand-chevron {
+            transform: rotate(180deg);
+        }
 
         /* --- CHECKLIST STYLE --- */
-        .onboarding-checklist { background: var(--crust-light); border: 1px solid var(--crust-med); border-radius: 8px; padding: 12px; margin-top: 12px; }
-        .checklist-title { font-family: 'Subhead2', sans-serif; font-size: 16px; margin-bottom: 8px; color: var(--crust-burnt); text-transform: uppercase; letter-spacing: 0.5px; }
-        .checklist-item { display: flex; align-items: center; gap: 8px; font-size: 15px; margin-bottom: 8px; font-family: 'Condensed', sans-serif; color: var(--crust-deep); }
-        .checklist-item:last-child { margin-bottom: 0; }
-        .chk-icon { font-size: 16px; font-weight: bold; }
-        .chk-done { color: var(--brand-green); }
-        .chk-missing { color: var(--brand-red); font-family: 'Subhead2', sans-serif; }
-        .chk-pending { color: #888; }
+        .onboarding-checklist {
+            background: var(--crust-light);
+            border: 1px solid var(--crust-med);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+
+        .checklist-title {
+            font-family: 'Subhead2', sans-serif;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: var(--crust-burnt);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            margin-bottom: 8px;
+            font-family: 'Condensed', sans-serif;
+            color: var(--crust-deep);
+        }
+
+        .checklist-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .chk-icon {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .chk-done {
+            color: var(--brand-green);
+        }
+
+        .chk-missing {
+            color: var(--brand-red);
+            font-family: 'Subhead2', sans-serif;
+        }
+
+        .chk-pending {
+            color: #888;
+        }
 
         /* --- DATA CHIPS --- */
-        .chip-container { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-        .chip { font-size: 15px; background: #f0f4f8; padding: 6px 12px; border-radius: 6px; border: 1px solid #dde1e6; color: #444; display: flex; align-items: center; gap: 4px; font-family: 'Condensed', sans-serif; }
-        .chip-nto { background: #e3f2fd; color: #0d47a1; border-color: #bbdefb; font-weight: bold; }
+        .chip-container {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            font-size: 15px;
+            background: #f0f4f8;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #dde1e6;
+            color: #444;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-family: 'Condensed', sans-serif;
+        }
+
+        .chip-nto {
+            background: #e3f2fd;
+            color: #0d47a1;
+            border-color: #bbdefb;
+            font-weight: bold;
+        }
 
         /* --- NUDGE & ACTION BUTTONS --- */
-        .action-container { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-        .action-btn { flex: 1; min-width: 120px; padding: 10px; border-radius: 8px; border: none; font-family: 'Subhead2', sans-serif; font-size: 14px; text-transform: uppercase; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .btn-call { background-color: var(--dark-blue); color: white; }
-        .btn-nudge { background-color: var(--brand-red); color: white; }
-        .action-btn:active { transform: scale(0.98); }
+        .action-container {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            font-family: 'Subhead2', sans-serif;
+            font-size: 14px;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-call {
+            background-color: var(--dark-blue);
+            color: white;
+        }
+
+        .btn-nudge {
+            background-color: var(--brand-red);
+            color: white;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+        }
 
         /* --- NOTES --- */
-        .notes-section { 
-            font-size: 16px; 
-            margin-top: 12px; 
-            color: var(--crust-deep); 
-            background: #f9f9f9; 
-            padding: 10px; 
-            border-radius: 6px; 
-            border-left: 3px solid #ccc; 
-            white-space: pre-wrap; 
-            word-break: break-word; 
+        .notes-section {
+            font-size: 16px;
+            margin-top: 12px;
+            color: var(--crust-deep);
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 3px solid #ccc;
+            white-space: pre-wrap;
+            word-break: break-word;
         }
-        .notes-section.hold-notes { background: #ffebee; border-left-color: var(--brand-red); color: #b71c1c; }
 
-        .updated-text { font-size: 13px; color: #999; text-align: right; margin-top: 8px; font-style: italic; }
-        .loader { text-align: center; padding: 40px; color: var(--crust-dark); font-family: 'ExtraBlack', serif; font-size: 20px; }
-        .hidden { display: none; }
+        .notes-section.hold-notes {
+            background: #ffebee;
+            border-left-color: var(--brand-red);
+            color: #b71c1c;
+        }
+
+        .updated-text {
+            font-size: 13px;
+            color: #999;
+            text-align: right;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .loader {
+            text-align: center;
+            padding: 40px;
+            color: var(--crust-dark);
+            font-family: 'ExtraBlack', serif;
+            font-size: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
 
         /* --- BRAND DIALOG MODAL CSS --- */
         .brand-modal-overlay {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: rgba(71, 43, 16, 0.4);
             backdrop-filter: blur(4px);
             display: flex;
@@ -165,6 +488,7 @@
             padding: 16px;
             box-sizing: border-box;
         }
+
         .brand-modal-card {
             background: var(--card-bg);
             width: 95%;
@@ -178,12 +502,14 @@
             overflow: hidden;
             animation: fadeIn 0.15s ease-out;
         }
+
         .brand-modal-brand-stripe {
             background: linear-gradient(90deg, var(--brand-red) 50%, var(--brand-blue) 50%);
             height: 8px;
             width: 100%;
             flex-shrink: 0;
         }
+
         .brand-modal-content {
             padding: 24px;
             overflow-y: auto;
@@ -191,570 +517,616 @@
             max-height: calc(90vh - 8px);
             box-sizing: border-box;
         }
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
-        .hidden { display: none !important; }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
     <!-- OneSignal Web Push SDK -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-        appId: "260aafa0-6a1c-40fc-a8a7-2a8e80b206b4",
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(async function (OneSignal) {
+            await OneSignal.init({
+                appId: "260aafa0-6a1c-40fc-a8a7-2a8e80b206b4",
+            });
+
+            checkPushSetupStatus();
         });
-        
-        checkPushSetupStatus();
-    });
     </script>
 </head>
+
 <body>
 
-<header>
-    <img src="images/New_Logo_v2.png" alt="Logo" class="logo" onerror="this.style.display='none'">
-    <div class="header-text">
-        <h1>Staffing Command</h1>
-        <div class="subtitle">Team Wow Hiring Tracker</div>
+    <header>
+        <img src="images/New_Logo_v2.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+        <div class="header-text">
+            <h1>Staffing Command</h1>
+            <div class="subtitle">Team Wow Hiring Tracker</div>
+        </div>
+    </header>
+
+    <div class="controls">
+        <select id="doFilter">
+            <option value="All">All DOs</option>
+        </select>
+        <select id="storeFilter">
+            <option value="All">All Stores</option>
+        </select>
     </div>
-</header>
 
-<div class="controls">
-    <select id="doFilter"><option value="All">All DOs</option></select>
-    <select id="storeFilter"><option value="All">All Stores</option></select>
-</div>
+    <div class="container">
+        <div id="loader" class="loader">Accessing Database...</div>
+        <div id="onboardingList"></div>
+    </div>
 
-<div class="container">
-    <div id="loader" class="loader">Accessing Database...</div>
-    <div id="onboardingList"></div>
-</div>
+    <!-- Push Notification Store Setup Modal -->
+    <div id="pushSetupModal" class="brand-modal-overlay hidden">
+        <div class="brand-modal-card">
+            <div class="brand-modal-brand-stripe"></div>
+            <div class="brand-modal-content" style="padding: 24px;">
+                <h3
+                    style="margin-top: 0; margin-bottom: 12px; color: var(--dark-blue); font-family: 'Subhead1', sans-serif; font-size: 22px; text-transform: uppercase; letter-spacing: 0.5px;">
+                    🔔 Enable Hiring Push Alerts</h3>
+                <p
+                    style="font-size: 19px; line-height: 1.45; color: var(--crust-burnt); margin-top: 0; margin-bottom: 16px; font-family: 'Condensed';">
+                    Select your Store # or District to receive instant notifications (Onboarding Progress, NTO Signups,
+                    Hires, and more!):</p>
 
-<!-- Push Notification Store Setup Modal -->
-<div id="pushSetupModal" class="brand-modal-overlay hidden">
-    <div class="brand-modal-card">
-        <div class="brand-modal-brand-stripe"></div>
-        <div class="brand-modal-content" style="padding: 24px;">
-            <h3 style="margin-top: 0; margin-bottom: 12px; color: var(--dark-blue); font-family: 'Subhead1', sans-serif; font-size: 22px; text-transform: uppercase; letter-spacing: 0.5px;">🔔 Enable Hiring Push Alerts</h3>
-            <p style="font-size: 19px; line-height: 1.45; color: var(--crust-burnt); margin-top: 0; margin-bottom: 16px; font-family: 'Condensed';">Select your Store # or District to receive instant notifications (Onboarding Progress, NTO Signups, Hires, and more!):</p>
-            
-            <div style="display: flex; flex-direction: column; gap: 14px; margin: 20px 0;">
-                <div>
-                    <label style="font-family: 'Subhead2'; font-size: 17px; color: var(--crust-deep);">Select Your Store #:</label>
-                    <select id="pushStoreSelect" style="width: 100%; margin-top: 6px; padding: 10px; border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 16px;"><option value="ALL">All Stores</option></select>
+                <div style="display: flex; flex-direction: column; gap: 14px; margin: 20px 0;">
+                    <div>
+                        <label style="font-family: 'Subhead2'; font-size: 17px; color: var(--crust-deep);">Select Your
+                            Store #:</label>
+                        <select id="pushStoreSelect"
+                            style="width: 100%; margin-top: 6px; padding: 10px; border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 16px;">
+                            <option value="ALL">All Stores</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-family: 'Subhead2'; font-size: 17px; color: var(--crust-deep);">Or Select
+                            Your District (DO):</label>
+                        <select id="pushDoSelect"
+                            style="width: 100%; margin-top: 6px; padding: 10px; border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 16px;">
+                            <option value="ALL">All DOs</option>
+                        </select>
+                    </div>
                 </div>
-                <div>
-                    <label style="font-family: 'Subhead2'; font-size: 17px; color: var(--crust-deep);">Or Select Your District (DO):</label>
-                    <select id="pushDoSelect" style="width: 100%; margin-top: 6px; padding: 10px; border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 16px;"><option value="ALL">All DOs</option></select>
-                </div>
-            </div>
 
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; border-top: 1.5px solid var(--crust-med); padding-top: 14px;">
-                <button type="button" onclick="closePushSetupModal()" style="background: var(--crust-med); color: var(--crust-burnt); border: none; padding: 10px 18px; border-radius: 6px; font-family: 'Subhead2'; font-size: 16px; cursor: pointer;">Skip</button>
-                <button type="button" onclick="savePushSubscriptionTags()" style="background: var(--brand-blue); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-family: 'Subhead2'; font-size: 16px; text-transform: uppercase; cursor: pointer;">Enable Push Alerts</button>
+                <div
+                    style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; border-top: 1.5px solid var(--crust-med); padding-top: 14px;">
+                    <button type="button" onclick="closePushSetupModal()"
+                        style="background: var(--crust-med); color: var(--crust-burnt); border: none; padding: 10px 18px; border-radius: 6px; font-family: 'Subhead2'; font-size: 16px; cursor: pointer;">Skip</button>
+                    <button type="button" onclick="savePushSubscriptionTags()"
+                        style="background: var(--brand-blue); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-family: 'Subhead2'; font-size: 16px; text-transform: uppercase; cursor: pointer;">Enable
+                        Push Alerts</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-<!-- What's New Welcome Modal -->
-<div id="updateModal" class="brand-modal-overlay hidden">
-    <div class="brand-modal-card">
-        <div class="brand-modal-brand-stripe"></div>
-        <div class="brand-modal-content" style="padding: 24px;">
-            <h3 style="margin-top: 0; margin-bottom: 12px; color: var(--dark-blue); font-family: 'Subhead1', sans-serif; font-size: 22px; text-transform: uppercase; letter-spacing: 0.5px;">Tracker Updates! 🍕</h3>
-            <p style="font-size: 19px; line-height: 1.45; color: var(--crust-burnt); margin-top: 0; margin-bottom: 16px; font-family: 'Condensed';">
-                We upgraded your Hiring Tracker to make onboarding new team members even smoother! Here is what's new:
-            </p>
-            <ul style="font-size: 17px; line-height: 1.5; color: var(--crust-deep); padding-left: 20px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 10px; font-family: 'Condensed';">
-                <li>📱 <strong>Tap to Expand:</strong> Tap any candidate's card to view their onboarding checklist, assets, and action items.</li>
-                <li>💬 <strong>Smart Nudge Texts:</strong> Tapping "Nudge SMS" now automatically drafts a text based on exactly what they are missing.</li>
-                <li>📲 <strong>Add to Home Screen:</strong> Save as an app for 1-tap access! On iPhone, tap Safari's Share button ➔ <em>Add to Home Screen</em>. Android: tap <em>Install</em> when prompted.</li>
-                <li>🎨 <strong>Clean Design:</strong> Cleaned up fonts and layouts for faster mobile reading.</li>
-            </ul>
-            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1.5px solid var(--crust-med); padding-top: 14px;">
-                <label style="display: flex; align-items: center; gap: 8px; font-size: 16px; font-family: 'Condensed'; color: var(--crust-deep); cursor: pointer;">
-                    <input type="checkbox" id="hideUpdateCheckbox" style="width: 20px; height: 20px; cursor: pointer;"> Don't show this again
-                </label>
-                <button type="button" onclick="closeUpdateModal()" style="background: var(--brand-blue); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-family: 'Subhead2'; font-size: 16px; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">Got It!</button>
+    <!-- What's New Welcome Modal -->
+    <div id="updateModal" class="brand-modal-overlay hidden">
+        <div class="brand-modal-card">
+            <div class="brand-modal-brand-stripe"></div>
+            <div class="brand-modal-content" style="padding: 24px;">
+                <h3
+                    style="margin-top: 0; margin-bottom: 12px; color: var(--dark-blue); font-family: 'Subhead1', sans-serif; font-size: 22px; text-transform: uppercase; letter-spacing: 0.5px;">
+                    Tracker Updates! 🍕</h3>
+                <p
+                    style="font-size: 19px; line-height: 1.45; color: var(--crust-burnt); margin-top: 0; margin-bottom: 16px; font-family: 'Condensed';">
+                    We upgraded your Hiring Tracker to make onboarding new team members even smoother! Here is what's
+                    new:
+                </p>
+                <ul
+                    style="font-size: 17px; line-height: 1.5; color: var(--crust-deep); padding-left: 20px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 10px; font-family: 'Condensed';">
+                    <li>📱 <strong>Tap to Expand:</strong> Tap any candidate's card to view their onboarding checklist,
+                        assets, and action items.</li>
+                    <li>💬 <strong>Smart Nudge Texts:</strong> Tapping "Nudge SMS" now automatically drafts a text based
+                        on exactly what they are missing.</li>
+                    <li>📲 <strong>Add to Home Screen:</strong> Save as an app for 1-tap access! On iPhone, tap Safari's
+                        Share button ➔ <em>Add to Home Screen</em>. Android: tap <em>Install</em> when prompted.</li>
+                    <li>🎨 <strong>Clean Design:</strong> Cleaned up fonts and layouts for faster mobile reading.</li>
+                </ul>
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; border-top: 1.5px solid var(--crust-med); padding-top: 14px;">
+                    <label
+                        style="display: flex; align-items: center; gap: 8px; font-size: 16px; font-family: 'Condensed'; color: var(--crust-deep); cursor: pointer;">
+                        <input type="checkbox" id="hideUpdateCheckbox"
+                            style="width: 20px; height: 20px; cursor: pointer;"> Don't show this again
+                    </label>
+                    <button type="button" onclick="closeUpdateModal()"
+                        style="background: var(--brand-blue); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-family: 'Subhead2'; font-size: 16px; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">Got
+                        It!</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxQVuU0uQ3TdkfsBwJpZ-K1iUDXTuLgvqEayPeqZgSRLDNxHOEUsOrjaSZAujI8p_874g/exec?city=Denver&username=denver_admin&password=denver_password_123";
-    let rawData = { onboarding: [] };
-    let expandedCardIds = new Set(); 
-    let showOlderForStore = false; // Tracks if GM clicked "View Older Candidates"
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbxQVuU0uQ3TdkfsBwJpZ-K1iUDXTuLgvqEayPeqZgSRLDNxHOEUsOrjaSZAujI8p_874g/exec?city=Denver&username=denver_admin&password=denver_password_123";
+        let rawData = { onboarding: [] };
+        let expandedCardIds = new Set();
+        let showOlderForStore = false; // Tracks if GM clicked "View Older Candidates"
 
-    function toggleOlderCandidates() {
-        showOlderForStore = !showOlderForStore;
-        renderOnboarding();
-    }
+        function toggleOlderCandidates() {
+            showOlderForStore = !showOlderForStore;
+            renderOnboarding();
+        }
 
-    // Check if we should display the welcome modal
-    (function() {
-        try {
-            const hideModal = localStorage.getItem('hideTrackerUpdate_v1');
-            if (hideModal !== 'true') {
+        // Check if we should display the welcome modal
+        (function () {
+            try {
+                const hideModal = localStorage.getItem('hideTrackerUpdate_v1');
+                if (hideModal !== 'true') {
+                    document.getElementById('updateModal').classList.remove('hidden');
+                }
+            } catch (e) {
                 document.getElementById('updateModal').classList.remove('hidden');
             }
-        } catch (e) {
-            document.getElementById('updateModal').classList.remove('hidden');
-        }
-    })();
+        })();
 
-    function closeUpdateModal() {
-        const dontShowAgain = document.getElementById('hideUpdateCheckbox').checked;
-        if (dontShowAgain) {
-            try {
-                localStorage.setItem('hideTrackerUpdate_v1', 'true');
-            } catch (e) {}
-        }
-        document.getElementById('updateModal').classList.add('hidden');
-    }
-
-    // Initial load
-    fetchData(true);
-
-    // Silent background sync timer (every 30 seconds)
-    setInterval(() => {
-        fetchData(false);
-    }, 30000);
-
-    function fetchData(showFullScreenLoader) {
-        if (showFullScreenLoader) {
-            document.getElementById('loader').classList.remove('hidden');
+        function closeUpdateModal() {
+            const dontShowAgain = document.getElementById('hideUpdateCheckbox').checked;
+            if (dontShowAgain) {
+                try {
+                    localStorage.setItem('hideTrackerUpdate_v1', 'true');
+                } catch (e) { }
+            }
+            document.getElementById('updateModal').classList.add('hidden');
         }
 
-        fetch(API_URL)
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    document.getElementById('loader').innerHTML = `
+        // Initial load
+        fetchData(true);
+
+        // Silent background sync timer (every 30 seconds)
+        setInterval(() => {
+            fetchData(false);
+        }, 30000);
+
+        function fetchData(showFullScreenLoader) {
+            if (showFullScreenLoader) {
+                document.getElementById('loader').classList.remove('hidden');
+            }
+
+            fetch(API_URL)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('loader').innerHTML = `
                         <div style="color: var(--brand-red); font-family: 'Subhead2';">
                             ⚠️ Database Error:<br>
                             <span style="font-family: monospace; font-size: 14px; color: #444; display: block; margin-top: 10px;">
                                 ${data.error}
                             </span>
                         </div>`;
-                    return;
+                        return;
+                    }
+                    rawData = data;
+                    populateFilters();
+                    renderOnboarding();
+                    document.getElementById('loader').classList.add('hidden');
+                })
+                .catch(err => {
+                    if (showFullScreenLoader) {
+                        document.getElementById('loader').innerText = "Error Loading Data";
+                    }
+                    console.error(err);
+                });
+        }
+
+        // --- ONE SIGNAL PUSH TAGGING & DEEP LINKING ---
+        function checkPushSetupStatus() {
+            try {
+                const hasSetTags = localStorage.getItem('pushSetupCompleted_v1');
+                if (!hasSetTags) {
+                    document.getElementById('pushSetupModal').classList.remove('hidden');
                 }
-                rawData = data;
-                populateFilters();
-                renderOnboarding();
-                document.getElementById('loader').classList.add('hidden');
-            })
-            .catch(err => {
-                if (showFullScreenLoader) {
-                    document.getElementById('loader').innerText = "Error Loading Data";
+            } catch (e) { }
+        }
+
+        function savePushSubscriptionTags() {
+            const selectedStore = document.getElementById('pushStoreSelect').value;
+            const selectedDo = document.getElementById('pushDoSelect').value;
+
+            window.OneSignalDeferred.push(async function (OneSignal) {
+                await OneSignal.Notifications.requestPermission();
+
+                if (selectedStore && selectedStore !== "ALL") {
+                    const cleanStore = selectedStore.replace(/\D/g, "").trim();
+                    await OneSignal.User.addTag("store_number", cleanStore);
                 }
-                console.error(err);
+                if (selectedDo && selectedDo !== "ALL") {
+                    await OneSignal.User.addTag("do_name", selectedDo.trim().toLowerCase());
+                }
+
+                try { localStorage.setItem('pushSetupCompleted_v1', 'true'); } catch (e) { }
+                document.getElementById('pushSetupModal').classList.add('hidden');
             });
-    }
-    
-    // --- ONE SIGNAL PUSH TAGGING & DEEP LINKING ---
-    function checkPushSetupStatus() {
-        try {
-            const hasSetTags = localStorage.getItem('pushSetupCompleted_v1');
-            if (!hasSetTags) {
-                document.getElementById('pushSetupModal').classList.remove('hidden');
-            }
-        } catch(e) {}
-    }
+        }
 
-    function savePushSubscriptionTags() {
-        const selectedStore = document.getElementById('pushStoreSelect').value;
-        const selectedDo = document.getElementById('pushDoSelect').value;
-
-        window.OneSignalDeferred.push(async function(OneSignal) {
-            await OneSignal.Notifications.requestPermission();
-            
-            if (selectedStore && selectedStore !== "ALL") {
-                const cleanStore = selectedStore.replace(/\D/g, "").trim();
-                await OneSignal.User.addTag("store_number", cleanStore);
-            }
-            if (selectedDo && selectedDo !== "ALL") {
-                await OneSignal.User.addTag("do_name", selectedDo.trim().toLowerCase());
-            }
-
-            try { localStorage.setItem('pushSetupCompleted_v1', 'true'); } catch(e) {}
+        function closePushSetupModal() {
+            try { localStorage.setItem('pushSetupCompleted_v1', 'true'); } catch (e) { }
             document.getElementById('pushSetupModal').classList.add('hidden');
-        });
-    }
-
-    function closePushSetupModal() {
-        try { localStorage.setItem('pushSetupCompleted_v1', 'true'); } catch(e) {}
-        document.getElementById('pushSetupModal').classList.add('hidden');
-    }
-
-    // --- DEEP LINK PARAMETER READER ---
-    function checkDeepLinkParams() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const targetStore = urlParams.get('store');
-        const targetDo = urlParams.get('do');
-
-        if (targetDo) {
-            const doSelect = document.getElementById('doFilter');
-            if (doSelect) { doSelect.value = targetDo; }
-        }
-        if (targetStore) {
-            const storeSelect = document.getElementById('storeFilter');
-            if (storeSelect) { storeSelect.value = targetStore; }
         }
 
-        logUsagePinger(targetStore || document.getElementById('storeFilter').value, targetDo || document.getElementById('doFilter').value, 'onboarding');
-    }
+        // --- DEEP LINK PARAMETER READER ---
+        function checkDeepLinkParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetStore = urlParams.get('store');
+            const targetDo = urlParams.get('do');
 
-    function logUsagePinger(storeVal, doVal, activeView) {
-        try {
-            const payload = {
-                action: "logUsage",
-                storeNum: storeVal || "All",
-                doName: doVal || "All",
-                actionView: activeView || "Opened App",
-                deviceType: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? "Mobile" : "Desktop"
-            };
-            fetch(API_URL, { method: "POST", body: JSON.stringify(payload) }).catch(e => {});
-        } catch(e) {}
-    }
-
-    function populateFilters() {
-        const activeDo = document.getElementById('doFilter').value;
-        const activeStore = document.getElementById('storeFilter').value;
-
-        const onboardingData = rawData.onboarding || [];
-        const allDos = onboardingData.map(i => i.doName);
-        const dos = [...new Set(allDos.filter(d => d && d !== 'DO').map(d => d.toString().trim()))].sort();
-        const allStores = onboardingData.map(i => i.store);
-        const stores = [...new Set(allStores.filter(s => s && s !== 'Store #').map(s => s.toString().trim()))].sort();
-
-        const doSelect = document.getElementById('doFilter');
-        doSelect.innerHTML = '<option value="All">All DOs</option>';
-        dos.forEach(d => { let opt = document.createElement('option'); opt.value = d; opt.innerText = d; doSelect.appendChild(opt); });
-        doSelect.value = activeDo;
-
-        const storeSelect = document.getElementById('storeFilter');
-        storeSelect.innerHTML = '<option value="All">All Stores</option>';
-        stores.forEach(s => { let opt = document.createElement('option'); opt.value = s; opt.innerText = s; storeSelect.appendChild(opt); });
-        storeSelect.value = activeStore;
-
-        doSelect.onchange = () => { showOlderForStore = false; renderOnboarding(); };
-        storeSelect.onchange = () => { showOlderForStore = false; renderOnboarding(); };
-
-        const pushStoreSelect = document.getElementById('pushStoreSelect');
-        const pushDoSelect = document.getElementById('pushDoSelect');
-        if (pushStoreSelect) pushStoreSelect.innerHTML = storeSelect.innerHTML;
-        if (pushDoSelect) pushDoSelect.innerHTML = doSelect.innerHTML;
-
-        checkDeepLinkParams();
-    }
-
-    function refreshViews() { 
-        showOlderForStore = false;
-        renderOnboarding(); 
-    }
-
-    // LAYER 1: PIPELINE PROGRESS & STATUS LABELS
-    function getPipelineDetails(item) {
-        if (item.ineligible) return { pct: 100, color: 'grey', label: 'Ineligible' };
-        if (item.inactive) return { pct: 100, color: 'grey', label: 'Inactive' };
-        if (item.hired) return { pct: 100, color: 'green', label: 'Hired' };
-
-        const att = (item.ntoAttendance || '').trim();
-
-        if (att === 'NTO Complete' || att === 'Attended') return { pct: 98, color: 'green', label: '🎓 NTO Complete' };
-
-        if (item.incorrectEmail) return { pct: 15, color: 'red', label: 'Incorrect Email' };
-        if (item.hasMissingDocs) return { pct: 15, color: 'red', label: 'Missing Documents' };
-        if (item.hasAllPayError || (item.allPayError && item.allPayError !== 'FALSE')) return { pct: 15, color: 'red', label: 'AllPay Error' };
-        if (att === 'Left Early') return { pct: 90, color: 'red', label: 'Left Class Early' };
-        if (item.missedNto || att === 'Not in NTO' || att.includes('Incomplete')) {
-            return { pct: 90, color: 'red', label: 'Missed Orientation' };
-        }
-
-        if (item.ntoScheduled || item.ntoDate || att === 'In Class') {
-            return { pct: 85, color: 'blue', label: 'Orientation Scheduled' };
-        }
-        if (item.ntoSignupLinkSent) return { pct: 70, color: 'blue', label: 'NTO Signup Sent' };
-
-        if (item.onboardingSent) {
-            let pct = 35;
-            if (item.bgcComplete) pct += 10;
-            if (item.allPayCompleted) pct += 10;
-            if (item.pulseFormComplete) pct += 10;
-            return { pct: pct, color: 'blue', label: 'Onboarding Sent' };
-        }
-
-        if (item.submissionReceived) return { pct: 15, color: 'blue', label: 'Submission Received' };
-        return { pct: 5, color: 'grey', label: 'Awaiting Onboarding' };
-    }
-
-    // LAYER 2: DEDICATED ALERT BANNERS (Live Events & Blockers)
-    function getAlertBanner(item) {
-        const att = (item.ntoAttendance || '').trim();
-
-        if (att === 'In Class') {
-            return `<div class="alert-banner" style="background-color: #e8f5e9; border-color: #4caf50; color: #1b5e20;">📖 Currently in NTO Class</div>`;
-        }
-        if (att === 'NTO Complete' || att === 'Attended') {
-            return `<div class="alert-banner" style="background-color: #e8f5e9; border-color: #28a745; color: #1b5e20;">🎓 NTO Class Completed!</div>`;
-        }
-        if (att === 'Left Early') {
-            return `<div class="alert-banner">⚠️ Candidate Left Class Early</div>`;
-        }
-        if (att === 'Not in NTO' || att.includes('Incomplete')) {
-            return `<div class="alert-banner">❌ Candidate Absent / Missed NTO</div>`;
-        }
-
-        if (item.incorrectEmail) {
-            return `<div class="alert-banner">🛑 Incorrect Email (Requires Outreach)</div>`;
-        }
-        if (item.missedNto) {
-            return `<div class="alert-banner">⚠️ Missed Orientation / NTO (Needs Approval to Reschedule)</div>`;
-        }
-        if (item.hasMissingDocs) {
-            const missingText = item.missingDocsText ? `: ${item.missingDocsText}` : ' (Paperwork Required)';
-            return `<div class="alert-banner">⚠️ Missing Documents${missingText}</div>`;
-        }
-        if (item.hasAllPayError || (item.allPayError && item.allPayError !== 'FALSE')) {
-            const errText = item.allPayErrorText || (item.allPayError && item.allPayError !== 'TRUE' ? item.allPayError : 'I-9 Correction Required');
-            return `<div class="alert-banner" style="background-color: #fff3e0; border-color: #ff9800; color: #e65100;">⚠️ AllPay Error: ${errText}</div>`;
-        }
-
-        return '';
-    }
-    
-    function getStatusWeight(item) {
-        if (item.ineligible) return 12;
-        if (item.inactive) return 11;
-
-        const att = (item.ntoAttendance || item.ntoStatus || item['NTO Status'] || item.liveStatus || item.status || '').trim();
-        const isMissedNtoActive = !item.ntoScheduled && (item.missedNto || (att && (att === 'Not in NTO' || att.includes('Incomplete'))));
-
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        let ntoDateObj = item.ntoDate ? new Date(item.ntoDate) : null;
-        if (ntoDateObj && !isNaN(ntoDateObj.getTime())) {
-            ntoDateObj.setHours(0,0,0,0);
-        } else {
-            ntoDateObj = null;
-        }
-
-        const isNtoInPast = ntoDateObj && ntoDateObj.getTime() < today.getTime();
-        const isNtoToday = ntoDateObj && ntoDateObj.getTime() === today.getTime();
-
-        if (item.hired && isNtoToday) return 1;
-
-        // Upcoming NTO Scheduled or in class today
-        if (!isNtoInPast && (item.ntoScheduled || att === 'In Class' || isNtoToday)) {
-            return 2;
-        }
-
-        // Past Completed NTO / Hired > 24h Ago
-        if (item.hired || (isNtoInPast && (att === 'NTO Complete' || att === 'Attended' || item.allPayCompleted || item.pulseFormComplete))) {
-            return 10;
-        }
-
-        if (item.incorrectEmail || item.hasMissingDocs || isMissedNtoActive || att === 'Left Early') return 7;
-
-        // Active Pipeline Candidates (most recent highest)
-        return 3;
-    }
-
-    function parseDateTimestamp(val) {
-        if (!val) return 0;
-        const d = new Date(val);
-        return isNaN(d.getTime()) ? 0 : d.getTime();
-    }
-
-    function compareCandidates(a, b) {
-        const weightA = getStatusWeight(a);
-        const weightB = getStatusWeight(b);
-        if (weightA !== weightB) {
-            return weightA - weightB;
-        }
-
-        const timeA = parseDateTimestamp(a.lastUpdated);
-        const timeB = parseDateTimestamp(b.lastUpdated);
-
-        return timeB - timeA;
-    }
-    
-    function formatDisplayDateTime(val) {
-        if (!val) return '';
-        const str = String(val).trim();
-        if (/\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}:\d{2}\s+(AM|PM)/i.test(str)) {
-            return str;
-        }
-        const d = new Date(str);
-        if (isNaN(d.getTime())) return str;
-        const m = d.getMonth() + 1;
-        const day = d.getDate();
-        const yr = d.getFullYear();
-        let hours = d.getHours();
-        const minutes = String(d.getMinutes()).padStart(2, '0');
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        hours = hours ? hours : 12;
-        return `${m}/${day}/${yr} ${hours}:${minutes} ${ampm}`;
-    }
-
-    function getPositionIcon(position) {
-        const pos = position ? position.toUpperCase().trim() : '';
-        if (pos === 'DE') return '🚗';
-        if (pos === 'BIKE') return '🚲';
-        if (pos === 'CSR') return '🍕';
-        if (pos === 'MIT') return '🎓';
-        return '🍕';
-    }
-
-    function formatPhone(phone) {
-        if (!phone) return '';
-        const cleaned = ('' + phone).replace(/\D/g, '');
-        const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
-        return match ? `(${match[1]}) ${match[2]}-${match[3]}` : phone;
-    }
-
-    function buildSmsUrl(item) {
-        const phone = item.phoneNumber ? item.phoneNumber.replace(/\D/g, '') : '';
-        if (!phone) return '#';
-
-        const firstName = item.name ? item.name.toString().trim().split(/\s+/)[0] : 'Team Member';
-
-        if (item.incorrectEmail) {
-            const txt = `Hey ${firstName}! This is Domino's. We tried sending over your onboarding documents, but it looks like we have an incorrect email address on file. Can you please reply with your correct email so we can get you set up? Thanks!`;
-            return `sms:${phone}?body=${encodeURIComponent(txt)}`;
-        }
-
-        if (item.missedNto) {
-            const txt = `Hey ${firstName}! This is Domino's. We noticed you missed your scheduled orientation (NTO). Please reply back to discuss rescheduling the class.`;
-            return `sms:${phone}?body=${encodeURIComponent(txt)}`;
-        }
-
-        if (item.hasMissingDocs) {
-            let txt = `Hey ${firstName}! This is Domino's. We are missing some onboarding paperwork for you. Please reply back so we can help you get this updated and get you scheduled!`;
-            
-            if (item.missingDocsText) {
-                const textLower = item.missingDocsText.toLowerCase();
-                if (textLower.includes('id') || textLower.includes('license') || textLower.includes('social') || textLower.includes('ssn') || textLower.includes('birth') || textLower.includes('i-9') || textLower.includes('passport') || textLower.includes('mismatch')) {
-                    txt = `Hey ${firstName}! This is Domino's. We need an updated document or correction for your onboarding (${item.missingDocsText}). Please reply back so we can arrange a time for you to bring that to the store or upload it!`;
-                } else {
-                    txt = `Hey ${firstName}! This is Domino's. We are missing your ${item.missingDocsText} for your onboarding. Please reply back so we can get this updated and get you scheduled!`;
-                }
+            if (targetDo) {
+                const doSelect = document.getElementById('doFilter');
+                if (doSelect) { doSelect.value = targetDo; }
             }
-            return `sms:${phone}?body=${encodeURIComponent(txt)}`;
+            if (targetStore) {
+                const storeSelect = document.getElementById('storeFilter');
+                if (storeSelect) { storeSelect.value = targetStore; }
+            }
+
+            logUsagePinger(targetStore || document.getElementById('storeFilter').value, targetDo || document.getElementById('doFilter').value, 'onboarding');
         }
 
-        if (item.ntoSignupLinkSent && !item.ntoScheduled && !item.ntoDate && !item.date && !item.hired) {
-            const txt = `Hey ${firstName}! This is Domino's. Friendly reminder to sign up for your online orientation class! The registration link was sent to your email. Please check your spam or junk folder if you don't see it in your inbox. Let us know if you have any questions!`;
-            return `sms:${phone}?body=${encodeURIComponent(txt)}`;
+        function logUsagePinger(storeVal, doVal, activeView) {
+            try {
+                const payload = {
+                    action: "logUsage",
+                    storeNum: storeVal || "All",
+                    doName: doVal || "All",
+                    actionView: activeView || "Opened App",
+                    deviceType: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? "Mobile" : "Desktop"
+                };
+                fetch(API_URL, { method: "POST", body: JSON.stringify(payload) }).catch(e => { });
+            } catch (e) { }
         }
 
-        if (item.onboardingSent && !item.hired) {
-            const missing = [];
-            if (!item.bgcComplete) missing.push("background check");
-            if (!item.allPayCompleted) missing.push("forms in AllPay");
-            if (!item.pulseFormComplete) missing.push("Pulse Form");
+        function populateFilters() {
+            const activeDo = document.getElementById('doFilter').value;
+            const activeStore = document.getElementById('storeFilter').value;
 
-            if (missing.length > 0) {
-                let missingStr = "";
-                if (missing.length === 1) missingStr = missing[0];
-                else if (missing.length === 2) missingStr = `${missing[0]} and ${missing[1]}`;
-                else missingStr = `${missing[0]}, ${missing[1]}, and ${missing[2]}`;
+            const onboardingData = rawData.onboarding || [];
+            const allDos = onboardingData.map(i => i.doName);
+            const dos = [...new Set(allDos.filter(d => d && d !== 'DO').map(d => d.toString().trim()))].sort();
+            const allStores = onboardingData.map(i => i.store);
+            const stores = [...new Set(allStores.filter(s => s && s !== 'Store #').map(s => s.toString().trim()))].sort();
 
-                const txt = `Hey ${firstName}! This is Domino's. Excited to get you started! We just need you to finish your ${missingStr} so we can schedule you. The links were sent to your email. Let us know when you finish them!`;
+            const doSelect = document.getElementById('doFilter');
+            doSelect.innerHTML = '<option value="All">All DOs</option>';
+            dos.forEach(d => { let opt = document.createElement('option'); opt.value = d; opt.innerText = d; doSelect.appendChild(opt); });
+            doSelect.value = activeDo;
+
+            const storeSelect = document.getElementById('storeFilter');
+            storeSelect.innerHTML = '<option value="All">All Stores</option>';
+            stores.forEach(s => { let opt = document.createElement('option'); opt.value = s; opt.innerText = s; storeSelect.appendChild(opt); });
+            storeSelect.value = activeStore;
+
+            doSelect.onchange = () => { showOlderForStore = false; renderOnboarding(); };
+            storeSelect.onchange = () => { showOlderForStore = false; renderOnboarding(); };
+
+            const pushStoreSelect = document.getElementById('pushStoreSelect');
+            const pushDoSelect = document.getElementById('pushDoSelect');
+            if (pushStoreSelect) pushStoreSelect.innerHTML = storeSelect.innerHTML;
+            if (pushDoSelect) pushDoSelect.innerHTML = doSelect.innerHTML;
+
+            checkDeepLinkParams();
+        }
+
+        function refreshViews() {
+            showOlderForStore = false;
+            renderOnboarding();
+        }
+
+        // LAYER 1: PIPELINE PROGRESS & STATUS LABELS
+        function getPipelineDetails(item) {
+            if (item.ineligible) return { pct: 100, color: 'grey', label: 'Ineligible' };
+            if (item.inactive) return { pct: 100, color: 'grey', label: 'Inactive' };
+            if (item.hired) return { pct: 100, color: 'green', label: 'Hired' };
+
+            const att = (item.ntoAttendance || '').trim();
+
+            if (att === 'NTO Complete' || att === 'Attended') return { pct: 98, color: 'green', label: '🎓 NTO Complete' };
+
+            if (item.incorrectEmail) return { pct: 15, color: 'red', label: 'Incorrect Email' };
+            if (item.hasMissingDocs) return { pct: 15, color: 'red', label: 'Missing Documents' };
+            if (item.hasAllPayError || (item.allPayError && item.allPayError !== 'FALSE')) return { pct: 15, color: 'red', label: 'AllPay Error' };
+            if (att === 'Left Early') return { pct: 90, color: 'red', label: 'Left Class Early' };
+            if (item.missedNto || att === 'Not in NTO' || att.includes('Incomplete')) {
+                return { pct: 90, color: 'red', label: 'Missed Orientation' };
+            }
+
+            if (item.ntoScheduled || item.ntoDate || att === 'In Class') {
+                return { pct: 85, color: 'blue', label: 'Orientation Scheduled' };
+            }
+            if (item.ntoSignupLinkSent) return { pct: 70, color: 'blue', label: 'NTO Signup Sent' };
+
+            if (item.onboardingSent) {
+                let pct = 35;
+                if (item.bgcComplete) pct += 10;
+                if (item.allPayCompleted) pct += 10;
+                if (item.pulseFormComplete) pct += 10;
+                return { pct: pct, color: 'blue', label: 'Onboarding Sent' };
+            }
+
+            if (item.submissionReceived) return { pct: 15, color: 'blue', label: 'Submission Received' };
+            return { pct: 5, color: 'grey', label: 'Awaiting Onboarding' };
+        }
+
+        // LAYER 2: DEDICATED ALERT BANNERS (Live Events & Blockers)
+        function getAlertBanner(item) {
+            const att = (item.ntoAttendance || '').trim();
+
+            if (att === 'In Class') {
+                return `<div class="alert-banner" style="background-color: #e8f5e9; border-color: #4caf50; color: #1b5e20;">📖 Currently in NTO Class</div>`;
+            }
+            if (att === 'NTO Complete' || att === 'Attended') {
+                return `<div class="alert-banner" style="background-color: #e8f5e9; border-color: #28a745; color: #1b5e20;">🎓 NTO Class Completed!</div>`;
+            }
+            if (att === 'Left Early') {
+                return `<div class="alert-banner">⚠️ Candidate Left Class Early</div>`;
+            }
+            if (att === 'Not in NTO' || att.includes('Incomplete')) {
+                return `<div class="alert-banner">❌ Candidate Absent / Missed NTO</div>`;
+            }
+
+            if (item.incorrectEmail) {
+                return `<div class="alert-banner">🛑 Incorrect Email (Requires Outreach)</div>`;
+            }
+            if (item.missedNto) {
+                return `<div class="alert-banner">⚠️ Missed Orientation / NTO (Needs Approval to Reschedule)</div>`;
+            }
+            if (item.hasMissingDocs) {
+                const missingText = item.missingDocsText ? `: ${item.missingDocsText}` : ' (Paperwork Required)';
+                return `<div class="alert-banner">⚠️ Missing Documents${missingText}</div>`;
+            }
+            if (item.hasAllPayError || (item.allPayError && item.allPayError !== 'FALSE')) {
+                const errText = item.allPayErrorText || (item.allPayError && item.allPayError !== 'TRUE' ? item.allPayError : 'I-9 Correction Required');
+                return `<div class="alert-banner" style="background-color: #fff3e0; border-color: #ff9800; color: #e65100;">⚠️ AllPay Error: ${errText}</div>`;
+            }
+
+            return '';
+        }
+
+        function getStatusWeight(item) {
+            if (item.ineligible) return 12;
+            if (item.inactive) return 11;
+
+            const att = (item.ntoAttendance || item.ntoStatus || item['NTO Status'] || item.liveStatus || item.status || '').trim();
+            const isMissedNtoActive = !item.ntoScheduled && (item.missedNto || (att && (att === 'Not in NTO' || att.includes('Incomplete'))));
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            let ntoDateObj = item.ntoDate ? new Date(item.ntoDate) : null;
+            if (ntoDateObj && !isNaN(ntoDateObj.getTime())) {
+                ntoDateObj.setHours(0, 0, 0, 0);
+            } else {
+                ntoDateObj = null;
+            }
+
+            const isNtoInPast = ntoDateObj && ntoDateObj.getTime() < today.getTime();
+            const isNtoToday = ntoDateObj && ntoDateObj.getTime() === today.getTime();
+
+            if (item.hired && isNtoToday) return 1;
+
+            // Upcoming NTO Scheduled or in class today
+            if (!isNtoInPast && (item.ntoScheduled || att === 'In Class' || isNtoToday)) {
+                return 2;
+            }
+
+            // Past Completed NTO / Hired > 24h Ago
+            if (item.hired || (isNtoInPast && (att === 'NTO Complete' || att === 'Attended' || item.allPayCompleted || item.pulseFormComplete))) {
+                return 10;
+            }
+
+            if (item.incorrectEmail || item.hasMissingDocs || isMissedNtoActive || att === 'Left Early') return 7;
+
+            // Active Pipeline Candidates (most recent highest)
+            return 3;
+        }
+
+        function parseDateTimestamp(val) {
+            if (!val) return 0;
+            const d = new Date(val);
+            return isNaN(d.getTime()) ? 0 : d.getTime();
+        }
+
+        function compareCandidates(a, b) {
+            const weightA = getStatusWeight(a);
+            const weightB = getStatusWeight(b);
+            if (weightA !== weightB) {
+                return weightA - weightB;
+            }
+
+            const timeA = parseDateTimestamp(a.lastUpdated);
+            const timeB = parseDateTimestamp(b.lastUpdated);
+
+            return timeB - timeA;
+        }
+
+        function formatDisplayDateTime(val) {
+            if (!val) return '';
+            const str = String(val).trim();
+            if (/\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}:\d{2}\s+(AM|PM)/i.test(str)) {
+                return str;
+            }
+            const d = new Date(str);
+            if (isNaN(d.getTime())) return str;
+            const m = d.getMonth() + 1;
+            const day = d.getDate();
+            const yr = d.getFullYear();
+            let hours = d.getHours();
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            return `${m}/${day}/${yr} ${hours}:${minutes} ${ampm}`;
+        }
+
+        function getPositionIcon(position) {
+            const pos = position ? position.toUpperCase().trim() : '';
+            if (pos === 'DE') return '🚗';
+            if (pos === 'BIKE') return '🚲';
+            if (pos === 'CSR') return '🍕';
+            if (pos === 'MIT') return '🎓';
+            return '🍕';
+        }
+
+        function formatPhone(phone) {
+            if (!phone) return '';
+            const cleaned = ('' + phone).replace(/\D/g, '');
+            const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+            return match ? `(${match[1]}) ${match[2]}-${match[3]}` : phone;
+        }
+
+        function buildSmsUrl(item) {
+            const phone = item.phoneNumber ? item.phoneNumber.replace(/\D/g, '') : '';
+            if (!phone) return '#';
+
+            const firstName = item.name ? item.name.toString().trim().split(/\s+/)[0] : 'Team Member';
+
+            if (item.incorrectEmail) {
+                const txt = `Hey ${firstName}! This is Domino's. We tried sending over your onboarding documents, but it looks like we have an incorrect email address on file. Can you please reply with your correct email so we can get you set up? Thanks!`;
                 return `sms:${phone}?body=${encodeURIComponent(txt)}`;
             }
-        }
 
-        const defaultTxt = `Hey ${firstName}! This is Domino's. Just checking in on your onboarding paperwork. Let us know if you have any questions!`;
-        return `sms:${phone}?body=${encodeURIComponent(defaultTxt)}`;
-    }
-
-    function toggleCard(cardElement, itemId) {
-        const isExpanded = cardElement.classList.toggle('expanded');
-        if (isExpanded) {
-            expandedCardIds.add(itemId);
-        } else {
-            expandedCardIds.delete(itemId);
-        }
-    }
-
-    function renderOnboarding() {
-        const list = document.getElementById('onboardingList');
-        list.innerHTML = '';
-        const doVal = document.getElementById('doFilter').value;
-        const storeVal = document.getElementById('storeFilter').value;
-
-        const onboardingData = rawData.onboarding || [];
-        const twoWeeksAgo = new Date();
-        twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
-
-        let hiddenOlderCount = 0;
-
-        const filtered = onboardingData.filter(item => {
-            const iDo = item.doName ? item.doName.toString().trim() : '';
-            const iStore = item.store ? item.store.toString().trim() : '';
-            const matchesDo = (doVal === 'All' || iDo === doVal);
-            const matchesStore = (storeVal === 'All' || iStore === storeVal);
-
-            if (item.store === 'Store #' || !matchesDo || !matchesStore) return false;
-
-            let candidateDate = item.ntoDate ? new Date(item.ntoDate) : null;
-            if (!candidateDate || isNaN(candidateDate.getTime())) {
-                candidateDate = item.lastUpdated ? new Date(item.lastUpdated) : null;
+            if (item.missedNto) {
+                const txt = `Hey ${firstName}! This is Domino's. We noticed you missed your scheduled orientation (NTO). Please reply back to discuss rescheduling the class.`;
+                return `sms:${phone}?body=${encodeURIComponent(txt)}`;
             }
 
-            const isTerminalState = item.hired || item.inactive || item.ineligible;
-            const isOlderThanTwoWeeks = candidateDate && !isNaN(candidateDate.getTime()) && candidateDate < twoWeeksAgo;
+            if (item.hasMissingDocs) {
+                let txt = `Hey ${firstName}! This is Domino's. We are missing some onboarding paperwork for you. Please reply back so we can help you get this updated and get you scheduled!`;
 
-            if (isOlderThanTwoWeeks || (isTerminalState && isOlderThanTwoWeeks)) {
-                if (!showOlderForStore) {
-                    hiddenOlderCount++;
-                    return false;
+                if (item.missingDocsText) {
+                    const textLower = item.missingDocsText.toLowerCase();
+                    if (textLower.includes('id') || textLower.includes('license') || textLower.includes('social') || textLower.includes('ssn') || textLower.includes('birth') || textLower.includes('i-9') || textLower.includes('passport') || textLower.includes('mismatch')) {
+                        txt = `Hey ${firstName}! This is Domino's. We need an updated document or correction for your onboarding (${item.missingDocsText}). Please reply back so we can arrange a time for you to bring that to the store or upload it!`;
+                    } else {
+                        txt = `Hey ${firstName}! This is Domino's. We are missing your ${item.missingDocsText} for your onboarding. Please reply back so we can get this updated and get you scheduled!`;
+                    }
+                }
+                return `sms:${phone}?body=${encodeURIComponent(txt)}`;
+            }
+
+            if (item.ntoSignupLinkSent && !item.ntoScheduled && !item.ntoDate && !item.date && !item.hired) {
+                const txt = `Hey ${firstName}! This is Domino's. Friendly reminder to sign up for your online orientation class! The registration link was sent to your email. Please check your spam or junk folder if you don't see it in your inbox. Let us know if you have any questions!`;
+                return `sms:${phone}?body=${encodeURIComponent(txt)}`;
+            }
+
+            if (item.onboardingSent && !item.hired) {
+                const missing = [];
+                if (!item.bgcComplete) missing.push("background check");
+                if (!item.allPayCompleted) missing.push("forms in AllPay");
+                if (!item.pulseFormComplete) missing.push("Pulse Form");
+
+                if (missing.length > 0) {
+                    let missingStr = "";
+                    if (missing.length === 1) missingStr = missing[0];
+                    else if (missing.length === 2) missingStr = `${missing[0]} and ${missing[1]}`;
+                    else missingStr = `${missing[0]}, ${missing[1]}, and ${missing[2]}`;
+
+                    const txt = `Hey ${firstName}! This is Domino's. Excited to get you started! We just need you to finish your ${missingStr} so we can schedule you. The links were sent to your email. Let us know when you finish them!`;
+                    return `sms:${phone}?body=${encodeURIComponent(txt)}`;
                 }
             }
 
-            return true;
-        }).sort(compareCandidates);
-
-        if(filtered.length === 0 && hiddenOlderCount === 0) { 
-            list.innerHTML = '<div class="loader">No candidates active.</div>'; 
-            return; 
+            const defaultTxt = `Hey ${firstName}! This is Domino's. Just checking in on your onboarding paperwork. Let us know if you have any questions!`;
+            return `sms:${phone}?body=${encodeURIComponent(defaultTxt)}`;
         }
 
-        filtered.forEach(item => {
-            const icon = getPositionIcon(item.position);
-            const pipe = getPipelineDetails(item);
-            const alertHtml = getAlertBanner(item);
-
-            let cardClass = 'status-blue';
-            if (item.inactive || item.ineligible) {
-                cardClass = 'status-gray';
-            } else if (pipe.color === 'red') {
-                cardClass = 'status-red';
-            } else if (pipe.color === 'green') {
-                cardClass = 'status-green';
+        function toggleCard(cardElement, itemId) {
+            const isExpanded = cardElement.classList.toggle('expanded');
+            if (isExpanded) {
+                expandedCardIds.add(itemId);
+            } else {
+                expandedCardIds.delete(itemId);
             }
+        }
 
-            let chipsHtml = '';
-            if (item.shirtSize) chipsHtml += `<span class="chip">👕 ${item.shirtSize}</span>`;
-            if (item.hatStyle && (item.hatStyle.toLowerCase() === 'cap' || item.hatStyle.toLowerCase() === 'visor')) {
-                chipsHtml += `<span class="chip">🧢 ${item.hatStyle}</span>`;
-            }
-            if (item.payCard) {
-                if (item.ddEntered) {
-                    chipsHtml += `<span class="chip" style="background: #e6f4ea; color: #137333; border: 1px solid #ceead6; font-weight: bold;">💳 Pay Card: Complete ✔</span>`;
-                } else {
-                    chipsHtml += `<span class="chip">💳 Pay Card Required</span>`;
+        function renderOnboarding() {
+            const list = document.getElementById('onboardingList');
+            list.innerHTML = '';
+            const doVal = document.getElementById('doFilter').value;
+            const storeVal = document.getElementById('storeFilter').value;
+
+            const onboardingData = rawData.onboarding || [];
+            const twoWeeksAgo = new Date();
+            twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+
+            let hiddenOlderCount = 0;
+
+            const filtered = onboardingData.filter(item => {
+                const iDo = item.doName ? item.doName.toString().trim() : '';
+                const iStore = item.store ? item.store.toString().trim() : '';
+                const matchesDo = (doVal === 'All' || iDo === doVal);
+                const matchesStore = (storeVal === 'All' || iStore === storeVal);
+
+                if (item.store === 'Store #' || !matchesDo || !matchesStore) return false;
+
+                let candidateDate = item.ntoDate ? new Date(item.ntoDate) : null;
+                if (!candidateDate || isNaN(candidateDate.getTime())) {
+                    candidateDate = item.lastUpdated ? new Date(item.lastUpdated) : null;
                 }
-            }
-            if (item.ntoDate) chipsHtml += `<span class="chip chip-nto">📅 NTO: ${item.ntoDate}</span>`;
 
-            let checklistHtml = '';
-            if (!item.inactive && !item.ineligible && !item.hired) {
-                checklistHtml = `
+                const isTerminalState = item.hired || item.inactive || item.ineligible;
+                const isOlderThanTwoWeeks = candidateDate && !isNaN(candidateDate.getTime()) && candidateDate < twoWeeksAgo;
+
+                if (isOlderThanTwoWeeks || (isTerminalState && isOlderThanTwoWeeks)) {
+                    if (!showOlderForStore) {
+                        hiddenOlderCount++;
+                        return false;
+                    }
+                }
+
+                return true;
+            }).sort(compareCandidates);
+
+            if (filtered.length === 0 && hiddenOlderCount === 0) {
+                list.innerHTML = '<div class="loader">No candidates active.</div>';
+                return;
+            }
+
+            filtered.forEach(item => {
+                const icon = getPositionIcon(item.position);
+                const pipe = getPipelineDetails(item);
+                const alertHtml = getAlertBanner(item);
+
+                let cardClass = 'status-blue';
+                if (item.inactive || item.ineligible) {
+                    cardClass = 'status-gray';
+                } else if (pipe.color === 'red') {
+                    cardClass = 'status-red';
+                } else if (pipe.color === 'green') {
+                    cardClass = 'status-green';
+                }
+
+                let chipsHtml = '';
+                if (item.shirtSize) chipsHtml += `<span class="chip">👕 ${item.shirtSize}</span>`;
+                if (item.hatStyle && (item.hatStyle.toLowerCase() === 'cap' || item.hatStyle.toLowerCase() === 'visor')) {
+                    chipsHtml += `<span class="chip">🧢 ${item.hatStyle}</span>`;
+                }
+                if (item.payCard) {
+                    if (item.ddEntered) {
+                        chipsHtml += `<span class="chip" style="background: #e6f4ea; color: #137333; border: 1px solid #ceead6; font-weight: bold;">💳 Pay Card: Complete ✔</span>`;
+                    } else {
+                        chipsHtml += `<span class="chip">💳 Pay Card Required</span>`;
+                    }
+                }
+                if (item.ntoDate) chipsHtml += `<span class="chip chip-nto">📅 NTO: ${item.ntoDate}</span>`;
+
+                let checklistHtml = '';
+                if (!item.inactive && !item.ineligible && !item.hired) {
+                    checklistHtml = `
                     <div class="onboarding-checklist">
                         <div class="checklist-title">Onboarding Tasks</div>
                         <div class="checklist-item">
@@ -778,23 +1150,23 @@
                             <span>Pulse Form Completed</span>
                         </div>
                     </div>`;
-            }
+                }
 
-            let notesHtml = '';
-            if (item.notes) {
-                const noteClass = item.incorrectEmail ? 'hold-notes' : '';
-                notesHtml = `<div class="notes-section ${noteClass}">📝 ${item.notes}</div>`;
-            }
+                let notesHtml = '';
+                if (item.notes) {
+                    const noteClass = item.incorrectEmail ? 'hold-notes' : '';
+                    notesHtml = `<div class="notes-section ${noteClass}">📝 ${item.notes}</div>`;
+                }
 
-            let updatedHtml = '';
-            if (item.lastUpdated) {
-                updatedHtml = `<div class="updated-text">Last Updated: ${formatDisplayDateTime(item.lastUpdated)}</div>`;
-            }
+                let updatedHtml = '';
+                if (item.lastUpdated) {
+                    updatedHtml = `<div class="updated-text">Last Updated: ${formatDisplayDateTime(item.lastUpdated)}</div>`;
+                }
 
-            const smsUrl = buildSmsUrl(item);
-            const isCurrentlyExpanded = expandedCardIds.has(item.id);
+                const smsUrl = buildSmsUrl(item);
+                const isCurrentlyExpanded = expandedCardIds.has(item.id);
 
-            const html = `
+                const html = `
                 <div class="card ${cardClass} ${isCurrentlyExpanded ? 'expanded' : ''}" onclick="toggleCard(this, '${item.id}')">
                     <div class="card-header">
                         <div class="name-phone-group" style="display: flex; flex-direction: column;">
@@ -831,37 +1203,38 @@
                         ${updatedHtml}
                     </div>
                 </div>`;
-            list.innerHTML += html;
-        });
+                list.innerHTML += html;
+            });
 
-        if (storeVal !== 'All' || hiddenOlderCount > 0) {
-            const loadMoreBox = document.createElement('div');
-            loadMoreBox.style.cssText = "text-align: center; margin: 20px 0; padding: 12px;";
+            if (storeVal !== 'All' || hiddenOlderCount > 0) {
+                const loadMoreBox = document.createElement('div');
+                loadMoreBox.style.cssText = "text-align: center; margin: 20px 0; padding: 12px;";
 
-            if (!showOlderForStore) {
-                loadMoreBox.innerHTML = `
+                if (!showOlderForStore) {
+                    loadMoreBox.innerHTML = `
                     <button type="button" onclick="toggleOlderCandidates()" style="background: white; border: 2px solid var(--dark-blue); color: var(--dark-blue); font-family: 'Subhead2', sans-serif; font-size: 15px; padding: 10px 20px; border-radius: 8px; cursor: pointer; text-transform: uppercase; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
                         📂 View Older Candidates ${hiddenOlderCount > 0 ? '(' + hiddenOlderCount + ' Hidden)' : ''}
                     </button>
                 `;
-            } else {
-                loadMoreBox.innerHTML = `
+                } else {
+                    loadMoreBox.innerHTML = `
                     <button type="button" onclick="toggleOlderCandidates()" style="background: var(--crust-med); border: 1px solid var(--crust-dark); color: var(--crust-burnt); font-family: 'Subhead2', sans-serif; font-size: 14px; padding: 8px 16px; border-radius: 8px; cursor: pointer; text-transform: uppercase;">
                         ⬆️ Hide Older Candidates
                     </button>
                 `;
+                }
+                list.appendChild(loadMoreBox);
             }
-            list.appendChild(loadMoreBox);
         }
-    }
 
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./OneSignalSDKWorker.js')
-                .then(reg => console.log('Staffing App Service Worker registered!'))
-                .catch(err => console.error('Service Worker registration failed:', err));
-        });
-    }
-</script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./OneSignalSDKWorker.js')
+                    .then(reg => console.log('Staffing App Service Worker registered!'))
+                    .catch(err => console.error('Service Worker registration failed:', err));
+            });
+        }
+    </script>
 </body>
+
 </html>
