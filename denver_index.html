@@ -1115,6 +1115,7 @@
                 if (item.hatStyle && (item.hatStyle.toLowerCase() === 'cap' || item.hatStyle.toLowerCase() === 'visor')) {
                     chipsHtml += `<span class="chip">🧢 ${item.hatStyle}</span>`;
                 }
+                /* Pay Card not used in Denver
                 if (item.payCard) {
                     if (item.ddEntered) {
                         chipsHtml += `<span class="chip" style="background: #e6f4ea; color: #137333; border: 1px solid #ceead6; font-weight: bold;">💳 Pay Card: Complete ✔</span>`;
@@ -1122,6 +1123,7 @@
                         chipsHtml += `<span class="chip">💳 Pay Card Required</span>`;
                     }
                 }
+                */
                 if (item.ntoDate) chipsHtml += `<span class="chip chip-nto">📅 NTO: ${item.ntoDate}</span>`;
 
                 let checklistHtml = '';

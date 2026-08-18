@@ -1688,13 +1688,13 @@
             const togglePay = document.getElementById('togglePay');
             const btnGmaps = document.getElementById('btnGmapsLink');
 
-            // 🚫 ONLY hide Interviews & Dallas Store Map for Denver
+            // 🚫 Hide Interviews, Dallas Store Map, and Pay Cards for Denver
             if (toggleInt) toggleInt.style.display = isDenver ? 'none' : 'block';
             if (btnGmaps) btnGmaps.style.display = isDenver ? 'none' : 'inline-flex';
+            if (togglePay) togglePay.style.display = isDenver ? 'none' : 'block'; // Hidden for Denver
 
-            // ✅ Staffing & Pay Cards are visible for BOTH Dallas and Denver
+            // ✅ Staffing is visible for BOTH Dallas and Denver
             if (toggleStf) toggleStf.style.display = 'block';
-            if (togglePay) togglePay.style.display = 'block';
         }
 
         function handleLogout() {
