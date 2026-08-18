@@ -1287,6 +1287,21 @@
             }
         }
 
+        function toggleAllPayErrorSelector() {
+            const container = document.getElementById('allPayErrorContainer');
+            const isChecked = document.getElementById('checkAllPayError').checked;
+            if (container) {
+                if (isChecked) {
+                    container.classList.remove('hidden');
+                } else {
+                    container.classList.add('hidden');
+                    document.querySelectorAll('.allpay-err-chk').forEach(c => c.checked = false);
+                    const customField = document.getElementById('customAllPayError');
+                    if (customField) customField.value = '';
+                }
+            }
+        }
+
         function setSelectValueCaseInsensitive(selectId, value) {
             const select = document.getElementById(selectId);
             if (!select) return;
