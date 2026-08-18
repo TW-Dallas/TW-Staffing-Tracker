@@ -4250,15 +4250,15 @@
                 const candId = item.id || item.classId || item['Class ID'] || '';
 
                 row.innerHTML = `
-                <div style="flex: 1.4;">
+                <div style="flex: 1.6;">
                     <div style="font-family: 'Subhead2', sans-serif; font-size: 19px; color: var(--dark-blue);">${item.name}</div>
                     <div style="font-family: 'Condensed', sans-serif; font-size: 16px; color: var(--text-dark); margin-top: 2px;">Store #${item.store} • ${item.position || 'CSR'} • Date: ${ntoDateVal || 'N/A'}</div>
                 </div>
-                <div style="flex: 1.6; display: flex; gap: 8px; align-items: center; justify-content: flex-end;">
-                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" style="flex: 1; min-width: 235px; padding: 8px 12px; font-size: 18px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1.5px solid var(--crust-dark); cursor: pointer;">
+                <div style="flex: 1.4; display: flex; gap: 8px; align-items: center; justify-content: flex-end;">
+                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" style="width: 205px; min-width: 195px; padding: 8px 10px; font-size: 18px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1.5px solid var(--crust-dark); cursor: pointer;">
                         <option value="" ${!savedStatus ? 'selected' : ''}>Select Status...</option>
                         <option value="In Class" ${savedStatus === 'In Class' ? 'selected' : ''}>📖 In Class</option>                        
-                        <option value="Not in NTO" ${savedStatus === 'Not in NTO' ? 'selected' : ''}>❌ Not in NTO (Absent)&nbsp;&nbsp;</option>
+                        <option value="Not in NTO" ${savedStatus === 'Not in NTO' ? 'selected' : ''}>❌ Not in NTO (Absent)</option>
                         <option value="Left Early" ${savedStatus === 'Left Early' ? 'selected' : ''}>⚠️ Left Early</option>
                         <option value="NTO Complete" ${savedStatus === 'NTO Complete' ? 'selected' : ''}>🎓 NTO Complete</option>
                     </select>
