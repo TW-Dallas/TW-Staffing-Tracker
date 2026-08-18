@@ -2910,6 +2910,8 @@
             else if (currentView === 'interviews') targetName = (document.getElementById('intName').value || '').trim();
             else targetName = (document.getElementById('fieldName').value || '').trim();
 
+            showLoader(true, `Saving ${targetName || 'details'}...`);
+
             let existingCand = null;
             let activeViewList = [];
             if (currentView === 'paycards') activeViewList = paycards;
