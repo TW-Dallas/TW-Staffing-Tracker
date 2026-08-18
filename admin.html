@@ -1265,13 +1265,14 @@
             }
         });
 
-        // Helper function to build the 10:00 AM - 8:00 PM time list
+        // Helper function to build the 8:00 AM - 9:00 PM time list
         function generateTimeOptions() {
             const list = document.getElementById('time15MinList');
             if (!list) return;
-            for (let h = 10; h <= 20; h++) {
+            list.innerHTML = '';
+            for (let h = 8; h <= 21; h++) {
                 for (let m = 0; m < 60; m += 15) {
-                    if (h === 20 && m > 0) break;
+                    if (h === 21 && m > 0) break;
                     const period = h < 12 ? 'AM' : 'PM';
                     const displayH = h % 12 || 12;
                     const displayM = m === 0 ? '00' : m;
@@ -5180,14 +5181,14 @@
                             <label
                                 style="font-family: 'Subhead2'; font-size: 16px; font-weight: bold; color: var(--crust-burnt);">Start
                                 Time:</label>
-                            <input type="text" id="newClassStart" value="6:00 PM" placeholder="e.g. 6:00 PM"
+                            <input type="text" id="newClassStart" list="time15MinList" value="6:00 PM" placeholder="e.g. 6:00 PM"
                                 style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
                         </div>
                         <div>
                             <label
                                 style="font-family: 'Subhead2'; font-size: 16px; font-weight: bold; color: var(--crust-burnt);">Est.
                                 End Time:</label>
-                            <input type="text" id="newClassEnd" value="7:15 PM" placeholder="e.g. 7:15 PM"
+                            <input type="text" id="newClassEnd" list="time15MinList" value="7:15 PM" placeholder="e.g. 7:15 PM"
                                 style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
                         </div>
                     </div>
