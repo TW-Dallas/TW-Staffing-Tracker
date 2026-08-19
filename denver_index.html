@@ -891,7 +891,7 @@
             }
             if (item.hasAllPayError || (item.allPayError && item.allPayError !== 'FALSE')) {
                 const errText = item.allPayErrorText || (item.allPayError && item.allPayError !== 'TRUE' ? item.allPayError : 'I-9 Correction Required');
-                return `<div class="alert-banner" style="background-color: #fff3e0; border-color: #ff9800; color: #e65100;">⚠️ AllPay Error: ${errText}</div>`;
+                return `<div class="alert-banner" style="background-color: #ffebee; border-color: #f44336; color: #c62828;">⚠️ AllPay Error: ${errText}</div>`;
             }
 
             return '';
@@ -903,6 +903,7 @@
 
             const att = (item.ntoAttendance || item.ntoStatus || item['NTO Status'] || item.liveStatus || item.status || '').trim();
             const isMissedNtoActive = !item.ntoScheduled && (item.missedNto || (att && (att === 'Not in NTO' || att.includes('Incomplete'))));
+            const isAllPayError = item.hasAllPayError || (item.allPayError && item.allPayError !== 'FALSE');
 
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -928,7 +929,7 @@
                 return 10;
             }
 
-            if (item.incorrectEmail || item.hasMissingDocs || isMissedNtoActive || att === 'Left Early') return 7;
+            if (item.incorrectEmail || item.hasMissingDocs || isAllPayError || isMissedNtoActive || att === 'Left Early') return 7;
 
             // Active Pipeline Candidates (most recent highest)
             return 3;
