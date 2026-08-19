@@ -736,15 +736,20 @@
                                     📅 Manage NTO Class Schedule
                                 </button>
                             </div>
-                            <div class="form-row">
+                            <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px;">
                                 <div class="form-group">
                                     <label>Class Date</label>
                                     <input type="date" id="ntoClassDate" onchange="renderNtoClassView()">
                                 </div>
                                 <div class="form-group">
+                                    <label>Class Start Time</label>
+                                    <input type="text" id="ntoStartTime" list="time15MinList" placeholder="e.g., 6:00 PM"
+                                        onblur="autoFormatTimeInput(this)">
+                                </div>
+                                <div class="form-group">
                                     <label>Class End Time</label>
-                                    <input type="text" id="ntoEndTime" list="time15MinList" placeholder="e.g., 4:30 PM"
-                                        onblur="autoFormatEndTimeInput()">
+                                    <input type="text" id="ntoEndTime" list="time15MinList" placeholder="e.g., 7:30 PM"
+                                        onblur="autoFormatTimeInput(this)">
                                 </div>
                             </div>
 
@@ -4252,6 +4257,25 @@
                 return candidateFormattedDate === selectedDate;
             });
 
+            // Auto-populate Start Time from scheduled candidates on this date
+            const startInput = document.getElementById('ntoStartTime');
+            if (startInput) {
+                let detectedStart = '';
+                for (const cand of activeClassList) {
+                    const rawT = cand.time || cand.startTime || cand.ntoTime || cand['Time'] || cand['Start Time'];
+                    if (rawT) {
+                        detectedStart = formatTimeDisplayFrontEnd(rawT);
+                        if (detectedStart) break;
+                    }
+                }
+                if (!detectedStart && activeClassList.length > 0) {
+                    detectedStart = '6:00 PM';
+                }
+                if (detectedStart) {
+                    startInput.value = detectedStart;
+                }
+            }
+
             if (activeClassList.length === 0) {
                 const dateDisplay = showAllDates ? "across all dates" : `scheduled for ${selectedDate}`;
                 container.innerHTML = `
@@ -4347,13 +4371,24 @@
             }
         }
 
+        function autoFormatTimeInput(el) {
+            if (!el || !el.value) return;
+            const formatted = formatTimeDisplayFrontEnd(el.value);
+            if (formatted) el.value = formatted;
+        }
+
         // Trigger Conclude NTO Class
         async function concludeNtoClass() {
             const classDate = document.getElementById('ntoClassDate').value;
+            let rawStartTime = document.getElementById('ntoStartTime') ? document.getElementById('ntoStartTime').value.trim() : '';
             let rawEndTime = document.getElementById('ntoEndTime').value.trim();
 
+            if (!rawStartTime) rawStartTime = "6:00 PM";
+            const startTime = formatTimeDisplayFrontEnd(rawStartTime) || rawStartTime;
+            if (document.getElementById('ntoStartTime')) document.getElementById('ntoStartTime').value = startTime;
+
             if (!rawEndTime) {
-                rawEndTime = await showBrandPrompt("Class End Time is required! Enter the class end time below (e.g. 4:30 PM or 16:30):", "", "Class End Time Required");
+                rawEndTime = await showBrandPrompt("Class End Time is required! Enter the class end time below (e.g. 7:30 PM):", "", "Class End Time Required");
                 if (!rawEndTime || !rawEndTime.trim()) return;
                 rawEndTime = rawEndTime.trim();
             }
@@ -4397,6 +4432,7 @@
                     ntoStatus: attVal,
                     'NTO Status': attVal,
                     liveStatus: attVal,
+                    startTime: startTime,
                     endTime: endTime,
                     'End Time': endTime
                 });
@@ -4413,6 +4449,7 @@
 
             const confirmMsg = `Are you sure you want to conclude class and send all roster emails?\n\n` +
                 `• Class Date: ${classDate}\n` +
+                `• Start Time: ${startTime}\n` +
                 `• End Time: ${endTime}\n` +
                 `• Total Attendees: ${attendedCount} / ${rosterData.length}\n\n` +
                 `This will send 3 automated email reports (HR, Leadership, and Store/DOs).`;
@@ -4426,6 +4463,7 @@
                 const result = await apiCall('POST', {
                     action: "concludeNtoClass",
                     classDate: classDate,
+                    startTime: startTime,
                     endTime: endTime,
                     roster: rosterData
                 });
