@@ -3926,16 +3926,28 @@
             }
         }
 
-        // Helper to convert sheet dates (7/24/2026) to YYYY-MM-DD for HTML <input type="date">
+        // Helper to convert sheet dates (7/24/2026, 8.17.2026, or "Monday, August 17, 2026") to YYYY-MM-DD for HTML <input type="date">
         function formatDateForInput(dateStr) {
             if (!dateStr || dateStr === "null" || dateStr === "undefined") return '';
             let str = String(dateStr).trim();
+            if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+
             if (str.includes('/')) {
                 const parts = str.split('/');
                 if (parts.length === 3) {
                     let m = parts[0].padStart(2, '0');
                     let d = parts[1].padStart(2, '0');
-                    let y = parts[2];
+                    let y = parts[2].trim();
+                    if (y.length === 2) y = '20' + y;
+                    return `${y}-${m}-${d}`;
+                }
+            }
+            if (str.includes('.')) {
+                const parts = str.split('.');
+                if (parts.length === 3) {
+                    let m = parts[0].padStart(2, '0');
+                    let d = parts[1].padStart(2, '0');
+                    let y = parts[2].trim();
                     if (y.length === 2) y = '20' + y;
                     return `${y}-${m}-${d}`;
                 }
@@ -4269,7 +4281,10 @@
 
                 // 1. Check Calendar Schedule Cache for this exact date
                 if (window.ntoCalendarClassesCache && window.ntoCalendarClassesCache.length > 0) {
-                    const calMatch = window.ntoCalendarClassesCache.find(c => formatDateForInput(c.classDate) === selectedDate);
+                    const calMatch = window.ntoCalendarClassesCache.find(c => {
+                        const cDate = formatDateForInput(c.classDate);
+                        return cDate === selectedDate || String(c.classDate || '').includes(selectedDate);
+                    });
                     if (calMatch) {
                         if (calMatch.startTime) detectedStart = formatTimeDisplayFrontEnd(calMatch.startTime) || calMatch.startTime;
                         if (calMatch.endTime) detectedEnd = formatTimeDisplayFrontEnd(calMatch.endTime) || calMatch.endTime;
@@ -4285,6 +4300,11 @@
                             if (detectedStart) break;
                         }
                     }
+                }
+
+                // 3. Standard fallback if nothing set
+                if (!detectedStart && activeClassList.length > 0) {
+                    detectedStart = '6:00 PM';
                 }
 
                 if (detectedStart) {
