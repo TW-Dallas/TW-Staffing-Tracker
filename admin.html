@@ -1876,18 +1876,6 @@
         function getActiveStatusText(item) {
             if (item.ineligible) return "🚫 Ineligible";
             if (item.inactive) return "💤 Inactive";
-
-            const rawAllPayError = (item.allPayError || "").toString().trim();
-            const isAllPayError = rawAllPayError !== "" && rawAllPayError.toUpperCase() !== "FALSE";
-            if (isAllPayError) return "⚠️ AllPay Error";
-
-            if (item.incorrectEmail) return "⚠️ Incorrect Email";
-
-            const rawMissingDocs = (item.missingDocs || "").toString().trim();
-            const isBlockedByDocs = rawMissingDocs !== "" && rawMissingDocs.toUpperCase() !== "FALSE";
-            if (isBlockedByDocs) return "⚠️ Missing Docs";
-
-            if (item.missedNto) return "⚠️ Missed NTO";
             if (item.hired) return "🎉 Hired";
 
             const dateStr = (item.ntoDate || "").toString().trim();
@@ -2550,8 +2538,7 @@
                     const activeStatusText = getActiveStatusText(item);
 
                     let statusStyleColor = 'var(--brand-blue)';
-                    if (isAllPayError || item.incorrectEmail || isBlockedByDocs || item.missedNto) statusStyleColor = 'var(--brand-red)';
-                    else if (item.hired) statusStyleColor = 'var(--success-green)';
+                    if (item.hired) statusStyleColor = 'var(--success-green)';
                     else if (item.currentlyReviewing) statusStyleColor = 'var(--med-blue)';
                     else if (item.ntoScheduled || item.ntoSignupLinkSent) statusStyleColor = 'var(--dark-blue)';
                     else if (item.bgcComplete || item.allPayCompleted || item.pulseFormComplete) statusStyleColor = 'var(--med-blue)';
