@@ -1876,7 +1876,17 @@
         function getActiveStatusText(item) {
             if (item.ineligible) return "🚫 Ineligible";
             if (item.inactive) return "💤 Inactive";
+
+            const rawAllPayError = (item.allPayError || "").toString().trim();
+            const isAllPayError = rawAllPayError !== "" && rawAllPayError.toUpperCase() !== "FALSE";
+            if (isAllPayError) return "⚠️ AllPay Error";
+
             if (item.incorrectEmail) return "⚠️ Incorrect Email";
+
+            const rawMissingDocs = (item.missingDocs || "").toString().trim();
+            const isBlockedByDocs = rawMissingDocs !== "" && rawMissingDocs.toUpperCase() !== "FALSE";
+            if (isBlockedByDocs) return "⚠️ Missing Docs";
+
             if (item.missedNto) return "⚠️ Missed NTO";
             if (item.hired) return "🎉 Hired";
 
@@ -1904,7 +1914,9 @@
 
             const rawMissingDocs = (item.missingDocs || "").toString().trim();
             const isBlockedByDocs = rawMissingDocs !== "" && rawMissingDocs.toUpperCase() !== "FALSE";
-            const isBlocked = isBlockedByDocs || item.incorrectEmail || item.missedNto;
+            const rawAllPayError = (item.allPayError || "").toString().trim();
+            const isBlockedByAllPay = rawAllPayError !== "" && rawAllPayError.toUpperCase() !== "FALSE";
+            const isBlocked = isBlockedByDocs || isBlockedByAllPay || item.incorrectEmail || item.missedNto;
 
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -1927,7 +1939,7 @@
             if ((item.bgcComplete || item.allPayCompleted || item.pulseFormComplete) && !isBlocked) return 5;
             if (item.onboardingSent && !isBlocked) return 4;
 
-            // Blocked Candidates (Missing Docs / Incorrect Email / Missed NTO) -> Grouped below active queue (Weight 3)
+            // Blocked Candidates (Missing Docs / AllPay Error / Incorrect Email / Missed NTO) -> Grouped below active queue (Weight 3)
             if (isBlocked) return 3;
 
             // Hired / Past NTO Completed Candidates -> Bottom of active view (Weight 1)
@@ -2516,10 +2528,12 @@
 
                     const rawMissingDocs = item.missingDocs || "";
                     const isBlockedByDocs = rawMissingDocs !== "" && rawMissingDocs.toString().toUpperCase() !== "FALSE";
+                    const rawAllPayError = (item.allPayError || "").toString().trim();
+                    const isAllPayError = rawAllPayError !== "" && rawAllPayError.toUpperCase() !== "FALSE";
 
                     if (item.ineligible || item.inactive) {
                         card.classList.add('status-gray');
-                    } else if (item.incorrectEmail || isBlockedByDocs || item.missedNto) {
+                    } else if (isAllPayError || item.incorrectEmail || isBlockedByDocs || item.missedNto) {
                         card.classList.add('status-red');
                     } else if (item.hired) {
                         card.classList.add('status-green');
@@ -2536,13 +2550,15 @@
                     const activeStatusText = getActiveStatusText(item);
 
                     let statusStyleColor = 'var(--brand-blue)';
-                    if (item.hired) statusStyleColor = 'var(--success-green)';
-                    if (item.currentlyReviewing) statusStyleColor = 'var(--med-blue)';
-                    if (item.ntoScheduled || item.ntoSignupLinkSent) statusStyleColor = 'var(--dark-blue)';
-                    if (item.bgcComplete || item.allPayCompleted || item.pulseFormComplete) statusStyleColor = 'var(--med-blue)';
-                    if (item.ineligible || item.inactive) statusStyleColor = 'var(--brand-grey)';
+                    if (isAllPayError || item.incorrectEmail || isBlockedByDocs || item.missedNto) statusStyleColor = 'var(--brand-red)';
+                    else if (item.hired) statusStyleColor = 'var(--success-green)';
+                    else if (item.currentlyReviewing) statusStyleColor = 'var(--med-blue)';
+                    else if (item.ntoScheduled || item.ntoSignupLinkSent) statusStyleColor = 'var(--dark-blue)';
+                    else if (item.bgcComplete || item.allPayCompleted || item.pulseFormComplete) statusStyleColor = 'var(--med-blue)';
+                    else if (item.ineligible || item.inactive) statusStyleColor = 'var(--brand-grey)';
 
                     let flags = '';
+                    if (isAllPayError) flags += '<span class="badge-incorrect">⚠️ AllPay Error</span> ';
                     if (item.incorrectEmail) flags += '<span class="badge-incorrect">⚠️ Email Error</span> ';
                     if (isBlockedByDocs) flags += '<span class="badge-incorrect">⚠️ Missing Docs</span> ';
                     if (item.missedNto) flags += '<span class="badge-incorrect">⚠️ Missed NTO</span> ';
