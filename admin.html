@@ -1844,6 +1844,9 @@
                 if (ntoFormFields) ntoFormFields.classList.remove('hidden');
                 document.getElementById('formTitle').innerText = "🎓 NTO Attendance & Class Closure";
                 renderNtoClassView();
+                if (!window.ntoCalendarClassesCache || window.ntoCalendarClassesCache.length === 0) {
+                    fetchNtoCalendarClasses();
+                }
 
             } else {
                 btnOnb.style.background = 'var(--dark-blue)';
@@ -4257,22 +4260,38 @@
                 return candidateFormattedDate === selectedDate;
             });
 
-            // Auto-populate Start Time from scheduled candidates on this date
+            // Auto-populate Start Time from Calendar Schedule or scheduled candidates on this date
             const startInput = document.getElementById('ntoStartTime');
+            const endInput = document.getElementById('ntoEndTime');
             if (startInput) {
                 let detectedStart = '';
-                for (const cand of activeClassList) {
-                    const rawT = cand.time || cand.startTime || cand.ntoTime || cand['Time'] || cand['Start Time'];
-                    if (rawT) {
-                        detectedStart = formatTimeDisplayFrontEnd(rawT);
-                        if (detectedStart) break;
+                let detectedEnd = '';
+
+                // 1. Check Calendar Schedule Cache for this exact date
+                if (window.ntoCalendarClassesCache && window.ntoCalendarClassesCache.length > 0) {
+                    const calMatch = window.ntoCalendarClassesCache.find(c => formatDateForInput(c.classDate) === selectedDate);
+                    if (calMatch) {
+                        if (calMatch.startTime) detectedStart = formatTimeDisplayFrontEnd(calMatch.startTime) || calMatch.startTime;
+                        if (calMatch.endTime) detectedEnd = formatTimeDisplayFrontEnd(calMatch.endTime) || calMatch.endTime;
                     }
                 }
-                if (!detectedStart && activeClassList.length > 0) {
-                    detectedStart = '6:00 PM';
+
+                // 2. Check Candidate roster times
+                if (!detectedStart) {
+                    for (const cand of activeClassList) {
+                        const rawT = cand.time || cand.startTime || cand.ntoTime || cand['Time'] || cand['Start Time'];
+                        if (rawT) {
+                            detectedStart = formatTimeDisplayFrontEnd(rawT);
+                            if (detectedStart) break;
+                        }
+                    }
                 }
+
                 if (detectedStart) {
                     startInput.value = detectedStart;
+                }
+                if (detectedEnd && endInput && !endInput.value) {
+                    endInput.placeholder = detectedEnd;
                 }
             }
 
@@ -4973,14 +4992,17 @@
 
         async function fetchNtoCalendarClasses() {
             const tbody = document.getElementById('classCalendarTableBody');
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color:#888; font-size: 17px;">Loading scheduled classes...</td></tr>`;
+            if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color:#888; font-size: 17px;">Loading scheduled classes...</td></tr>`;
 
             try {
                 const data = await apiCall('POST', { action: 'getNtoClasses' });
                 if (!data.success || !data.classes || data.classes.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color:#888; font-size: 17px;">No scheduled classes found.</td></tr>`;
+                    window.ntoCalendarClassesCache = [];
+                    if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color:#888; font-size: 17px;">No scheduled classes found.</td></tr>`;
                     return;
                 }
+
+                window.ntoCalendarClassesCache = data.classes;
 
                 // Sort classes descending by date (furthest out / latest class at TOP)
                 data.classes.sort((a, b) => {
@@ -4991,29 +5013,34 @@
                     return timeB - timeA;
                 });
 
-                tbody.innerHTML = '';
-                data.classes.forEach(c => {
-                    const row = document.createElement('tr');
-                    row.style.borderBottom = '1px solid var(--crust-med)';
-                    const startDisp = formatTimeDisplayFrontEnd(c.startTime) || c.startTime;
-                    const endDisp = formatTimeDisplayFrontEnd(c.endTime) || c.endTime;
-                    row.innerHTML = `
-                    <td style="padding: 10px 12px; font-weight: bold; color: var(--dark-blue); font-size: 17px;">
-                        ${c.classDate} <br><span style="font-size: 13px; color: var(--brand-grey); font-weight: normal;">${c.classId || 'Auto ID'}</span>
-                    </td>
-                    <td style="padding: 10px 12px; text-align: center; font-size: 17px;">${startDisp} - ${endDisp}</td>
-                    <td style="padding: 10px 12px; text-align: center; font-size: 17px;">${c.trainerName}</td>
-                    <td style="padding: 10px 12px; text-align: center; font-weight: bold; font-size: 17px;">${c.capacity}</td>
-                    <td style="padding: 10px 12px; text-align: center;">
-                        <button type="button" onclick="deleteNtoClassSession('${c.classId}', '${c.classDate}', ${c.rowNum})" style="background: var(--brand-red); color: white; border: none; padding: 6px 12px; font-size: 14px; border-radius: 4px; cursor: pointer; font-family: 'Subhead2';">
-                            🗑️ Cancel
-                        </button>
-                    </td>
-                `;
-                    tbody.appendChild(row);
-                });
+                if (tbody) {
+                    tbody.innerHTML = '';
+                    data.classes.forEach(c => {
+                        const row = document.createElement('tr');
+                        row.style.borderBottom = '1px solid var(--crust-med)';
+                        const startDisp = formatTimeDisplayFrontEnd(c.startTime) || c.startTime;
+                        const endDisp = formatTimeDisplayFrontEnd(c.endTime) || c.endTime;
+                        row.innerHTML = `
+                        <td style="padding: 10px 12px; font-weight: bold; color: var(--dark-blue); font-size: 17px;">
+                            ${c.classDate} <br><span style="font-size: 13px; color: var(--brand-grey); font-weight: normal;">${c.classId || 'Auto ID'}</span>
+                        </td>
+                        <td style="padding: 10px 12px; text-align: center; font-size: 17px;">${startDisp} - ${endDisp}</td>
+                        <td style="padding: 10px 12px; text-align: center; font-size: 17px;">${c.trainerName}</td>
+                        <td style="padding: 10px 12px; text-align: center; font-weight: bold; font-size: 17px;">${c.capacity}</td>
+                        <td style="padding: 10px 12px; text-align: center;">
+                            <button type="button" onclick="deleteNtoClassSession('${c.classId}', '${c.classDate}', ${c.rowNum})" style="background: var(--brand-red); color: white; border: none; padding: 6px 12px; font-size: 14px; border-radius: 4px; cursor: pointer; font-family: 'Subhead2';">
+                                🗑️ Cancel
+                            </button>
+                        </td>
+                    `;
+                        tbody.appendChild(row);
+                    });
+                }
+
+                // Populate Class Start Time & End Time placeholder on main action bar
+                renderNtoClassView();
             } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color: var(--brand-red); font-size: 17px;">Error loading calendar.</td></tr>`;
+                if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color: var(--brand-red); font-size: 17px;">Error loading calendar.</td></tr>`;
             }
         }
 
