@@ -2364,7 +2364,20 @@
                 });
 
             } else if (currentView === 'staffing') {
-                let filtered = staffing.filter(item => matchesSearchQuery(item, searchQuery));
+                let filtered = staffing.filter(item => {
+                    if (!matchesSearchQuery(item, searchQuery)) return false;
+                    if (searchQuery) return true; // Keep 100% searchable when typing a name or store
+
+                    // Hide historical terminations older than 10 days from the default active list
+                    const isTerm = !!item.termDate;
+                    if (isTerm) {
+                        const tDate = parseCandidateDate(item.lastUpdated || item.termDate);
+                        if (tDate && tDate.getTime() < tenDaysAgo.getTime()) {
+                            return false;
+                        }
+                    }
+                    return true;
+                });
                 filtered.sort(sortComparator);
 
                 if (filtered.length === 0) {
