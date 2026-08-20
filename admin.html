@@ -2498,7 +2498,9 @@
 
             } else {
                 let filteredCandidates = candidates.filter(item => {
-                    if (searchQuery && !matchesSearchQuery(item, searchQuery)) return false;
+                    if (!matchesSearchQuery(item, searchQuery)) return false;
+                    if (searchQuery) return true; // If user is searching, show all matching candidates (including inactive/ineligible/hired)
+
                     const isTerminalState = item.hired || item.ineligible || item.inactive;
                     if (isTerminalState && item.lastUpdated) {
                         const updatedDate = new Date(item.lastUpdated);
@@ -4599,7 +4601,11 @@
             const phoneDigits = phoneStr.replace(/\D/g, '');
             const phoneMatch = phoneStr.includes(q) || (digitsOnly.length >= 3 && phoneDigits.includes(digitsOnly));
 
-            return nameMatch || emailMatch || phoneMatch;
+            // 4. Store Match
+            const storeStr = String(item.store || '').toLowerCase();
+            const storeMatch = storeStr && (storeStr === q || storeStr === digitsOnly || storeStr.includes(q));
+
+            return nameMatch || emailMatch || phoneMatch || storeMatch;
         }
 
         async function saveNtoAttendanceOnly() {
