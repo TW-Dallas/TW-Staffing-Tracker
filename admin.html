@@ -2993,7 +2993,11 @@
                 document.getElementById('formTitle').innerText = "Hires & Terminations Details";
                 autoCalculatePeriodFromDates();
             } else if (currentView === 'interviews') {
-                document.getElementById('formTitle').innerText = "Interview details";
+                document.getElementById('formTitle').innerText = "Interview Details";
+            } else if (currentView === 'contacts') {
+                document.getElementById('formTitle').innerText = "📞 GM & DO Store Directory";
+            } else if (currentView === 'nto') {
+                document.getElementById('formTitle').innerText = "🎓 NTO Attendance & Class Closure";
             } else {
                 document.getElementById('formTitle').innerText = "Candidate details";
             }
