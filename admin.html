@@ -4568,11 +4568,19 @@
             }
 
             const rosterData = [];
-            let missingSelection = false;
+            let missingSelection = [];
+            let inClassSelection = [];
 
             rosterElements.forEach(el => {
-                if (!el.value) missingSelection = true;
-                const attVal = el.value || '';
+                const attVal = (el.value || '').trim();
+                const candName = el.getAttribute('data-name') || 'Trainee';
+
+                if (!attVal) {
+                    missingSelection.push(candName);
+                } else if (attVal === 'In Class') {
+                    inClassSelection.push(candName);
+                }
+
                 rosterData.push({
                     id: el.getAttribute('data-id') || '',
                     classId: el.getAttribute('data-id') || '',
@@ -4580,9 +4588,9 @@
                     email: el.getAttribute('data-email') || '',
                     store: el.getAttribute('data-store') || '',
                     position: el.getAttribute('data-position') || 'CSR',
-                    shirtSize: el.getAttribute('data-shirt') || '',
-                    shirt: el.getAttribute('data-shirt') || '',
-                    Shirt: el.getAttribute('data-shirt') || '',
+                    shirtSize: (el.getAttribute('data-shirt') || '').replace(/\\'/g, "'"),
+                    shirt: (el.getAttribute('data-shirt') || '').replace(/\\'/g, "'"),
+                    Shirt: (el.getAttribute('data-shirt') || '').replace(/\\'/g, "'"),
                     hatStyle: el.getAttribute('data-hat') || '',
                     capVisor: el.getAttribute('data-hat') || '',
                     hat: el.getAttribute('data-hat') || '',
@@ -4603,8 +4611,13 @@
                 });
             });
 
-            if (missingSelection) {
-                showBrandAlert("Please select an attendance status for all trainees on the roster before concluding class.", "Missing Attendance Status");
+            if (missingSelection.length > 0) {
+                showBrandAlert(`Please select an attendance status for all trainees before concluding class.\n\nMissing Status:\n• ${missingSelection.join('\n• ')}`, "Missing Attendance Status");
+                return;
+            }
+
+            if (inClassSelection.length > 0) {
+                showBrandAlert(`Cannot conclude class with trainees still marked "In Class".\n\nPlease assign a final status (NTO Complete, Not in NTO, or Left Early) for:\n• ${inClassSelection.join('\n• ')}`, "Final Status Required");
                 return;
             }
 
