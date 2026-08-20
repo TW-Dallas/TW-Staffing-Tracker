@@ -2962,11 +2962,11 @@
                 payload.period = document.getElementById('stfPeriod').value.trim();
                 payload.hireDate = document.getElementById('stfHireDate').value.trim();
                 payload.termDate = document.getElementById('stfTermDate').value.trim();
-                payload.termReason = document.getElementById('stfReason').value.trim();
-                payload.termSubReason = document.getElementById('stfSubReason').value.trim();
-                payload.gmName = document.getElementById('stfGm').value.trim();
-                payload.ssnLast4 = document.getElementById('stfSsnLast4').value.trim();
+                payload.rehireEligible = document.getElementById('stfRehire') ? document.getElementById('stfRehire').value : 'Yes';
+                payload.causeOfAction = document.getElementById('stfCause') ? document.getElementById('stfCause').value.trim() : '';
+                payload.reasonOfAction = document.getElementById('stfReason') ? document.getElementById('stfReason').value.trim() : '';
                 payload.notes = document.getElementById('stfNotes').value.trim();
+                payload.gmName = (document.getElementById('stfGmName') || document.getElementById('stfGm'))?.value.trim() || '';
 
             } else if (currentView === 'interviews') {
                 payload.name = document.getElementById('intName').value.trim();
