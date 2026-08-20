@@ -884,6 +884,17 @@
                                     style="font-family: 'Subhead2', sans-serif; font-size: 17px;">0</strong>
                             </span>
                         </div>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; font-size: 17px;">
+                            <span>Terms Submitted:</span>
+                            <span style="font-family: 'Compact'; font-size: 17px;">
+                                This Week: <strong id="metricsTermsThisWeek"
+                                    style="color: var(--brand-red); font-family: 'Subhead2', sans-serif; font-size: 17px;">0</strong>
+                                |
+                                Last Week: <strong id="metricsTermsLastWeek"
+                                    style="color: var(--brand-red); font-family: 'Subhead2', sans-serif; font-size: 17px;">0</strong>
+                            </span>
+                        </div>
                     </div>
 
                     <!-- Fiscal Period Staffing Content (Hires & Terminations) -->
@@ -3908,8 +3919,31 @@
             if (elHiresThis) elHiresThis.innerText = hiresThisWeek;
             if (elHiresLast) elHiresLast.innerText = hiresLastWeek;
 
+            // Weekly Terminations Submitted (Counted by entry/submission date, not effective termDate)
+            let termsSubmittedThisWeek = 0;
+            let termsSubmittedLastWeek = 0;
+
+            (staffing || []).forEach(item => {
+                const isTerm = !!item.termDate || (item.causeOfAction && item.causeOfAction.trim() !== '') || (item.reasonOfAction && item.reasonOfAction.trim() !== '');
+                if (isTerm) {
+                    const submitDate = parseCandidateDate(item.lastUpdated || item.termDate);
+                    if (submitDate) {
+                        if (submitDate >= startThisWeek && submitDate <= endThisWeek) {
+                            termsSubmittedThisWeek++;
+                        } else if (submitDate >= startLastWeek && submitDate <= endLastWeek) {
+                            termsSubmittedLastWeek++;
+                        }
+                    }
+                }
+            });
+
+            const elTermsThis = document.getElementById('metricsTermsThisWeek');
+            const elTermsLast = document.getElementById('metricsTermsLastWeek');
+            if (elTermsThis) elTermsThis.innerText = termsSubmittedThisWeek;
+            if (elTermsLast) elTermsLast.innerText = termsSubmittedLastWeek;
+
             // 2. PERIOD & YEARLY STAFFING AUDIT (For Hires & Terms view)
-            let weekHires = 0, weekTerms = 0;
+            let weekHires = 0, weekTerms = termsSubmittedThisWeek;
             let periodHires = 0, periodTerms = 0;
             let yearHires = 0, yearTerms = 0;
 
@@ -3931,12 +3965,9 @@
                     if (tPeriod === currentPeriod) periodTerms++;
                 }
 
-                // Weekly counts (evaluate independently to avoid overrides)
+                // Weekly hires count
                 if (hDate && hDate >= startThisWeek && hDate <= endThisWeek) {
                     weekHires++;
-                }
-                if (tDate && tDate >= startThisWeek && tDate <= endThisWeek) {
-                    weekTerms++;
                 }
             });
 
