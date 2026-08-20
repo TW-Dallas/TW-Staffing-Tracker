@@ -2502,9 +2502,10 @@
                     if (searchQuery) return true; // If user is searching, show all matching candidates (including inactive/ineligible/hired)
 
                     const isTerminalState = item.hired || item.ineligible || item.inactive;
-                    if (isTerminalState && item.lastUpdated) {
-                        const updatedDate = new Date(item.lastUpdated);
-                        if (!isNaN(updatedDate.getTime()) && updatedDate < oneWeekAgo) {
+                    if (isTerminalState) {
+                        const rawDate = item.lastUpdated || item.ntoDate || item.hireDate || item.date;
+                        const candidateDate = parseCandidateDate(rawDate);
+                        if (!candidateDate || candidateDate.getTime() < tenDaysAgo.getTime()) {
                             return false;
                         }
                     }
