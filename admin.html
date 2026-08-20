@@ -2195,8 +2195,9 @@
                         if (timeA !== timeB) return timeA - timeB;
                         return (a.name || '').localeCompare(b.name || '');
                     } else if (currentView === 'paycards') {
-                        const completeA = (a.ddEntered || a.registered) ? 1 : 0;
-                        const completeB = (b.ddEntered || b.registered) ? 1 : 0;
+                        const isComplete = (item) => (item.ddReceived && item.ddEntered) || (item.cardReceived && item.registered && item.ddEntered);
+                        const completeA = isComplete(a) ? 1 : 0;
+                        const completeB = isComplete(b) ? 1 : 0;
                         if (completeA !== completeB) return completeA - completeB; // Action Needed first!
 
                         const rawA = a.ntoDate || a.hireDate || a.date;
@@ -2252,11 +2253,17 @@
             };
 
             if (currentView === 'paycards') {
-                let filtered = paycards.filter(item => !searchQuery || (item.name && item.name.toLowerCase().includes(searchQuery)));
+                const isPayrollComplete = (item) => (item.ddReceived && item.ddEntered) || (item.cardReceived && item.registered && item.ddEntered);
+
+                let filtered = paycards.filter(item => {
+                    if (!matchesSearchQuery(item, searchQuery)) return false;
+                    if (searchQuery) return true; // Keep searchable
+                    return !isPayrollComplete(item); // Hide completed records from active list
+                });
                 filtered.sort(sortComparator);
 
                 if (filtered.length === 0) {
-                    listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:var(--crust-burnt);">No pay card records found.</div>';
+                    listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:var(--crust-burnt);">No pending pay card records found.</div>';
                     return;
                 }
 
@@ -2265,21 +2272,21 @@
                     card.className = 'candidate-card';
                     if (item.id === currentSelectedId) card.classList.add('selected');
 
-                    const isPayrollComplete = item.ddEntered || item.registered;
+                    const isComplete = isPayrollComplete(item);
 
-                    card.style.borderLeftColor = isPayrollComplete ? 'var(--success-green)' : 'var(--dark-red)';
+                    card.style.borderLeftColor = isComplete ? 'var(--success-green)' : 'var(--dark-red)';
                     card.style.borderLeftWidth = '8px';
 
                     card.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div class="card-name">${item.name}</div>
-                        <span class="badge-review" style="background:${isPayrollComplete ? '#e8f5e9' : '#ffebee'}; color:${isPayrollComplete ? 'var(--success-green)' : 'var(--dark-red)'}; font-weight: bold;">
-                            ${isPayrollComplete ? '✓ Payroll Complete' : '⚠️ Action Needed'}
+                        <span class="badge-review" style="background:${isComplete ? '#e8f5e9' : '#ffebee'}; color:${isComplete ? 'var(--success-green)' : 'var(--dark-red)'}; font-weight: bold;">
+                            ${isComplete ? '✓ Payroll Complete' : '⚠️ Action Needed'}
                         </span>
                     </div>
                     <div class="card-sub">
                         <span>Store #${item.store} (${item.position})</span>
-                        <span style="font-weight: bold; color: ${isPayrollComplete ? 'var(--success-green)' : 'var(--dark-red)'};">
+                        <span style="font-weight: bold; color: ${isComplete ? 'var(--success-green)' : 'var(--dark-red)'};">
                             ${item.ntoDate ? 'NTO: ' + item.ntoDate : 'Manual Entry'}
                         </span>
                     </div>
