@@ -603,10 +603,10 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Termination Date</label>
-                                    <input type="date" id="stfTermDate" onchange="autoCalculatePeriodFromDates()">
+                                    <input type="date" id="stfTermDate">
                                 </div>
                                 <div class="form-group">
-                                    <label>Domino's Period</label>
+                                    <label>Hire Period</label>
                                     <input type="text" id="stfPeriod" placeholder="P08" readonly
                                         style="background: var(--crust-light); font-weight: bold; color: var(--dark-blue);">
                                 </div>
@@ -1881,10 +1881,10 @@
 
         function autoCalculatePeriodFromDates() {
             const hireD = document.getElementById('stfHireDate').value;
-            const termD = document.getElementById('stfTermDate').value;
-            const targetDate = termD || hireD || new Date();
-            const p = getDominosFiscalPeriod(targetDate);
-            document.getElementById('stfPeriod').value = p;
+            if (hireD) {
+                const p = getDominosFiscalPeriod(hireD);
+                document.getElementById('stfPeriod').value = p;
+            }
         }
 
         function getActiveStatusText(item) {
@@ -2817,7 +2817,7 @@
                 document.getElementById('stfHireDate').value = formatDateForInput(item.hireDate);
                 document.getElementById('stfTermDate').value = formatDateForInput(item.termDate);
 
-                document.getElementById('stfPeriod').value = item.period || getDominosFiscalPeriod(item.termDate || item.hireDate);
+                document.getElementById('stfPeriod').value = item.period || (item.hireDate ? getDominosFiscalPeriod(item.hireDate) : '');
                 setSelectValueCaseInsensitive('stfRehire', item.rehireEligible || 'Yes');
                 setSelectValueCaseInsensitive('stfCause', item.causeOfAction || '');
                 setSelectValueCaseInsensitive('stfReason', item.reasonOfAction || '');
