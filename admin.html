@@ -5231,9 +5231,9 @@
 
                 showLoader(false);
                 closeEditContactModal();
-                showBrandAlert(`Store #${store} information saved successfully!`, "Contact Updated");
-                populateContactsDoFilter();
+                populateContactDoDropdown();
                 renderContactsView();
+                showBrandAlert(`Store #${store} information saved successfully!`, "Contact Updated");
             } catch (err) {
                 showLoader(false);
                 showBrandAlert("Error updating store contact: " + err.message, "Update Failed");
