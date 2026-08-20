@@ -2871,7 +2871,7 @@
                 document.getElementById('fieldPayCard').value = item.payCard || '';
                 document.getElementById('fieldNotes').value = displayNotes;
 
-                setSelectValueCaseInsensitive('fieldShirt', item.shirtSize);
+                setSelectValueCaseInsensitive('fieldShirt', (item.shirtSize || '').replace(/\\'/g, "'"));
                 setSelectValueCaseInsensitive('fieldHat', item.hatStyle);
 
                 document.getElementById('checkSubmission').checked = (item.submissionReceived === false || item.submissionReceived === "false") ? false : true;
@@ -4458,7 +4458,7 @@
                 row.style.cssText = "display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--crust-med); gap: 12px;";
 
                 const savedStatus = (item.ntoAttendance || '').trim();
-                const shirtVal = item.shirtSize || item.shirt || item.Shirt || '';
+                const shirtVal = (item.shirtSize || item.shirt || item.Shirt || '').replace(/\\'/g, "'");
                 const hatVal = item.hatStyle || item.capVisor || item['Cap/Visor'] || item.hat || item.Hat || '';
                 const payCardVal = item.payCard || item.paycard || item.Paycard || '';
                 const ntoDateVal = item.ntoDate || item.date || item.Date || '';
