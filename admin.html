@@ -3071,6 +3071,14 @@
             document.getElementById('fieldNto').value = '';
             document.getElementById('checkSubmission').checked = true;
 
+            const stfEmpCont = document.getElementById('stfEmploymentPeriodsContainer');
+            if (stfEmpCont) stfEmpCont.innerHTML = '';
+            const priorStCont = document.getElementById('priorStintsContainer');
+            if (priorStCont) priorStCont.innerHTML = '';
+            if (typeof toggleActiveStintEditor === 'function') toggleActiveStintEditor(true);
+            const activeTitle = document.getElementById('stfActiveEditorTitle');
+            if (activeTitle) activeTitle.innerText = '✏️ Active Record / Stint Details';
+
             if (currentView === 'paycards') {
                 document.getElementById('formTitle').innerText = "Pay Card & Payroll Details";
             } else if (currentView === 'staffing') {
@@ -4844,6 +4852,7 @@
             if (!container) return;
             container.innerHTML = '';
 
+            const periods = getEmploymentPeriods(name, email, currentRecordId);
             const priorPeriods = periods.filter(p => String(p.id || '') !== String(currentRecordId || ''));
 
             priorPeriods.forEach(p => {
