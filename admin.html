@@ -4519,11 +4519,13 @@
                 }
             });
 
-            // Sort chronologically by beginDate ascending (oldest to newest)
+            // Sort chronologically: newest / most recent stint on TOP
             matchedStints.sort((a, b) => {
-                const dA = a.beginDate ? new Date(a.beginDate).getTime() : 0;
-                const dB = b.beginDate ? new Date(b.beginDate).getTime() : 0;
-                return dA - dB;
+                const dateA = a.endDate || a.beginDate;
+                const dateB = b.endDate || b.beginDate;
+                const dA = dateA ? new Date(dateA).getTime() : 0;
+                const dB = dateB ? new Date(dateB).getTime() : 0;
+                return dB - dA;
             });
 
             return matchedStints;
