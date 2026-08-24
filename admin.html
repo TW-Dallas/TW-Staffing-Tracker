@@ -4541,6 +4541,19 @@
             return `${months} month${months === 1 ? '' : 's'}`;
         }
 
+        function toggleStintDetailRow(idx) {
+            const row = document.getElementById(`stint-detail-row-${idx}`);
+            if (!row) return;
+            row.style.display = (row.style.display === 'none' || !row.style.display) ? 'table-row' : 'none';
+        }
+
+        function loadSpecificStintIntoForm(stintId) {
+            const stfItem = staffing.find(s => String(s.id) === String(stintId));
+            if (stfItem) {
+                selectCandidate(stfItem);
+            }
+        }
+
         function renderEmploymentPeriodsCard(containerEl, name, email, id) {
             if (!containerEl) return;
             const periods = getEmploymentPeriods(name, email, id);
@@ -4549,6 +4562,7 @@
                 return;
             }
 
+            window.currentCandidateEmploymentPeriods = periods;
             const isRehire = periods.length > 1;
             const rehireBadge = isRehire ? `<span style="background: #e8f0fe; color: #1a73e8; font-size: 13px; font-weight: bold; padding: 2px 8px; border-radius: 4px; margin-left: 8px; border: 1px solid #cce0ff;">🔁 Re-Hire (${periods.length} Stints)</span>` : '';
 
@@ -4579,6 +4593,41 @@
                         <td style="padding: 8px 10px;">${p.position || 'CSR'}</td>
                         <td style="padding: 8px 10px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeText(reason)}">${escapeText(reason)}</td>
                         <td style="padding: 8px 10px; text-align: center;">${rehireBadgeStint}</td>
+                        <td style="padding: 6px 10px; text-align: center;">
+                            <button type="button" onclick="toggleStintDetailRow(${idx})"
+                                style="background: #eef3f8; border: 1px solid #c0d4e8; color: #1f4e79; border-radius: 4px; padding: 3px 8px; font-size: 12px; cursor: pointer; font-family: 'Subhead1', sans-serif;">
+                                👁️ Notes
+                            </button>
+                        </td>
+                    </tr>
+                    <tr id="stint-detail-row-${idx}" class="stint-detail-drawer" style="display: none; background: #fffcf5; border-bottom: 2px solid #c29d62;">
+                        <td colspan="9" style="padding: 12px 16px;">
+                            <div style="background: white; border: 1px solid #e0d0ba; border-radius: 8px; padding: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; border-bottom: 1px solid #f0e6d6; padding-bottom: 6px; gap: 12px; flex-wrap: wrap;">
+                                    <div>
+                                        <strong style="color: #1f4e79; font-size: 14.5px; font-family: 'Subhead1', sans-serif;">
+                                            📋 Stint #${idx + 1} (${p.beginDate ? formatDisplayDate(p.beginDate) : 'Unknown'} – ${p.endDate ? formatDisplayDate(p.endDate) : 'Active'}) — Store #${p.store || '—'} (${p.position || 'CSR'})
+                                        </strong>
+                                        <div style="font-size: 13px; color: #5d4037; margin-top: 3px; display: flex; gap: 12px; flex-wrap: wrap;">
+                                            ${p.causeOfAction ? `<span><strong>Cause:</strong> ${escapeText(p.causeOfAction)}</span>` : ''}
+                                            ${p.reasonOfAction ? `<span><strong>Reason:</strong> ${escapeText(p.reasonOfAction)}</span>` : ''}
+                                            ${p.gmName ? `<span><strong>Submitted by (GM):</strong> ${escapeText(p.gmName)}</span>` : ''}
+                                            ${p.doName ? `<span><strong>DO:</strong> ${escapeText(p.doName)}</span>` : ''}
+                                        </div>
+                                    </div>
+                                    ${p.id ? `
+                                        <button type="button" onclick="loadSpecificStintIntoForm('${p.id}')"
+                                            style="background: var(--brand-blue); color: white; border: none; border-radius: 6px; padding: 6px 14px; font-family: 'Subhead1', sans-serif; font-size: 13px; cursor: pointer; white-space: nowrap;">
+                                            ✏️ Edit This Stint in Form
+                                        </button>
+                                    ` : ''}
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; font-weight: bold; color: #472b10; margin-bottom: 3px;">📝 Full Termination & Staffing Notes:</div>
+                                    <div style="font-size: 13.5px; color: #333; background: #faf5ed; border: 1px solid #e8dfcf; border-radius: 6px; padding: 8px 12px; font-family: 'Condensed', sans-serif; white-space: pre-wrap; line-height: 1.4;">${escapeText(p.notes || 'No specific notes recorded for this stint.')}</div>
+                                </div>
+                            </div>
+                        </td>
                     </tr>
                 `;
             }).join('');
@@ -4601,6 +4650,7 @@
                                     <th style="padding: 7px 10px;">Position</th>
                                     <th style="padding: 7px 10px;">Reason / Action</th>
                                     <th style="padding: 7px 10px; text-align: center;">Rehire Status</th>
+                                    <th style="padding: 7px 10px; text-align: center;">Details</th>
                                 </tr>
                             </thead>
                             <tbody>
