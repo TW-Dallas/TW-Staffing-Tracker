@@ -4103,6 +4103,10 @@
             const termsThisWeekItems = [];
 
             (staffing || []).forEach(item => {
+                // Historical archive sheets (e.g. 2025) should never count toward current weekly submissions
+                if (item.sourceSheet && item.sourceSheet.includes('2025')) {
+                    return;
+                }
                 const isTerm = !!item.termDate || (item.causeOfAction && item.causeOfAction.trim() !== '') || (item.reasonOfAction && item.reasonOfAction.trim() !== '');
                 if (isTerm) {
                     const tDate = parseCandidateDate(item.termDate);
