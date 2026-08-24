@@ -4130,39 +4130,50 @@
             let periodHires = 0, periodTerms = 0;
             let yearHires = 0, yearTerms = 0;
 
-            (staffing || []).forEach(item => {
-                const hDate = parseCandidateDate(item.hireDate);
-                const tDate = parseCandidateDate(item.termDate);
+            const countedHireKeys = new Set();
 
-                // Year-to-Date (YTD) counts
-                if (hDate && hDate.getFullYear() === currentYear) yearHires++;
-                if (tDate && tDate.getFullYear() === currentYear) yearTerms++;
-
-                // Fiscal Period counts (evaluate independently to avoid overrides)
-                if (hDate) {
-                    const hPeriod = getDominosFiscalPeriod(hDate);
-                    if (hPeriod === currentPeriod) periodHires++;
-                }
-                if (tDate) {
-                    const tPeriod = getDominosFiscalPeriod(tDate);
-                    if (tPeriod === currentPeriod) periodTerms++;
-                }
-
-                // Weekly hires count
-                if (hDate && hDate >= startThisWeek && hDate <= endThisWeek) {
-                    weekHires++;
-                }
-            });
-
-            // Include hires marked in onboarding for week, period, and year
+            // 1. Process Hires from Onboarding
             (candidates || []).forEach(item => {
-                if (item.hired && (!item.id || !countedHireIds.has(String(item.id)))) {
+                if (item.hired) {
+                    const normName = (item.name || '').toLowerCase().trim();
                     const d = parseCandidateDate(item.ntoDate || item.lastUpdated || item.hireDate);
                     if (d) {
                         if (d.getFullYear() === currentYear) yearHires++;
                         const hPeriod = getDominosFiscalPeriod(d);
                         if (hPeriod === currentPeriod) periodHires++;
                         if (d >= startThisWeek && d <= endThisWeek) weekHires++;
+                        if (normName) countedHireKeys.add(normName);
+                        if (item.id) countedHireKeys.add(String(item.id));
+                    }
+                }
+            });
+
+            // 2. Process Staffing Records (Distinguish Active Hires vs Terminations)
+            (staffing || []).forEach(item => {
+                const normName = (item.name || '').toLowerCase().trim();
+                const isTerm = !!item.termDate || (item.causeOfAction && item.causeOfAction.trim() !== '') || (item.reasonOfAction && item.reasonOfAction.trim() !== '');
+
+                if (isTerm) {
+                    // TERMINATIONS: Only increment term metrics
+                    const tDate = parseCandidateDate(item.termDate);
+                    if (tDate && tDate.getFullYear() === currentYear) {
+                        yearTerms++;
+                        const tPeriod = getDominosFiscalPeriod(tDate);
+                        if (tPeriod === currentPeriod) periodTerms++;
+                    }
+                } else {
+                    // DIRECT ACTIVE HIRES: Only count if not already counted from Onboarding
+                    const alreadyCounted = (normName && countedHireKeys.has(normName)) || (item.id && countedHireKeys.has(String(item.id)));
+                    if (!alreadyCounted && item.hireDate) {
+                        const hDate = parseCandidateDate(item.hireDate);
+                        if (hDate) {
+                            if (hDate.getFullYear() === currentYear) yearHires++;
+                            const hPeriod = getDominosFiscalPeriod(hDate);
+                            if (hPeriod === currentPeriod) periodHires++;
+                            if (hDate >= startThisWeek && hDate <= endThisWeek) weekHires++;
+                            if (normName) countedHireKeys.add(normName);
+                            if (item.id) countedHireKeys.add(String(item.id));
+                        }
                     }
                 }
             });
