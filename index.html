@@ -1460,7 +1460,10 @@
                     <div style="background: var(--dark-blue); color: white; border-radius: 12px; padding: 12px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-family: 'Condensed', sans-serif;">
                         <div>
                             <div style="font-family: 'Subhead2', sans-serif; font-size: 19px; font-weight: bold; color: white;">⭐ ${lc.name} <span style="font-family: 'Condensed'; font-size: 15px; opacity: 0.9; font-weight: normal;">— ${lc.title || 'Market Leader'}</span></div>
-                            ${lc.email ? `<div style="font-size: 14px; opacity: 0.95; margin-top: 2px;">✉️ ${lc.email}</div>` : ''}
+                            <div style="display: flex; gap: 12px; font-family: 'Condensed'; font-size: 14px; opacity: 0.95; flex-wrap: wrap; margin-top: 2px;">
+                                ${lc.phone ? `<div>📱 ${lc.phone}</div>` : ''}
+                                ${lc.email ? `<div>✉️ ${lc.email}</div>` : ''}
+                            </div>
                         </div>
                         <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                             ${lc.phone ? `<a href="tel:${lc.phone}" style="background: rgba(255,255,255,0.25); color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">${phoneSvg} Call</a>` : ''}
