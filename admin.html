@@ -1227,8 +1227,9 @@
 
             return data;
         }
-        // OFFICIAL DOMINO'S 2026 FISCAL PERIOD BOUNDARIES
-        const DOMINOS_FISCAL_2026 = [
+        // OFFICIAL DOMINO'S FISCAL PERIOD BOUNDARIES (2022 - 2027) - 13 Periods of 4 Weeks (28 days) Each
+        const DOMINOS_FISCAL_CALENDARS = [
+            // 2026
             { period: "P01", start: "2025-12-29", end: "2026-01-25" },
             { period: "P02", start: "2026-01-26", end: "2026-02-22" },
             { period: "P03", start: "2026-02-23", end: "2026-03-22" },
@@ -1241,12 +1242,72 @@
             { period: "P10", start: "2026-09-07", end: "2026-10-04" },
             { period: "P11", start: "2026-10-05", end: "2026-11-01" },
             { period: "P12", start: "2026-11-02", end: "2026-11-29" },
-            { period: "P13", start: "2026-11-30", end: "2026-12-27" }
+            { period: "P13", start: "2026-11-30", end: "2026-12-27" },
+
+            // 2025
+            { period: "P01", start: "2024-12-30", end: "2025-01-26" },
+            { period: "P02", start: "2025-01-27", end: "2025-02-23" },
+            { period: "P03", start: "2025-02-24", end: "2025-03-23" },
+            { period: "P04", start: "2025-03-24", end: "2025-04-20" },
+            { period: "P05", start: "2025-04-21", end: "2025-05-18" },
+            { period: "P06", start: "2025-05-19", end: "2025-06-15" },
+            { period: "P07", start: "2025-06-16", end: "2025-07-13" },
+            { period: "P08", start: "2025-07-14", end: "2025-08-10" },
+            { period: "P09", start: "2025-08-11", end: "2025-09-07" },
+            { period: "P10", start: "2025-09-08", end: "2025-10-05" },
+            { period: "P11", start: "2025-10-06", end: "2025-11-02" },
+            { period: "P12", start: "2025-11-03", end: "2025-11-30" },
+            { period: "P13", start: "2025-12-01", end: "2025-12-28" },
+
+            // 2024
+            { period: "P01", start: "2024-01-01", end: "2024-01-28" },
+            { period: "P02", start: "2024-01-29", end: "2024-02-25" },
+            { period: "P03", start: "2024-02-26", end: "2024-03-24" },
+            { period: "P04", start: "2024-03-25", end: "2024-04-21" },
+            { period: "P05", start: "2024-04-22", end: "2024-05-19" },
+            { period: "P06", start: "2024-05-20", end: "2024-06-16" },
+            { period: "P07", start: "2024-06-17", end: "2024-07-14" },
+            { period: "P08", start: "2024-07-15", end: "2024-08-11" },
+            { period: "P09", start: "2024-08-12", end: "2024-09-08" },
+            { period: "P10", start: "2024-09-09", end: "2024-10-06" },
+            { period: "P11", start: "2024-10-07", end: "2024-11-03" },
+            { period: "P12", start: "2024-11-04", end: "2024-12-01" },
+            { period: "P13", start: "2024-12-02", end: "2024-12-29" },
+
+            // 2023
+            { period: "P01", start: "2023-01-02", end: "2023-01-29" },
+            { period: "P02", start: "2023-01-30", end: "2023-02-26" },
+            { period: "P03", start: "2023-02-27", end: "2023-03-26" },
+            { period: "P04", start: "2023-03-27", end: "2023-04-23" },
+            { period: "P05", start: "2023-04-24", end: "2023-05-21" },
+            { period: "P06", start: "2023-05-22", end: "2023-06-18" },
+            { period: "P07", start: "2023-06-19", end: "2023-07-16" },
+            { period: "P08", start: "2023-07-17", end: "2023-08-13" },
+            { period: "P09", start: "2023-08-14", end: "2023-09-10" },
+            { period: "P10", start: "2023-09-11", end: "2023-10-08" },
+            { period: "P11", start: "2023-10-09", end: "2023-11-05" },
+            { period: "P12", start: "2023-11-06", end: "2023-12-03" },
+            { period: "P13", start: "2023-12-04", end: "2023-12-31" },
+
+            // 2022
+            { period: "P01", start: "2022-01-03", end: "2022-01-30" },
+            { period: "P02", start: "2022-01-31", end: "2022-02-27" },
+            { period: "P03", start: "2022-02-28", end: "2022-03-27" },
+            { period: "P04", start: "2022-03-28", end: "2022-04-24" },
+            { period: "P05", start: "2022-04-25", end: "2022-05-22" },
+            { period: "P06", start: "2022-05-23", end: "2022-06-19" },
+            { period: "P07", start: "2022-06-20", end: "2022-07-17" },
+            { period: "P08", start: "2022-07-18", end: "2022-08-14" },
+            { period: "P09", start: "2022-08-15", end: "2022-09-11" },
+            { period: "P10", start: "2022-09-12", end: "2022-10-09" },
+            { period: "P11", start: "2022-10-10", end: "2022-11-06" },
+            { period: "P12", start: "2022-11-07", end: "2022-12-04" },
+            { period: "P13", start: "2022-12-05", end: "2023-01-01" }
         ];
 
         function getDominosFiscalPeriod(dateInput) {
             if (!dateInput) return "P08";
-            let d = new Date(dateInput);
+            let d = (dateInput instanceof Date) ? dateInput : new Date(dateInput);
             if (isNaN(d.getTime())) return "P08";
 
             const yyyy = d.getFullYear();
@@ -1254,9 +1315,9 @@
             const dd = String(d.getDate()).padStart(2, '0');
             const dateStr = `${yyyy}-${mm}-${dd}`;
 
-            for (let i = 0; i < DOMINOS_FISCAL_2026.length; i++) {
-                if (dateStr >= DOMINOS_FISCAL_2026[i].start && dateStr <= DOMINOS_FISCAL_2026[i].end) {
-                    return DOMINOS_FISCAL_2026[i].period;
+            for (let i = 0; i < DOMINOS_FISCAL_CALENDARS.length; i++) {
+                if (dateStr >= DOMINOS_FISCAL_CALENDARS[i].start && dateStr <= DOMINOS_FISCAL_CALENDARS[i].end) {
+                    return DOMINOS_FISCAL_CALENDARS[i].period;
                 }
             }
             return "P08";
