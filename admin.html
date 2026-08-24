@@ -4023,7 +4023,7 @@
             (staffing || []).forEach(item => {
                 const isTerm = !!item.termDate || (item.causeOfAction && item.causeOfAction.trim() !== '') || (item.reasonOfAction && item.reasonOfAction.trim() !== '');
                 if (isTerm) {
-                    const submitDate = parseCandidateDate(item.receivedDate || item.lastUpdated || item.termDate);
+                    const submitDate = parseCandidateDate(item.receivedDate || item.termDate || item.lastUpdated);
                     if (submitDate) {
                         if (submitDate >= startThisWeek && submitDate <= endThisWeek) {
                             termsSubmittedThisWeek++;
