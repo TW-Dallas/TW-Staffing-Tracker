@@ -577,107 +577,118 @@
                                 <input type="text" id="stfName" placeholder="e.g. John Smith">
                             </div>
 
-                            <div class="form-row flex-three">
-                                <div class="form-group">
-                                    <label>Position</label>
-                                    <select id="stfPosition">
-                                        <option value="">Select Position</option>
-                                        <option value="CSR">🍕 CSR</option>
-                                        <option value="BIKE">🚲 BIKE</option>
-                                        <option value="DE">🚗 DE</option>
-                                        <option value="MIT">🎓 MIT</option>
-                                    </select>
+                            <!-- HRAlliance Style Employment Periods Card (Top Position) -->
+                            <div id="stfEmploymentPeriodsContainer" style="margin-top: 10px; margin-bottom: 14px;"></div>
+
+                            <!-- Collapsible Active Stint Editor -->
+                            <div id="stfActiveEditorWrapper" style="background: white; border: 1.5px solid #d0c0a8; border-radius: 8px; overflow: hidden; margin-bottom: 14px;">
+                                <div onclick="toggleActiveStintEditor()" style="background: #f7f1e6; padding: 10px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0d0ba;">
+                                    <strong id="stfActiveEditorTitle" style="color: #472b10; font-family: 'Subhead1', sans-serif; font-size: 16px;">
+                                        ✏️ Active Record / Stint Details
+                                    </strong>
+                                    <span id="stfActiveEditorChevron" style="font-size: 13.5px; color: #1f4e79; font-weight: bold; font-family: 'Subhead1', sans-serif;">▼ Collapse / Expand</span>
                                 </div>
-                                <div class="form-group">
-                                    <label>Store #</label>
-                                    <input type="text" id="stfStore">
-                                </div>
-                                <div class="form-group">
-                                    <label>DO Name</label>
-                                    <input type="text" id="stfDo">
+                                <div id="stfActiveEditorBody" style="padding: 14px;">
+                                    <div class="form-row flex-three">
+                                        <div class="form-group">
+                                            <label>Position</label>
+                                            <select id="stfPosition">
+                                                <option value="">Select Position</option>
+                                                <option value="CSR">🍕 CSR</option>
+                                                <option value="BIKE">🚲 BIKE</option>
+                                                <option value="DE">🚗 DE</option>
+                                                <option value="MIT">🎓 MIT</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Store #</label>
+                                            <input type="text" id="stfStore">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>DO Name</label>
+                                            <input type="text" id="stfDo">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
+                                        <div class="form-group">
+                                            <label>Hire Date (NTO)</label>
+                                            <input type="date" id="stfHireDate" onchange="autoCalculatePeriodFromDates()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Termination Date</label>
+                                            <input type="date" id="stfTermDate" onchange="autoCalculatePeriodFromDates()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Date Received</label>
+                                            <input type="date" id="stfReceivedDate" title="Date GM submitted the form (used for weekly submission metrics)">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Fiscal Period</label>
+                                            <input type="text" id="stfPeriod" placeholder="P08" readonly
+                                                style="background: var(--crust-light); font-weight: bold; color: var(--dark-blue);">
+                                        </div>
+                                    </div>
+
+                                    <div class="section-header" style="margin-top: 10px;">Termination & Bonus Eligibility Audit</div>
+
+                                    <div class="form-row flex-three">
+                                        <div class="form-group">
+                                            <label>Re-Hire Eligible?</label>
+                                            <select id="stfRehire">
+                                                <option value="Yes">✅ Yes - Eligible for Re-Hire</option>
+                                                <option value="No">🚫 No - Ineligible / Do Not Rehire</option>
+                                                <option value="Review Required">⚠️ Review Required</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Cause of Action</label>
+                                            <select id="stfCause">
+                                                <option value="">Select Action Cause</option>
+                                                <option value="Abandoned job">Abandoned job</option>
+                                                <option value="Resignation">Resignation</option>
+                                                <option value="Fired">Fired</option>
+                                                <option value="LOA">LOA</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Reason for Action</label>
+                                            <select id="stfReason">
+                                                <option value="">Select Reason</option>
+                                                <option value="Quit without notice">Quit without notice</option>
+                                                <option value="Illness">Illness</option>
+                                                <option value="Problem with GM">Problem with GM</option>
+                                                <option value="Problem with Co-worker">Problem with Co-worker</option>
+                                                <option value="Attendance">Attendance</option>
+                                                <option value="Insubordination">Insubordination</option>
+                                                <option value="Violation of Rules">Violation of Rules</option>
+                                                <option value="Unsatisfactory Performance">Unsatisfactory Performance</option>
+                                                <option value="Medical Leave">Medical Leave</option>
+                                                <option value="Personal Leave">Personal Leave</option>
+                                                <option value="Returning to School">Returning to School</option>
+                                                <option value="Gross Negligence">Gross Negligence</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>General Staffing Notes / Explain Reason in Detail</label>
+                                        <textarea id="stfNotes" placeholder="Enter detailed explanation here..."></textarea>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Submitted by:</label>
+                                        <input type="text" id="stfGmName" placeholder="Manager who completed form">
+                                    </div>
                                 </div>
                             </div>
-
-                            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
-                                <div class="form-group">
-                                    <label>Hire Date (NTO)</label>
-                                    <input type="date" id="stfHireDate" onchange="autoCalculatePeriodFromDates()">
-                                </div>
-                                <div class="form-group">
-                                    <label>Termination Date</label>
-                                    <input type="date" id="stfTermDate" onchange="autoCalculatePeriodFromDates()">
-                                </div>
-                                <div class="form-group">
-                                    <label>Date Received</label>
-                                    <input type="date" id="stfReceivedDate" title="Date GM submitted the form (used for weekly submission metrics)">
-                                </div>
-                                <div class="form-group">
-                                    <label>Fiscal Period</label>
-                                    <input type="text" id="stfPeriod" placeholder="P08" readonly
-                                        style="background: var(--crust-light); font-weight: bold; color: var(--dark-blue);">
-                                </div>
-                            </div>
-
-                            <div class="section-header">Termination & Bonus Eligibility Audit</div>
-
-                            <div class="form-row flex-three">
-                                <div class="form-group">
-                                    <label>Re-Hire Eligible?</label>
-                                    <select id="stfRehire">
-                                        <option value="Yes">✅ Yes - Eligible for Re-Hire</option>
-                                        <option value="No">🚫 No - Ineligible / Do Not Rehire</option>
-                                        <option value="Review Required">⚠️ Review Required</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Cause of Action</label>
-                                    <select id="stfCause">
-                                        <option value="">Select Action Cause</option>
-                                        <option value="Abandoned job">Abandoned job</option>
-                                        <option value="Resignation">Resignation</option>
-                                        <option value="Fired">Fired</option>
-                                        <option value="LOA">LOA</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Reason for Action</label>
-                                    <select id="stfReason">
-                                        <option value="">Select Reason</option>
-                                        <option value="Quit without notice">Quit without notice</option>
-                                        <option value="Illness">Illness</option>
-                                        <option value="Problem with GM">Problem with GM</option>
-                                        <option value="Problem with Co-worker">Problem with Co-worker</option>
-                                        <option value="Attendance">Attendance</option>
-                                        <option value="Insubordination">Insubordination</option>
-                                        <option value="Violation of Rules">Violation of Rules</option>
-                                        <option value="Unsatisfactory Performance">Unsatisfactory Performance</option>
-                                        <option value="Medical Leave">Medical Leave</option>
-                                        <option value="Personal Leave">Personal Leave</option>
-                                        <option value="Returning to School">Returning to School</option>
-                                        <option value="Gross Negligence">Gross Negligence</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label>General Staffing Notes / Explain Reason in Detail</label>
-                                <textarea id="stfNotes" placeholder="Enter detailed explanation here..."></textarea>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Submitted by:</label>
-                                <input type="text" id="stfGmName" placeholder="Manager who completed form">
-                            </div>
-
-                            <!-- HRAlliance Style Employment Periods Card -->
-                            <div id="stfEmploymentPeriodsContainer" style="margin-top: 16px;"></div>
 
                             <!-- Additional / Prior Employment Stints Sub-Form -->
-                            <div id="stfPriorStintsWrapper" style="margin-top: 16px; background: #faf5ed; border: 1.5px dashed #c29d62; border-radius: 8px; padding: 14px;">
+                            <div id="stfPriorStintsWrapper" style="margin-top: 14px; background: #faf5ed; border: 1.5px dashed #c29d62; border-radius: 8px; padding: 14px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                     <div style="font-family: 'Subhead1', sans-serif; font-size: 15px; color: #472b10; font-weight: bold;">
-                                        🔁 Additional / Past Employment Stints
+                                        🔁 Add Historical / Past Stint to File
                                     </div>
                                     <button type="button" onclick="addPriorStintCard()"
                                         style="background: var(--brand-blue); color: white; border: none; border-radius: 6px; padding: 6px 12px; font-family: 'Subhead1', sans-serif; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
@@ -4541,6 +4552,18 @@
             return `${months} month${months === 1 ? '' : 's'}`;
         }
 
+        function toggleActiveStintEditor(forceState) {
+            const body = document.getElementById('stfActiveEditorBody');
+            const chevron = document.getElementById('stfActiveEditorChevron');
+            if (!body) return;
+            const isCurrentlyHidden = (body.style.display === 'none');
+            const show = (forceState !== undefined) ? forceState : isCurrentlyHidden;
+            body.style.display = show ? 'block' : 'none';
+            if (chevron) {
+                chevron.innerText = show ? '▲ Collapse Form' : '▼ Expand Form';
+            }
+        }
+
         function toggleStintDetailRow(idx) {
             const row = document.getElementById(`stint-detail-row-${idx}`);
             if (!row) return;
@@ -4551,6 +4574,9 @@
             const stfItem = staffing.find(s => String(s.id) === String(stintId));
             if (stfItem) {
                 selectCandidate(stfItem);
+                toggleActiveStintEditor(true);
+                const editor = document.getElementById('stfActiveEditorWrapper');
+                if (editor) editor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
         }
 
@@ -4559,56 +4585,66 @@
             const periods = getEmploymentPeriods(name, email, id);
             if (periods.length === 0) {
                 containerEl.innerHTML = '';
+                toggleActiveStintEditor(true);
                 return;
             }
 
             window.currentCandidateEmploymentPeriods = periods;
             const isRehire = periods.length > 1;
-            const rehireBadge = isRehire ? `<span style="background: #e8f0fe; color: #1a73e8; font-size: 13px; font-weight: bold; padding: 2px 8px; border-radius: 4px; margin-left: 8px; border: 1px solid #cce0ff;">🔁 Re-Hire (${periods.length} Stints)</span>` : '';
+            const rehireBadge = isRehire ? `<span style="background: #e8f0fe; color: #1a73e8; font-size: 14.5px; font-weight: bold; padding: 4px 10px; border-radius: 4px; margin-left: 8px; border: 1px solid #cce0ff;">🔁 Re-Hire (${periods.length} Stints)</span>` : '';
+
+            // If multi-stint rehire, collapse the top editor by default to avoid clutter
+            if (isRehire) {
+                const titleEl = document.getElementById('stfActiveEditorTitle');
+                if (titleEl) titleEl.innerText = `✏️ Edit Stint / Staffing Record Form`;
+                toggleActiveStintEditor(false);
+            } else {
+                toggleActiveStintEditor(true);
+            }
 
             let rowsHtml = periods.map((p, idx) => {
                 const beginDisplay = p.beginDate ? formatDisplayDate(p.beginDate) : 'Unknown';
                 const endDisplay = p.endDate ? formatDisplayDate(p.endDate) : '<span style="color: #137333; font-weight: bold;">Present (Active)</span>';
                 const duration = calculateTenureDuration(p.beginDate, p.endDate);
-                const reason = [p.causeOfAction, p.reasonOfAction].filter(Boolean).join(' - ') || (p.notes ? p.notes.substring(0, 30) : '—');
+                const reason = [p.causeOfAction, p.reasonOfAction].filter(Boolean).join(' - ') || (p.notes ? p.notes.substring(0, 35) : '—');
                 
                 let rehireBadgeStint = '';
                 if (p.rehireEligible === 'No') {
-                    rehireBadgeStint = '<span style="color: #c5221f; font-weight: bold;">🚫 Ineligible</span>';
+                    rehireBadgeStint = '<span style="color: #c5221f; font-weight: bold; font-size: 15.5px;">🚫 Ineligible</span>';
                 } else if (p.rehireEligible === 'Review Required') {
-                    rehireBadgeStint = '<span style="color: #b06000; font-weight: bold;">⚠️ Review</span>';
+                    rehireBadgeStint = '<span style="color: #b06000; font-weight: bold; font-size: 15.5px;">⚠️ Review</span>';
                 } else {
-                    rehireBadgeStint = '<span style="color: #137333;">✅ Eligible</span>';
+                    rehireBadgeStint = '<span style="color: #137333; font-weight: bold; font-size: 15.5px;">✅ Eligible</span>';
                 }
 
                 const rowBg = idx % 2 === 0 ? '#ffffff' : '#f8f9fa';
 
                 return `
-                    <tr style="background: ${rowBg}; border-bottom: 1px solid #e0e0e0; font-size: 14.5px;">
-                        <td style="padding: 8px 10px; font-weight: bold; color: #1f4e79;">Stint ${idx + 1}</td>
-                        <td style="padding: 8px 10px;">${beginDisplay}</td>
-                        <td style="padding: 8px 10px;">${endDisplay}</td>
-                        <td style="padding: 8px 10px; color: #555;">${duration}</td>
-                        <td style="padding: 8px 10px; font-weight: 500;">Store #${p.store || '—'}</td>
-                        <td style="padding: 8px 10px;">${p.position || 'CSR'}</td>
-                        <td style="padding: 8px 10px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeText(reason)}">${escapeText(reason)}</td>
-                        <td style="padding: 8px 10px; text-align: center;">${rehireBadgeStint}</td>
-                        <td style="padding: 6px 10px; text-align: center;">
+                    <tr style="background: ${rowBg}; border-bottom: 1px solid #e0e0e0; font-size: 16px;">
+                        <td style="padding: 10px 12px; font-weight: bold; color: #1f4e79;">Stint ${idx + 1}</td>
+                        <td style="padding: 10px 12px;">${beginDisplay}</td>
+                        <td style="padding: 10px 12px;">${endDisplay}</td>
+                        <td style="padding: 10px 12px; color: #555;">${duration}</td>
+                        <td style="padding: 10px 12px; font-weight: 500;">Store #${p.store || '—'}</td>
+                        <td style="padding: 10px 12px;">${p.position || 'CSR'}</td>
+                        <td style="padding: 10px 12px; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeText(reason)}">${escapeText(reason)}</td>
+                        <td style="padding: 10px 12px; text-align: center;">${rehireBadgeStint}</td>
+                        <td style="padding: 8px 12px; text-align: center;">
                             <button type="button" onclick="toggleStintDetailRow(${idx})"
-                                style="background: #eef3f8; border: 1px solid #c0d4e8; color: #1f4e79; border-radius: 4px; padding: 3px 8px; font-size: 12px; cursor: pointer; font-family: 'Subhead1', sans-serif;">
-                                👁️ Notes
+                                style="background: #eef3f8; border: 1.5px solid #b8d2eb; color: #1f4e79; border-radius: 6px; padding: 6px 12px; font-size: 14px; cursor: pointer; font-family: 'Subhead1', sans-serif; font-weight: bold;">
+                                👁️ View Notes
                             </button>
                         </td>
                     </tr>
                     <tr id="stint-detail-row-${idx}" class="stint-detail-drawer" style="display: none; background: #fffcf5; border-bottom: 2px solid #c29d62;">
-                        <td colspan="9" style="padding: 12px 16px;">
-                            <div style="background: white; border: 1px solid #e0d0ba; border-radius: 8px; padding: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; border-bottom: 1px solid #f0e6d6; padding-bottom: 6px; gap: 12px; flex-wrap: wrap;">
+                        <td colspan="9" style="padding: 16px 20px;">
+                            <div style="background: white; border: 1.5px solid #dfcfb8; border-radius: 10px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1.5px solid #f0e6d6; padding-bottom: 10px; gap: 14px; flex-wrap: wrap;">
                                     <div>
-                                        <strong style="color: #1f4e79; font-size: 14.5px; font-family: 'Subhead1', sans-serif;">
+                                        <div style="color: #1f4e79; font-size: 18px; font-family: 'Subhead1', sans-serif; font-weight: bold;">
                                             📋 Stint #${idx + 1} (${p.beginDate ? formatDisplayDate(p.beginDate) : 'Unknown'} – ${p.endDate ? formatDisplayDate(p.endDate) : 'Active'}) — Store #${p.store || '—'} (${p.position || 'CSR'})
-                                        </strong>
-                                        <div style="font-size: 13px; color: #5d4037; margin-top: 3px; display: flex; gap: 12px; flex-wrap: wrap;">
+                                        </div>
+                                        <div style="font-size: 15.5px; color: #5d4037; margin-top: 5px; display: flex; gap: 16px; flex-wrap: wrap; font-family: 'Condensed', sans-serif;">
                                             ${p.causeOfAction ? `<span><strong>Cause:</strong> ${escapeText(p.causeOfAction)}</span>` : ''}
                                             ${p.reasonOfAction ? `<span><strong>Reason:</strong> ${escapeText(p.reasonOfAction)}</span>` : ''}
                                             ${p.gmName ? `<span><strong>Submitted by (GM):</strong> ${escapeText(p.gmName)}</span>` : ''}
@@ -4617,14 +4653,14 @@
                                     </div>
                                     ${p.id ? `
                                         <button type="button" onclick="loadSpecificStintIntoForm('${p.id}')"
-                                            style="background: var(--brand-blue); color: white; border: none; border-radius: 6px; padding: 6px 14px; font-family: 'Subhead1', sans-serif; font-size: 13px; cursor: pointer; white-space: nowrap;">
+                                            style="background: var(--brand-blue); color: white; border: none; border-radius: 6px; padding: 8px 18px; font-family: 'Subhead1', sans-serif; font-size: 14.5px; cursor: pointer; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                             ✏️ Edit This Stint in Form
                                         </button>
                                     ` : ''}
                                 </div>
                                 <div>
-                                    <div style="font-size: 12px; font-weight: bold; color: #472b10; margin-bottom: 3px;">📝 Full Termination & Staffing Notes:</div>
-                                    <div style="font-size: 13.5px; color: #333; background: #faf5ed; border: 1px solid #e8dfcf; border-radius: 6px; padding: 8px 12px; font-family: 'Condensed', sans-serif; white-space: pre-wrap; line-height: 1.4;">${escapeText(p.notes || 'No specific notes recorded for this stint.')}</div>
+                                    <div style="font-size: 15.5px; font-weight: bold; color: #472b10; margin-bottom: 6px; font-family: 'Subhead1', sans-serif;">📝 Full Termination & Staffing Notes:</div>
+                                    <div style="font-size: 17px; color: #222; background: #faf5ed; border: 1px solid #e2d5c1; border-radius: 8px; padding: 12px 16px; font-family: 'Condensed', sans-serif; white-space: pre-wrap; line-height: 1.6;">${escapeText(p.notes || 'No specific notes recorded for this stint.')}</div>
                                 </div>
                             </div>
                         </td>
@@ -4634,23 +4670,23 @@
 
             containerEl.innerHTML = `
                 <div style="background: white; border: 1.5px solid #1f4e79; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
-                    <div style="background: #1f4e79; color: white; padding: 8px 14px; font-family: 'Subhead1', sans-serif; font-size: 16px; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="background: #1f4e79; color: white; padding: 10px 16px; font-family: 'Subhead1', sans-serif; font-size: 18px; display: flex; align-items: center; justify-content: space-between;">
                         <span>📋 Employment Periods (HRAlliance History)</span>
                         ${rehireBadge}
                     </div>
                     <div style="overflow-x: auto;">
                         <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: 'Condensed', sans-serif;">
                             <thead>
-                                <tr style="background: #2b5b84; color: white; font-size: 14px; font-weight: 600;">
-                                    <th style="padding: 7px 10px;">Period</th>
-                                    <th style="padding: 7px 10px;">Begin Date</th>
-                                    <th style="padding: 7px 10px;">End Date</th>
-                                    <th style="padding: 7px 10px;">Duration</th>
-                                    <th style="padding: 7px 10px;">Store</th>
-                                    <th style="padding: 7px 10px;">Position</th>
-                                    <th style="padding: 7px 10px;">Reason / Action</th>
-                                    <th style="padding: 7px 10px; text-align: center;">Rehire Status</th>
-                                    <th style="padding: 7px 10px; text-align: center;">Details</th>
+                                <tr style="background: #2b5b84; color: white; font-size: 16px; font-weight: 600;">
+                                    <th style="padding: 10px 12px;">Period</th>
+                                    <th style="padding: 10px 12px;">Begin Date</th>
+                                    <th style="padding: 10px 12px;">End Date</th>
+                                    <th style="padding: 10px 12px;">Duration</th>
+                                    <th style="padding: 10px 12px;">Store</th>
+                                    <th style="padding: 10px 12px;">Position</th>
+                                    <th style="padding: 10px 12px;">Reason / Action</th>
+                                    <th style="padding: 10px 12px; text-align: center;">Rehire Status</th>
+                                    <th style="padding: 10px 12px; text-align: center;">Details</th>
                                 </tr>
                             </thead>
                             <tbody>
