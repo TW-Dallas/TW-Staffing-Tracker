@@ -2406,23 +2406,63 @@
                     }
                     return true;
                 });
-                filtered.sort(sortComparator);
 
                 if (filtered.length === 0) {
                     listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No staffing records found.</div>';
                     return;
                 }
+
+                // Group by employee name into a single cohesive employee file
+                const groupedMap = new Map();
                 filtered.forEach(item => {
+                    const normName = (item.name || '').toLowerCase().trim();
+                    if (!groupedMap.has(normName)) {
+                        groupedMap.set(normName, []);
+                    }
+                    groupedMap.get(normName).push(item);
+                });
+
+                // Pick the latest stint as the primary card representation
+                const employeeFiles = [];
+                groupedMap.forEach((stints, normName) => {
+                    // Sort stints: latest term/hire/updated date first
+                    stints.sort((a, b) => {
+                        const dateA = parseCandidateDate(a.termDate || a.hireDate || a.lastUpdated);
+                        const dateB = parseCandidateDate(b.termDate || b.hireDate || b.lastUpdated);
+                        const timeA = dateA ? dateA.getTime() : 0;
+                        const timeB = dateB ? dateB.getTime() : 0;
+                        return timeB - timeA;
+                    });
+                    employeeFiles.push({
+                        primary: stints[0],
+                        allStints: stints
+                    });
+                });
+
+                employeeFiles.sort((a, b) => sortComparator(a.primary, b.primary));
+
+                employeeFiles.forEach(emp => {
+                    const item = emp.primary;
                     const card = document.createElement('div');
                     card.className = 'candidate-card';
-                    if (item.id === currentSelectedId) card.classList.add('selected');
+                    
+                    const isCardSelected = emp.allStints.some(s => s.id === currentSelectedId);
+                    if (isCardSelected) card.classList.add('selected');
 
                     const isTerm = !!item.termDate;
                     card.classList.add(isTerm ? 'status-red' : 'status-green');
 
+                    const totalStints = getEmploymentPeriods(item.name, item.email, item.id).length;
+                    const rehireBadge = totalStints > 1 
+                        ? `<span class="badge-review" style="background: #e8f0fe; color: #1a73e8; border: 1px solid #cce0ff; font-weight: bold; margin-left: 4px;">🔁 Re-Hire (${totalStints})</span>` 
+                        : '';
+
                     card.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div class="card-name">${item.name}</div>
+                        <div class="card-name" style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                            <span>${item.name}</span>
+                            ${rehireBadge}
+                        </div>
                         <span class="badge-review" style="background:${isTerm ? '#ffebee' : '#e8f5e9'}; color:${isTerm ? 'var(--brand-red)' : 'var(--success-green)'};">${item.period}</span>
                     </div>
                     <div class="card-sub">
