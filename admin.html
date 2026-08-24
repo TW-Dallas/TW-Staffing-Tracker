@@ -4660,15 +4660,15 @@
                 showBrandAlert("Error concluding class: " + err.message, "System Error");
             }
         }
-        // Converts 18:30, 1830, or Sat Dec 30 1899 13:30:00 GMT... to "1:30 PM" for Frontend
+        // Converts 18:30, 1830, or Sat Dec 30 1899 19:20:00 GMT... to "7:20 PM" for Frontend
         function formatTimeDisplayFrontEnd(tStr) {
-            if (!tStr) return '';
+            if (!tStr && tStr !== 0) return '';
             let rawStr = tStr.toString().trim();
-            if (rawStr.includes("1899") || rawStr.includes("GMT") || rawStr.includes("Central")) {
-                const dt = new Date(rawStr);
-                if (!isNaN(dt.getTime())) {
-                    let h = dt.getHours();
-                    let m = dt.getMinutes();
+            if (rawStr.includes("1899") || rawStr.includes("GMT") || rawStr.includes("T")) {
+                const tMatch = rawStr.match(/(?:T|\s)(\d{1,2}):(\d{2})/);
+                if (tMatch) {
+                    let h = parseInt(tMatch[1], 10);
+                    let m = parseInt(tMatch[2], 10);
                     let period = h >= 12 ? "PM" : "AM";
                     let displayH = h % 12 || 12;
                     let displayM = m < 10 ? "0" + m : m;
@@ -4702,7 +4702,7 @@
             let finalH = Math.floor(totalMins / 60) % 24;
             let finalM = totalMins % 60;
             let period = finalH >= 12 ? "PM" : "AM";
-            let displayH = finalH % 12;
+            let displayH = finalH % 12 || 12;
             if (displayH === 0) displayH = 12;
             let displayM = finalM < 10 ? "0" + finalM : finalM;
 
