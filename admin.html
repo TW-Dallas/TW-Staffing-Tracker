@@ -672,6 +672,23 @@
 
                             <!-- HRAlliance Style Employment Periods Card -->
                             <div id="stfEmploymentPeriodsContainer" style="margin-top: 16px;"></div>
+
+                            <!-- Additional / Prior Employment Stints Sub-Form -->
+                            <div id="stfPriorStintsWrapper" style="margin-top: 16px; background: #faf5ed; border: 1.5px dashed #c29d62; border-radius: 8px; padding: 14px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="font-family: 'Subhead1', sans-serif; font-size: 15px; color: #472b10; font-weight: bold;">
+                                        🔁 Additional / Past Employment Stints
+                                    </div>
+                                    <button type="button" onclick="addPriorStintCard()"
+                                        style="background: var(--brand-blue); color: white; border: none; border-radius: 6px; padding: 6px 12px; font-family: 'Subhead1', sans-serif; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                        <span>➕ Add Prior Stint</span>
+                                    </button>
+                                </div>
+                                <div style="font-size: 13px; color: #795548; margin-bottom: 10px; font-family: 'Condensed', sans-serif;">
+                                    Enter any previous employment terms for this rehire. Each stint will be recorded with its own dates, store, reasons, and detailed notes.
+                                </div>
+                                <div id="priorStintsContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                            </div>
                         </div>
 
                         <!-- 4. PAY CARDS FORM TEMPLATE -->
@@ -2850,6 +2867,7 @@
                 document.getElementById('stfGmName').value = item.gmName || item.gm || '';
 
                 renderEmploymentPeriodsCard(document.getElementById('stfEmploymentPeriodsContainer'), item.name, item.email, item.id);
+                populatePriorStintsForCandidate(item.name, item.email, item.id);
 
             } else if (currentView === 'interviews') {
                 document.getElementById('fieldId').value = item.id;
@@ -3086,6 +3104,7 @@
                 payload.reasonOfAction = document.getElementById('stfReason') ? document.getElementById('stfReason').value.trim() : '';
                 payload.notes = document.getElementById('stfNotes').value.trim();
                 payload.gmName = (document.getElementById('stfGmName') || document.getElementById('stfGm'))?.value.trim() || '';
+                payload.priorStints = collectPriorStintsFromForm();
 
             } else if (currentView === 'interviews') {
                 payload.name = document.getElementById('intName').value.trim();
@@ -4533,7 +4552,152 @@
             `;
         }
 
-        function getNextUpcomingNtoClassDate() {
+        function addPriorStintCard(data) {
+            const container = document.getElementById('priorStintsContainer');
+            if (!container) return;
+            const stint = data || {};
+            const stintIdx = container.querySelectorAll('.prior-stint-card').length + 1;
+            const card = document.createElement('div');
+            card.className = 'prior-stint-card';
+            card.style.cssText = 'background: white; border: 1px solid #e0d0ba; border-radius: 8px; padding: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); position: relative;';
+            
+            card.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #f0e6d6; padding-bottom: 4px;">
+                    <strong style="color: #1f4e79; font-size: 14px; font-family: 'Subhead1', sans-serif;">Prior Stint #${stintIdx}</strong>
+                    <button type="button" onclick="this.closest('.prior-stint-card').remove(); updatePriorStintIndexes();"
+                        style="background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; border-radius: 4px; padding: 2px 8px; font-size: 12px; cursor: pointer; font-family: 'Subhead1', sans-serif;">
+                        🗑️ Remove
+                    </button>
+                </div>
+                <input type="hidden" class="stint-id" value="${escapeText(stint.id || '')}">
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 12px;">Hire Date</label>
+                        <input type="date" class="stint-hire-date" value="${formatDateForInput(stint.hireDate || stint.beginDate)}">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 12px;">Term Date</label>
+                        <input type="date" class="stint-term-date" value="${formatDateForInput(stint.termDate || stint.endDate)}">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 12px;">Store #</label>
+                        <input type="text" class="stint-store" value="${escapeText(stint.store || '')}" placeholder="e.g. 6836">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 12px;">Position</label>
+                        <select class="stint-position">
+                            <option value="CSR" ${stint.position === 'CSR' ? 'selected' : ''}>🍕 CSR</option>
+                            <option value="DE" ${stint.position === 'DE' ? 'selected' : ''}>🚗 DE</option>
+                            <option value="BIKE" ${stint.position === 'BIKE' ? 'selected' : ''}>🚲 BIKE</option>
+                            <option value="MIT" ${stint.position === 'MIT' ? 'selected' : ''}>🎓 MIT</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 12px;">Re-Hire Eligible?</label>
+                        <select class="stint-rehire">
+                            <option value="Yes" ${stint.rehireEligible === 'Yes' ? 'selected' : ''}>✅ Yes - Eligible</option>
+                            <option value="No" ${stint.rehireEligible === 'No' ? 'selected' : ''}>🚫 No - Ineligible</option>
+                            <option value="Review Required" ${stint.rehireEligible === 'Review Required' ? 'selected' : ''}>⚠️ Review Required</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 12px;">Cause of Action</label>
+                        <select class="stint-cause">
+                            <option value="">Select Cause</option>
+                            <option value="Resignation" ${stint.causeOfAction === 'Resignation' ? 'selected' : ''}>Resignation</option>
+                            <option value="Abandoned job" ${stint.causeOfAction === 'Abandoned job' ? 'selected' : ''}>Abandoned job</option>
+                            <option value="Fired" ${stint.causeOfAction === 'Fired' ? 'selected' : ''}>Fired</option>
+                            <option value="LOA" ${stint.causeOfAction === 'LOA' ? 'selected' : ''}>LOA</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 12px;">Reason for Action</label>
+                        <select class="stint-reason">
+                            <option value="">Select Reason</option>
+                            <option value="Quit without notice" ${stint.reasonOfAction === 'Quit without notice' ? 'selected' : ''}>Quit without notice</option>
+                            <option value="Illness" ${stint.reasonOfAction === 'Illness' ? 'selected' : ''}>Illness</option>
+                            <option value="Problem with GM" ${stint.reasonOfAction === 'Problem with GM' ? 'selected' : ''}>Problem with GM</option>
+                            <option value="Problem with Co-worker" ${stint.reasonOfAction === 'Problem with Co-worker' ? 'selected' : ''}>Problem with Co-worker</option>
+                            <option value="Attendance" ${stint.reasonOfAction === 'Attendance' ? 'selected' : ''}>Attendance</option>
+                            <option value="Insubordination" ${stint.reasonOfAction === 'Insubordination' ? 'selected' : ''}>Insubordination</option>
+                            <option value="Violation of Rules" ${stint.reasonOfAction === 'Violation of Rules' ? 'selected' : ''}>Violation of Rules</option>
+                            <option value="Unsatisfactory Performance" ${stint.reasonOfAction === 'Unsatisfactory Performance' ? 'selected' : ''}>Unsatisfactory Performance</option>
+                            <option value="Medical Leave" ${stint.reasonOfAction === 'Medical Leave' ? 'selected' : ''}>Medical Leave</option>
+                            <option value="Personal Leave" ${stint.reasonOfAction === 'Personal Leave' ? 'selected' : ''}>Personal Leave</option>
+                            <option value="Returning to School" ${stint.reasonOfAction === 'Returning to School' ? 'selected' : ''}>Returning to School</option>
+                            <option value="Gross Negligence" ${stint.reasonOfAction === 'Gross Negligence' ? 'selected' : ''}>Gross Negligence</option>
+                            <option value="Other" ${stint.reasonOfAction === 'Other' ? 'selected' : ''}>Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-size: 12px;">Stint Notes & Specific Reason Details</label>
+                    <textarea class="stint-notes" placeholder="Enter specific details for this past stint..." style="height: 55px; font-size: 14px; padding: 6px 8px; font-family: 'Condensed', sans-serif;"></textarea>
+                </div>
+            `;
+            
+            const notesEl = card.querySelector('.stint-notes');
+            if (notesEl && stint.notes) notesEl.value = stint.notes;
+
+            container.appendChild(card);
+        }
+
+        function updatePriorStintIndexes() {
+            const container = document.getElementById('priorStintsContainer');
+            if (!container) return;
+            container.querySelectorAll('.prior-stint-card').forEach((card, idx) => {
+                const titleEl = card.querySelector('strong');
+                if (titleEl) titleEl.innerText = `Prior Stint #${idx + 1}`;
+            });
+        }
+
+        function collectPriorStintsFromForm() {
+            const container = document.getElementById('priorStintsContainer');
+            if (!container) return [];
+            const stints = [];
+            container.querySelectorAll('.prior-stint-card').forEach(card => {
+                const hireDate = card.querySelector('.stint-hire-date')?.value.trim() || '';
+                const termDate = card.querySelector('.stint-term-date')?.value.trim() || '';
+                const store = card.querySelector('.stint-store')?.value.trim() || '';
+                const position = card.querySelector('.stint-position')?.value || 'CSR';
+                const rehireEligible = card.querySelector('.stint-rehire')?.value || 'Yes';
+                const causeOfAction = card.querySelector('.stint-cause')?.value || '';
+                const reasonOfAction = card.querySelector('.stint-reason')?.value || '';
+                const notes = card.querySelector('.stint-notes')?.value.trim() || '';
+                const id = card.querySelector('.stint-id')?.value.trim() || '';
+
+                if (hireDate || termDate || notes) {
+                    stints.push({
+                        hireDate,
+                        termDate,
+                        store,
+                        position,
+                        rehireEligible,
+                        causeOfAction,
+                        reasonOfAction,
+                        notes,
+                        id
+                    });
+                }
+            });
+            return stints;
+        }
+
+        function populatePriorStintsForCandidate(name, email, currentRecordId) {
+            const container = document.getElementById('priorStintsContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const periods = getEmploymentPeriods(name, email, currentRecordId);
+            // Filter out the active record being edited so it only shows other / prior stints
+            const priorPeriods = periods.filter(p => p.id && String(p.id) !== String(currentRecordId));
+
+            priorPeriods.forEach(p => {
+                addPriorStintCard(p);
+            });
+        }
             const todayStart = new Date();
             todayStart.setHours(0, 0, 0, 0);
 
