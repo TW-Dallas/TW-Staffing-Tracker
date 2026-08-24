@@ -373,7 +373,9 @@
                                 <label class="checkbox-item flag-box flag-inactive">
                                     <input type="checkbox" id="checkInactive"> 💤 Inactive
                                 </label>
-                                <div></div>
+                                <label class="checkbox-item flag-box flag-inactive">
+                                    <input type="checkbox" id="checkWithdrawn"> 🚪 Withdrawn
+                                </label>
                             </div>
 
                             <!-- MANUAL EMAIL QUICK ACTIONS -->
@@ -1888,6 +1890,7 @@
         }
 
         function getActiveStatusText(item) {
+            if (item.withdrawn) return "🚪 Withdrawn";
             if (item.ineligible) return "🚫 Ineligible";
             if (item.inactive) return "💤 Inactive";
             if (item.hired) return "🎉 Hired";
@@ -1911,6 +1914,7 @@
         }
 
         function getStatusWeight(item) {
+            if (item.withdrawn) return -3;
             if (item.ineligible) return -1;
             if (item.inactive) return -2;
 
@@ -2214,8 +2218,8 @@
             const sortComparator = (a, b) => {
                 // Push "Hired", "Ineligible", and "Inactive" candidates to the bottom of the list for onboarding
                 if (currentView === 'onboarding') {
-                    const isTermA = a.hired || a.ineligible || a.inactive;
-                    const isTermB = b.hired || b.ineligible || b.inactive;
+                    const isTermA = a.hired || a.ineligible || a.inactive || a.withdrawn;
+                    const isTermB = b.hired || b.ineligible || b.inactive || b.withdrawn;
                     if (isTermA && !isTermB) return 1;
                     if (!isTermA && isTermB) return -1;
                 }
@@ -2585,7 +2589,7 @@
                     if (!matchesSearchQuery(item, searchQuery)) return false;
                     if (searchQuery) return true; // If user is searching, show all matching candidates (including inactive/ineligible/hired)
 
-                    const isTerminalState = item.hired || item.ineligible || item.inactive;
+                    const isTerminalState = item.hired || item.ineligible || item.inactive || item.withdrawn;
                     if (isTerminalState) {
                         const rawDate = item.lastUpdated || item.ntoDate || item.hireDate || item.date;
                         const candidateDate = parseCandidateDate(rawDate);
@@ -2613,7 +2617,7 @@
                     const rawAllPayError = (item.allPayError || "").toString().trim();
                     const isAllPayError = rawAllPayError !== "" && rawAllPayError.toUpperCase() !== "FALSE";
 
-                    if (item.ineligible || item.inactive) {
+                    if (item.ineligible || item.inactive || item.withdrawn) {
                         card.classList.add('status-gray');
                     } else if (isAllPayError || item.incorrectEmail || isBlockedByDocs || item.missedNto) {
                         card.classList.add('status-red');
@@ -2636,7 +2640,7 @@
                     else if (item.currentlyReviewing) statusStyleColor = 'var(--med-blue)';
                     else if (item.ntoScheduled || item.ntoSignupLinkSent) statusStyleColor = 'var(--dark-blue)';
                     else if (item.bgcComplete || item.allPayCompleted || item.pulseFormComplete) statusStyleColor = 'var(--med-blue)';
-                    else if (item.ineligible || item.inactive) statusStyleColor = 'var(--brand-grey)';
+                    else if (item.ineligible || item.inactive || item.withdrawn) statusStyleColor = 'var(--brand-grey)';
 
                     let flags = '';
                     if (isAllPayError) flags += '<span class="badge-incorrect">⚠️ AllPay Error</span> ';
@@ -2884,6 +2888,7 @@
                 document.getElementById('checkIncorrect').checked = item.incorrectEmail || false;
                 document.getElementById('checkIneligible').checked = item.ineligible || false;
                 document.getElementById('checkInactive').checked = item.inactive || false;
+                document.getElementById('checkWithdrawn').checked = item.withdrawn || false;
                 document.getElementById('checkPulseForm').checked = item.pulseFormComplete || false;
                 if (document.getElementById('checkMissedNto')) document.getElementById('checkMissedNto').checked = item.missedNto || false;
 
@@ -3111,6 +3116,7 @@
                 payload.incorrectEmail = document.getElementById('checkIncorrect').checked;
                 payload.ineligible = document.getElementById('checkIneligible').checked;
                 payload.inactive = document.getElementById('checkInactive').checked;
+                payload.withdrawn = document.getElementById('checkWithdrawn').checked;
                 payload.pulseFormComplete = document.getElementById('checkPulseForm').checked;
                 payload.missedNto = document.getElementById('checkMissedNto') ? document.getElementById('checkMissedNto').checked : (existingCand ? (existingCand.missedNto || false) : false);
 
@@ -4286,8 +4292,8 @@
                 const hasPayCard = val === "yes" || val === "true" || val === "1" || val.includes("yes");
                 if (!hasPayCard) return false;
 
-                // Exclude candidates explicitly marked inactive or ineligible
-                if (item.ineligible || item.inactive) return false;
+                // Exclude candidates explicitly marked inactive, ineligible, or withdrawn
+                if (item.ineligible || item.inactive || item.withdrawn) return false;
 
                 return true;
             }).map(item => {

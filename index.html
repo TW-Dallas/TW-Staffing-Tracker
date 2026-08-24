@@ -516,6 +516,7 @@
 
     // LAYER 1: PIPELINE PROGRESS & STATUS LABELS
     function getPipelineDetails(item) {
+        if (item.withdrawn) return { pct: 100, color: 'grey', label: 'Withdrawn' };
         if (item.ineligible) return { pct: 100, color: 'grey', label: 'Ineligible' };
         if (item.inactive) return { pct: 100, color: 'grey', label: 'Inactive' };
         if (item.hired) return { pct: 100, color: 'green', label: 'Hired' };
@@ -566,7 +567,7 @@
 
     // LAYER 2: DEDICATED ALERT BANNERS (Live Events & Blockers)
     function getAlertBanner(item) {
-        if (item.hired || item.inactive || item.ineligible) return '';
+        if (item.hired || item.inactive || item.ineligible || item.withdrawn) return '';
 
         const att = (item.ntoAttendance || item.ntoStatus || item['NTO Status'] || item.liveStatus || item.status || '').trim();
 
@@ -599,6 +600,7 @@
     }
     
     function getStatusWeight(item) {
+        if (item.withdrawn) return 13;
         if (item.ineligible) return 12;
         if (item.inactive) return 11;
 
@@ -901,7 +903,7 @@
                 candidateDate = item.lastUpdated ? new Date(item.lastUpdated) : null;
             }
 
-            const isTerminalState = item.hired || item.inactive || item.ineligible;
+            const isTerminalState = item.hired || item.inactive || item.ineligible || item.withdrawn;
             const isOlderThanTwoWeeks = candidateDate && !isNaN(candidateDate.getTime()) && candidateDate < twoWeeksAgo;
 
             if (isOlderThanTwoWeeks || (isTerminalState && isOlderThanTwoWeeks)) {
@@ -925,7 +927,7 @@
             const alertHtml = getAlertBanner(item); // 👈 Safely calls getAlertBanner!
 
             let cardClass = 'status-blue';
-            if (item.inactive || item.ineligible) {
+            if (item.inactive || item.ineligible || item.withdrawn) {
                 cardClass = 'status-gray';
             } else if (pipe.color === 'red') {
                 cardClass = 'status-red';
@@ -953,7 +955,7 @@
             if (ntoDateVal) chipsHtml += `<span class="chip chip-nto">📅 NTO: ${formatDisplayDate(ntoDateVal)}</span>`;
 
             let checklistHtml = '';
-            if (!item.inactive && !item.ineligible && !item.hired) {
+            if (!item.inactive && !item.ineligible && !item.withdrawn && !item.hired) {
                 checklistHtml = `
                     <div class="onboarding-checklist">
                         <div class="checklist-title">Onboarding Tasks</div>
