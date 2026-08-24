@@ -2918,7 +2918,8 @@
                 document.getElementById('stfGmName').value = item.gmName || item.gm || '';
 
                 renderEmploymentPeriodsCard(document.getElementById('stfEmploymentPeriodsContainer'), item.name, item.email, item.id);
-                populatePriorStintsForCandidate(item.name, item.email, item.id);
+                const priorStCont = document.getElementById('priorStintsContainer');
+                if (priorStCont) priorStCont.innerHTML = '';
 
             } else if (currentView === 'interviews') {
                 document.getElementById('fieldId').value = item.id;
@@ -4042,6 +4043,11 @@
             (staffing || []).forEach(item => {
                 const isTerm = !!item.termDate || (item.causeOfAction && item.causeOfAction.trim() !== '') || (item.reasonOfAction && item.reasonOfAction.trim() !== '');
                 if (isTerm) {
+                    const tDate = parseCandidateDate(item.termDate);
+                    // Ignore historical stints from prior years (e.g. 2025 or earlier)
+                    if (tDate && tDate.getFullYear() < currentYear) {
+                        return;
+                    }
                     const submitDate = parseCandidateDate(item.receivedDate || item.termDate || item.lastUpdated);
                     if (submitDate) {
                         if (submitDate >= startThisWeek && submitDate <= endThisWeek) {
@@ -4649,7 +4655,7 @@
                     <tr id="stint-detail-row-${idx}" class="stint-detail-drawer" style="display: none; background: #fffcf5; border-bottom: 2px solid #c29d62;">
                         <td colspan="9" style="padding: 16px 20px;">
                             <div style="background: white; border: 1.5px solid #dfcfb8; border-radius: 10px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1.5px solid #f0e6d6; padding-bottom: 10px; gap: 14px; flex-wrap: wrap;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; border-bottom: 1.5px solid #f0e6d6; padding-bottom: 8px; gap: 14px; flex-wrap: wrap;">
                                     <div>
                                         <div style="color: #1f4e79; font-size: 18px; font-family: 'Subhead1', sans-serif; font-weight: bold;">
                                             📋 Stint #${idx + 1} (${p.beginDate ? formatDisplayDate(p.beginDate) : 'Unknown'} – ${p.endDate ? formatDisplayDate(p.endDate) : 'Active'}) — Store #${p.store || '—'} (${p.position || 'CSR'})
@@ -4661,12 +4667,6 @@
                                             ${p.doName ? `<span><strong>DO:</strong> ${escapeText(p.doName)}</span>` : ''}
                                         </div>
                                     </div>
-                                    ${p.id ? `
-                                        <button type="button" onclick="loadSpecificStintIntoForm('${p.id}')"
-                                            style="background: var(--brand-blue); color: white; border: none; border-radius: 6px; padding: 8px 18px; font-family: 'Subhead1', sans-serif; font-size: 14.5px; cursor: pointer; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                            ✏️ Edit This Stint in Form
-                                        </button>
-                                    ` : ''}
                                 </div>
                                 <div>
                                     <div style="font-size: 15.5px; font-weight: bold; color: #472b10; margin-bottom: 6px; font-family: 'Subhead1', sans-serif;">📝 Full Termination & Staffing Notes:</div>
