@@ -4414,6 +4414,13 @@
             }
         }
 
+        function formatDisplayDate(dateStr) {
+            if (!dateStr) return '';
+            const dt = parseCandidateDate(dateStr);
+            if (!dt) return String(dateStr);
+            return `${dt.getMonth() + 1}/${dt.getDate()}/${dt.getFullYear()}`;
+        }
+
         function isFuzzyNameMatch(name1, name2) {
             if (!name1 || !name2) return false;
             const n1 = name1.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -4449,14 +4456,18 @@
                     if (!seenStintKeys.has(stintKey)) {
                         seenStintKeys.add(stintKey);
                         matchedStints.push({
+                            id: stf.id || '',
                             beginDate: hDate,
                             endDate: tDate,
+                            hireDate: hDate,
+                            termDate: tDate,
                             store: stf.store || '',
                             doName: stf.doName || '',
                             position: stf.position || 'CSR',
                             causeOfAction: stf.causeOfAction || '',
                             reasonOfAction: stf.reasonOfAction || '',
                             notes: stf.notes || '',
+                            gmName: stf.gmName || stf.gm || '',
                             rehireEligible: stf.rehireEligible || 'Yes',
                             status: tDate ? 'Terminated' : 'Active',
                             source: stf.sourceSheet || 'Staffing'
@@ -4745,9 +4756,7 @@
             if (!container) return;
             container.innerHTML = '';
 
-            const periods = getEmploymentPeriods(name, email, currentRecordId);
-            // Filter out the active record being edited so it only shows other / prior stints
-            const priorPeriods = periods.filter(p => p.id && String(p.id) !== String(currentRecordId));
+            const priorPeriods = periods.filter(p => String(p.id || '') !== String(currentRecordId || ''));
 
             priorPeriods.forEach(p => {
                 addPriorStintCard(p);
