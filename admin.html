@@ -3237,14 +3237,18 @@
             let payloadAllPayErrorText = "";
 
             if (emailType === "welcome") {
-                if (position === "DE") {
+                if (position === "DE" || position === "BIKE") {
                     payRateInput = await showBrandPrompt(`Enter IN-STORE starting rate for ${name} (e.g., 9.00):`, "9.00", "In-Store Hourly Wage");
                     if (payRateInput === null) return;
 
                     roadRateInput = await showBrandPrompt(`Enter ON-THE-ROAD rate for ${name} (e.g., 4.35):`, "4.35", "On-the-Road Hourly Wage");
                     if (roadRateInput === null) return;
 
-                    confirmationMessage = `Send Dynamic Welcome Email & Offer to ${name}?\n\n• In-Store Wage: $${payRateInput}/hr\n• On-The-Road Wage: $${roadRateInput}/hr + Mileage\n\n(This will automatically CC the store and BCC the DO)`;
+                    if (position === "BIKE") {
+                        confirmationMessage = `Send Dynamic Welcome Email & Offer to ${name}?\n\n• Position: Bike Delivery Expert\n• In-Store Wage: $${payRateInput}/hr\n• On-The-Road Wage: $${roadRateInput}/hr (Company Provided Bike - No Mileage Reimbursement)\n\n(This will automatically CC the store and BCC the DO)`;
+                    } else {
+                        confirmationMessage = `Send Dynamic Welcome Email & Offer to ${name}?\n\n• Position: Delivery Expert (Driver)\n• In-Store Wage: $${payRateInput}/hr\n• On-The-Road Wage: $${roadRateInput}/hr + $0.58/mile\n\n(This will automatically CC the store and BCC the DO)`;
+                    }
                 } else {
                     payRateInput = await showBrandPrompt(`Enter starting hourly rate for ${name} (e.g., 9.00):`, "9.00", "Starting Hourly Wage");
                     if (payRateInput === null) return;
