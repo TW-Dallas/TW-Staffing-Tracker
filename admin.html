@@ -4100,6 +4100,7 @@
             // Weekly Terminations Submitted (Counted by Date Received / submission timestamp)
             let termsSubmittedThisWeek = 0;
             let termsSubmittedLastWeek = 0;
+            const termsThisWeekItems = [];
 
             (staffing || []).forEach(item => {
                 const isTerm = !!item.termDate || (item.causeOfAction && item.causeOfAction.trim() !== '') || (item.reasonOfAction && item.reasonOfAction.trim() !== '');
@@ -4113,6 +4114,8 @@
                     if (submitDate) {
                         if (submitDate >= startThisWeek && submitDate <= endThisWeek) {
                             termsSubmittedThisWeek++;
+                            termsThisWeekItems.push(`${item.name || 'Unnamed'} (Store #${item.store || '—'}, ${item.receivedDate || item.termDate || item.lastUpdated})`);
+                            console.log("👉 Term counted in THIS WEEK (8/24-8/30):", item.name, "Store #" + item.store, "Received:", item.receivedDate, "TermDate:", item.termDate, "LastUpdated:", item.lastUpdated);
                         } else if (submitDate >= startLastWeek && submitDate <= endLastWeek) {
                             termsSubmittedLastWeek++;
                         }
@@ -4122,7 +4125,10 @@
 
             const elTermsThis = document.getElementById('metricsTermsThisWeek');
             const elTermsLast = document.getElementById('metricsTermsLastWeek');
-            if (elTermsThis) elTermsThis.innerText = termsSubmittedThisWeek;
+            if (elTermsThis) {
+                elTermsThis.innerText = termsSubmittedThisWeek;
+                elTermsThis.title = termsThisWeekItems.length > 0 ? "This Week Terms:\n" + termsThisWeekItems.join("\n") : "No terms submitted this week";
+            }
             if (elTermsLast) elTermsLast.innerText = termsSubmittedLastWeek;
 
             // 2. PERIOD & YEARLY STAFFING AUDIT (For Hires & Terms view)
