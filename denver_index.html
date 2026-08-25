@@ -1225,10 +1225,15 @@
 
         function isFuzzyNameMatch(name1, name2) {
             if (!name1 || !name2) return false;
-            const n1 = name1.toLowerCase().replace(/[^a-z0-9]/g, '');
-            const n2 = name2.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const n1 = name1.toLowerCase().trim().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+            const n2 = name2.toLowerCase().trim().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
             if (n1 === n2) return true;
-            if (n1.length > 5 && n2.length > 5 && (n1.includes(n2) || n2.includes(n1))) return true;
+
+            const stripSuffix = (str) => str.replace(/\b(jr|sr|ii|iii|iv)\b/gi, '').trim().replace(/\s+/g, ' ');
+            const s1 = stripSuffix(n1);
+            const s2 = stripSuffix(n2);
+            if (s1 === s2) return true;
+
             return false;
         }
 

@@ -950,13 +950,27 @@
                         </div>
                         <div
                             style="display: flex; justify-content: space-between; align-items: center; font-size: 17px;">
-                            <span>Period (<span id="stfCurrentPeriodName">P08</span>):</span>
+                            <span>This Period (<span id="stfCurrentPeriodName">P09</span>):</span>
                             <span style="font-family: 'Compact'; font-size: 17px;">
                                 Hires: <strong id="stfPeriodHires"
                                     style="color: var(--med-blue); font-family: 'Subhead2', sans-serif; font-size: 17px;">0</strong>
                                 |
                                 Terms: <strong id="stfPeriodTerms"
                                     style="color: var(--brand-red); font-family: 'Subhead2', sans-serif; font-size: 17px;">0</strong>
+                            </span>
+                        </div>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; font-size: 17px; background: rgba(0, 92, 145, 0.06); padding: 3px 6px; border-radius: 4px;">
+                            <span>Last Period (<span id="stfLastPeriodName">P08</span>):</span>
+                            <span style="font-family: 'Compact'; font-size: 17px;">
+                                Hires: <strong id="stfLastPeriodHires"
+                                    style="color: var(--med-blue); font-family: 'Subhead2', sans-serif; font-size: 17px;">0</strong>
+                                |
+                                Terms: <strong id="stfLastPeriodTerms"
+                                    style="color: var(--brand-red); font-family: 'Subhead2', sans-serif; font-size: 17px;">0</strong>
+                                |
+                                Net: <strong id="stfLastPeriodNet"
+                                    style="color: var(--dark-blue); font-family: 'Subhead2', sans-serif; font-size: 17px;">+0</strong>
                             </span>
                         </div>
                         <div
@@ -1131,6 +1145,34 @@
                     </div>
                 </div>
 
+                <!-- Summary Totals Banner -->
+                <div id="trendSummaryBanner" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; background: var(--crust-light); border: 1.5px solid var(--crust-dark); border-radius: 8px; padding: 10px 14px;">
+                    <div style="display: flex; flex-direction: column;">
+                        <span style="font-size: 12px; font-family: 'Subhead2'; color: var(--crust-deep); text-transform: uppercase;">Period Hires</span>
+                        <strong id="trendSumPeriodHires" style="font-size: 22px; font-family: 'ExtraBold'; color: var(--med-blue);">0</strong>
+                    </div>
+                    <div style="display: flex; flex-direction: column;">
+                        <span style="font-size: 12px; font-family: 'Subhead2'; color: var(--crust-deep); text-transform: uppercase;">Period Terms</span>
+                        <strong id="trendSumPeriodTerms" style="font-size: 22px; font-family: 'ExtraBold'; color: var(--brand-red);">0</strong>
+                    </div>
+                    <div style="display: flex; flex-direction: column;">
+                        <span style="font-size: 12px; font-family: 'Subhead2'; color: var(--crust-deep); text-transform: uppercase;">Period Net Gain</span>
+                        <strong id="trendSumPeriodNet" style="font-size: 22px; font-family: 'ExtraBold'; color: var(--dark-blue);">+0</strong>
+                    </div>
+                    <div style="display: flex; flex-direction: column;">
+                        <span style="font-size: 12px; font-family: 'Subhead2'; color: var(--crust-deep); text-transform: uppercase;">YTD Total Hires</span>
+                        <strong id="trendSumYtdHires" style="font-size: 22px; font-family: 'ExtraBold'; color: var(--med-blue);">0</strong>
+                    </div>
+                    <div style="display: flex; flex-direction: column;">
+                        <span style="font-size: 12px; font-family: 'Subhead2'; color: var(--crust-deep); text-transform: uppercase;">YTD Total Terms</span>
+                        <strong id="trendSumYtdTerms" style="font-size: 22px; font-family: 'ExtraBold'; color: var(--brand-red);">0</strong>
+                    </div>
+                    <div style="display: flex; flex-direction: column;">
+                        <span style="font-size: 12px; font-family: 'Subhead2'; color: var(--crust-deep); text-transform: uppercase;">YTD Net Gain</span>
+                        <strong id="trendSumYtdNet" style="font-size: 22px; font-family: 'ExtraBold'; color: var(--success-green);">+0</strong>
+                    </div>
+                </div>
+
                 <!-- Trends Table Container -->
                 <div
                     style="max-height: 500px; overflow-y: auto; border: 1px solid var(--crust-dark); border-radius: 8px;">
@@ -1138,7 +1180,7 @@
                         style="width: 100%; border-collapse: collapse; font-family: 'Condensed', sans-serif; font-size: 15px; text-align: left;">
                         <thead>
                             <tr
-                                style="background: var(--dark-blue); color: white; position: sticky; top: 0; font-family: 'Subhead2'; font-size: 13px; text-transform: uppercase;">
+                                style="background: var(--dark-blue); color: white; position: sticky; top: 0; font-family: 'Subhead2'; font-size: 13px; text-transform: uppercase; z-index: 2;">
                                 <th style="padding: 8px 10px;">Store / DO</th>
                                 <th style="padding: 8px 10px; text-align: center;">Period Hires</th>
                                 <th style="padding: 8px 10px; text-align: center;">Period Terms</th>
@@ -1149,6 +1191,7 @@
                             </tr>
                         </thead>
                         <tbody id="storeTrendsTableBody"></tbody>
+                        <tfoot id="storeTrendsTableFoot" style="position: sticky; bottom: 0; background: #eef3f8; border-top: 2px solid var(--dark-blue); font-family: 'Subhead2'; font-size: 15px; font-weight: bold; z-index: 2;"></tfoot>
                     </table>
                 </div>
             </div>
@@ -3332,6 +3375,22 @@
                 if (finalId) delete unsavedDrafts[finalId];
                 updateBatchDraftBanner();
 
+                // Keep local cache in sync so refresh never reverts to stale state
+                const u = localStorage.getItem('onb_user');
+                if (u) {
+                    try {
+                        const raw = localStorage.getItem(`cached_workspace_data_${u}`);
+                        if (raw) {
+                            const cached = JSON.parse(raw);
+                            if (currentView === 'onboarding') cached.onboarding = candidates;
+                            else if (currentView === 'interviews') cached.interviews = interviews;
+                            else if (currentView === 'staffing') cached.staffing = staffing;
+                            else if (currentView === 'paycards') cached.paycards = paycards;
+                            localStorage.setItem(`cached_workspace_data_${u}`, JSON.stringify(cached));
+                        }
+                    } catch (e) {}
+                }
+
                 currentSelectedId = assignedId;
                 renderList();
                 updateAuditMetrics();
@@ -4012,9 +4071,19 @@
             const now = new Date();
             const currentYear = now.getFullYear();
             const currentPeriod = getDominosFiscalPeriod(now);
+            const getPreviousPeriod = (p) => {
+                const num = parseInt((p || 'P08').replace(/\D/g, ''), 10);
+                if (isNaN(num)) return 'P08';
+                const prev = num === 1 ? 13 : num - 1;
+                return 'P' + String(prev).padStart(2, '0');
+            };
+            const lastPeriod = getPreviousPeriod(currentPeriod);
 
             const periodNameEl = document.getElementById('stfCurrentPeriodName');
             if (periodNameEl) periodNameEl.innerText = currentPeriod;
+
+            const lastPeriodNameEl = document.getElementById('stfLastPeriodName');
+            if (lastPeriodNameEl) lastPeriodNameEl.innerText = lastPeriod;
 
             const yearNameEl = document.getElementById('stfCurrentYear');
             if (yearNameEl) yearNameEl.innerText = currentYear;
@@ -4119,7 +4188,6 @@
                         if (submitDate >= startThisWeek && submitDate <= endThisWeek) {
                             termsSubmittedThisWeek++;
                             termsThisWeekItems.push(`${item.name || 'Unnamed'} (Store #${item.store || '—'}, ${item.receivedDate || item.termDate || item.lastUpdated})`);
-                            console.log("👉 Term counted in THIS WEEK (8/24-8/30):", item.name, "Store #" + item.store, "Received:", item.receivedDate, "TermDate:", item.termDate, "LastUpdated:", item.lastUpdated);
                         } else if (submitDate >= startLastWeek && submitDate <= endLastWeek) {
                             termsSubmittedLastWeek++;
                         }
@@ -4138,6 +4206,7 @@
             // 2. PERIOD & YEARLY STAFFING AUDIT (For Hires & Terms view)
             let weekHires = 0, weekTerms = termsSubmittedThisWeek;
             let periodHires = 0, periodTerms = 0;
+            let lastPeriodHires = 0, lastPeriodTerms = 0;
             let yearHires = 0, yearTerms = 0;
 
             const countedHireKeys = new Set();
@@ -4151,6 +4220,7 @@
                         if (d.getFullYear() === currentYear) yearHires++;
                         const hPeriod = getDominosFiscalPeriod(d);
                         if (hPeriod === currentPeriod) periodHires++;
+                        if (hPeriod === lastPeriod) lastPeriodHires++;
                         if (d >= startThisWeek && d <= endThisWeek) weekHires++;
                         if (normName) countedHireKeys.add(normName);
                         if (item.id) countedHireKeys.add(String(item.id));
@@ -4170,6 +4240,7 @@
                         yearTerms++;
                         const tPeriod = getDominosFiscalPeriod(tDate);
                         if (tPeriod === currentPeriod) periodTerms++;
+                        if (tPeriod === lastPeriod) lastPeriodTerms++;
                     }
                 } else {
                     // DIRECT ACTIVE HIRES: Only count if not already counted from Onboarding
@@ -4180,6 +4251,7 @@
                             if (hDate.getFullYear() === currentYear) yearHires++;
                             const hPeriod = getDominosFiscalPeriod(hDate);
                             if (hPeriod === currentPeriod) periodHires++;
+                            if (hPeriod === lastPeriod) lastPeriodHires++;
                             if (hDate >= startThisWeek && hDate <= endThisWeek) weekHires++;
                             if (normName) countedHireKeys.add(normName);
                             if (item.id) countedHireKeys.add(String(item.id));
@@ -4192,6 +4264,9 @@
             const elStfWeekTerms = document.getElementById('stfWeekTerms');
             const elStfPeriodHires = document.getElementById('stfPeriodHires');
             const elStfPeriodTerms = document.getElementById('stfPeriodTerms');
+            const elStfLastPeriodHires = document.getElementById('stfLastPeriodHires');
+            const elStfLastPeriodTerms = document.getElementById('stfLastPeriodTerms');
+            const elStfLastPeriodNet = document.getElementById('stfLastPeriodNet');
             const elStfYearHires = document.getElementById('stfYearHires');
             const elStfYearTerms = document.getElementById('stfYearTerms');
             const elStfPeriodNet = document.getElementById('stfPeriodNet');
@@ -4201,6 +4276,12 @@
             if (elStfWeekTerms) elStfWeekTerms.innerText = weekTerms;
             if (elStfPeriodHires) elStfPeriodHires.innerText = periodHires;
             if (elStfPeriodTerms) elStfPeriodTerms.innerText = periodTerms;
+
+            if (elStfLastPeriodHires) elStfLastPeriodHires.innerText = lastPeriodHires;
+            if (elStfLastPeriodTerms) elStfLastPeriodTerms.innerText = lastPeriodTerms;
+            const lastPeriodNet = lastPeriodHires - lastPeriodTerms;
+            if (elStfLastPeriodNet) elStfLastPeriodNet.innerText = (lastPeriodNet >= 0 ? '+' : '') + lastPeriodNet;
+
             if (elStfYearHires) elStfYearHires.innerText = yearHires;
             if (elStfYearTerms) elStfYearTerms.innerText = yearTerms;
 
@@ -4293,8 +4374,10 @@
 
         function renderStoreTrends() {
             const tbody = document.getElementById('storeTrendsTableBody');
+            const tfoot = document.getElementById('storeTrendsTableFoot');
             if (!tbody) return;
             tbody.innerHTML = '';
+            if (tfoot) tfoot.innerHTML = '';
 
             const selectedPeriodEl = document.getElementById('trendPeriodFilter');
             const sortFilterEl = document.getElementById('trendSortFilter');
@@ -4402,12 +4485,42 @@
                 }
             });
 
-            // Calculate nets correctly
+            // Calculate nets correctly & accumulate Grand Totals
+            let totPHires = 0, totPTerms = 0, totYtdHires = 0, totYtdTerms = 0;
+
             const storeList = Object.values(storeMap).map(s => {
                 s.p_net = s.p_hires - s.p_terms;
                 s.ytd_net = s.ytd_hires - s.ytd_terms;
+                totPHires += s.p_hires;
+                totPTerms += s.p_terms;
+                totYtdHires += s.ytd_hires;
+                totYtdTerms += s.ytd_terms;
                 return s;
             });
+
+            const totPNet = totPHires - totPTerms;
+            const totYtdNet = totYtdHires - totYtdTerms;
+
+            // Populate Summary Header Banner
+            const elSumPHires = document.getElementById('trendSumPeriodHires');
+            const elSumPTerms = document.getElementById('trendSumPeriodTerms');
+            const elSumPNet = document.getElementById('trendSumPeriodNet');
+            const elSumYtdHires = document.getElementById('trendSumYtdHires');
+            const elSumYtdTerms = document.getElementById('trendSumYtdTerms');
+            const elSumYtdNet = document.getElementById('trendSumYtdNet');
+
+            if (elSumPHires) elSumPHires.innerText = totPHires;
+            if (elSumPTerms) elSumPTerms.innerText = totPTerms;
+            if (elSumPNet) {
+                elSumPNet.innerText = (totPNet >= 0 ? '+' : '') + totPNet;
+                elSumPNet.style.color = totPNet > 0 ? 'var(--dark-blue)' : (totPNet < 0 ? 'var(--brand-red)' : 'var(--text-dark)');
+            }
+            if (elSumYtdHires) elSumYtdHires.innerText = totYtdHires;
+            if (elSumYtdTerms) elSumYtdTerms.innerText = totYtdTerms;
+            if (elSumYtdNet) {
+                elSumYtdNet.innerText = (totYtdNet >= 0 ? '+' : '') + totYtdNet;
+                elSumYtdNet.style.color = totYtdNet > 0 ? 'var(--success-green)' : (totYtdNet < 0 ? 'var(--brand-red)' : 'var(--text-dark)');
+            }
 
             // 3. Sort Ranking Logic (Store #, DO Name, Net Gain, Hires, Terms)
             storeList.sort((a, b) => {
@@ -4436,16 +4549,16 @@
                 return;
             }
 
+            const formatNet = (net) => {
+                const color = net > 0 ? 'var(--success-green)' : (net < 0 ? 'var(--brand-red)' : 'var(--text-dark)');
+                const sign = net > 0 ? '+' : '';
+                return `<strong style="color:${color};">${sign}${net}</strong>`;
+            };
+
             storeList.forEach((s, idx) => {
                 const row = document.createElement('tr');
                 row.style.background = idx % 2 === 0 ? '#ffffff' : 'var(--crust-light)';
                 row.style.borderBottom = '1px solid var(--crust-med)';
-
-                const formatNet = (net) => {
-                    const color = net > 0 ? 'var(--success-green)' : (net < 0 ? 'var(--brand-red)' : 'var(--text-dark)');
-                    const sign = net > 0 ? '+' : '';
-                    return `<strong style="color:${color};">${sign}${net}</strong>`;
-                };
 
                 row.innerHTML = `
                 <td style="padding: 8px 10px; font-weight: bold; color: var(--dark-blue);">
@@ -4460,6 +4573,23 @@
             `;
                 tbody.appendChild(row);
             });
+
+            // Append Grand Total Row to tfoot
+            if (tfoot) {
+                tfoot.innerHTML = `
+                <tr>
+                    <td style="padding: 10px; color: var(--dark-blue); text-transform: uppercase;">
+                        👑 GRAND TOTAL (${storeList.length} Stores)
+                    </td>
+                    <td style="padding: 10px; text-align: center; color: var(--med-blue); font-size: 16px;">${totPHires}</td>
+                    <td style="padding: 10px; text-align: center; color: var(--brand-red); font-size: 16px;">${totPTerms}</td>
+                    <td style="padding: 10px; text-align: center; font-size: 16px;">${formatNet(totPNet)}</td>
+                    <td style="padding: 10px; text-align: center; font-size: 16px;">${totYtdHires}</td>
+                    <td style="padding: 10px; text-align: center; font-size: 16px;">${totYtdTerms}</td>
+                    <td style="padding: 10px; text-align: center; font-size: 16px;">${formatNet(totYtdNet)}</td>
+                </tr>
+            `;
+            }
         }
 
         // Automatically pull candidates from Onboarding who have Pay Card Status = "Yes"
@@ -4530,10 +4660,15 @@
 
         function isFuzzyNameMatch(name1, name2) {
             if (!name1 || !name2) return false;
-            const n1 = name1.toLowerCase().replace(/[^a-z0-9]/g, '');
-            const n2 = name2.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const n1 = name1.toLowerCase().trim().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+            const n2 = name2.toLowerCase().trim().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
             if (n1 === n2) return true;
-            if (n1.length > 5 && n2.length > 5 && (n1.includes(n2) || n2.includes(n1))) return true;
+
+            const stripSuffix = (str) => str.replace(/\b(jr|sr|ii|iii|iv)\b/gi, '').trim().replace(/\s+/g, ' ');
+            const s1 = stripSuffix(n1);
+            const s2 = stripSuffix(n2);
+            if (s1 === s2) return true;
+
             return false;
         }
 
