@@ -494,6 +494,13 @@
         return null;
     }
 
+    function formatNtoDisplayDate(dt) {
+        if (!dt || isNaN(dt.getTime())) return '';
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return `${days[dt.getDay()]}, ${months[dt.getMonth()]} ${dt.getDate()}`;
+    }
+
     function renderNtoSchedule(classes) {
         const banner = document.getElementById('ntoScheduleBanner');
         const highlight = document.getElementById('nextNtoHighlight');
@@ -524,17 +531,19 @@
 
         banner.style.display = 'block';
         const nextClass = upcoming[0];
+        const nextDateDisp = nextClass.parsedDt ? formatNtoDisplayDate(nextClass.parsedDt) : nextClass.classDate;
         const nextTimeDisp = nextClass.startTime ? (nextClass.endTime ? `${nextClass.startTime} – ${nextClass.endTime}` : nextClass.startTime) : '6:00 PM';
         
         if (highlight) {
-            highlight.innerHTML = `<strong style="color: var(--dark-blue);">Next:</strong> ${nextClass.classDate} (${nextTimeDisp})`;
+            highlight.innerHTML = `<strong style="color: var(--dark-blue);">Next:</strong> ${nextDateDisp} (${nextTimeDisp})`;
         }
 
         pillsContainer.innerHTML = upcoming.slice(0, 8).map(c => {
+            const dateDisp = c.parsedDt ? formatNtoDisplayDate(c.parsedDt) : c.classDate;
             const timeDisp = c.startTime ? (c.endTime ? `${c.startTime} – ${c.endTime}` : c.startTime) : '6:00 PM';
             return `
                 <div class="nto-pill">
-                    <span class="nto-pill-day">${c.classDate}</span>
+                    <span class="nto-pill-day">${dateDisp}</span>
                     <span class="nto-pill-time">${timeDisp}</span>
                     <span class="nto-pill-trainer">👨‍🏫 Trainer: ${c.trainerName || 'Mike'}</span>
                 </div>
