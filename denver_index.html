@@ -518,6 +518,68 @@
             box-sizing: border-box;
         }
 
+        /* --- SUBTLE UPCOMING NTO SCHEDULE BANNER --- */
+        .nto-schedule-banner {
+            background: #ffffff;
+            border: 1.5px solid #d0e2ec;
+            border-left: 4px solid var(--brand-blue);
+            border-radius: 8px;
+            margin-bottom: 14px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+        }
+        .nto-schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            cursor: pointer;
+            background: #f8fbfe;
+            user-select: none;
+            transition: background 0.15s;
+        }
+        .nto-schedule-header:hover {
+            background: #edf5fc;
+        }
+        .nto-schedule-dropdown {
+            padding: 12px 14px;
+            border-top: 1px solid #e2edf5;
+            background: #ffffff;
+        }
+        .nto-pills-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .nto-pill {
+            background: #f0f7fc;
+            border: 1px solid #c9e0f0;
+            border-radius: 6px;
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            flex: 1 1 160px;
+            max-width: 220px;
+            box-sizing: border-box;
+        }
+        .nto-pill-day {
+            font-family: 'Subhead2', sans-serif;
+            font-size: 14px;
+            color: var(--dark-blue);
+        }
+        .nto-pill-time {
+            font-size: 13.5px;
+            color: #333;
+            font-weight: 500;
+            font-family: 'Condensed', sans-serif;
+        }
+        .nto-pill-trainer {
+            font-size: 12.5px;
+            color: #777;
+            font-family: 'Condensed', sans-serif;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -568,6 +630,23 @@
     </div>
 
     <div class="container">
+        <!-- Subtle Upcoming NTO Schedule Banner -->
+        <div id="ntoScheduleBanner" class="nto-schedule-banner" style="display: none;">
+            <div class="nto-schedule-header" onclick="toggleNtoScheduleDropdown()">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px;">📅</span>
+                    <span style="font-family: 'Subhead2', sans-serif; font-size: 15px; color: var(--dark-blue); text-transform: uppercase; letter-spacing: 0.5px;">Upcoming NTO Classes</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span id="nextNtoHighlight" style="font-size: 14px; color: var(--crust-deep); font-family: 'Condensed', sans-serif;"></span>
+                    <span id="ntoScheduleChevron" style="font-size: 11px; color: var(--dark-blue); transition: transform 0.2s;">▼</span>
+                </div>
+            </div>
+            <div id="ntoScheduleDropdown" class="nto-schedule-dropdown hidden">
+                <div id="ntoSchedulePills" class="nto-pills-row"></div>
+            </div>
+        </div>
+
         <div id="loader" class="loader">Accessing Database...</div>
         <div id="onboardingList"></div>
     </div>
@@ -714,6 +793,7 @@
                     }
                     rawData = data;
                     populateFilters();
+                    renderNtoSchedule(data.ntoClasses || []);
                     renderOnboarding();
                     document.getElementById('loader').classList.add('hidden');
                 })
@@ -723,6 +803,79 @@
                     }
                     console.error(err);
                 });
+        }
+
+        function parseNtoClassDate(dateStr) {
+            if (!dateStr) return null;
+            if (dateStr instanceof Date) return isNaN(dateStr.getTime()) ? null : dateStr;
+            const str = String(dateStr).trim();
+            const d = new Date(str);
+            if (!isNaN(d.getTime())) return d;
+            const parts = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+            if (parts) {
+                let yr = parseInt(parts[3], 10);
+                if (yr < 100) yr += 2000;
+                return new Date(yr, parseInt(parts[1], 10) - 1, parseInt(parts[2], 10), 12, 0, 0);
+            }
+            return null;
+        }
+
+        function renderNtoSchedule(classes) {
+            const banner = document.getElementById('ntoScheduleBanner');
+            const highlight = document.getElementById('nextNtoHighlight');
+            const pillsContainer = document.getElementById('ntoSchedulePills');
+            if (!banner || !pillsContainer) return;
+
+            if (!classes || classes.length === 0) {
+                banner.style.display = 'none';
+                return;
+            }
+
+            const now = new Date();
+            const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+            // Sort upcoming classes ascending (soonest first)
+            const upcoming = classes.map(c => {
+                const dt = parseNtoClassDate(c.classDate);
+                return { ...c, timestamp: dt ? dt.getTime() : 0, parsedDt: dt };
+            }).filter(c => c.timestamp >= todayMidnight)
+              .sort((a, b) => a.timestamp - b.timestamp);
+
+            if (upcoming.length === 0) {
+                if (highlight) highlight.innerText = 'No upcoming classes';
+                pillsContainer.innerHTML = '<span style="color: #888; font-size: 13px; font-style: italic; padding: 4px;">No upcoming classes scheduled.</span>';
+                banner.style.display = 'block';
+                return;
+            }
+
+            banner.style.display = 'block';
+            const nextClass = upcoming[0];
+            const nextTimeDisp = nextClass.startTime ? (nextClass.endTime ? `${nextClass.startTime} – ${nextClass.endTime}` : nextClass.startTime) : '6:00 PM';
+            
+            if (highlight) {
+                highlight.innerHTML = `<strong style="color: var(--dark-blue);">Next:</strong> ${nextClass.classDate} (${nextTimeDisp})`;
+            }
+
+            pillsContainer.innerHTML = upcoming.slice(0, 8).map(c => {
+                const timeDisp = c.startTime ? (c.endTime ? `${c.startTime} – ${c.endTime}` : c.startTime) : '6:00 PM';
+                return `
+                    <div class="nto-pill">
+                        <span class="nto-pill-day">${c.classDate}</span>
+                        <span class="nto-pill-time">${timeDisp}</span>
+                        <span class="nto-pill-trainer">👨‍🏫 Trainer: ${c.trainerName || 'Richard'}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleNtoScheduleDropdown() {
+            const dropdown = document.getElementById('ntoScheduleDropdown');
+            const chevron = document.getElementById('ntoScheduleChevron');
+            if (!dropdown) return;
+            const isHidden = dropdown.classList.toggle('hidden');
+            if (chevron) {
+                chevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+            }
         }
 
         // --- ONE SIGNAL PUSH TAGGING & DEEP LINKING ---
