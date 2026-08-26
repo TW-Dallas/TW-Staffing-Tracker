@@ -827,6 +827,28 @@
             return `${days[dt.getDay()]}, ${months[dt.getMonth()]} ${dt.getDate()}`;
         }
 
+        function parseNtoClassDateTime(dateStr, timeStr) {
+            const dt = parseNtoClassDate(dateStr);
+            if (!dt) return null;
+            
+            let hours = 20; // 8 PM default
+            let minutes = 0;
+            
+            if (timeStr) {
+                const tStr = String(timeStr).trim();
+                const match = tStr.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/i);
+                if (match) {
+                    hours = parseInt(match[1], 10);
+                    minutes = match[2] ? parseInt(match[2], 10) : 0;
+                    const meridiem = (match[3] || '').toLowerCase();
+                    if (meridiem === 'pm' && hours < 12) hours += 12;
+                    if (meridiem === 'am' && hours === 12) hours = 0;
+                }
+            }
+            
+            return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate(), hours, minutes, 0);
+        }
+
         function renderNtoSchedule(classes) {
             const banner = document.getElementById('ntoScheduleBanner');
             const highlight = document.getElementById('nextNtoHighlight');
@@ -839,14 +861,20 @@
             }
 
             const now = new Date();
-            const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+            const nowMs = now.getTime();
 
-            // Sort upcoming classes ascending (soonest first)
+            // Sort upcoming classes ascending (soonest first) and filter out classes that already ended
             const upcoming = classes.map(c => {
                 const dt = parseNtoClassDate(c.classDate);
-                return { ...c, timestamp: dt ? dt.getTime() : 0, parsedDt: dt };
-            }).filter(c => c.timestamp >= todayMidnight)
-              .sort((a, b) => a.timestamp - b.timestamp);
+                const expiryDt = parseNtoClassDateTime(c.classDate, c.endTime || c.startTime);
+                return { 
+                    ...c, 
+                    timestamp: dt ? dt.getTime() : 0, 
+                    expiryMs: expiryDt ? expiryDt.getTime() : (dt ? dt.getTime() + (24 * 3600 * 1000) : 0),
+                    parsedDt: dt 
+                };
+            }).filter(c => c.expiryMs > nowMs)
+              .sort((a, b) => a.expiryMs - b.expiryMs);
 
             if (upcoming.length === 0) {
                 if (highlight) highlight.innerText = 'No upcoming classes';
