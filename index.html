@@ -878,196 +878,6 @@
         }
     }
 
-    function getEmploymentPeriods(name, email, id) {
-        if (!name && !email && !id) return [];
-        const cleanName = (name || '').toLowerCase().trim();
-        const cleanEmail = (email || '').toLowerCase().trim();
-        const cleanId = (id || '').toLowerCase().trim();
-
-        const matchedStints = [];
-        const seenStintKeys = new Set();
-        const staffing = rawData.staffing || [];
-
-        // 1. Scan Staffing Records (Hiring Data 2026 & 2025)
-        staffing.forEach(stf => {
-            const sName = (stf.name || '').toLowerCase().trim();
-            const sEmail = (stf.email || '').toLowerCase().trim();
-            const sId = (stf.id || '').toLowerCase().trim();
-
-            const nameMatch = cleanName && (sName === cleanName || isFuzzyNameMatch(cleanName, sName));
-            const emailMatch = cleanEmail && sEmail && (sEmail === cleanEmail);
-            const idMatch = cleanId && sId && (sId === cleanId);
-
-            if (nameMatch || emailMatch || idMatch) {
-                const hDate = stf.hireDate || '';
-                const tDate = stf.termDate || '';
-                const stintKey = `${stf.store}_${hDate}_${tDate}`;
-                if (!seenStintKeys.has(stintKey)) {
-                    seenStintKeys.add(stintKey);
-                    matchedStints.push({
-                        beginDate: hDate,
-                        endDate: tDate,
-                        store: stf.store || '',
-                        doName: stf.doName || '',
-                        position: stf.position || 'CSR',
-                        causeOfAction: stf.causeOfAction || '',
-                        reasonOfAction: stf.reasonOfAction || '',
-                        notes: stf.notes || '',
-                        rehireEligible: stf.rehireEligible || 'Yes',
-                        status: tDate ? 'Terminated' : 'Active',
-                        source: stf.sourceSheet || 'Staffing'
-                    });
-                }
-            }
-        });
-
-        // 2. Scan Active Onboarding Candidates
-        const candidates = rawData.onboarding || [];
-        candidates.forEach(cand => {
-            const cName = (cand.name || '').toLowerCase().trim();
-            const cEmail = (cand.email || '').toLowerCase().trim();
-            const cId = (cand.id || '').toLowerCase().trim();
-
-            const nameMatch = cleanName && (cName === cleanName || isFuzzyNameMatch(cleanName, cName));
-            const emailMatch = cleanEmail && cEmail && (cEmail === cleanEmail);
-            const idMatch = cleanId && cId && (cId === cleanId);
-
-            if (nameMatch || emailMatch || idMatch) {
-                const hDate = cand.ntoDate || cand.hireDate || '';
-                const stintKey = `${cand.store}_${hDate}_active`;
-                if (cand.hired && hDate && !seenStintKeys.has(stintKey)) {
-                    seenStintKeys.add(stintKey);
-                    matchedStints.push({
-                        beginDate: hDate,
-                        endDate: '',
-                        store: cand.store || '',
-                        doName: cand.doName || '',
-                        position: cand.position || 'CSR',
-                        causeOfAction: '',
-                        reasonOfAction: '',
-                        notes: cand.notes || '',
-                        rehireEligible: 'Yes',
-                        status: 'Active (Current)',
-                        source: 'Onboarding'
-                    });
-                }
-            }
-        });
-
-        // Sort chronologically by beginDate ascending
-        matchedStints.sort((a, b) => {
-            const dA = a.beginDate ? new Date(a.beginDate).getTime() : 0;
-            const dB = b.beginDate ? new Date(b.beginDate).getTime() : 0;
-            return dA - dB;
-        });
-
-        return matchedStints;
-    }
-
-    function calculateTenureDuration(beginStr, endStr) {
-        if (!beginStr) return '—';
-        const start = new Date(beginStr);
-        if (isNaN(start.getTime())) return '—';
-        const end = endStr ? new Date(endStr) : new Date();
-        if (isNaN(end.getTime())) return '—';
-
-        let diffMonths = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
-        let diffDays = Math.floor((end - start) / (1000 * 60 * 60 * 24));
-        if (diffDays < 0) return '—';
-
-        if (diffDays < 31) {
-            return `${diffDays} day${diffDays === 1 ? '' : 's'}`;
-        }
-        const years = Math.floor(diffMonths / 12);
-        const months = diffMonths % 12;
-
-        if (years > 0) {
-            return months > 0 ? `${years} yr${years > 1 ? 's' : ''} ${months} mo${months > 1 ? 's' : ''}` : `${years} yr${years > 1 ? 's' : ''}`;
-        }
-        return `${months} month${months === 1 ? '' : 's'}`;
-    }
-
-    function renderEmploymentPeriodsHtml(name, email, id) {
-        const periods = getEmploymentPeriods(name, email, id);
-        if (periods.length === 0) return '';
-
-        const isRehire = periods.length > 1;
-        const rehireBadge = isRehire ? `<span style="background: #e8f0fe; color: #1a73e8; font-size: 13px; font-weight: bold; padding: 2px 8px; border-radius: 4px; margin-left: 8px; border: 1px solid #cce0ff;">🔁 Re-Hire (${periods.length} Stints)</span>` : '';
-
-        let rowsHtml = periods.map((p, idx) => {
-            const beginDisplay = p.beginDate ? formatDisplayDate(p.beginDate) : 'Unknown';
-            const endDisplay = p.endDate ? formatDisplayDate(p.endDate) : '<span style="color: #137333; font-weight: bold;">Present (Active)</span>';
-            const duration = calculateTenureDuration(p.beginDate, p.endDate);
-            const reason = [p.causeOfAction, p.reasonOfAction].filter(Boolean).join(' - ') || (p.notes ? p.notes.substring(0, 30) : '—');
-            
-            let rehireBadgeStint = '';
-            if (p.rehireEligible === 'No') {
-                rehireBadgeStint = '<span style="color: #c5221f; font-weight: bold;">🚫 Ineligible</span>';
-            } else if (p.rehireEligible === 'Review Required') {
-                rehireBadgeStint = '<span style="color: #b06000; font-weight: bold;">⚠️ Review</span>';
-            } else {
-                rehireBadgeStint = '<span style="color: #137333;">✅ Eligible</span>';
-            }
-
-            const rowBg = idx % 2 === 0 ? '#ffffff' : '#f8f9fa';
-
-            return `
-                <tr style="background: ${rowBg}; border-bottom: 1px solid #e0e0e0; font-size: 13.5px;">
-                    <td style="padding: 6px 8px; font-weight: bold; color: #1f4e79;">Stint ${idx + 1}</td>
-                    <td style="padding: 6px 8px;">${beginDisplay}</td>
-                    <td style="padding: 6px 8px;">${endDisplay}</td>
-                    <td style="padding: 6px 8px; color: #555;">${duration}</td>
-                    <td style="padding: 6px 8px; font-weight: 500;">Store #${p.store || '—'}</td>
-                    <td style="padding: 6px 8px;">${p.position || 'CSR'}</td>
-                    <td style="padding: 6px 8px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeText(reason)}">${escapeText(reason)}</td>
-                    <td style="padding: 6px 8px; text-align: center;">${rehireBadgeStint}</td>
-                </tr>
-            `;
-        }).join('');
-
-        return `
-            <div style="background: white; border: 1.5px solid #1f4e79; border-radius: 8px; overflow: hidden; margin-top: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
-                <div style="background: #1f4e79; color: white; padding: 6px 12px; font-family: 'Subhead1', sans-serif; font-size: 14.5px; display: flex; align-items: center; justify-content: space-between;">
-                    <span>📋 Employment Periods (HRAlliance History)</span>
-                    ${rehireBadge}
-                </div>
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: 'Condensed', sans-serif;">
-                        <thead>
-                            <tr style="background: #2b5b84; color: white; font-size: 13px; font-weight: 600;">
-                                <th style="padding: 6px 8px;">Period</th>
-                                <th style="padding: 6px 8px;">Begin Date</th>
-                                <th style="padding: 6px 8px;">End Date</th>
-                                <th style="padding: 6px 8px;">Duration</th>
-                                <th style="padding: 6px 8px;">Store</th>
-                                <th style="padding: 6px 8px;">Position</th>
-                                <th style="padding: 6px 8px;">Reason / Action</th>
-                                <th style="padding: 6px 8px; text-align: center;">Rehire Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${rowsHtml}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        `;
-    }
-
-    function isFuzzyNameMatch(name1, name2) {
-        if (!name1 || !name2) return false;
-        const n1 = name1.toLowerCase().trim().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
-        const n2 = name2.toLowerCase().trim().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
-        if (n1 === n2) return true;
-
-        const stripSuffix = (str) => str.replace(/\b(jr|sr|ii|iii|iv)\b/gi, '').trim().replace(/\s+/g, ' ');
-        const s1 = stripSuffix(n1);
-        const s2 = stripSuffix(n2);
-        if (s1 === s2) return true;
-
-        return false;
-    }
-
     function renderOnboarding() {
         const list = document.getElementById('onboardingList');
         list.innerHTML = '';
@@ -1144,15 +954,6 @@
             }
             if (ntoDateVal) chipsHtml += `<span class="chip chip-nto">📅 NTO: ${formatDisplayDate(ntoDateVal)}</span>`;
 
-            // Check Employment Periods (HRAlliance Re-Hire History)
-            const empPeriods = getEmploymentPeriods(item.name, item.email, item.id);
-            if (empPeriods.length > 1) {
-                chipsHtml += `<span class="chip" style="background: #e8f0fe; color: #1a73e8; border: 1px solid #cce0ff; font-weight: bold;">🔁 Re-Hire (${empPeriods.length} Stints)</span>`;
-                if (empPeriods.some(p => p.rehireEligible === 'No')) {
-                    chipsHtml += `<span class="chip" style="background: #fce8e6; color: #c5221f; border: 1px solid #fad2cf; font-weight: bold;">🚫 Prior Term: Ineligible</span>`;
-                }
-            }
-
             let checklistHtml = '';
             if (!item.inactive && !item.ineligible && !item.withdrawn && !item.hired) {
                 checklistHtml = `
@@ -1192,7 +993,6 @@
                 updatedHtml = `<div class="updated-text">Last Updated: ${formatDisplayDateTime(item.lastUpdated)}</div>`;
             }
 
-            const empPeriodsHtml = renderEmploymentPeriodsHtml(item.name, item.email, item.id);
             const smsUrl = buildSmsUrl(item);
             const isCurrentlyExpanded = expandedCardIds.has(item.id);
 
@@ -1222,7 +1022,6 @@
                         ${checklistHtml}
                         <div class="chip-container">${chipsHtml}</div>
                         ${notesHtml}
-                        ${empPeriodsHtml}
                         
                         ${item.phoneNumber ? `
                             <div class="action-container">

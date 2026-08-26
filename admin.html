@@ -4694,7 +4694,9 @@
                 if (nameMatch || emailMatch || idMatch) {
                     const hDate = stf.hireDate || '';
                     const tDate = stf.termDate || '';
-                    const stintKey = `${stf.store}_${hDate}_${tDate}`;
+                    const normHDate = formatDateForInput(hDate) || hDate;
+                    const normTDate = tDate ? (formatDateForInput(tDate) || tDate) : 'active';
+                    const stintKey = `${stf.store}_${normHDate}_${normTDate}`;
                     if (!seenStintKeys.has(stintKey)) {
                         seenStintKeys.add(stintKey);
                         matchedStints.push({
@@ -4730,7 +4732,8 @@
 
                 if (nameMatch || emailMatch || idMatch) {
                     const hDate = cand.ntoDate || cand.hireDate || '';
-                    const stintKey = `${cand.store}_${hDate}_active`;
+                    const normHDate = formatDateForInput(hDate) || hDate;
+                    const stintKey = `${cand.store}_${normHDate}_active`;
                     if (cand.hired && hDate && !seenStintKeys.has(stintKey)) {
                         seenStintKeys.add(stintKey);
                         matchedStints.push({
