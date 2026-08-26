@@ -5629,6 +5629,16 @@
                 return;
             }
 
+            function formatPayRate(val) {
+                if (val === undefined || val === null) return '';
+                const s = String(val).trim();
+                if (!s) return '';
+                if (s.startsWith('$')) return s;
+                const num = parseFloat(s.replace(/[^0-9.]/g, ''));
+                if (!isNaN(num)) return `$${num.toFixed(2)}`;
+                return s;
+            }
+
             filtered.forEach(item => {
                 const card = document.createElement('div');
                 card.style.cssText = `
@@ -5639,12 +5649,82 @@
                 padding: 12px 14px;
                 display: flex;
                 flex-direction: column;
-                gap: 6px;
+                gap: 8px;
                 box-shadow: 0 2px 5px rgba(71,43,16,0.06);
             `;
 
                 // SVG Overlapping Squares Icon
                 const copySvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+
+                // Check if store has pay rates
+                const hasCsrRates = !!(item.csrStart || item.csrMid || item.csrTop);
+                const hasDeRates = !!(item.deBase || item.deOtr || item.deCloserBase || item.deCloserOtr);
+                const hasAnyRates = hasCsrRates || hasDeRates;
+
+                let payRatesHtml = '';
+                if (hasAnyRates) {
+                    payRatesHtml = `
+                    <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; margin-top: 4px;">
+                        <div style="font-family: 'Subhead1'; font-size: 14px; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+                            <span>💰 Store Pay Rates</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
+                            <!-- CSR Column -->
+                            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 7px 10px;">
+                                <div style="font-family: 'Subhead2'; font-weight: bold; color: var(--crust-burnt); border-bottom: 1px solid #edf2f7; padding-bottom: 3px; margin-bottom: 5px; font-size: 14px;">
+                                    🍕 CSR / Inside
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 3px; font-size: 13.5px; font-family: 'Condensed', sans-serif;">
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span style="color: #4a5568;">Start (P/T, No Exp):</span>
+                                        <strong style="color: #1a202c;">${formatPayRate(item.csrStart) || '—'}</strong>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span style="color: #4a5568;">Mid (P/T Exp / F/T No Exp):</span>
+                                        <strong style="color: #1a202c;">${formatPayRate(item.csrMid) || '—'}</strong>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span style="color: #4a5568;">Top (F/T w/ Exp):</span>
+                                        <strong style="color: #1a202c;">${formatPayRate(item.csrTop) || '—'}</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Driver Column -->
+                            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 7px 10px;">
+                                <div style="font-family: 'Subhead2'; font-weight: bold; color: var(--crust-burnt); border-bottom: 1px solid #edf2f7; padding-bottom: 3px; margin-bottom: 5px; font-size: 14px;">
+                                    🚗 Driver (DE)
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 3px; font-size: 13.5px; font-family: 'Condensed', sans-serif;">
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span style="color: #4a5568;">Standard In-Store:</span>
+                                        <strong style="color: #1a202c;">${formatPayRate(item.deBase) || '—'}</strong>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span style="color: #4a5568;">Standard On-the-Road (OTR):</span>
+                                        <strong style="color: #1a202c;">${formatPayRate(item.deOtr) || '—'}</strong>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span style="color: #4a5568;">Closer In-Store:</span>
+                                        <strong style="color: #1a202c;">${formatPayRate(item.deCloserBase) || 'Standard'}</strong>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span style="color: #4a5568;">Closer OTR:</span>
+                                        <strong style="color: #1a202c;">${formatPayRate(item.deCloserOtr) || (item.deOtr ? `${formatPayRate(item.deOtr)} (Std)` : '—')}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                } else {
+                    payRatesHtml = `
+                    <div style="background: #fafafa; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 6px 10px; margin-top: 3px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 13px; color: var(--text-light); font-family: 'Subhead2';">💰 Pay Rates not configured</span>
+                        <button type="button" onclick="openEditContactModal('${escapeText(item.store)}')" style="background: none; border: none; color: var(--brand-blue); font-size: 12.5px; font-weight: bold; cursor: pointer; text-decoration: underline; font-family: 'Subhead2';">+ Set Rates</button>
+                    </div>
+                    `;
+                }
 
                 card.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid var(--crust-med); padding-bottom: 8px;">
@@ -5694,6 +5774,8 @@
                         ${item.ipAddress ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.ipAddress)}', this)" title="Copy IP Address">${copySvg}</button>` : ''}
                     </div>
                 </div>
+
+                ${payRatesHtml}
             `;
 
                 container.appendChild(card);
@@ -6065,6 +6147,15 @@
             document.getElementById('editContactAddress').value = contact.address || '';
             document.getElementById('editContactIp').value = contact.ipAddress || '';
 
+            // Pay Rates
+            document.getElementById('editContactCsrStart').value = contact.csrStart || '';
+            document.getElementById('editContactCsrMid').value = contact.csrMid || '';
+            document.getElementById('editContactCsrTop').value = contact.csrTop || '';
+            document.getElementById('editContactDeBase').value = contact.deBase || '';
+            document.getElementById('editContactDeOtr').value = contact.deOtr || '';
+            document.getElementById('editContactDeCloserBase').value = contact.deCloserBase || '';
+            document.getElementById('editContactDeCloserOtr').value = contact.deCloserOtr || '';
+
             document.getElementById('editContactModalTitle').innerText = `🏬 Edit Store #${contact.store} Info`;
             document.getElementById('editContactModal').classList.remove('hidden');
         }
@@ -6087,6 +6178,14 @@
             const address = document.getElementById('editContactAddress').value.trim();
             const ipAddress = document.getElementById('editContactIp').value.trim();
 
+            const csrStart = document.getElementById('editContactCsrStart').value.trim();
+            const csrMid = document.getElementById('editContactCsrMid').value.trim();
+            const csrTop = document.getElementById('editContactCsrTop').value.trim();
+            const deBase = document.getElementById('editContactDeBase').value.trim();
+            const deOtr = document.getElementById('editContactDeOtr').value.trim();
+            const deCloserBase = document.getElementById('editContactDeCloserBase').value.trim();
+            const deCloserOtr = document.getElementById('editContactDeCloserOtr').value.trim();
+
             showLoader(true, `Updating Store #${store} details in database...`);
 
             try {
@@ -6102,7 +6201,14 @@
                     doEmail: doEmail,
                     doCell: doCell,
                     address: address,
-                    ipAddress: ipAddress
+                    ipAddress: ipAddress,
+                    csrStart: csrStart,
+                    csrMid: csrMid,
+                    csrTop: csrTop,
+                    deBase: deBase,
+                    deOtr: deOtr,
+                    deCloserBase: deCloserBase,
+                    deCloserOtr: deCloserOtr
                 });
 
                 // Update in local memory
@@ -6110,7 +6216,8 @@
                 if (idx !== -1) {
                     contacts[idx] = {
                         ...contacts[idx],
-                        doName, manager, gmPhone, storePhone, storeEmail, doEmail, doCell, address, ipAddress
+                        doName, manager, gmPhone, storePhone, storeEmail, doEmail, doCell, address, ipAddress,
+                        csrStart, csrMid, csrTop, deBase, deOtr, deCloserBase, deCloserOtr
                     };
                 }
 
@@ -6242,7 +6349,7 @@
 
     <!-- EDIT STORE CONTACT MODAL -->
     <div id="editContactModal" class="brand-modal-overlay hidden">
-        <div class="brand-modal-card" style="max-width: 650px; width: 95%;">
+        <div class="brand-modal-card" style="max-width: 680px; width: 95%; max-height: 90vh; overflow-y: auto;">
             <div class="brand-modal-brand-stripe"></div>
             <div class="brand-modal-content" style="padding: 24px;">
                 <!-- Modal Title & Close Button -->
@@ -6305,9 +6412,60 @@
                         <input type="text" id="editContactAddress" placeholder="e.g. 6709 W Coal Mine, Littleton 80123" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
                     </div>
 
-                    <div style="margin-bottom: 20px;">
+                    <div style="margin-bottom: 16px;">
                         <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">🌐 Network IP Address (Router / WAN / Equipment IP):</label>
                         <input type="text" id="editContactIp" placeholder="e.g. 192.168.1.1 or Static WAN IP" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; font-family: monospace; font-weight: bold; color: #005c91;">
+                    </div>
+
+                    <!-- PAY RATES SECTION -->
+                    <div style="background: var(--crust-light); border: 1.5px solid var(--crust-dark); border-radius: 8px; padding: 14px; margin-bottom: 20px;">
+                        <div style="font-family: 'ExtraBold'; font-size: 16px; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                            <span>💰 Store Pay Rates</span>
+                        </div>
+
+                        <!-- CSR Sub-grid -->
+                        <div style="margin-bottom: 14px;">
+                            <div style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt); margin-bottom: 6px;">🍕 Customer Service Rep (CSR) Rates:</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                                <div>
+                                    <label style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Start (P/T No Exp):</label>
+                                    <input type="text" id="editContactCsrStart" placeholder="e.g. 9.00" style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                                </div>
+                                <div>
+                                    <label style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Mid (P/T Exp / F/T No Exp):</label>
+                                    <input type="text" id="editContactCsrMid" placeholder="e.g. 10.00" style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                                </div>
+                                <div>
+                                    <label style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Top (F/T w/ Exp):</label>
+                                    <input type="text" id="editContactCsrTop" placeholder="e.g. 11.00" style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Driver Sub-grid -->
+                        <div>
+                            <div style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt); margin-bottom: 6px;">🚗 Delivery Expert (DE) Rates:</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px;">
+                                <div>
+                                    <label style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Driver Base (In-Store):</label>
+                                    <input type="text" id="editContactDeBase" placeholder="e.g. 9.00" style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                                </div>
+                                <div>
+                                    <label style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Driver OTR (On-The-Road):</label>
+                                    <input type="text" id="editContactDeOtr" placeholder="e.g. 4.35" style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div>
+                                    <label style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Closer In-Store (Optional):</label>
+                                    <input type="text" id="editContactDeCloserBase" placeholder="e.g. 10.50 (Blank = Base)" style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                                </div>
+                                <div>
+                                    <label style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Closer OTR (Optional):</label>
+                                    <input type="text" id="editContactDeCloserOtr" placeholder="e.g. 8.00 (Blank = Std OTR)" style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1.5px solid var(--crust-med); padding-top: 14px;">
