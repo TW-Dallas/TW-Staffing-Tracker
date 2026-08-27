@@ -419,7 +419,7 @@
     // Check if we should display the welcome modal
     (function() {
         try {
-            const hideModal = localStorage.getItem('hideTrackerUpdate_v3');
+            const hideModal = localStorage.getItem('hideTrackerUpdate_v4');
             if (hideModal !== 'true') {
                 document.getElementById('updateModal').classList.remove('hidden');
             }
@@ -432,7 +432,7 @@
         const dontShowAgain = document.getElementById('hideUpdateCheckbox').checked;
         if (dontShowAgain) {
             try {
-                localStorage.setItem('hideTrackerUpdate_v3', 'true');
+                localStorage.setItem('hideTrackerUpdate_v4', 'true');
             } catch (e) {}
         }
         document.getElementById('updateModal').classList.add('hidden');
