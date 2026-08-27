@@ -5583,6 +5583,18 @@
             select.value = current || 'ALL';
         }
 
+        function formatPhoneNumber(val) {
+            if (!val) return '';
+            let digits = String(val).replace(/\D/g, '');
+            if (digits.length === 11 && digits.startsWith('1')) {
+                digits = digits.substring(1);
+            }
+            if (digits.length === 10) {
+                return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+            }
+            return String(val).trim();
+        }
+
         // Render Contact Rows with SVG Copy Buttons and Quick Edit
         function renderContactsView() {
             const container = document.getElementById('contactsGridContainer');
@@ -5592,6 +5604,7 @@
             const doFilter = document.getElementById('contactDoFilter')?.value || 'ALL';
             const sortBy = document.getElementById('contactSortFilter')?.value || 'store_asc';
             const searchQuery = (document.getElementById('contactSearchInput')?.value || document.getElementById('searchControl')?.value || '').toLowerCase().trim();
+            const searchDigits = searchQuery.replace(/\D/g, '');
 
             let filtered = contacts.filter(item => {
                 if (doFilter !== 'ALL' && item.doName !== doFilter) return false;
@@ -5599,7 +5612,14 @@
                     const matchesStore = String(item.store || '').toLowerCase().includes(searchQuery);
                     const matchesDo = String(item.doName || '').toLowerCase().includes(searchQuery);
                     const matchesGm = String(item.manager || '').toLowerCase().includes(searchQuery);
-                    const matchesPhone = String(item.storePhone || '').includes(searchQuery) || String(item.gmPhone || '').includes(searchQuery) || String(item.doCell || '').includes(searchQuery);
+                    const matchesPhone = String(item.storePhone || '').includes(searchQuery) ||
+                                         String(item.gmPhone || '').includes(searchQuery) ||
+                                         String(item.doCell || '').includes(searchQuery) ||
+                                         (searchDigits.length >= 4 && (
+                                             String(item.storePhone || '').replace(/\D/g, '').includes(searchDigits) ||
+                                             String(item.gmPhone || '').replace(/\D/g, '').includes(searchDigits) ||
+                                             String(item.doCell || '').replace(/\D/g, '').includes(searchDigits)
+                                         ));
                     const matchesEmail = String(item.storeEmail || '').toLowerCase().includes(searchQuery) || String(item.doEmail || '').toLowerCase().includes(searchQuery);
                     const matchesAddress = String(item.address || '').toLowerCase().includes(searchQuery);
                     const matchesIp = String(item.ipAddress || '').toLowerCase().includes(searchQuery);
@@ -5726,6 +5746,10 @@
                     `;
                 }
 
+                const formattedGmPhone = formatPhoneNumber(item.gmPhone);
+                const formattedStorePhone = formatPhoneNumber(item.storePhone);
+                const formattedDoCell = formatPhoneNumber(item.doCell);
+
                 card.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid var(--crust-med); padding-bottom: 8px;">
                     <div>
@@ -5736,7 +5760,7 @@
                         <button type="button" onclick="openEditContactModal('${escapeText(item.store)}')" title="Edit Store & GM Details" style="background: var(--brand-blue); color: white; border: none; padding: 5px 12px; font-size: 13px; font-family: 'Subhead2'; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
                             ✏️ Edit Info
                         </button>
-                        <button type="button" onclick="copyToClipboard('${escapeText(item.store + ' - ' + (item.manager || '') + ' - ' + (item.gmPhone || item.storePhone || ''))}', this)" title="Copy summary" style="background: var(--crust-med); color: var(--crust-burnt); padding: 5px 10px; font-size: 13px; font-family: 'Subhead2'; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                        <button type="button" onclick="copyToClipboard('${escapeText(item.store + ' - ' + (item.manager || '') + ' - ' + (formattedGmPhone || formattedStorePhone || ''))}', this)" title="Copy summary" style="background: var(--crust-med); color: var(--crust-burnt); padding: 5px 10px; font-size: 13px; font-family: 'Subhead2'; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                             ${copySvg} <span style="font-size: 12px;">Copy</span>
                         </button>
                     </div>
@@ -5747,8 +5771,8 @@
                         <strong>General Manager:</strong> ${item.manager || 'N/A'}
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px;">
-                        <strong>GM Phone:</strong> ${item.gmPhone || 'N/A'}
-                        ${item.gmPhone ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${item.gmPhone}', this)" title="Copy GM Phone">${copySvg}</button>` : ''}
+                        <strong>GM Phone:</strong> ${formattedGmPhone || 'N/A'}
+                        ${formattedGmPhone ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${formattedGmPhone}', this)" title="Copy GM Phone">${copySvg}</button>` : ''}
                     </div>
                     <div>
                         <strong>Address:</strong> ${item.address || 'N/A'}
@@ -5758,15 +5782,15 @@
                         ` : ''}
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px;">
-                        <strong>Store Phone:</strong> ${item.storePhone || 'N/A'}
-                        ${item.storePhone ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${item.storePhone}', this)" title="Copy Store Phone">${copySvg}</button>` : ''}
+                        <strong>Store Phone:</strong> ${formattedStorePhone || 'N/A'}
+                        ${formattedStorePhone ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${formattedStorePhone}', this)" title="Copy Store Phone">${copySvg}</button>` : ''}
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px;">
                         <strong>Store Email:</strong> ${item.storeEmail || 'N/A'}
                         ${item.storeEmail ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.storeEmail)}', this)" title="Copy Store Email">${copySvg}</button>` : ''}
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px;">
-                        <strong>DO Email / Cell:</strong> ${item.doEmail || item.doCell ? `${item.doEmail || ''} ${item.doCell ? `(${item.doCell})` : ''}` : 'N/A'}
+                        <strong>DO Email / Cell:</strong> ${item.doEmail || formattedDoCell ? `${item.doEmail || ''} ${formattedDoCell ? `(${formattedDoCell})` : ''}` : 'N/A'}
                         ${item.doEmail ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.doEmail)}', this)" title="Copy DO Email">${copySvg}</button>` : ''}
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px; grid-column: span 2; background: #fff8e1; border: 1px solid #ffe082; padding: 6px 10px; border-radius: 6px; margin-top: 2px;">
@@ -6139,11 +6163,11 @@
             document.getElementById('editContactStoreDisplay').value = `Store #${contact.store}`;
             document.getElementById('editContactDo').value = contact.doName || '';
             document.getElementById('editContactGm').value = contact.manager || '';
-            document.getElementById('editContactGmPhone').value = contact.gmPhone || '';
-            document.getElementById('editContactStorePhone').value = contact.storePhone || '';
+            document.getElementById('editContactGmPhone').value = formatPhoneNumber(contact.gmPhone) || '';
+            document.getElementById('editContactStorePhone').value = formatPhoneNumber(contact.storePhone) || '';
             document.getElementById('editContactStoreEmail').value = contact.storeEmail || '';
             document.getElementById('editContactDoEmail').value = contact.doEmail || '';
-            document.getElementById('editContactDoCell').value = contact.doCell || '';
+            document.getElementById('editContactDoCell').value = formatPhoneNumber(contact.doCell) || '';
             document.getElementById('editContactAddress').value = contact.address || '';
             document.getElementById('editContactIp').value = contact.ipAddress || '';
 
@@ -6170,11 +6194,11 @@
 
             const doName = document.getElementById('editContactDo').value.trim();
             const manager = document.getElementById('editContactGm').value.trim();
-            const gmPhone = document.getElementById('editContactGmPhone').value.trim();
-            const storePhone = document.getElementById('editContactStorePhone').value.trim();
+            const gmPhone = formatPhoneNumber(document.getElementById('editContactGmPhone').value.trim());
+            const storePhone = formatPhoneNumber(document.getElementById('editContactStorePhone').value.trim());
             const storeEmail = document.getElementById('editContactStoreEmail').value.trim();
             const doEmail = document.getElementById('editContactDoEmail').value.trim();
-            const doCell = document.getElementById('editContactDoCell').value.trim();
+            const doCell = formatPhoneNumber(document.getElementById('editContactDoCell').value.trim());
             const address = document.getElementById('editContactAddress').value.trim();
             const ipAddress = document.getElementById('editContactIp').value.trim();
 
@@ -6244,6 +6268,15 @@
                 showBrandAlert("Error updating store contact: " + err.message, "Update Failed");
             }
         }
+
+        // Global auto-format for any phone/cell input field on blur
+        document.addEventListener('focusout', function(e) {
+            if (e.target && (e.target.type === 'tel' || (e.target.id && (e.target.id.toLowerCase().includes('phone') || e.target.id.toLowerCase().includes('cell'))))) {
+                if (e.target.value) {
+                    e.target.value = formatPhoneNumber(e.target.value);
+                }
+            }
+        });
     </script>
     <datalist id="time15MinList"></datalist>
     <!-- NTO CLASS CALENDAR MANAGEMENT MODAL -->
