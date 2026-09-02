@@ -4690,8 +4690,9 @@
                 const nameMatch = cleanName && (sName === cleanName || isFuzzyNameMatch(cleanName, sName));
                 const emailMatch = cleanEmail && sEmail && (sEmail === cleanEmail);
                 const idMatch = cleanId && sId && (sId === cleanId);
+                const emailMismatch = cleanEmail && sEmail && (sEmail !== cleanEmail);
 
-                if (nameMatch || emailMatch || idMatch) {
+                if (idMatch || emailMatch || (nameMatch && !emailMismatch)) {
                     const hDate = stf.hireDate || '';
                     const tDate = stf.termDate || '';
                     const normHDate = formatDateForInput(hDate) || hDate;
@@ -4729,8 +4730,9 @@
                 const nameMatch = cleanName && (cName === cleanName || isFuzzyNameMatch(cleanName, cName));
                 const emailMatch = cleanEmail && cEmail && (cEmail === cleanEmail);
                 const idMatch = cleanId && cId && (cId === cleanId);
+                const emailMismatch = cleanEmail && cEmail && (cEmail !== cleanEmail);
 
-                if (nameMatch || emailMatch || idMatch) {
+                if (idMatch || emailMatch || (nameMatch && !emailMismatch)) {
                     const hDate = cand.ntoDate || cand.hireDate || '';
                     const normHDate = formatDateForInput(hDate) || hDate;
                     const stintKey = `${cand.store}_${normHDate}_active`;
