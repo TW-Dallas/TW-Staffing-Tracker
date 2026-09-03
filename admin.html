@@ -2724,8 +2724,9 @@
                     let ntoStatusColor = 'var(--brand-blue)';
                     let ntoLabel = '';
 
-                    const isCompleted = item.ntoStatus === 'NTO Complete' || item.ntoStatus === 'In Class';
-                    const isMissed = item.missedNto || item.ntoStatus === 'Not in NTO' || item.ntoStatus === 'Left Early';
+                    const isCompleted = item.ntoStatus === 'NTO Complete' || item.ntoAttendance === 'NTO Complete';
+                    const isInClass = item.ntoStatus === 'In Class' || item.ntoAttendance === 'In Class';
+                    const isMissed = item.missedNto || item.ntoStatus === 'Not in NTO' || item.ntoStatus === 'Left Early' || item.ntoAttendance === 'Not in NTO' || item.ntoAttendance === 'Left Early';
 
                     if (isMissed) {
                         card.classList.add('status-red');
@@ -2735,6 +2736,10 @@
                         card.classList.add('status-green');
                         ntoStatusColor = 'var(--success-green)';
                         ntoLabel = item.ntoDate ? `🎓 NTO: ${item.ntoDate} (Done)` : '🎓 NTO Complete';
+                    } else if (isInClass) {
+                        card.classList.add('status-blue');
+                        ntoStatusColor = '#d97706';
+                        ntoLabel = item.ntoDate ? `📖 In Class: ${item.ntoDate}` : '📖 In Class';
                     } else if (item.ntoDate) {
                         card.classList.add('status-blue');
                         ntoStatusColor = 'var(--dark-blue)';
@@ -5321,9 +5326,14 @@
             const endTime = formatTimeDisplayFrontEnd(rawEndTime) || rawEndTime;
             document.getElementById('ntoEndTime').value = endTime;
 
-            const rosterElements = document.querySelectorAll('.nto-attendance-select');
+            const selectedDateFormatted = formatDateForInput(classDate);
+            const allRosterElements = Array.from(document.querySelectorAll('.nto-attendance-select'));
+            const rosterElements = allRosterElements.filter(el => {
+                const elDate = formatDateForInput(el.getAttribute('data-ntodate') || '');
+                return !selectedDateFormatted || !elDate || elDate === selectedDateFormatted;
+            });
             if (rosterElements.length === 0) {
-                showBrandAlert("No trainees found on the roster to process.", "Class Empty");
+                showBrandAlert(`No trainees found on the roster for class date ${classDate} to process.`, "Class Empty");
                 return;
             }
 
@@ -5497,10 +5507,15 @@
 
         async function saveNtoAttendanceOnly() {
             const classDate = document.getElementById('ntoClassDate').value;
-            const rosterElements = document.querySelectorAll('.nto-attendance-select');
+            const selectedDateFormatted = formatDateForInput(classDate);
+            const allRosterElements = Array.from(document.querySelectorAll('.nto-attendance-select'));
+            const rosterElements = allRosterElements.filter(el => {
+                const elDate = formatDateForInput(el.getAttribute('data-ntodate') || '');
+                return !selectedDateFormatted || !elDate || elDate === selectedDateFormatted;
+            });
 
             if (rosterElements.length === 0) {
-                showBrandAlert("No trainees found on the roster to save.", "Roster Empty");
+                showBrandAlert(`No trainees found on the roster for class date ${classDate} to save.`, "Roster Empty");
                 return;
             }
 
