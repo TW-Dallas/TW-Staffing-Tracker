@@ -71,8 +71,8 @@
                 </div>
             </div>
 
-            <!-- CENTERED QUICK PORTAL BUTTONS (PURE BUTTONS - NO LINK TAGS) -->
-            <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <!-- CENTERED QUICK PORTAL BUTTONS (PURE BUTTONS - HIDDEN ON MOBILE) -->
+            <div class="header-portal-links">
 
                 <button type="button" onclick="window.open('https://www.hralliance.net/', '_blank')"
                     style="display: inline-flex; align-items: center; gap: 6px; background: var(--crust-base); color: var(--dark-blue); font-size: 15px; padding: 7px 14px; font-family: 'Subhead1', sans-serif;">
@@ -114,7 +114,15 @@
 
             </div>
 
-            <button class="secondary" onclick="handleLogout()">Log Out</button>
+            <!-- RIGHT HEADER ACTIONS -->
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" id="btnSrTemplate" onclick="openSrTemplateModal()"
+                    style="background: var(--brand-blue); color: white; border: 1.5px solid rgba(255,255,255,0.35); font-family: 'Subhead1', sans-serif; font-size: 15px; padding: 7px 13px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.25); white-space: nowrap;">
+                    <span>🍕</span> ATS Phone Invite
+                </button>
+
+                <button class="secondary" onclick="handleLogout()">Log Out</button>
+            </div>
         </header>
         <div class="dashboard">
             <!-- Left Panel: List of Candidates -->
@@ -263,119 +271,148 @@
                                     placeholder="Write any specific candidate notes here..."></textarea>
                             </div>
 
-                            <!-- 3-Column Structured Checklist Grid -->
+                            <!-- Structured Onboarding Checklist Grid (Stage 1 & 3 Collapsed, Stage 2 & Blockers Open) -->
                             <div class="checkbox-grid">
-                                <div class="section-header">Stage 1: Onboarding Intake</div>
-                                <label class="checkbox-item"><input type="checkbox" id="checkSubmission"> Submission
-                                    Received</label>
-                                <label class="checkbox-item"><input type="checkbox" id="checkOnbSent"> Onboarding
-                                    Sent</label>
-                                <div></div>
-
-                                <div class="section-header">Stage 2: Paperwork Processing</div>
-                                <label class="checkbox-item"><input type="checkbox" id="checkBgc"> Background Check
-                                    Done</label>
-                                <label class="checkbox-item"><input type="checkbox" id="checkAllPay"> AllPay
-                                    Done</label>
-                                <label class="checkbox-item"><input type="checkbox" id="checkPulseForm"> Pulse Form
-                                    Complete</label>
-
-                                <div class="section-header">Stage 3: Orientation & Hire</div>
-                                <label class="checkbox-item"><input type="checkbox" id="checkNtoLink"> NTO Signup Link
-                                    Sent</label>
-                                <label class="checkbox-item"><input type="checkbox" id="checkNto"> NTO Scheduled</label>
-                                <label class="checkbox-item"><input type="checkbox" id="checkHired"> Hired</label>
-
-                                <div class="section-header">Active Flags & Blockers</div>
-
-                                <label class="checkbox-item flag-box flag-incorrect">
-                                    <input type="checkbox" id="checkIncorrect"> ⚠️ Incorrect Email
-                                </label>
-                                <label class="checkbox-item flag-box flag-incorrect">
-                                    <input type="checkbox" id="checkMissingDocs" onchange="toggleMissingDocsSelector()">
-                                    ⚠️ Missing/Incorrect Docs
-                                </label>
-                                <label class="checkbox-item flag-box flag-incorrect">
-                                    <input type="checkbox" id="checkAllPayError" onchange="toggleAllPayErrorSelector()">
-                                    ⚠️ AllPay Error
-                                </label>
-
-                                <!-- SMART EXPANDABLE MISSING DOCUMENTS CHECKLIST -->
-                                <div id="missingDocsContainer" class="hidden"
-                                    style="grid-column: span 3; background: white; padding: 12px; border-radius: 8px; border: 1.5px solid var(--brand-red); display: grid; grid-template-columns: 1fr 1fr; gap: 12px; box-sizing: border-box; font-family: 'Condensed', sans-serif;">
-                                    <div
-                                        style="grid-column: span 2; font-family: 'Subhead2'; font-size: 11px; color: var(--dark-red); text-transform: uppercase; font-weight: bold; border-bottom: 1px solid var(--crust-med); padding-bottom: 2px; margin-bottom: 4px;">
-                                        Select Missing Documents</div>
-                                    
-                                    <!-- Left Column: I-9 & ID Verification -->
-                                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                                        <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                                class="doc-chk"
-                                                value="List A ID (Passport, I-551 Permanent Resident Card, or I-766 Employment Authorization Card)">
-                                            ✈️ List A ID (Passport, I-551, I-766)</label>
-                                        <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                                class="doc-chk" value="List B ID (Driver's License, State ID, School ID)">
-                                            🪪 List B ID (DL, State ID, School ID)</label>
-                                        <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                                class="doc-chk" value="List C ID (Social Security Card, Birth Certificate)">
-                                            💳 List C ID (Social Security Card, Birth Cert)</label>
-                                        <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                                class="doc-chk" value="Document Mismatch"> ✖️ Document Mismatch</label>
+                                
+                                <!-- STAGE 1: INTAKE (COLLAPSIBLE) -->
+                                <div class="stage-collapsible-wrapper">
+                                    <div class="stage-accordion-header" onclick="toggleStageAccordion('stage1Content', 'stage1Chevron')">
+                                        <span style="display: flex; align-items: center; gap: 8px;">
+                                            <span>📥</span> <strong>Stage 1: Onboarding Intake</strong>
+                                            <span id="stage1StatusBadge" class="stage-mini-badge hidden"></span>
+                                        </span>
+                                        <span id="stage1Chevron" class="stage-chevron">▶ Expand</span>
                                     </div>
-
-                                    <!-- Right Column: Vehicle / Driver Requirements -->
-                                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                                        <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                                class="doc-chk" value="Vehicle Inspection"> 🚗 Vehicle Inspection</label>
-                                        <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                                class="doc-chk" value="Auto Registration"> 🏷️ Auto Registration</label>
-                                        <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                                class="doc-chk"
-                                                value="Auto Insurance ID (Driver name must be listed as a covered driver)">
-                                            📄 Auto Insurance ID</label>
-                                    </div>
-
-                                    <div
-                                        style="grid-column: span 2; display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
-                                        <span
-                                            style="font-size: 11px; font-family: 'Subhead2'; color: var(--dark-red); text-transform: uppercase; font-weight: bold;">Custom
-                                            Missing Document:</span>
-                                        <input type="text" id="customMissingDoc"
-                                            placeholder="e.g. Voided Check, Profile Signature"
-                                            style="width: 100%; font-size: 13px; padding: 4px;">
+                                    <div id="stage1Content" class="stage-accordion-body hidden">
+                                        <div class="checkbox-subgrid">
+                                            <label class="checkbox-item"><input type="checkbox" id="checkSubmission" onchange="updateStageBadges()"> Submission Received</label>
+                                            <label class="checkbox-item"><input type="checkbox" id="checkOnbSent" onchange="updateStageBadges()"> Onboarding Sent</label>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- SMART EXPANDABLE ALLPAY ERROR DETAILS -->
-                                <div id="allPayErrorContainer" class="hidden"
-                                    style="grid-column: span 3; background: white; padding: 12px; border-radius: 8px; border: 1.5px solid var(--brand-red); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; box-sizing: border-box; font-family: 'Condensed', sans-serif;">
-                                    <div
-                                        style="grid-column: span 2; font-family: 'Subhead2'; font-size: 11px; color: var(--dark-red); text-transform: uppercase; font-weight: bold; border-bottom: 1px solid var(--crust-med); padding-bottom: 2px; margin-bottom: 4px;">
-                                        Select AllPay Error Details</div>
-                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                            class="allpay-err-chk" value="Incorrect DOB on I-9"> 🎂 Incorrect DOB on I-9</label>
-                                    <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                            class="allpay-err-chk" value="Incorrect SSN on I-9"> 💳 Incorrect SSN on I-9</label>
-                                    <div
-                                        style="grid-column: span 2; display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
-                                        <span
-                                            style="font-size: 11px; font-family: 'Subhead2'; color: var(--dark-red); text-transform: uppercase; font-weight: bold;">Custom
-                                            / Other AllPay Error:</span>
-                                        <input type="text" id="customAllPayError"
-                                            placeholder="e.g. Missing Signature, Address Mismatch"
-                                            style="width: 100%; font-size: 13px; padding: 4px;">
+                                <!-- STAGE 2: PAPERWORK PROCESSING (OPEN BY DEFAULT) -->
+                                <div>
+                                    <div class="section-header" style="margin-top: 2px;">Stage 2: Paperwork Processing</div>
+                                    <div class="checkbox-subgrid three-col" style="margin-top: 6px;">
+                                        <label class="checkbox-item"><input type="checkbox" id="checkBgc"> Background Check Done</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="checkAllPay"> AllPay Done</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="checkPulseForm"> Pulse Form Complete</label>
                                     </div>
                                 </div>
 
-                                <label class="checkbox-item flag-box flag-inactive">
-                                    <input type="checkbox" id="checkIneligible"> 🚫 Ineligible / Rejected
-                                </label>
-                                <label class="checkbox-item flag-box flag-inactive">
-                                    <input type="checkbox" id="checkInactive"> 💤 Inactive
-                                </label>
-                                <label class="checkbox-item flag-box flag-inactive">
-                                    <input type="checkbox" id="checkWithdrawn"> 🚪 Withdrawn
-                                </label>
+                                <!-- STAGE 3: ORIENTATION & HIRE (COLLAPSIBLE) -->
+                                <div class="stage-collapsible-wrapper">
+                                    <div class="stage-accordion-header" onclick="toggleStageAccordion('stage3Content', 'stage3Chevron')">
+                                        <span style="display: flex; align-items: center; gap: 8px;">
+                                            <span>🎓</span> <strong>Stage 3: Orientation & Hire</strong>
+                                            <span id="stage3StatusBadge" class="stage-mini-badge hidden"></span>
+                                        </span>
+                                        <span id="stage3Chevron" class="stage-chevron">▶ Expand</span>
+                                    </div>
+                                    <div id="stage3Content" class="stage-accordion-body hidden">
+                                        <div class="checkbox-subgrid three-col">
+                                            <label class="checkbox-item"><input type="checkbox" id="checkNtoLink" onchange="updateStageBadges()"> NTO Signup Link Sent</label>
+                                            <label class="checkbox-item"><input type="checkbox" id="checkNto" onchange="updateStageBadges()"> NTO Scheduled</label>
+                                            <label class="checkbox-item"><input type="checkbox" id="checkHired" onchange="updateStageBadges()"> Hired</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ACTIVE FLAGS & BLOCKERS (OPEN BY DEFAULT) -->
+                                <div>
+                                    <div class="section-header" style="margin-top: 2px;">Active Flags & Blockers</div>
+                                    <div class="checkbox-subgrid three-col" style="margin-top: 6px;">
+                                        <label class="checkbox-item flag-box flag-incorrect">
+                                            <input type="checkbox" id="checkIncorrect"> ⚠️ Incorrect Email
+                                        </label>
+                                        <label class="checkbox-item flag-box flag-incorrect">
+                                            <input type="checkbox" id="checkMissingDocs" onchange="toggleMissingDocsSelector()">
+                                            ⚠️ Missing/Incorrect Docs
+                                        </label>
+                                        <label class="checkbox-item flag-box flag-incorrect">
+                                            <input type="checkbox" id="checkAllPayError" onchange="toggleAllPayErrorSelector()">
+                                            ⚠️ AllPay Error
+                                        </label>
+
+                                        <!-- SMART EXPANDABLE MISSING DOCUMENTS CHECKLIST -->
+                                        <div id="missingDocsContainer" class="hidden"
+                                            style="grid-column: 1 / -1; background: white; padding: 12px; border-radius: 8px; border: 1.5px solid var(--brand-red); display: grid; grid-template-columns: 1fr 1fr; gap: 12px; box-sizing: border-box; font-family: 'Condensed', sans-serif;">
+                                            <div
+                                                style="grid-column: span 2; font-family: 'Subhead2'; font-size: 11px; color: var(--dark-red); text-transform: uppercase; font-weight: bold; border-bottom: 1px solid var(--crust-med); padding-bottom: 2px; margin-bottom: 4px;">
+                                                Select Missing Documents</div>
+                                            
+                                            <!-- Left Column: I-9 & ID Verification -->
+                                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
+                                                        class="doc-chk"
+                                                        value="List A ID (Passport, I-551 Permanent Resident Card, or I-766 Employment Authorization Card)">
+                                                    ✈️ List A ID (Passport, I-551, I-766)</label>
+                                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
+                                                        class="doc-chk" value="List B ID (Driver's License, State ID, School ID)">
+                                                    🪪 List B ID (DL, State ID, School ID)</label>
+                                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
+                                                        class="doc-chk" value="List C ID (Social Security Card, Birth Certificate)">
+                                                    💳 List C ID (Social Security Card, Birth Cert)</label>
+                                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
+                                                        class="doc-chk" value="Document Mismatch"> ✖️ Document Mismatch</label>
+                                            </div>
+
+                                            <!-- Right Column: Vehicle / Driver Requirements -->
+                                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
+                                                        class="doc-chk" value="Vehicle Inspection"> 🚗 Vehicle Inspection</label>
+                                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
+                                                        class="doc-chk" value="Auto Registration"> 🏷️ Auto Registration</label>
+                                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
+                                                        class="doc-chk"
+                                                        value="Auto Insurance ID (Driver name must be listed as a covered driver)">
+                                                    📄 Auto Insurance ID</label>
+                                            </div>
+
+                                            <div
+                                                style="grid-column: span 2; display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+                                                <span
+                                                    style="font-size: 11px; font-family: 'Subhead2'; color: var(--dark-red); text-transform: uppercase; font-weight: bold;">Custom
+                                                    Missing Document:</span>
+                                                <input type="text" id="customMissingDoc"
+                                                    placeholder="e.g. Voided Check, Profile Signature"
+                                                    style="width: 100%; font-size: 13px; padding: 4px;">
+                                            </div>
+                                        </div>
+
+                                        <!-- SMART EXPANDABLE ALLPAY ERROR DETAILS -->
+                                        <div id="allPayErrorContainer" class="hidden"
+                                            style="grid-column: 1 / -1; background: white; padding: 12px; border-radius: 8px; border: 1.5px solid var(--brand-red); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; box-sizing: border-box; font-family: 'Condensed', sans-serif;">
+                                            <div
+                                                style="grid-column: span 2; font-family: 'Subhead2'; font-size: 11px; color: var(--dark-red); text-transform: uppercase; font-weight: bold; border-bottom: 1px solid var(--crust-med); padding-bottom: 2px; margin-bottom: 4px;">
+                                                Select AllPay Error Details</div>
+                                            <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
+                                                    class="allpay-err-chk" value="Incorrect DOB on I-9"> 🎂 Incorrect DOB on I-9</label>
+                                            <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
+                                                    class="allpay-err-chk" value="Incorrect SSN on I-9"> 💳 Incorrect SSN on I-9</label>
+                                            <div
+                                                style="grid-column: span 2; display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+                                                <span
+                                                    style="font-size: 11px; font-family: 'Subhead2'; color: var(--dark-red); text-transform: uppercase; font-weight: bold;">Custom
+                                                    / Other AllPay Error:</span>
+                                                <input type="text" id="customAllPayError"
+                                                    placeholder="e.g. Missing Signature, Address Mismatch"
+                                                    style="width: 100%; font-size: 13px; padding: 4px;">
+                                            </div>
+                                        </div>
+
+                                        <label class="checkbox-item flag-box flag-inactive">
+                                            <input type="checkbox" id="checkIneligible"> 🚫 Ineligible / Rejected
+                                        </label>
+                                        <label class="checkbox-item flag-box flag-inactive">
+                                            <input type="checkbox" id="checkInactive"> 💤 Inactive
+                                        </label>
+                                        <label class="checkbox-item flag-box flag-inactive">
+                                            <input type="checkbox" id="checkWithdrawn"> 🚪 Withdrawn
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- MANUAL EMAIL QUICK ACTIONS -->
@@ -1128,6 +1165,92 @@
                 </div>
             </div>
         </div>
+    <!-- SMARTRICRUITERS (ATS) PHONE INTERVIEW TEMPLATE MODAL -->
+    <div id="srTemplateModal" class="brand-modal-overlay hidden">
+        <div class="brand-modal-card" style="max-width: 620px; width: 95%;">
+            <div class="brand-modal-brand-stripe"></div>
+            <div class="brand-modal-content" style="padding: 20px; text-align: left;">
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--crust-med); padding-bottom: 8px; margin-bottom: 14px;">
+                    <div>
+                        <h3 style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 19px; text-transform: uppercase;">
+                            🍕 ATS Phone Interview Outreach
+                        </h3>
+                        <div style="font-family: 'Compact', sans-serif; font-size: 13.5px; color: var(--crust-deep); margin-top: 2px;">
+                            SmartRecruiters One-Click Email Template
+                        </div>
+                    </div>
+                    <button type="button" onclick="closeSrTemplateModal()"
+                        style="background: var(--crust-med); color: var(--crust-burnt); border: none; font-size: 13px; padding: 5px 12px; border-radius: 6px; cursor: pointer;">
+                        ✕ Close
+                    </button>
+                </div>
+
+                <!-- Section 1: Subject Line -->
+                <div style="margin-bottom: 14px; background: var(--crust-base); border: 1px solid var(--crust-dark); border-radius: 8px; padding: 10px 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-family: 'Subhead2', sans-serif; font-size: 12.5px; font-weight: bold; color: var(--dark-blue); text-transform: uppercase;">
+                            Email Subject Line:
+                        </span>
+                        <button type="button" id="btnCopySrSubject" onclick="copySrSubject()"
+                            style="background: var(--brand-blue); color: white; border: none; font-size: 12.5px; padding: 4px 10px; border-radius: 4px; font-family: 'Subhead1', sans-serif; cursor: pointer;">
+                            📋 Copy Subject
+                        </button>
+                    </div>
+                    <input type="text" id="srSubjectInput" readonly value="🍕 Invitation to Phone Interview - Team Wow! Domino’s"
+                        style="width: 100%; font-size: 14.5px; padding: 6px 10px; background: white; border: 1px solid var(--crust-med); font-weight: bold; color: var(--text-dark);">
+                </div>
+
+                <!-- Section 2: Google Booking Link -->
+                <div style="margin-bottom: 14px; background: #fdfaf7; border: 1px solid var(--crust-dark); border-radius: 8px; padding: 10px 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <label for="srBookingUrlInput" style="font-family: 'Subhead2', sans-serif; font-size: 12.5px; font-weight: bold; color: var(--dark-blue); text-transform: uppercase;">
+                            📅 Google Appointment Booking Link:
+                        </label>
+                        <span id="srLinkSavedStatus" style="font-size: 11.5px; color: var(--success-green); font-weight: bold; font-family: 'Compact', sans-serif;">✓ Saved</span>
+                    </div>
+                    <input type="text" id="srBookingUrlInput" placeholder="https://calendar.app.google/..."
+                        oninput="handleSrBookingUrlChange(this.value)"
+                        style="width: 100%; font-size: 14px; padding: 6px 10px; background: white; border: 1px solid var(--crust-med); color: var(--dark-blue); font-family: 'Condensed', sans-serif;">
+                    <div style="font-size: 11.5px; color: var(--brand-grey); font-family: 'Condensed', sans-serif; margin-top: 4px;">
+                        ℹ️ Updating this link updates the clickable <strong>CLICK HERE</strong> link below in real time and remembers it for next time.
+                    </div>
+                </div>
+
+                <!-- Section 3: Body Preview -->
+                <div style="margin-bottom: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-family: 'Subhead2', sans-serif; font-size: 12.5px; font-weight: bold; color: var(--dark-blue); text-transform: uppercase;">
+                            Message Body (Formatted Preview):
+                        </span>
+                        <span style="font-size: 11.5px; color: var(--brand-grey); font-family: 'Compact', sans-serif;">
+                            Includes SmartRecruiters merge tags
+                        </span>
+                    </div>
+                    <div id="srTemplateBodyPreview" style="background: white; border: 1.5px solid var(--crust-dark); border-radius: 8px; padding: 14px 16px; font-family: 'Condensed', sans-serif; font-size: 15.5px; line-height: 1.5; color: var(--text-dark); max-height: 220px; overflow-y: auto;">
+                        <p style="margin: 0 0 10px 0;">Hello [m_applicant_first_name],</p>
+                        <p style="margin: 0 0 10px 0;">Thank you for your interest in joining the Domino’s team!</p>
+                        <p style="margin: 0 0 10px 0;">I would like to schedule a brief phone call to discuss our current opportunities and see if we are a good match. If so, we can get you on the schedule for an in-person interview.</p>
+                        <p style="margin: 0 0 10px 0;">Please <a id="srPreviewHyperlink" href="https://calendar.app.google/rCFq2H2Z7VCc8Ks17" target="_blank" style="color: var(--brand-blue); font-weight: bold; text-decoration: underline;">CLICK HERE</a> to view my Google Appointment Bookings page and select a time that works for you. I will call you at the time you select.</p>
+                        <p style="margin: 0 0 3px 0;">Best regards,</p>
+                        <p style="margin: 0;">[m_employee_first_name] [m_employee_last_name]</p>
+                    </div>
+                </div>
+
+                <!-- Section 4: Action Buttons -->
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button type="button" id="btnCopySrBody" onclick="copySrBody()"
+                        style="flex: 1.5; background: var(--success-green); color: white; border: none; font-size: 16px; padding: 11px 16px; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 6px rgba(17,122,48,0.3);">
+                        <span>📋</span> Copy Formatted Body (With Clickable Link)
+                    </button>
+                    <button type="button" onclick="closeSrTemplateModal()" class="secondary"
+                        style="flex: 0.8; font-size: 15px; padding: 11px 16px;">
+                        Close
+                    </button>
+                </div>
+
+            </div>
+        </div>
     </div>
 
     <!-- STORE HIRING TRENDS MODAL -->
@@ -1521,7 +1644,164 @@
                     return;
                 }
             }
-            select.value = '';
+        function toggleStageAccordion(contentId, chevronId) {
+            const content = document.getElementById(contentId);
+            const chevron = document.getElementById(chevronId);
+            if (!content) return;
+            const isHidden = content.classList.contains('hidden');
+            if (isHidden) {
+                content.classList.remove('hidden');
+                if (chevron) chevron.innerText = '▼ Collapse';
+            } else {
+                content.classList.add('hidden');
+                if (chevron) chevron.innerText = '▶ Expand';
+            }
+        }
+
+        function updateStageBadges() {
+            // Stage 1 (Intake)
+            const subRec = document.getElementById('checkSubmission')?.checked;
+            const onbSent = document.getElementById('checkOnbSent')?.checked;
+            const s1Count = (subRec ? 1 : 0) + (onbSent ? 1 : 0);
+            const s1Badge = document.getElementById('stage1StatusBadge');
+            if (s1Badge) {
+                if (s1Count === 2) {
+                    s1Badge.innerText = '✓ Complete (2/2)';
+                    s1Badge.style.background = 'var(--success-green)';
+                    s1Badge.classList.remove('hidden');
+                } else if (s1Count === 1) {
+                    s1Badge.innerText = subRec ? '✓ Submission Rec\'d' : '✓ Onboarding Sent';
+                    s1Badge.style.background = 'var(--brand-blue)';
+                    s1Badge.classList.remove('hidden');
+                } else {
+                    s1Badge.classList.add('hidden');
+                }
+            }
+
+            // Stage 3 (Orientation & Hire)
+            const ntoLink = document.getElementById('checkNtoLink')?.checked;
+            const ntoSched = document.getElementById('checkNto')?.checked;
+            const hired = document.getElementById('checkHired')?.checked;
+            const s3Badge = document.getElementById('stage3StatusBadge');
+            if (s3Badge) {
+                if (hired) {
+                    s3Badge.innerText = '🎉 Hired';
+                    s3Badge.style.background = 'var(--success-green)';
+                    s3Badge.classList.remove('hidden');
+                } else if (ntoSched) {
+                    s3Badge.innerText = '📅 NTO Scheduled';
+                    s3Badge.style.background = 'var(--dark-blue)';
+                    s3Badge.classList.remove('hidden');
+                } else if (ntoLink) {
+                    s3Badge.innerText = '📨 Link Sent';
+                    s3Badge.style.background = 'var(--brand-blue)';
+                    s3Badge.classList.remove('hidden');
+                } else {
+                    s3Badge.classList.add('hidden');
+                }
+            }
+        }
+
+        /* --- SMARTRICRUITERS (ATS) PHONE INTERVIEW TEMPLATE --- */
+        const DEFAULT_SR_BOOKING_URL = 'https://calendar.app.google/rCFq2H2Z7VCc8Ks17';
+
+        function getActiveSrBookingUrl() {
+            return (localStorage.getItem('tw_sr_booking_url') || DEFAULT_SR_BOOKING_URL).trim();
+        }
+
+        function openSrTemplateModal() {
+            const modal = document.getElementById('srTemplateModal');
+            if (!modal) return;
+            const urlInput = document.getElementById('srBookingUrlInput');
+            const activeUrl = getActiveSrBookingUrl();
+            if (urlInput) urlInput.value = activeUrl;
+            refreshSrPreview(activeUrl);
+            modal.classList.remove('hidden');
+        }
+
+        function closeSrTemplateModal() {
+            const modal = document.getElementById('srTemplateModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function handleSrBookingUrlChange(val) {
+            const clean = (val || '').trim() || DEFAULT_SR_BOOKING_URL;
+            localStorage.setItem('tw_sr_booking_url', clean);
+            refreshSrPreview(clean);
+            const savedStatus = document.getElementById('srLinkSavedStatus');
+            if (savedStatus) {
+                savedStatus.innerText = '✓ Saved';
+                savedStatus.style.opacity = '1';
+            }
+        }
+
+        function refreshSrPreview(url) {
+            const previewLink = document.getElementById('srPreviewHyperlink');
+            if (previewLink) {
+                previewLink.href = url;
+            }
+        }
+
+        async function copySrSubject() {
+            const subject = document.getElementById('srSubjectInput')?.value || "🍕 Invitation to Phone Interview - Team Wow! Domino’s";
+            try {
+                await navigator.clipboard.writeText(subject);
+                const btn = document.getElementById('btnCopySrSubject');
+                if (btn) {
+                    const orig = btn.innerText;
+                    btn.innerText = '✅ Copied!';
+                    btn.style.background = 'var(--success-green)';
+                    setTimeout(() => {
+                        btn.innerText = orig;
+                        btn.style.background = 'var(--brand-blue)';
+                    }, 1800);
+                }
+                showNotification("📋 Copied Subject Line!");
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function copySrBody() {
+            const url = getActiveSrBookingUrl();
+            const htmlContent = `<p>Hello [m_applicant_first_name],</p><p>Thank you for your interest in joining the Domino’s team!</p><p>I would like to schedule a brief phone call to discuss our current opportunities and see if we are a good match. If so, we can get you on the schedule for an in-person interview.</p><p>Please <a href="${url}">CLICK HERE</a> to view my Google Appointment Bookings page and select a time that works for you. I will call you at the time you select.</p><p>Best regards,<br>[m_employee_first_name] [m_employee_last_name]</p>`;
+            const plainText = `Hello [m_applicant_first_name],\n\nThank you for your interest in joining the Domino’s team!\n\nI would like to schedule a brief phone call to discuss our current opportunities and see if we are a good match. If so, we can get you on the schedule for an in-person interview.\n\nPlease CLICK HERE (${url}) to view my Google Appointment Bookings page and select a time that works for you. I will call you at the time you select.\n\nBest regards,\n[m_employee_first_name] [m_employee_last_name]`;
+
+            try {
+                if (navigator.clipboard && window.ClipboardItem) {
+                    const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
+                    const textBlob = new Blob([plainText], { type: 'text/plain' });
+                    await navigator.clipboard.write([new ClipboardItem({ 'text/html': htmlBlob, 'text/plain': textBlob })]);
+                } else {
+                    const el = document.createElement('div');
+                    el.innerHTML = htmlContent;
+                    el.style.position = 'fixed';
+                    el.style.left = '-9999px';
+                    document.body.appendChild(el);
+                    const range = document.createRange();
+                    range.selectNodeContents(el);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    document.execCommand('copy');
+                    document.body.removeChild(el);
+                }
+
+                const btn = document.getElementById('btnCopySrBody');
+                if (btn) {
+                    const orig = btn.innerHTML;
+                    btn.innerHTML = '<span>✅</span> Copied Rich Text with Link!';
+                    btn.style.background = 'var(--dark-blue)';
+                    setTimeout(() => {
+                        btn.innerHTML = orig;
+                        btn.style.background = 'var(--success-green)';
+                    }, 2200);
+                }
+                showNotification("📋 Copied formatted body with clickable CLICK HERE link!");
+            } catch (err) {
+                console.error("Clipboard write error:", err);
+                showNotification("⚠️ Copy failed. Please select text manually.");
+            }
         }
 
         /* --- BRAND DIALOG MODAL HELPERS --- */
@@ -3351,6 +3631,7 @@
                 document.getElementById('checkWithdrawn').checked = item.withdrawn || false;
                 document.getElementById('checkPulseForm').checked = item.pulseFormComplete || false;
                 if (document.getElementById('checkMissedNto')) document.getElementById('checkMissedNto').checked = item.missedNto || false;
+                updateStageBadges();
 
                 const rawMissingDocs = (item.missingDocs || "").toString().trim();
                 if (rawMissingDocs && rawMissingDocs.toUpperCase() !== "FALSE") {
@@ -3441,6 +3722,7 @@
             } else {
                 document.getElementById('formTitle').innerText = "Add New Candidate";
                 document.getElementById('checkSubmission').checked = true;
+                updateStageBadges();
                 document.getElementById('fieldName').focus();
             }
         }
@@ -3451,6 +3733,7 @@
             document.getElementById('fieldId').value = '';
             document.getElementById('fieldNto').value = '';
             document.getElementById('checkSubmission').checked = true;
+            updateStageBadges();
 
             const stfEmpCont = document.getElementById('stfEmploymentPeriodsContainer');
             if (stfEmpCont) stfEmpCont.innerHTML = '';
