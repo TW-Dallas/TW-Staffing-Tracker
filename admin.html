@@ -5968,9 +5968,106 @@
                 return 0;
             });
 
-            if (filtered.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding: 30px; color: var(--brand-grey); font-size: 18px; font-family: 'Subhead2';">🔍 No store contacts matched "${escapeText(searchQuery)}".</div>`;
+            // 1. Extract and group unique Directors of Operations (DOs)
+            const doMap = {};
+            contacts.forEach(c => {
+                const name = (c.doName || '').trim();
+                if (!name) return;
+                if (!doMap[name]) {
+                    doMap[name] = {
+                        doName: name,
+                        doEmail: (c.doEmail || '').trim(),
+                        doCell: (c.doCell || '').trim(),
+                        stores: []
+                    };
+                }
+                if (c.store && !doMap[name].stores.includes(c.store)) {
+                    doMap[name].stores.push(c.store);
+                }
+                if (!doMap[name].doEmail && c.doEmail) doMap[name].doEmail = c.doEmail.trim();
+                if (!doMap[name].doCell && c.doCell) doMap[name].doCell = c.doCell.trim();
+            });
+
+            const doList = Object.values(doMap).sort((a, b) => a.doName.localeCompare(b.doName));
+            doList.forEach(d => {
+                d.stores.sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+            });
+
+            const filteredDos = doList.filter(d => {
+                if (doFilter !== 'ALL' && d.doName !== doFilter) return false;
+                if (searchQuery) {
+                    const matchesName = d.doName.toLowerCase().includes(searchQuery);
+                    const matchesEmail = d.doEmail.toLowerCase().includes(searchQuery);
+                    const matchesCell = String(d.doCell || '').includes(searchQuery) ||
+                                        (searchDigits.length >= 4 && String(d.doCell || '').replace(/\D/g, '').includes(searchDigits));
+                    const matchesStore = d.stores.some(s => String(s).toLowerCase().includes(searchQuery));
+                    return matchesName || matchesEmail || matchesCell || matchesStore;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0 && filteredDos.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding: 30px; color: var(--brand-grey); font-size: 18px; font-family: 'Subhead2';">🔍 No store or DO contacts matched "${escapeText(searchQuery)}".</div>`;
                 return;
+            }
+
+            const copySvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+
+            // Render Dedicated DO Cards Section if any match
+            if (filteredDos.length > 0) {
+                const doHeader = document.createElement('div');
+                doHeader.style.cssText = `margin-bottom: 8px; font-family: 'Subhead1', sans-serif; font-size: 19px; color: var(--dark-blue); text-transform: uppercase; border-bottom: 2px solid #16a34a; padding-bottom: 4px; display: flex; align-items: center; justify-content: space-between;`;
+                doHeader.innerHTML = `<span>👔 Director of Operations (DO) Directory</span><span style="font-size: 12px; color: var(--brand-grey); font-family: 'Condensed', sans-serif;">${filteredDos.length} DO${filteredDos.length === 1 ? '' : 's'}</span>`;
+                container.appendChild(doHeader);
+
+                filteredDos.forEach(d => {
+                    const doCard = document.createElement('div');
+                    doCard.style.cssText = `
+                        background: #f0fdf4;
+                        border: 1.5px solid #86efac;
+                        border-left: 6px solid #16a34a;
+                        border-radius: 8px;
+                        padding: 12px 14px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                        box-shadow: 0 2px 5px rgba(22, 163, 74, 0.08);
+                        margin-bottom: 12px;
+                    `;
+
+                    const formattedCell = formatPhoneNumber(d.doCell);
+
+                    doCard.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #bbf7d0; padding-bottom: 8px;">
+                            <div>
+                                <span style="font-family: 'ExtraBold'; font-size: 21px; color: #14532d;">DO: ${d.doName}</span>
+                                <span style="font-family: 'Subhead2'; font-size: 14px; color: #166534; margin-left: 8px;">Director of Operations</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <button type="button" onclick="copyToClipboard('${escapeText(d.doName + ' (DO) - ' + (d.doEmail || '') + ' - ' + (formattedCell || ''))}', this)" title="Copy DO Contact Summary" style="background: white; border: 1px solid #86efac; color: #166534; padding: 5px 10px; font-size: 13px; font-family: 'Subhead2'; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                    ${copySvg} <span style="font-size: 12px;">Copy</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 16px; margin-top: 2px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <strong>DO Phone / Cell:</strong> ${formattedCell || 'N/A'}
+                                ${formattedCell ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${formattedCell}', this)" title="Copy DO Phone">${copySvg}</button>` : ''}
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <strong>DO Email:</strong> ${d.doEmail || 'N/A'}
+                                ${d.doEmail ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(d.doEmail)}', this)" title="Copy DO Email">${copySvg}</button>` : ''}
+                            </div>
+                            <div style="grid-column: span 2; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 2px;">
+                                <strong style="color: #14532d;">Supervised Stores (${d.stores.length}):</strong>
+                                ${d.stores.map(st => `<span style="background: white; border: 1px solid #86efac; color: #166534; font-family: 'Condensed', sans-serif; font-size: 13.5px; font-weight: bold; padding: 2px 7px; border-radius: 4px;">#${st}</span>`).join(' ')}
+                            </div>
+                        </div>
+                    `;
+
+                    container.appendChild(doCard);
+                });
             }
 
             function formatPayRate(val) {
@@ -5983,151 +6080,154 @@
                 return s;
             }
 
-            filtered.forEach(item => {
-                const card = document.createElement('div');
-                card.style.cssText = `
-                background: var(--crust-base);
-                border: 1.5px solid var(--crust-dark);
-                border-left: 6px solid var(--brand-blue);
-                border-radius: 8px;
-                padding: 12px 14px;
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-                box-shadow: 0 2px 5px rgba(71,43,16,0.06);
-            `;
-
-                // SVG Overlapping Squares Icon
-                const copySvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
-
-                // Check if store has pay rates
-                const hasCsrRates = !!(item.csrStart || item.csrMid || item.csrTop);
-                const hasDeRates = !!(item.deBase || item.deOtr || item.deCloserBase || item.deCloserOtr);
-                const hasAnyRates = hasCsrRates || hasDeRates;
-
-                let payRatesHtml = '';
-                if (hasAnyRates) {
-                    payRatesHtml = `
-                    <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; margin-top: 4px;">
-                        <div style="font-family: 'Subhead1'; font-size: 14px; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
-                            <span>💰 Store Pay Rates</span>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
-                            <!-- CSR Column -->
-                            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 7px 10px;">
-                                <div style="font-family: 'Subhead2'; font-weight: bold; color: var(--crust-burnt); border-bottom: 1px solid #edf2f7; padding-bottom: 3px; margin-bottom: 5px; font-size: 14px;">
-                                    🍕 CSR / Inside
-                                </div>
-                                <div style="display: flex; flex-direction: column; gap: 3px; font-size: 13.5px; font-family: 'Condensed', sans-serif;">
-                                    <div style="display: flex; justify-content: space-between;">
-                                        <span style="color: #4a5568;">Start (P/T, No Exp):</span>
-                                        <strong style="color: #1a202c;">${formatPayRate(item.csrStart) || '—'}</strong>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between;">
-                                        <span style="color: #4a5568;">Mid (P/T Exp / F/T No Exp):</span>
-                                        <strong style="color: #1a202c;">${formatPayRate(item.csrMid) || '—'}</strong>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between;">
-                                        <span style="color: #4a5568;">Top (F/T w/ Exp):</span>
-                                        <strong style="color: #1a202c;">${formatPayRate(item.csrTop) || '—'}</strong>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Driver Column -->
-                            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 7px 10px;">
-                                <div style="font-family: 'Subhead2'; font-weight: bold; color: var(--crust-burnt); border-bottom: 1px solid #edf2f7; padding-bottom: 3px; margin-bottom: 5px; font-size: 14px;">
-                                    🚗 Driver (DE)
-                                </div>
-                                <div style="display: flex; flex-direction: column; gap: 3px; font-size: 13.5px; font-family: 'Condensed', sans-serif;">
-                                    <div style="display: flex; justify-content: space-between;">
-                                        <span style="color: #4a5568;">Standard In-Store:</span>
-                                        <strong style="color: #1a202c;">${formatPayRate(item.deBase) || '—'}</strong>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between;">
-                                        <span style="color: #4a5568;">Standard On-the-Road (OTR):</span>
-                                        <strong style="color: #1a202c;">${formatPayRate(item.deOtr) || '—'}</strong>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between;">
-                                        <span style="color: #4a5568;">Closer In-Store:</span>
-                                        <strong style="color: #1a202c;">${formatPayRate(item.deCloserBase) || 'Standard'}</strong>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between;">
-                                        <span style="color: #4a5568;">Closer OTR:</span>
-                                        <strong style="color: #1a202c;">${formatPayRate(item.deCloserOtr) || (item.deOtr ? `${formatPayRate(item.deOtr)} (Std)` : '—')}</strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    `;
-                } else {
-                    payRatesHtml = `
-                    <div style="background: #fafafa; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 6px 10px; margin-top: 3px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 13px; color: var(--text-light); font-family: 'Subhead2';">💰 Pay Rates not configured</span>
-                        <button type="button" onclick="openEditContactModal('${escapeText(item.store)}')" style="background: none; border: none; color: var(--brand-blue); font-size: 12.5px; font-weight: bold; cursor: pointer; text-decoration: underline; font-family: 'Subhead2';">+ Set Rates</button>
-                    </div>
-                    `;
+            // Render Store Cards
+            if (filtered.length > 0) {
+                if (filteredDos.length > 0) {
+                    const storeHeader = document.createElement('div');
+                    storeHeader.style.cssText = `margin-top: 14px; margin-bottom: 8px; font-family: 'Subhead1', sans-serif; font-size: 19px; color: var(--dark-blue); text-transform: uppercase; border-bottom: 2px solid var(--brand-blue); padding-bottom: 4px; display: flex; align-items: center; justify-content: space-between;`;
+                    storeHeader.innerHTML = `<span>🏬 Store Locations & GM Directory</span><span style="font-size: 12px; color: var(--brand-grey); font-family: 'Condensed', sans-serif;">${filtered.length} Store${filtered.length === 1 ? '' : 's'}</span>`;
+                    container.appendChild(storeHeader);
                 }
 
-                const formattedGmPhone = formatPhoneNumber(item.gmPhone);
-                const formattedStorePhone = formatPhoneNumber(item.storePhone);
-                const formattedDoCell = formatPhoneNumber(item.doCell);
+                filtered.forEach(item => {
+                    const card = document.createElement('div');
+                    card.style.cssText = `
+                    background: var(--crust-base);
+                    border: 1.5px solid var(--crust-dark);
+                    border-left: 6px solid var(--brand-blue);
+                    border-radius: 8px;
+                    padding: 12px 14px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                    box-shadow: 0 2px 5px rgba(71,43,16,0.06);
+                    margin-bottom: 12px;
+                `;
 
-                card.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid var(--crust-med); padding-bottom: 8px;">
-                    <div>
-                        <span style="font-family: 'ExtraBold'; font-size: 21px; color: var(--dark-blue);">Store #${item.store}</span>
-                        <span style="font-family: 'Subhead2'; font-size: 16px; color: var(--text-light); margin-left: 10px;">DO: <strong>${item.doName}</strong></span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <button type="button" onclick="openEditContactModal('${escapeText(item.store)}')" title="Edit Store & GM Details" style="background: var(--brand-blue); color: white; border: none; padding: 5px 12px; font-size: 13px; font-family: 'Subhead2'; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
-                            ✏️ Edit Info
-                        </button>
-                        <button type="button" onclick="copyToClipboard('${escapeText(item.store + ' - ' + (item.manager || '') + ' - ' + (formattedGmPhone || formattedStorePhone || ''))}', this)" title="Copy summary" style="background: var(--crust-med); color: var(--crust-burnt); padding: 5px 10px; font-size: 13px; font-family: 'Subhead2'; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                            ${copySvg} <span style="font-size: 12px;">Copy</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 16px; margin-top: 4px;">
-                    <div>
-                        <strong>General Manager:</strong> ${item.manager || 'N/A'}
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <strong>GM Phone:</strong> ${formattedGmPhone || 'N/A'}
-                        ${formattedGmPhone ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${formattedGmPhone}', this)" title="Copy GM Phone">${copySvg}</button>` : ''}
-                    </div>
-                    <div>
-                        <strong>Address:</strong> ${item.address || 'N/A'}
-                        ${item.address ? `
-                            <button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.address)}', this)" title="Copy Address">${copySvg}</button>
-                            <button type="button" onclick="openMapLink('${escapeText(item.address)}')" style="background: none; border: none; color: var(--brand-blue); font-size: 13px; font-weight: bold; margin-left: 4px; cursor: pointer; text-decoration: underline;">[Map]</button>
-                        ` : ''}
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <strong>Store Phone:</strong> ${formattedStorePhone || 'N/A'}
-                        ${formattedStorePhone ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${formattedStorePhone}', this)" title="Copy Store Phone">${copySvg}</button>` : ''}
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <strong>Store Email:</strong> ${item.storeEmail || 'N/A'}
-                        ${item.storeEmail ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.storeEmail)}', this)" title="Copy Store Email">${copySvg}</button>` : ''}
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <strong>DO Email / Cell:</strong> ${item.doEmail || formattedDoCell ? `${item.doEmail || ''} ${formattedDoCell ? `(${formattedDoCell})` : ''}` : 'N/A'}
-                        ${item.doEmail ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.doEmail)}', this)" title="Copy DO Email">${copySvg}</button>` : ''}
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 6px; grid-column: span 2; background: #fff8e1; border: 1px solid #ffe082; padding: 6px 10px; border-radius: 6px; margin-top: 2px;">
-                        <strong style="color: #b78103;">🌐 Network IP:</strong> <span style="font-family: monospace; font-weight: bold; color: #472b10;">${item.ipAddress || 'Not Assigned'}</span>
-                        ${item.ipAddress ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.ipAddress)}', this)" title="Copy IP Address">${copySvg}</button>` : ''}
-                    </div>
-                </div>
+                    // Check if store has pay rates
+                    const hasCsrRates = !!(item.csrStart || item.csrMid || item.csrTop);
+                    const hasDeRates = !!(item.deBase || item.deOtr || item.deCloserBase || item.deCloserOtr);
+                    const hasAnyRates = hasCsrRates || hasDeRates;
 
-                ${payRatesHtml}
-            `;
+                    let payRatesHtml = '';
+                    if (hasAnyRates) {
+                        payRatesHtml = `
+                        <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; margin-top: 4px;">
+                            <div style="font-family: 'Subhead1'; font-size: 14px; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+                                <span>💰 Store Pay Rates</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
+                                <!-- CSR Column -->
+                                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 7px 10px;">
+                                    <div style="font-family: 'Subhead2'; font-weight: bold; color: var(--crust-burnt); border-bottom: 1px solid #edf2f7; padding-bottom: 3px; margin-bottom: 5px; font-size: 14px;">
+                                        🍕 CSR / Inside
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; gap: 3px; font-size: 13.5px; font-family: 'Condensed', sans-serif;">
+                                        <div style="display: flex; justify-content: space-between;">
+                                            <span style="color: #4a5568;">Start (P/T, No Exp):</span>
+                                            <strong style="color: #1a202c;">${formatPayRate(item.csrStart) || '—'}</strong>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between;">
+                                            <span style="color: #4a5568;">Mid (P/T Exp / F/T No Exp):</span>
+                                            <strong style="color: #1a202c;">${formatPayRate(item.csrMid) || '—'}</strong>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between;">
+                                            <span style="color: #4a5568;">Top (F/T w/ Exp):</span>
+                                            <strong style="color: #1a202c;">${formatPayRate(item.csrTop) || '—'}</strong>
+                                        </div>
+                                    </div>
+                                </div>
 
-                container.appendChild(card);
-            });
+                                <!-- Driver Column -->
+                                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 7px 10px;">
+                                    <div style="font-family: 'Subhead2'; font-weight: bold; color: var(--crust-burnt); border-bottom: 1px solid #edf2f7; padding-bottom: 3px; margin-bottom: 5px; font-size: 14px;">
+                                        🚗 Driver (DE)
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; gap: 3px; font-size: 13.5px; font-family: 'Condensed', sans-serif;">
+                                        <div style="display: flex; justify-content: space-between;">
+                                            <span style="color: #4a5568;">Standard In-Store:</span>
+                                            <strong style="color: #1a202c;">${formatPayRate(item.deBase) || '—'}</strong>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between;">
+                                            <span style="color: #4a5568;">Standard On-the-Road (OTR):</span>
+                                            <strong style="color: #1a202c;">${formatPayRate(item.deOtr) || '—'}</strong>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between;">
+                                            <span style="color: #4a5568;">Closer In-Store:</span>
+                                            <strong style="color: #1a202c;">${formatPayRate(item.deCloserBase) || 'Standard'}</strong>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between;">
+                                            <span style="color: #4a5568;">Closer OTR:</span>
+                                            <strong style="color: #1a202c;">${formatPayRate(item.deCloserOtr) || (item.deOtr ? `${formatPayRate(item.deOtr)} (Std)` : '—')}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        `;
+                    } else {
+                        payRatesHtml = `
+                        <div style="background: #fafafa; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 6px 10px; margin-top: 3px; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 13px; color: var(--text-light); font-family: 'Subhead2';">💰 Pay Rates not configured</span>
+                            <button type="button" onclick="openEditContactModal('${escapeText(item.store)}')" style="background: none; border: none; color: var(--brand-blue); font-size: 12.5px; font-weight: bold; cursor: pointer; text-decoration: underline; font-family: 'Subhead2';">+ Set Rates</button>
+                        </div>
+                        `;
+                    }
+
+                    const formattedGmPhone = formatPhoneNumber(item.gmPhone);
+                    const formattedStorePhone = formatPhoneNumber(item.storePhone);
+
+                    card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid var(--crust-med); padding-bottom: 8px;">
+                        <div>
+                            <span style="font-family: 'ExtraBold'; font-size: 21px; color: var(--dark-blue);">Store #${item.store}</span>
+                            <span style="font-family: 'Subhead2'; font-size: 16px; color: var(--text-light); margin-left: 10px;">DO: <strong>${item.doName}</strong></span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <button type="button" onclick="openEditContactModal('${escapeText(item.store)}')" title="Edit Store & GM Details" style="background: var(--brand-blue); color: white; border: none; padding: 5px 12px; font-size: 13px; font-family: 'Subhead2'; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
+                                ✏️ Edit Info
+                            </button>
+                            <button type="button" onclick="copyToClipboard('${escapeText(item.store + ' - ' + (item.manager || '') + ' - ' + (formattedGmPhone || formattedStorePhone || ''))}', this)" title="Copy summary" style="background: var(--crust-med); color: var(--crust-burnt); padding: 5px 10px; font-size: 13px; font-family: 'Subhead2'; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                ${copySvg} <span style="font-size: 12px;">Copy</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 16px; margin-top: 4px;">
+                        <div>
+                            <strong>General Manager:</strong> ${item.manager || 'N/A'}
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <strong>GM Phone:</strong> ${formattedGmPhone || 'N/A'}
+                            ${formattedGmPhone ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${formattedGmPhone}', this)" title="Copy GM Phone">${copySvg}</button>` : ''}
+                        </div>
+                        <div>
+                            <strong>Address:</strong> ${item.address || 'N/A'}
+                            ${item.address ? `
+                                <button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.address)}', this)" title="Copy Address">${copySvg}</button>
+                                <button type="button" onclick="openMapLink('${escapeText(item.address)}')" style="background: none; border: none; color: var(--brand-blue); font-size: 13px; font-weight: bold; margin-left: 4px; cursor: pointer; text-decoration: underline;">[Map]</button>
+                            ` : ''}
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <strong>Store Phone:</strong> ${formattedStorePhone || 'N/A'}
+                            ${formattedStorePhone ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${formattedStorePhone}', this)" title="Copy Store Phone">${copySvg}</button>` : ''}
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; grid-column: span 2;">
+                            <strong>Store Email:</strong> ${item.storeEmail || 'N/A'}
+                            ${item.storeEmail ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.storeEmail)}', this)" title="Copy Store Email">${copySvg}</button>` : ''}
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; grid-column: span 2; background: #fff8e1; border: 1px solid #ffe082; padding: 6px 10px; border-radius: 6px; margin-top: 2px;">
+                            <strong style="color: #b78103;">🌐 Network IP:</strong> <span style="font-family: monospace; font-weight: bold; color: #472b10;">${item.ipAddress || 'Not Assigned'}</span>
+                            ${item.ipAddress ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.ipAddress)}', this)" title="Copy IP Address">${copySvg}</button>` : ''}
+                        </div>
+                    </div>
+
+                    ${payRatesHtml}
+                `;
+
+                    container.appendChild(card);
+                });
+            }
 
             if (adminContacts.length > 0) {
                 const copySvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
