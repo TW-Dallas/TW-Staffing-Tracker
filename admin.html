@@ -6013,63 +6013,6 @@
 
             const copySvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
 
-            // Render Dedicated DO Cards Section if any match
-            if (filteredDos.length > 0) {
-                const doHeader = document.createElement('div');
-                doHeader.style.cssText = `margin-bottom: 8px; font-family: 'Subhead1', sans-serif; font-size: 19px; color: var(--dark-blue); text-transform: uppercase; border-bottom: 2px solid #16a34a; padding-bottom: 4px; display: flex; align-items: center; justify-content: space-between;`;
-                doHeader.innerHTML = `<span>👔 Director of Operations (DO) Directory</span><span style="font-size: 12px; color: var(--brand-grey); font-family: 'Condensed', sans-serif;">${filteredDos.length} DO${filteredDos.length === 1 ? '' : 's'}</span>`;
-                container.appendChild(doHeader);
-
-                filteredDos.forEach(d => {
-                    const doCard = document.createElement('div');
-                    doCard.style.cssText = `
-                        background: #f0fdf4;
-                        border: 1.5px solid #86efac;
-                        border-left: 6px solid #16a34a;
-                        border-radius: 8px;
-                        padding: 12px 14px;
-                        display: flex;
-                        flex-direction: column;
-                        gap: 8px;
-                        box-shadow: 0 2px 5px rgba(22, 163, 74, 0.08);
-                        margin-bottom: 12px;
-                    `;
-
-                    const formattedCell = formatPhoneNumber(d.doCell);
-
-                    doCard.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #bbf7d0; padding-bottom: 8px;">
-                            <div>
-                                <span style="font-family: 'ExtraBold'; font-size: 21px; color: #14532d;">DO: ${d.doName}</span>
-                                <span style="font-family: 'Subhead2'; font-size: 14px; color: #166534; margin-left: 8px;">Director of Operations</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <button type="button" onclick="copyToClipboard('${escapeText(d.doName + ' (DO) - ' + (d.doEmail || '') + ' - ' + (formattedCell || ''))}', this)" title="Copy DO Contact Summary" style="background: white; border: 1px solid #86efac; color: #166534; padding: 5px 10px; font-size: 13px; font-family: 'Subhead2'; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                                    ${copySvg} <span style="font-size: 12px;">Copy</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 16px; margin-top: 2px;">
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <strong>DO Phone / Cell:</strong> ${formattedCell || 'N/A'}
-                                ${formattedCell ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${formattedCell}', this)" title="Copy DO Phone">${copySvg}</button>` : ''}
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <strong>DO Email:</strong> ${d.doEmail || 'N/A'}
-                                ${d.doEmail ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(d.doEmail)}', this)" title="Copy DO Email">${copySvg}</button>` : ''}
-                            </div>
-                            <div style="grid-column: span 2; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 2px;">
-                                <strong style="color: #14532d;">Supervised Stores (${d.stores.length}):</strong>
-                                ${d.stores.map(st => `<span style="background: white; border: 1px solid #86efac; color: #166534; font-family: 'Condensed', sans-serif; font-size: 13.5px; font-weight: bold; padding: 2px 7px; border-radius: 4px;">#${st}</span>`).join(' ')}
-                            </div>
-                        </div>
-                    `;
-
-                    container.appendChild(doCard);
-                });
-            }
-
             function formatPayRate(val) {
                 if (val === undefined || val === null) return '';
                 const s = String(val).trim();
@@ -6080,15 +6023,8 @@
                 return s;
             }
 
-            // Render Store Cards
+            // 1. Render Store Cards First
             if (filtered.length > 0) {
-                if (filteredDos.length > 0) {
-                    const storeHeader = document.createElement('div');
-                    storeHeader.style.cssText = `margin-top: 14px; margin-bottom: 8px; font-family: 'Subhead1', sans-serif; font-size: 19px; color: var(--dark-blue); text-transform: uppercase; border-bottom: 2px solid var(--brand-blue); padding-bottom: 4px; display: flex; align-items: center; justify-content: space-between;`;
-                    storeHeader.innerHTML = `<span>🏬 Store Locations & GM Directory</span><span style="font-size: 12px; color: var(--brand-grey); font-family: 'Condensed', sans-serif;">${filtered.length} Store${filtered.length === 1 ? '' : 's'}</span>`;
-                    container.appendChild(storeHeader);
-                }
-
                 filtered.forEach(item => {
                     const card = document.createElement('div');
                     card.style.cssText = `
@@ -6226,6 +6162,63 @@
                 `;
 
                     container.appendChild(card);
+                });
+            }
+
+            // 2. Render Dedicated DO Cards Below Store Cards
+            if (filteredDos.length > 0) {
+                const doHeader = document.createElement('div');
+                doHeader.style.cssText = `margin-top: 20px; margin-bottom: 8px; font-family: 'Subhead1', sans-serif; font-size: 19px; color: var(--dark-blue); text-transform: uppercase; border-bottom: 2px solid var(--crust-dark); padding-bottom: 4px; display: flex; align-items: center; justify-content: space-between;`;
+                doHeader.innerHTML = `<span>👔 Director of Operations (DO) Directory</span><span style="font-size: 12px; color: var(--brand-grey); font-family: 'Condensed', sans-serif;">${filteredDos.length} DO${filteredDos.length === 1 ? '' : 's'}</span>`;
+                container.appendChild(doHeader);
+
+                filteredDos.forEach(d => {
+                    const doCard = document.createElement('div');
+                    doCard.style.cssText = `
+                        background: var(--crust-base);
+                        border: 1.5px solid var(--crust-dark);
+                        border-left: 6px solid var(--crust-dark);
+                        border-radius: 8px;
+                        padding: 12px 14px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                        box-shadow: 0 2px 5px rgba(71,43,16,0.06);
+                        margin-bottom: 12px;
+                    `;
+
+                    const formattedCell = formatPhoneNumber(d.doCell);
+
+                    doCard.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid var(--crust-med); padding-bottom: 8px;">
+                            <div>
+                                <span style="font-family: 'ExtraBold'; font-size: 21px; color: var(--dark-blue);">DO: ${d.doName}</span>
+                                <span style="font-family: 'Subhead2'; font-size: 15px; color: var(--text-light); margin-left: 8px;">Director of Operations</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <button type="button" onclick="copyToClipboard('${escapeText(d.doName + ' (DO) - ' + (d.doEmail || '') + ' - ' + (formattedCell || ''))}', this)" title="Copy DO Contact Summary" style="background: var(--crust-med); color: var(--crust-burnt); padding: 5px 10px; font-size: 13px; font-family: 'Subhead2'; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                    ${copySvg} <span style="font-size: 12px;">Copy</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 16px; margin-top: 2px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <strong>DO Phone / Cell:</strong> ${formattedCell || 'N/A'}
+                                ${formattedCell ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${formattedCell}', this)" title="Copy DO Phone">${copySvg}</button>` : ''}
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <strong>DO Email:</strong> ${d.doEmail || 'N/A'}
+                                ${d.doEmail ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(d.doEmail)}', this)" title="Copy DO Email">${copySvg}</button>` : ''}
+                            </div>
+                            <div style="grid-column: span 2; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 2px;">
+                                <strong style="color: var(--dark-blue);">Supervised Stores (${d.stores.length}):</strong>
+                                ${d.stores.map(st => `<span style="background: white; border: 1px solid var(--crust-dark); color: var(--crust-burnt); font-family: 'Condensed', sans-serif; font-size: 13.5px; font-weight: bold; padding: 2px 7px; border-radius: 4px;">#${st}</span>`).join(' ')}
+                            </div>
+                        </div>
+                    `;
+
+                    container.appendChild(doCard);
                 });
             }
 
