@@ -1052,6 +1052,45 @@
                     <input type="text" id="brandModalInput" style="width: 100%;">
                 </div>
 
+                <!-- Pay Rate Reference & Input Form for Welcome Letters -->
+                <div id="brandModalPayRateForm" class="hidden"
+                    style="margin-top: 12px; display: flex; flex-direction: column; gap: 12px; text-align: left;">
+                    
+                    <!-- Store Pay Rates Reference Card -->
+                    <div id="payRateRefContainer" style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px 12px;">
+                        <div style="font-family: 'Subhead1', sans-serif; font-size: 13.5px; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                            <span id="payRateRefHeader">💰 Store Pay Rates</span>
+                            <span id="payRateRefStoreBadge" style="font-size: 12px; color: var(--brand-grey); font-family: 'Condensed', sans-serif;"></span>
+                        </div>
+                        <div id="payRateRefBody" style="font-size: 13px;">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Input Fields -->
+                    <div id="payRateSingleInputGroup" class="form-group hidden" style="margin-bottom: 0;">
+                        <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; font-weight: bold; color: var(--dark-blue);">
+                            Starting Hourly Wage ($/hr):
+                        </label>
+                        <input type="text" id="payRateSingleInput" placeholder="e.g., 9.00" style="width: 100%; font-size: 15px; padding: 8px 10px; margin-top: 4px; box-sizing: border-box;">
+                    </div>
+
+                    <div id="payRateDualInputGroup" class="hidden" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; font-weight: bold; color: var(--dark-blue);">
+                                In-Store Hourly Wage ($/hr):
+                            </label>
+                            <input type="text" id="payRateInStoreInput" placeholder="e.g., 9.00" style="width: 100%; font-size: 15px; padding: 8px 10px; margin-top: 4px; box-sizing: border-box;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; font-weight: bold; color: var(--dark-blue);">
+                                On-The-Road Wage ($/hr):
+                            </label>
+                            <input type="text" id="payRateRoadInput" placeholder="e.g., 4.35" style="width: 100%; font-size: 15px; padding: 8px 10px; margin-top: 4px; box-sizing: border-box;">
+                        </div>
+                    </div>
+                </div>
+
                 <div id="brandModalReminderForm" class="hidden"
                     style="margin-top: 12px; display: flex; flex-direction: column; gap: 10px; text-align: left;">
                     <div id="reminderAllPayGroup" class="form-group hidden">
@@ -1495,11 +1534,13 @@
                 const cancelBtn = document.getElementById('brandModalCancelBtn');
                 const inputContainer = document.getElementById('brandModalInputContainer');
                 const reminderForm = document.getElementById('brandModalReminderForm');
+                const payRateForm = document.getElementById('brandModalPayRateForm');
 
                 titleEl.innerText = title;
                 msgEl.innerText = message;
 
-                reminderForm.classList.add('hidden');
+                if (reminderForm) reminderForm.classList.add('hidden');
+                if (payRateForm) payRateForm.classList.add('hidden');
                 inputContainer.classList.add('hidden');
                 cancelBtn.classList.add('hidden');
                 confirmBtn.innerText = "OK";
@@ -1525,11 +1566,13 @@
                 const cancelBtn = document.getElementById('brandModalCancelBtn');
                 const inputContainer = document.getElementById('brandModalInputContainer');
                 const reminderForm = document.getElementById('brandModalReminderForm');
+                const payRateForm = document.getElementById('brandModalPayRateForm');
 
                 titleEl.innerText = title;
                 msgEl.innerText = message;
 
-                reminderForm.classList.add('hidden');
+                if (reminderForm) reminderForm.classList.add('hidden');
+                if (payRateForm) payRateForm.classList.add('hidden');
                 inputContainer.classList.add('hidden');
                 cancelBtn.classList.remove('hidden');
                 confirmBtn.innerText = "Yes";
@@ -1569,11 +1612,13 @@
                 const inputContainer = document.getElementById('brandModalInputContainer');
                 const inputEl = document.getElementById('brandModalInput');
                 const reminderForm = document.getElementById('brandModalReminderForm');
+                const payRateForm = document.getElementById('brandModalPayRateForm');
 
                 titleEl.innerText = title;
                 msgEl.innerText = message;
 
-                reminderForm.classList.add('hidden');
+                if (reminderForm) reminderForm.classList.add('hidden');
+                if (payRateForm) payRateForm.classList.add('hidden');
                 inputEl.value = defaultValue;
                 inputContainer.classList.remove('hidden');
                 cancelBtn.classList.remove('hidden');
@@ -1624,6 +1669,7 @@
                 const cancelBtn = document.getElementById('brandModalCancelBtn');
                 const inputContainer = document.getElementById('brandModalInputContainer');
                 const reminderForm = document.getElementById('brandModalReminderForm');
+                const payRateForm = document.getElementById('brandModalPayRateForm');
 
                 const allPayGroup = document.getElementById('reminderAllPayGroup');
                 const checkrGroup = document.getElementById('reminderCheckrGroup');
@@ -1656,6 +1702,7 @@
                 }
 
                 inputContainer.classList.add('hidden');
+                if (payRateForm) payRateForm.classList.add('hidden');
                 reminderForm.classList.remove('hidden');
                 cancelBtn.classList.remove('hidden');
 
@@ -1737,6 +1784,230 @@
 
                 confirmBtn.addEventListener('click', handleConfirm);
                 cancelBtn.addEventListener('click', handleCancel);
+            });
+        }
+
+        function showBrandWelcomePayRatePrompt({ name, position, store }) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('brandModal');
+                const card = modal?.querySelector('.brand-modal-card');
+                const titleEl = document.getElementById('brandModalTitle');
+                const msgEl = document.getElementById('brandModalMessage');
+                const confirmBtn = document.getElementById('brandModalConfirmBtn');
+                const cancelBtn = document.getElementById('brandModalCancelBtn');
+                const inputContainer = document.getElementById('brandModalInputContainer');
+                const reminderForm = document.getElementById('brandModalReminderForm');
+                const payRateForm = document.getElementById('brandModalPayRateForm');
+
+                const refHeader = document.getElementById('payRateRefHeader');
+                const refStoreBadge = document.getElementById('payRateRefStoreBadge');
+                const refBody = document.getElementById('payRateRefBody');
+                const singleGroup = document.getElementById('payRateSingleInputGroup');
+                const dualGroup = document.getElementById('payRateDualInputGroup');
+                const singleInput = document.getElementById('payRateSingleInput');
+                const inStoreInput = document.getElementById('payRateInStoreInput');
+                const roadInput = document.getElementById('payRateRoadInput');
+
+                if (card) card.style.maxWidth = '520px';
+
+                inputContainer.classList.add('hidden');
+                if (reminderForm) reminderForm.classList.add('hidden');
+                if (payRateForm) payRateForm.classList.remove('hidden');
+                cancelBtn.classList.remove('hidden');
+
+                titleEl.innerText = "Welcome Offer Pay Rate";
+                confirmBtn.innerText = "Continue to Email";
+                cancelBtn.innerText = "Cancel";
+
+                const posCode = (position || '').toUpperCase();
+                const isDriver = (posCode === 'DE' || posCode === 'BIKE' || posCode.includes('DRIVER'));
+                const isBike = (posCode === 'BIKE');
+                const isCsr = (posCode === 'CSR' || posCode.includes('INSIDE') || posCode.includes('CUSTOMER'));
+
+                let positionLabel = isBike ? 'Bike Delivery Expert' : (isDriver ? 'Delivery Expert (Driver)' : (isCsr ? 'Customer Service Rep (CSR)' : position || 'Team Member'));
+
+                msgEl.innerHTML = `Set offer hourly wage for <strong>${escapeText(name)}</strong> at <strong>Store #${escapeText(store || '—')}</strong> (${escapeText(positionLabel)}):`;
+
+                // Find store contact in global contacts array
+                const storeContact = (contacts || []).find(c => String(c.store).trim() === String(store).trim());
+
+                function parseCleanRate(val, fallback = '') {
+                    if (val === undefined || val === null) return fallback;
+                    const s = String(val).replace(/[^0-9.]/g, '').trim();
+                    const num = parseFloat(s);
+                    if (!isNaN(num)) return num.toFixed(2);
+                    return fallback;
+                }
+
+                let html = '';
+                if (storeContact) {
+                    if (refStoreBadge) refStoreBadge.innerText = storeContact.doName ? `DO: ${storeContact.doName}` : `Store #${store}`;
+                    
+                    const csrStart = parseCleanRate(storeContact.csrStart);
+                    const csrMid = parseCleanRate(storeContact.csrMid);
+                    const csrTop = parseCleanRate(storeContact.csrTop);
+
+                    const deBase = parseCleanRate(storeContact.deBase);
+                    const deOtr = parseCleanRate(storeContact.deOtr);
+                    const deCloserBase = parseCleanRate(storeContact.deCloserBase);
+                    const deCloserOtr = parseCleanRate(storeContact.deCloserOtr);
+
+                    const hasCsr = !!(csrStart || csrMid || csrTop);
+                    const hasDe = !!(deBase || deOtr || deCloserBase || deCloserOtr);
+
+                    if (isDriver) {
+                        const defBase = deBase || '9.00';
+                        const defOtr = deOtr || '4.35';
+                        inStoreInput.value = defBase;
+                        roadInput.value = defOtr;
+
+                        if (hasDe) {
+                            html = `
+                            <div style="background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 10px;">
+                                <div style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: var(--crust-burnt); border-bottom: 1px solid #edf2f7; padding-bottom: 3px; margin-bottom: 6px; font-size: 13px; display: flex; justify-content: space-between; align-items: center;">
+                                    <span>🚗 Store #${store} Driver Wage Scale</span>
+                                    <span style="font-size: 11px; color: var(--brand-grey); font-family: 'Compact', sans-serif;">Click a tier to quick-fill</span>
+                                </div>
+                                <div style="display: grid; grid-template-columns: ${(deCloserBase || deCloserOtr) ? '1fr 1fr' : '1fr'}; gap: 6px;">
+                                    <button type="button" onclick="document.getElementById('payRateInStoreInput').value='${defBase}'; document.getElementById('payRateRoadInput').value='${defOtr}';" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 8px; cursor: pointer; text-align: left; transition: background 0.15s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+                                        <div style="font-size: 11px; color: #475569; font-weight: bold; text-transform: uppercase;">Standard Driver</div>
+                                        <div style="font-size: 13.5px; color: var(--dark-blue); font-family: 'Condensed', sans-serif; font-weight: bold; margin-top: 1px;">
+                                            In-Store: $${defBase} | OTR: $${defOtr}
+                                        </div>
+                                    </button>
+                                    ${(deCloserBase || deCloserOtr) ? `
+                                    <button type="button" onclick="document.getElementById('payRateInStoreInput').value='${deCloserBase || defBase}'; document.getElementById('payRateRoadInput').value='${deCloserOtr || defOtr}';" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 8px; cursor: pointer; text-align: left; transition: background 0.15s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+                                        <div style="font-size: 11px; color: #475569; font-weight: bold; text-transform: uppercase;">Closer Driver</div>
+                                        <div style="font-size: 13.5px; color: var(--dark-blue); font-family: 'Condensed', sans-serif; font-weight: bold; margin-top: 1px;">
+                                            In-Store: $${deCloserBase || defBase} | OTR: $${deCloserOtr || defOtr}
+                                        </div>
+                                    </button>` : ''}
+                                </div>
+                            </div>`;
+                        } else {
+                            html = `<div style="color: #64748b; font-size: 12.5px; font-family: 'Condensed', sans-serif;">ℹ️ No driver rates configured in Contacts for Store #${store}. Baseline defaults ($9.00 in-store / $4.35 OTR) applied.</div>`;
+                        }
+                    } else if (isCsr) {
+                        const defStart = csrStart || '9.00';
+                        singleInput.value = defStart;
+
+                        if (hasCsr) {
+                            html = `
+                            <div style="background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 10px;">
+                                <div style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: var(--crust-burnt); border-bottom: 1px solid #edf2f7; padding-bottom: 3px; margin-bottom: 6px; font-size: 13px; display: flex; justify-content: space-between; align-items: center;">
+                                    <span>🍕 Store #${store} CSR / Inside Wage Scale</span>
+                                    <span style="font-size: 11px; color: var(--brand-grey); font-family: 'Compact', sans-serif;">Click a tier to quick-fill</span>
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; text-align: center;">
+                                    <button type="button" onclick="document.getElementById('payRateSingleInput').value='${csrStart || '9.00'}';" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 4px; cursor: pointer; text-align: center; transition: background 0.15s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+                                        <div style="font-size: 10.5px; color: #475569; text-transform: uppercase; font-weight: bold;">Start (No Exp)</div>
+                                        <div style="font-size: 14px; font-weight: bold; color: var(--dark-blue); font-family: 'Condensed', sans-serif; margin-top: 1px;">$${csrStart || '9.00'}</div>
+                                    </button>
+                                    <button type="button" onclick="document.getElementById('payRateSingleInput').value='${csrMid || '9.50'}';" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 4px; cursor: pointer; text-align: center; transition: background 0.15s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+                                        <div style="font-size: 10.5px; color: #475569; text-transform: uppercase; font-weight: bold;">Mid (Exp/FT)</div>
+                                        <div style="font-size: 14px; font-weight: bold; color: var(--dark-blue); font-family: 'Condensed', sans-serif; margin-top: 1px;">$${csrMid || '9.50'}</div>
+                                    </button>
+                                    <button type="button" onclick="document.getElementById('payRateSingleInput').value='${csrTop || '10.00'}';" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 4px; cursor: pointer; text-align: center; transition: background 0.15s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+                                        <div style="font-size: 10.5px; color: #475569; text-transform: uppercase; font-weight: bold;">Top (FT w/ Exp)</div>
+                                        <div style="font-size: 14px; font-weight: bold; color: var(--dark-blue); font-family: 'Condensed', sans-serif; margin-top: 1px;">$${csrTop || '10.00'}</div>
+                                    </button>
+                                </div>
+                            </div>`;
+                        } else {
+                            html = `<div style="color: #64748b; font-size: 12.5px; font-family: 'Condensed', sans-serif;">ℹ️ No CSR rates configured in Contacts for Store #${store}. Baseline default ($9.00/hr) applied.</div>`;
+                        }
+                    } else {
+                        // Other role (Assistant Manager, MIT, etc.)
+                        singleInput.value = csrTop || '10.00';
+                        html = `
+                        <div style="background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 10px;">
+                            <div style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: var(--crust-burnt); border-bottom: 1px solid #edf2f7; padding-bottom: 3px; margin-bottom: 6px; font-size: 13px;">
+                                📋 Store #${store} Rate Reference
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12.5px; font-family: 'Condensed', sans-serif;">
+                                <div><strong>CSR Scale:</strong> Start: $${csrStart || '—'} | Mid: $${csrMid || '—'} | Top: $${csrTop || '—'}</div>
+                                <div><strong>Driver Scale:</strong> In-Store: $${deBase || '—'} | OTR: $${deOtr || '—'}</div>
+                            </div>
+                        </div>`;
+                    }
+                } else {
+                    if (refStoreBadge) refStoreBadge.innerText = `Store #${store || '—'}`;
+                    html = `<div style="color: #64748b; font-size: 12.5px; font-family: 'Condensed', sans-serif;">ℹ️ Store #${store || '—'} not found in Contacts directory. Standard baseline rates applied.</div>`;
+                    if (isDriver) {
+                        inStoreInput.value = "9.00";
+                        roadInput.value = "4.35";
+                    } else {
+                        singleInput.value = "9.00";
+                    }
+                }
+
+                if (refBody) refBody.innerHTML = html;
+
+                if (isDriver) {
+                    singleGroup.classList.add('hidden');
+                    dualGroup.classList.remove('hidden');
+                    setTimeout(() => inStoreInput.focus(), 50);
+                } else {
+                    dualGroup.classList.add('hidden');
+                    singleGroup.classList.remove('hidden');
+                    setTimeout(() => singleInput.focus(), 50);
+                }
+
+                modal.classList.remove('hidden');
+
+                const handleConfirm = () => {
+                    let payRateVal = "";
+                    let roadRateVal = "";
+
+                    if (isDriver) {
+                        payRateVal = inStoreInput.value.trim().replace('$', '');
+                        roadRateVal = roadInput.value.trim().replace('$', '');
+                        if (!payRateVal) {
+                            showBrandAlert("Please enter an In-Store Hourly Wage.", "Missing Wage");
+                            return;
+                        }
+                        if (!roadRateVal) {
+                            showBrandAlert("Please enter an On-The-Road Wage.", "Missing Wage");
+                            return;
+                        }
+                    } else {
+                        payRateVal = singleInput.value.trim().replace('$', '');
+                        if (!payRateVal) {
+                            showBrandAlert("Please enter a Starting Hourly Wage.", "Missing Wage");
+                            return;
+                        }
+                    }
+
+                    modal.classList.add('hidden');
+                    cleanup();
+                    resolve({ payRate: payRateVal, roadRate: roadRateVal });
+                };
+
+                const handleCancel = () => {
+                    modal.classList.add('hidden');
+                    cleanup();
+                    resolve(null);
+                };
+
+                const cleanup = () => {
+                    confirmBtn.removeEventListener('click', handleConfirm);
+                    cancelBtn.removeEventListener('click', handleCancel);
+                    if (payRateForm) payRateForm.classList.add('hidden');
+                    if (card) card.style.maxWidth = '';
+                };
+
+                confirmBtn.addEventListener('click', handleConfirm);
+                cancelBtn.addEventListener('click', handleCancel);
+
+                const handleKey = (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleConfirm();
+                    }
+                };
+                singleInput.onkeydown = handleKey;
+                inStoreInput.onkeydown = handleKey;
+                roadInput.onkeydown = handleKey;
             });
         }
 
@@ -3441,22 +3712,17 @@
             let payloadAllPayErrorText = "";
 
             if (emailType === "welcome") {
-                if (position === "DE" || position === "BIKE") {
-                    payRateInput = await showBrandPrompt(`Enter IN-STORE starting rate for ${name} (e.g., 9.00):`, "9.00", "In-Store Hourly Wage");
-                    if (payRateInput === null) return;
+                const promptResult = await showBrandWelcomePayRatePrompt({ name, position, store });
+                if (!promptResult) return;
 
-                    roadRateInput = await showBrandPrompt(`Enter ON-THE-ROAD rate for ${name} (e.g., 4.35):`, "4.35", "On-the-Road Hourly Wage");
-                    if (roadRateInput === null) return;
+                payRateInput = promptResult.payRate;
+                roadRateInput = promptResult.roadRate;
 
-                    if (position === "BIKE") {
-                        confirmationMessage = `Send Dynamic Welcome Email & Offer to ${name}?\n\n• Position: Bike Delivery Expert\n• In-Store Wage: $${payRateInput}/hr\n• On-The-Road Wage: $${roadRateInput}/hr (Company Provided Bike - No Mileage Reimbursement)\n\n(This will automatically CC the store and BCC the DO)`;
-                    } else {
-                        confirmationMessage = `Send Dynamic Welcome Email & Offer to ${name}?\n\n• Position: Delivery Expert (Driver)\n• In-Store Wage: $${payRateInput}/hr\n• On-The-Road Wage: $${roadRateInput}/hr + $0.58/mile\n\n(This will automatically CC the store and BCC the DO)`;
-                    }
+                if (position === "BIKE") {
+                    confirmationMessage = `Send Dynamic Welcome Email & Offer to ${name}?\n\n• Position: Bike Delivery Expert\n• In-Store Wage: $${payRateInput}/hr\n• On-The-Road Wage: $${roadRateInput}/hr (Company Provided Bike - No Mileage Reimbursement)\n\n(This will automatically CC the store and BCC the DO)`;
+                } else if (position === "DE") {
+                    confirmationMessage = `Send Dynamic Welcome Email & Offer to ${name}?\n\n• Position: Delivery Expert (Driver)\n• In-Store Wage: $${payRateInput}/hr\n• On-The-Road Wage: $${roadRateInput}/hr + $0.58/mile\n\n(This will automatically CC the store and BCC the DO)`;
                 } else {
-                    payRateInput = await showBrandPrompt(`Enter starting hourly rate for ${name} (e.g., 9.00):`, "9.00", "Starting Hourly Wage");
-                    if (payRateInput === null) return;
-
                     confirmationMessage = `Send Dynamic Welcome Email & Offer to ${name} at $${payRateInput}/hr?\n\n(This will automatically CC the store and BCC the DO)`;
                 }
             } else if (emailType === "reminder") {
