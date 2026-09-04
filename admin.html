@@ -1824,7 +1824,7 @@
                 const isBike = (posCode === 'BIKE');
                 const isCsr = (posCode === 'CSR' || posCode.includes('INSIDE') || posCode.includes('CUSTOMER'));
 
-                let positionLabel = isBike ? 'Bike Delivery Expert' : (isDriver ? 'Delivery Expert (Driver)' : (isCsr ? 'Customer Service Rep (CSR)' : position || 'Team Member'));
+                let positionLabel = isBike ? 'Bike Driver' : (isDriver ? 'Driver' : (isCsr ? 'CSR' : (position || 'Team Member')));
 
                 msgEl.innerHTML = `Set offer hourly wage for <strong>${escapeText(name)}</strong> at <strong>Store #${escapeText(store || '—')}</strong> (${escapeText(positionLabel)}):`;
 
