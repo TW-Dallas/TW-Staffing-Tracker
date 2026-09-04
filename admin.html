@@ -5650,8 +5650,44 @@
                 return true;
             });
 
-            // Sorting
+            function getContactRelevanceTier(item, q) {
+                if (!q) return 0;
+                const storeStr = String(item.store || '').toLowerCase().trim();
+                const gmStr = String(item.manager || '').toLowerCase().trim();
+                const doStr = String(item.doName || '').toLowerCase().trim();
+                const addrStr = String(item.address || '').toLowerCase().trim();
+                const ipStr = String(item.ipAddress || '').toLowerCase().trim();
+                const emailStr = (String(item.storeEmail || '') + ' ' + String(item.doEmail || '')).toLowerCase();
+
+                // 1. Exact store number match
+                if (storeStr === q) return 0;
+                // 2. Store number starts with search query
+                if (storeStr.startsWith(q)) return 1;
+                // 3. Store number contains search query
+                if (storeStr.includes(q)) return 2;
+
+                // 4. GM or DO name starts with query
+                if (gmStr.startsWith(q) || doStr.startsWith(q)) return 3;
+                // 5. GM or DO name contains query
+                if (gmStr.includes(q) || doStr.includes(q)) return 4;
+
+                // 6. Address, Email, or IP match
+                if (addrStr.includes(q) || ipStr.includes(q) || emailStr.includes(q)) return 5;
+
+                // 7. Phone numbers and other fields
+                return 6;
+            }
+
+            // Sorting: Relevance first if a search is active, then by selected sort option
             filtered.sort((a, b) => {
+                if (searchQuery) {
+                    const tierA = getContactRelevanceTier(a, searchQuery);
+                    const tierB = getContactRelevanceTier(b, searchQuery);
+                    if (tierA !== tierB) {
+                        return tierA - tierB;
+                    }
+                }
+
                 if (sortBy === 'store_asc') {
                     const numA = parseInt(a.store, 10);
                     const numB = parseInt(b.store, 10);
