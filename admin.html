@@ -3693,6 +3693,8 @@
             const phoneTime = (phoneTimeRaw ? (formatTimeDisplayFrontEnd(phoneTimeRaw) || phoneTimeRaw) : '') || '{H:MM AM/PM}';
 
             const status = document.getElementById('intStatus')?.value || 'Phone Interview';
+            const availability = document.getElementById('intAvailability')?.value.trim() || '';
+            const notes = document.getElementById('intNotes')?.value.trim() || '';
 
             let text = '';
 
@@ -3702,7 +3704,9 @@
                     `Time: ${gmTime}\n` +
                     `Name: ${name}\n` +
                     `Phone: ${phone}\n` +
-                    `Email: ${email}`;
+                    `Email: ${email}\n\n` +
+                    `Availability:\n${availability}\n\n` +
+                    `Notes:\n${notes}`;
             } else if (templateType === 'gm_noshow_check') {
                 const dayText = gmDay !== '{Day of the week}' ? `on ${gmDay}` : '';
                 const dayPhrase = dayText ? ` ${dayText}` : '';
@@ -3772,7 +3776,8 @@
         function initSmsTemplateListeners() {
             const fieldIds = [
                 'intName', 'intPosition', 'intStore', 'intPhone', 'intEmail',
-                'intDate', 'intDay', 'intTime', 'intGmDate', 'intGmDay', 'intGmTime', 'intStatus'
+                'intDate', 'intDay', 'intTime', 'intGmDate', 'intGmDay', 'intGmTime', 'intStatus',
+                'intAvailability', 'intNotes'
             ];
             fieldIds.forEach(id => {
                 const el = document.getElementById(id);
