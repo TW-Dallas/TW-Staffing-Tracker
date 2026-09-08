@@ -5363,9 +5363,9 @@
             const months = diffMonths % 12;
 
             if (years > 0) {
-                return months > 0 ? `${years} yr${years > 1 ? 's' : ''} ${months} mo${months > 1 ? 's' : ''}` : `${years} yr${years > 1 ? 's' : ''}`;
+                return months > 0 ? `${years}y ${months}m` : `${years} yr`;
             }
-            return `${months} month${months === 1 ? '' : 's'}`;
+            return `${months} mos`;
         }
 
         function toggleActiveStintEditor(forceState) {
@@ -5407,7 +5407,7 @@
 
             window.currentCandidateEmploymentPeriods = periods;
             const isRehire = periods.length > 1;
-            const rehireBadge = isRehire ? `<span style="background: #e8f0fe; color: #1a73e8; font-size: 14.5px; font-weight: bold; padding: 4px 10px; border-radius: 4px; margin-left: 8px; border: 1px solid #cce0ff;">🔁 Re-Hire (${periods.length} Stints)</span>` : '';
+            const rehireBadge = isRehire ? `<span style="background: #e8f0fe; color: #1a73e8; font-size: 13.5px; font-weight: bold; padding: 3px 8px; border-radius: 4px; margin-left: 8px; border: 1px solid #cce0ff;">🔁 Re-Hire (${periods.length} Stints)</span>` : '';
 
             // If multi-stint rehire, collapse the top editor by default to avoid clutter
             if (isRehire) {
@@ -5420,47 +5420,47 @@
 
             let rowsHtml = periods.map((p, idx) => {
                 const beginDisplay = p.beginDate ? formatDisplayDate(p.beginDate) : 'Unknown';
-                const endDisplay = p.endDate ? formatDisplayDate(p.endDate) : '<span style="color: #137333; font-weight: bold;">Present (Active)</span>';
+                const endDisplay = p.endDate ? formatDisplayDate(p.endDate) : '<span style="color: #137333; font-weight: bold;">Active</span>';
                 const duration = calculateTenureDuration(p.beginDate, p.endDate);
                 const reason = [p.causeOfAction, p.reasonOfAction].filter(Boolean).join(' - ') || (p.notes ? p.notes.substring(0, 35) : '—');
                 
                 let rehireBadgeStint = '';
                 if (p.rehireEligible === 'No') {
-                    rehireBadgeStint = '<span style="color: #c5221f; font-weight: bold; font-size: 15.5px;">🚫 Ineligible</span>';
+                    rehireBadgeStint = '<span style="color: #c5221f; font-weight: bold; font-size: 13px;">🚫 Ineligible</span>';
                 } else if (p.rehireEligible === 'Review Required') {
-                    rehireBadgeStint = '<span style="color: #b06000; font-weight: bold; font-size: 15.5px;">⚠️ Review</span>';
+                    rehireBadgeStint = '<span style="color: #b06000; font-weight: bold; font-size: 13px;">⚠️ Review</span>';
                 } else {
-                    rehireBadgeStint = '<span style="color: #137333; font-weight: bold; font-size: 15.5px;">✅ Eligible</span>';
+                    rehireBadgeStint = '<span style="color: #137333; font-weight: bold; font-size: 13px;">✅ Eligible</span>';
                 }
 
                 const rowBg = idx % 2 === 0 ? '#ffffff' : '#f8f9fa';
 
                 return `
-                    <tr style="background: ${rowBg}; border-bottom: 1px solid #e0e0e0; font-size: 15px;">
-                        <td style="padding: 9px 8px; font-weight: bold; color: #1f4e79; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Stint ${idx + 1}</td>
-                        <td style="padding: 9px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${beginDisplay}</td>
-                        <td style="padding: 9px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${endDisplay}</td>
-                        <td style="padding: 9px 8px; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${duration}</td>
-                        <td style="padding: 9px 8px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Store #${p.store || '—'}</td>
-                        <td style="padding: 9px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.position || 'CSR'}</td>
-                        <td style="padding: 9px 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeText(reason)}">${escapeText(reason)}</td>
-                        <td style="padding: 9px 8px; text-align: center; white-space: nowrap;">${rehireBadgeStint}</td>
-                        <td style="padding: 6px 8px; text-align: center; white-space: nowrap;">
+                    <tr style="background: ${rowBg}; border-bottom: 1px solid #e0e0e0; font-size: 14px;">
+                        <td style="padding: 8px 6px; font-weight: bold; color: #1f4e79; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Stint ${idx + 1}</td>
+                        <td style="padding: 8px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${beginDisplay}</td>
+                        <td style="padding: 8px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${endDisplay}</td>
+                        <td style="padding: 8px 6px; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${duration}</td>
+                        <td style="padding: 8px 6px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">#${p.store || '—'}</td>
+                        <td style="padding: 8px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.position || 'CSR'}</td>
+                        <td style="padding: 8px 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeText(reason)}">${escapeText(reason)}</td>
+                        <td style="padding: 8px 6px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${rehireBadgeStint}</td>
+                        <td style="padding: 6px 4px; text-align: center; white-space: nowrap;">
                             <button type="button" onclick="toggleStintDetailRow(${idx})"
-                                style="background: #eef3f8; border: 1.5px solid #b8d2eb; color: #1f4e79; border-radius: 6px; padding: 5px 8px; font-size: 13px; cursor: pointer; font-family: 'Subhead1', sans-serif; font-weight: bold; white-space: nowrap;">
-                                📝 View Notes
+                                style="background: #eef3f8; border: 1.5px solid #b8d2eb; color: #1f4e79; border-radius: 5px; padding: 3px 6px; font-size: 12px; cursor: pointer; font-family: 'Subhead1', sans-serif; font-weight: bold; white-space: nowrap;">
+                                📝 Notes
                             </button>
                         </td>
                     </tr>
                     <tr id="stint-detail-row-${idx}" class="stint-detail-drawer" style="display: none; background: #fffcf5; border-bottom: 2px solid #c29d62;">
-                        <td colspan="9" style="padding: 16px 20px;">
-                            <div style="background: white; border: 1.5px solid #dfcfb8; border-radius: 10px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+                        <td colspan="9" style="padding: 14px 16px;">
+                            <div style="background: white; border: 1.5px solid #dfcfb8; border-radius: 8px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
                                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; border-bottom: 1.5px solid #f0e6d6; padding-bottom: 8px; gap: 14px; flex-wrap: wrap;">
                                     <div>
-                                        <div style="color: #1f4e79; font-size: 18px; font-family: 'Subhead1', sans-serif; font-weight: bold;">
+                                        <div style="color: #1f4e79; font-size: 17px; font-family: 'Subhead1', sans-serif; font-weight: bold;">
                                             📋 Stint #${idx + 1} (${p.beginDate ? formatDisplayDate(p.beginDate) : 'Unknown'} – ${p.endDate ? formatDisplayDate(p.endDate) : 'Active'}) — Store #${p.store || '—'} (${p.position || 'CSR'})
                                         </div>
-                                        <div style="font-size: 15.5px; color: #5d4037; margin-top: 5px; display: flex; gap: 16px; flex-wrap: wrap; font-family: 'Condensed', sans-serif;">
+                                        <div style="font-size: 15px; color: #5d4037; margin-top: 5px; display: flex; gap: 14px; flex-wrap: wrap; font-family: 'Condensed', sans-serif;">
                                             ${p.causeOfAction ? `<span><strong>Cause:</strong> ${escapeText(p.causeOfAction)}</span>` : ''}
                                             ${p.reasonOfAction ? `<span><strong>Reason:</strong> ${escapeText(p.reasonOfAction)}</span>` : ''}
                                             ${p.gmName ? `<span><strong>Submitted by (GM):</strong> ${escapeText(p.gmName)}</span>` : ''}
@@ -5469,8 +5469,8 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <div style="font-size: 15.5px; font-weight: bold; color: #472b10; margin-bottom: 6px; font-family: 'Subhead1', sans-serif;">📝 Full Termination & Staffing Notes:</div>
-                                    <div style="font-size: 17px; color: #222; background: #faf5ed; border: 1px solid #e2d5c1; border-radius: 8px; padding: 12px 16px; font-family: 'Condensed', sans-serif; white-space: pre-wrap; line-height: 1.6;">${escapeText(p.notes || 'No specific notes recorded for this stint.')}</div>
+                                    <div style="font-size: 15px; font-weight: bold; color: #472b10; margin-bottom: 6px; font-family: 'Subhead1', sans-serif;">📝 Full Termination & Staffing Notes:</div>
+                                    <div style="font-size: 16px; color: #222; background: #faf5ed; border: 1px solid #e2d5c1; border-radius: 6px; padding: 10px 14px; font-family: 'Condensed', sans-serif; white-space: pre-wrap; line-height: 1.5;">${escapeText(p.notes || 'No specific notes recorded for this stint.')}</div>
                                 </div>
                             </div>
                         </td>
@@ -5480,34 +5480,34 @@
 
             containerEl.innerHTML = `
                 <div style="background: white; border: 1.5px solid #1f4e79; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
-                    <div style="background: #1f4e79; color: white; padding: 10px 16px; font-family: 'Subhead1', sans-serif; font-size: 18px; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="background: #1f4e79; color: white; padding: 8px 14px; font-family: 'Subhead1', sans-serif; font-size: 17px; display: flex; align-items: center; justify-content: space-between;">
                         <span>📋 Employment Periods (HRAlliance History)</span>
                         ${rehireBadge}
                     </div>
-                    <div style="overflow-x: auto; width: 100%;">
+                    <div style="overflow: hidden; width: 100%;">
                         <table style="width: 100%; table-layout: fixed; border-collapse: collapse; text-align: left; font-family: 'Condensed', sans-serif;">
                             <colgroup>
-                                <col style="width: 8%;">
-                                <col style="width: 11%;">
-                                <col style="width: 11%;">
-                                <col style="width: 10%;">
-                                <col style="width: 11%;">
+                                <col style="width: 9%;">
+                                <col style="width: 12%;">
+                                <col style="width: 12%;">
+                                <col style="width: 9%;">
+                                <col style="width: 9%;">
                                 <col style="width: 7%;">
                                 <col style="width: 22%;">
-                                <col style="width: 10%;">
-                                <col style="width: 10%;">
+                                <col style="width: 11%;">
+                                <col style="width: 9%;">
                             </colgroup>
                             <thead>
-                                <tr style="background: #2b5b84; color: white; font-size: 15px; font-weight: 600;">
-                                    <th style="padding: 9px 8px; white-space: nowrap;">Period</th>
-                                    <th style="padding: 9px 8px; white-space: nowrap;">Begin Date</th>
-                                    <th style="padding: 9px 8px; white-space: nowrap;">End Date</th>
-                                    <th style="padding: 9px 8px; white-space: nowrap;">Duration</th>
-                                    <th style="padding: 9px 8px; white-space: nowrap;">Store</th>
-                                    <th style="padding: 9px 8px; white-space: nowrap;">Position</th>
-                                    <th style="padding: 9px 8px; white-space: nowrap;">Reason / Action</th>
-                                    <th style="padding: 9px 8px; text-align: center; white-space: nowrap;">Rehire Status</th>
-                                    <th style="padding: 9px 8px; text-align: center; white-space: nowrap;">Details</th>
+                                <tr style="background: #2b5b84; color: white; font-size: 14px; font-weight: 600;">
+                                    <th style="padding: 7px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Stint</th>
+                                    <th style="padding: 7px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Start</th>
+                                    <th style="padding: 7px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">End</th>
+                                    <th style="padding: 7px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Tenure</th>
+                                    <th style="padding: 7px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Store</th>
+                                    <th style="padding: 7px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Pos</th>
+                                    <th style="padding: 7px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Reason</th>
+                                    <th style="padding: 7px 6px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Rehire</th>
+                                    <th style="padding: 7px 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Notes</th>
                                 </tr>
                             </thead>
                             <tbody>
