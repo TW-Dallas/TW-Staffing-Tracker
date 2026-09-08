@@ -2750,12 +2750,17 @@
 
         function formatDisplayDateTime(val) {
             if (!val) return '';
-            const str = String(val).trim();
-            if (/\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}:\d{2}\s+(AM|PM)/i.test(str)) {
-                return str;
+            let d = null;
+            if (val instanceof Date) {
+                d = val;
+            } else {
+                const str = String(val).trim();
+                if (/\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}:\d{2}\s+(AM|PM)/i.test(str)) {
+                    return str;
+                }
+                d = new Date(str);
             }
-            const d = new Date(str);
-            if (isNaN(d.getTime())) return str;
+            if (!d || isNaN(d.getTime())) return String(val).trim();
             const m = d.getMonth() + 1;
             const day = d.getDate();
             const yr = d.getFullYear();
@@ -3904,6 +3909,7 @@
                 const assignedId = result.id || id;
 
                 // INSTANT LOCAL MEMORY UPDATE (No second HTTP call = No 404s!)
+                const currentNowIso = new Date().toISOString();
                 if (currentView === 'onboarding') {
                     let item = candidates.find(c => (assignedId && c.id === assignedId) || (payload.name && (c.name || '').toLowerCase() === payload.name.toLowerCase()));
                     if (!item) {
@@ -3911,7 +3917,7 @@
                         candidates.unshift(item);
                     }
                     Object.assign(item, payload);
-                    item.lastUpdated = new Date().toISOString();
+                    item.lastUpdated = currentNowIso;
                 } else if (currentView === 'interviews') {
                     let item = interviews.find(c => c.id === assignedId);
                     if (!item) {
@@ -3919,6 +3925,7 @@
                         interviews.unshift(item);
                     }
                     Object.assign(item, payload);
+                    item.lastUpdated = currentNowIso;
                 } else if (currentView === 'staffing') {
                     let item = staffing.find(c => c.id === assignedId);
                     if (!item) {
@@ -3926,6 +3933,7 @@
                         staffing.unshift(item);
                     }
                     Object.assign(item, payload);
+                    item.lastUpdated = currentNowIso;
                 } else if (currentView === 'paycards') {
                     let item = paycards.find(c => c.id === assignedId);
                     if (!item) {
@@ -3933,6 +3941,12 @@
                         paycards.unshift(item);
                     }
                     Object.assign(item, payload);
+                    item.lastUpdated = currentNowIso;
+                }
+
+                const formLastUpdatedEl = document.getElementById('formLastUpdated');
+                if (formLastUpdatedEl) {
+                    formLastUpdatedEl.innerHTML = `🕒 Last Updated: ${formatDisplayDateTime(new Date())}`;
                 }
 
                 delete unsavedDrafts[assignedId];
@@ -5422,19 +5436,19 @@
                 const rowBg = idx % 2 === 0 ? '#ffffff' : '#f8f9fa';
 
                 return `
-                    <tr style="background: ${rowBg}; border-bottom: 1px solid #e0e0e0; font-size: 16px;">
-                        <td style="padding: 10px 12px; font-weight: bold; color: #1f4e79;">Stint ${idx + 1}</td>
-                        <td style="padding: 10px 12px;">${beginDisplay}</td>
-                        <td style="padding: 10px 12px;">${endDisplay}</td>
-                        <td style="padding: 10px 12px; color: #555;">${duration}</td>
-                        <td style="padding: 10px 12px; font-weight: 500;">Store #${p.store || '—'}</td>
-                        <td style="padding: 10px 12px;">${p.position || 'CSR'}</td>
-                        <td style="padding: 10px 12px; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeText(reason)}">${escapeText(reason)}</td>
-                        <td style="padding: 10px 12px; text-align: center;">${rehireBadgeStint}</td>
-                        <td style="padding: 8px 12px; text-align: center;">
+                    <tr style="background: ${rowBg}; border-bottom: 1px solid #e0e0e0; font-size: 15px;">
+                        <td style="padding: 9px 8px; font-weight: bold; color: #1f4e79; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Stint ${idx + 1}</td>
+                        <td style="padding: 9px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${beginDisplay}</td>
+                        <td style="padding: 9px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${endDisplay}</td>
+                        <td style="padding: 9px 8px; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${duration}</td>
+                        <td style="padding: 9px 8px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Store #${p.store || '—'}</td>
+                        <td style="padding: 9px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.position || 'CSR'}</td>
+                        <td style="padding: 9px 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeText(reason)}">${escapeText(reason)}</td>
+                        <td style="padding: 9px 8px; text-align: center; white-space: nowrap;">${rehireBadgeStint}</td>
+                        <td style="padding: 6px 8px; text-align: center; white-space: nowrap;">
                             <button type="button" onclick="toggleStintDetailRow(${idx})"
-                                style="background: #eef3f8; border: 1.5px solid #b8d2eb; color: #1f4e79; border-radius: 6px; padding: 6px 12px; font-size: 14px; cursor: pointer; font-family: 'Subhead1', sans-serif; font-weight: bold;">
-                                👁️ View Notes
+                                style="background: #eef3f8; border: 1.5px solid #b8d2eb; color: #1f4e79; border-radius: 6px; padding: 5px 8px; font-size: 13px; cursor: pointer; font-family: 'Subhead1', sans-serif; font-weight: bold; white-space: nowrap;">
+                                📝 View Notes
                             </button>
                         </td>
                     </tr>
@@ -5470,19 +5484,30 @@
                         <span>📋 Employment Periods (HRAlliance History)</span>
                         ${rehireBadge}
                     </div>
-                    <div style="overflow-x: auto;">
-                        <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: 'Condensed', sans-serif;">
+                    <div style="overflow-x: auto; width: 100%;">
+                        <table style="width: 100%; table-layout: fixed; border-collapse: collapse; text-align: left; font-family: 'Condensed', sans-serif;">
+                            <colgroup>
+                                <col style="width: 8%;">
+                                <col style="width: 11%;">
+                                <col style="width: 11%;">
+                                <col style="width: 10%;">
+                                <col style="width: 11%;">
+                                <col style="width: 7%;">
+                                <col style="width: 22%;">
+                                <col style="width: 10%;">
+                                <col style="width: 10%;">
+                            </colgroup>
                             <thead>
-                                <tr style="background: #2b5b84; color: white; font-size: 16px; font-weight: 600;">
-                                    <th style="padding: 10px 12px;">Period</th>
-                                    <th style="padding: 10px 12px;">Begin Date</th>
-                                    <th style="padding: 10px 12px;">End Date</th>
-                                    <th style="padding: 10px 12px;">Duration</th>
-                                    <th style="padding: 10px 12px;">Store</th>
-                                    <th style="padding: 10px 12px;">Position</th>
-                                    <th style="padding: 10px 12px;">Reason / Action</th>
-                                    <th style="padding: 10px 12px; text-align: center;">Rehire Status</th>
-                                    <th style="padding: 10px 12px; text-align: center;">Details</th>
+                                <tr style="background: #2b5b84; color: white; font-size: 15px; font-weight: 600;">
+                                    <th style="padding: 9px 8px; white-space: nowrap;">Period</th>
+                                    <th style="padding: 9px 8px; white-space: nowrap;">Begin Date</th>
+                                    <th style="padding: 9px 8px; white-space: nowrap;">End Date</th>
+                                    <th style="padding: 9px 8px; white-space: nowrap;">Duration</th>
+                                    <th style="padding: 9px 8px; white-space: nowrap;">Store</th>
+                                    <th style="padding: 9px 8px; white-space: nowrap;">Position</th>
+                                    <th style="padding: 9px 8px; white-space: nowrap;">Reason / Action</th>
+                                    <th style="padding: 9px 8px; text-align: center; white-space: nowrap;">Rehire Status</th>
+                                    <th style="padding: 9px 8px; text-align: center; white-space: nowrap;">Details</th>
                                 </tr>
                             </thead>
                             <tbody>
