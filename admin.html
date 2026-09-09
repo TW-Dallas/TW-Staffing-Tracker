@@ -5745,7 +5745,7 @@
 
                 const candidateFormattedDate = formatDateForInput(c.ntoDate);
                 return candidateFormattedDate === selectedDate;
-            });
+            }).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
             // Auto-populate Start Time from Calendar Schedule or scheduled candidates on this date
             const startInput = document.getElementById('ntoStartTime');
