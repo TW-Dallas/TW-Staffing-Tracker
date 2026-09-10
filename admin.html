@@ -98,10 +98,10 @@
                     Netspend
                 </button>
 
-                <button type="button" onclick="window.open('https://www.zenput.com/reports/', '_blank')"
+                <button type="button" onclick="window.open('https://ops-execution.crunchtime.com/reports/', '_blank')"
                     style="display: inline-flex; align-items: center; gap: 6px; background: var(--crust-base); color: var(--dark-blue); font-size: 15px; padding: 7px 14px; font-family: 'Subhead1', sans-serif;">
-                    <img src="images/icons/Zenput_Icon.png" alt="" style="width: 16px; height: 16px;">
-                    Zenput Reports
+                    <img src="images/icons/Crunchtime_icon.png" alt="" style="width: 16px; height: 16px;">
+                    Crunchtime Reports
                 </button>
 
                 <button type="button" id="btnGmapsLink"
@@ -186,7 +186,8 @@
                     <h2 id="formTitle"
                         style="margin: 0; font-family: 'ExtraBold', sans-serif; font-size: 20px; color: var(--dark-blue);">
                         Candidate details</h2>
-                    <span id="formLastUpdated" style="font-family: 'Subhead2', sans-serif; font-size: 12.5px; color: var(--brand-blue); font-weight: bold;"></span>
+                    <span id="formLastUpdated"
+                        style="font-family: 'Subhead2', sans-serif; font-size: 12.5px; color: var(--brand-blue); font-weight: bold;"></span>
                 </div>
                 <form id="candidateForm" onsubmit="saveCandidate(event)">
                     <!-- Hidden inputs for ID and NTO Date -->
@@ -273,10 +274,11 @@
 
                             <!-- Structured Onboarding Checklist Grid (Stage 1 & 3 Collapsed, Stage 2 & Blockers Open) -->
                             <div class="checkbox-grid">
-                                
+
                                 <!-- STAGE 1: INTAKE (COLLAPSIBLE) -->
                                 <div class="stage-collapsible-wrapper">
-                                    <div class="stage-accordion-header" onclick="toggleStageAccordion('stage1Content', 'stage1Chevron')">
+                                    <div class="stage-accordion-header"
+                                        onclick="toggleStageAccordion('stage1Content', 'stage1Chevron')">
                                         <span style="display: flex; align-items: center; gap: 8px;">
                                             <span>📥</span> <strong>Stage 1: Onboarding Intake</strong>
                                             <span id="stage1StatusBadge" class="stage-mini-badge hidden"></span>
@@ -285,25 +287,32 @@
                                     </div>
                                     <div id="stage1Content" class="stage-accordion-body hidden">
                                         <div class="checkbox-subgrid">
-                                            <label class="checkbox-item"><input type="checkbox" id="checkSubmission" onchange="updateStageBadges()"> Submission Received</label>
-                                            <label class="checkbox-item"><input type="checkbox" id="checkOnbSent" onchange="updateStageBadges()"> Onboarding Sent</label>
+                                            <label class="checkbox-item"><input type="checkbox" id="checkSubmission"
+                                                    onchange="updateStageBadges()"> Submission Received</label>
+                                            <label class="checkbox-item"><input type="checkbox" id="checkOnbSent"
+                                                    onchange="updateStageBadges()"> Onboarding Sent</label>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- STAGE 2: PAPERWORK PROCESSING (OPEN BY DEFAULT) -->
                                 <div>
-                                    <div class="section-header" style="margin-top: 2px;">Stage 2: Paperwork Processing</div>
+                                    <div class="section-header" style="margin-top: 2px;">Stage 2: Paperwork Processing
+                                    </div>
                                     <div class="checkbox-subgrid three-col" style="margin-top: 6px;">
-                                        <label class="checkbox-item"><input type="checkbox" id="checkBgc"> Background Check Done</label>
-                                        <label class="checkbox-item"><input type="checkbox" id="checkAllPay"> AllPay Done</label>
-                                        <label class="checkbox-item"><input type="checkbox" id="checkPulseForm"> Pulse Form Complete</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="checkBgc"> Background
+                                            Check Done</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="checkAllPay"> AllPay
+                                            Done</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="checkPulseForm"> Pulse
+                                            Form Complete</label>
                                     </div>
                                 </div>
 
                                 <!-- STAGE 3: ORIENTATION & HIRE (COLLAPSIBLE) -->
                                 <div class="stage-collapsible-wrapper">
-                                    <div class="stage-accordion-header" onclick="toggleStageAccordion('stage3Content', 'stage3Chevron')">
+                                    <div class="stage-accordion-header"
+                                        onclick="toggleStageAccordion('stage3Content', 'stage3Chevron')">
                                         <span style="display: flex; align-items: center; gap: 8px;">
                                             <span>🎓</span> <strong>Stage 3: Orientation & Hire</strong>
                                             <span id="stage3StatusBadge" class="stage-mini-badge hidden"></span>
@@ -312,9 +321,12 @@
                                     </div>
                                     <div id="stage3Content" class="stage-accordion-body hidden">
                                         <div class="checkbox-subgrid three-col">
-                                            <label class="checkbox-item"><input type="checkbox" id="checkNtoLink" onchange="updateStageBadges()"> NTO Signup Link Sent</label>
-                                            <label class="checkbox-item"><input type="checkbox" id="checkNto" onchange="updateStageBadges()"> NTO Scheduled</label>
-                                            <label class="checkbox-item"><input type="checkbox" id="checkHired" onchange="updateStageBadges()"> Hired</label>
+                                            <label class="checkbox-item"><input type="checkbox" id="checkNtoLink"
+                                                    onchange="updateStageBadges()"> NTO Signup Link Sent</label>
+                                            <label class="checkbox-item"><input type="checkbox" id="checkNto"
+                                                    onchange="updateStageBadges()"> NTO Scheduled</label>
+                                            <label class="checkbox-item"><input type="checkbox" id="checkHired"
+                                                    onchange="updateStageBadges()"> Hired</label>
                                         </div>
                                     </div>
                                 </div>
@@ -327,11 +339,13 @@
                                             <input type="checkbox" id="checkIncorrect"> ⚠️ Incorrect Email
                                         </label>
                                         <label class="checkbox-item flag-box flag-incorrect">
-                                            <input type="checkbox" id="checkMissingDocs" onchange="toggleMissingDocsSelector()">
+                                            <input type="checkbox" id="checkMissingDocs"
+                                                onchange="toggleMissingDocsSelector()">
                                             ⚠️ Missing/Incorrect Docs
                                         </label>
                                         <label class="checkbox-item flag-box flag-incorrect">
-                                            <input type="checkbox" id="checkAllPayError" onchange="toggleAllPayErrorSelector()">
+                                            <input type="checkbox" id="checkAllPayError"
+                                                onchange="toggleAllPayErrorSelector()">
                                             ⚠️ AllPay Error
                                         </label>
 
@@ -341,31 +355,36 @@
                                             <div
                                                 style="grid-column: span 2; font-family: 'Subhead2'; font-size: 11px; color: var(--dark-red); text-transform: uppercase; font-weight: bold; border-bottom: 1px solid var(--crust-med); padding-bottom: 2px; margin-bottom: 4px;">
                                                 Select Missing Documents</div>
-                                            
+
                                             <!-- Left Column: I-9 & ID Verification -->
                                             <div style="display: flex; flex-direction: column; gap: 8px;">
-                                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                                        class="doc-chk"
+                                                <label class="checkbox-item" style="color: var(--text-dark);"><input
+                                                        type="checkbox" class="doc-chk"
                                                         value="List A ID (Passport, I-551 Permanent Resident Card, or I-766 Employment Authorization Card)">
                                                     ✈️ List A ID (Passport, I-551, I-766)</label>
-                                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                                        class="doc-chk" value="List B ID (Driver's License, State ID, School ID)">
+                                                <label class="checkbox-item" style="color: var(--text-dark);"><input
+                                                        type="checkbox" class="doc-chk"
+                                                        value="List B ID (Driver's License, State ID, School ID)">
                                                     🪪 List B ID (DL, State ID, School ID)</label>
-                                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                                        class="doc-chk" value="List C ID (Social Security Card, Birth Certificate)">
+                                                <label class="checkbox-item" style="color: var(--text-dark);"><input
+                                                        type="checkbox" class="doc-chk"
+                                                        value="List C ID (Social Security Card, Birth Certificate)">
                                                     💳 List C ID (Social Security Card, Birth Cert)</label>
-                                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                                        class="doc-chk" value="Document Mismatch"> ✖️ Document Mismatch</label>
+                                                <label class="checkbox-item" style="color: var(--text-dark);"><input
+                                                        type="checkbox" class="doc-chk" value="Document Mismatch"> ✖️
+                                                    Document Mismatch</label>
                                             </div>
 
                                             <!-- Right Column: Vehicle / Driver Requirements -->
                                             <div style="display: flex; flex-direction: column; gap: 8px;">
-                                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                                        class="doc-chk" value="Vehicle Inspection"> 🚗 Vehicle Inspection</label>
-                                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                                        class="doc-chk" value="Auto Registration"> 🏷️ Auto Registration</label>
-                                                <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                                        class="doc-chk"
+                                                <label class="checkbox-item" style="color: var(--text-dark);"><input
+                                                        type="checkbox" class="doc-chk" value="Vehicle Inspection"> 🚗
+                                                    Vehicle Inspection</label>
+                                                <label class="checkbox-item" style="color: var(--text-dark);"><input
+                                                        type="checkbox" class="doc-chk" value="Auto Registration"> 🏷️
+                                                    Auto Registration</label>
+                                                <label class="checkbox-item" style="color: var(--text-dark);"><input
+                                                        type="checkbox" class="doc-chk"
                                                         value="Auto Insurance ID (Driver name must be listed as a covered driver)">
                                                     📄 Auto Insurance ID</label>
                                             </div>
@@ -387,10 +406,12 @@
                                             <div
                                                 style="grid-column: span 2; font-family: 'Subhead2'; font-size: 11px; color: var(--dark-red); text-transform: uppercase; font-weight: bold; border-bottom: 1px solid var(--crust-med); padding-bottom: 2px; margin-bottom: 4px;">
                                                 Select AllPay Error Details</div>
-                                            <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                                    class="allpay-err-chk" value="Incorrect DOB on I-9"> 🎂 Incorrect DOB on I-9</label>
-                                            <label class="checkbox-item" style="color: var(--text-dark);"><input type="checkbox"
-                                                    class="allpay-err-chk" value="Incorrect SSN on I-9"> 💳 Incorrect SSN on I-9</label>
+                                            <label class="checkbox-item" style="color: var(--text-dark);"><input
+                                                    type="checkbox" class="allpay-err-chk" value="Incorrect DOB on I-9">
+                                                🎂 Incorrect DOB on I-9</label>
+                                            <label class="checkbox-item" style="color: var(--text-dark);"><input
+                                                    type="checkbox" class="allpay-err-chk" value="Incorrect SSN on I-9">
+                                                💳 Incorrect SSN on I-9</label>
                                             <div
                                                 style="grid-column: span 2; display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
                                                 <span
@@ -615,15 +636,21 @@
                             </div>
 
                             <!-- HRAlliance Style Employment Periods Card (Top Position) -->
-                            <div id="stfEmploymentPeriodsContainer" style="margin-top: 10px; margin-bottom: 14px;"></div>
+                            <div id="stfEmploymentPeriodsContainer" style="margin-top: 10px; margin-bottom: 14px;">
+                            </div>
 
                             <!-- Collapsible Active Stint Editor -->
-                            <div id="stfActiveEditorWrapper" style="background: white; border: 1.5px solid #d0c0a8; border-radius: 8px; overflow: hidden; margin-bottom: 14px;">
-                                <div onclick="toggleActiveStintEditor()" style="background: #f7f1e6; padding: 10px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0d0ba;">
-                                    <strong id="stfActiveEditorTitle" style="color: #472b10; font-family: 'Subhead1', sans-serif; font-size: 16px;">
+                            <div id="stfActiveEditorWrapper"
+                                style="background: white; border: 1.5px solid #d0c0a8; border-radius: 8px; overflow: hidden; margin-bottom: 14px;">
+                                <div onclick="toggleActiveStintEditor()"
+                                    style="background: #f7f1e6; padding: 10px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0d0ba;">
+                                    <strong id="stfActiveEditorTitle"
+                                        style="color: #472b10; font-family: 'Subhead1', sans-serif; font-size: 16px;">
                                         ✏️ Active Record / Stint Details
                                     </strong>
-                                    <span id="stfActiveEditorChevron" style="font-size: 13.5px; color: #1f4e79; font-weight: bold; font-family: 'Subhead1', sans-serif;">▼ Collapse / Expand</span>
+                                    <span id="stfActiveEditorChevron"
+                                        style="font-size: 13.5px; color: #1f4e79; font-weight: bold; font-family: 'Subhead1', sans-serif;">▼
+                                        Collapse / Expand</span>
                                 </div>
                                 <div id="stfActiveEditorBody" style="padding: 14px;">
                                     <div class="form-row flex-three">
@@ -647,18 +674,22 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
+                                    <div class="form-row"
+                                        style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
                                         <div class="form-group">
                                             <label>Hire Date (NTO)</label>
-                                            <input type="date" id="stfHireDate" onchange="autoCalculatePeriodFromDates()">
+                                            <input type="date" id="stfHireDate"
+                                                onchange="autoCalculatePeriodFromDates()">
                                         </div>
                                         <div class="form-group">
                                             <label>Termination Date</label>
-                                            <input type="date" id="stfTermDate" onchange="autoCalculatePeriodFromDates()">
+                                            <input type="date" id="stfTermDate"
+                                                onchange="autoCalculatePeriodFromDates()">
                                         </div>
                                         <div class="form-group">
                                             <label>Date Received</label>
-                                            <input type="date" id="stfReceivedDate" title="Date GM submitted the form (used for weekly submission metrics)">
+                                            <input type="date" id="stfReceivedDate"
+                                                title="Date GM submitted the form (used for weekly submission metrics)">
                                         </div>
                                         <div class="form-group">
                                             <label>Fiscal Period</label>
@@ -667,7 +698,8 @@
                                         </div>
                                     </div>
 
-                                    <div class="section-header" style="margin-top: 10px;">Termination & Bonus Eligibility Audit</div>
+                                    <div class="section-header" style="margin-top: 10px;">Termination & Bonus
+                                        Eligibility Audit</div>
 
                                     <div class="form-row flex-three">
                                         <div class="form-group">
@@ -699,7 +731,8 @@
                                                 <option value="Attendance">Attendance</option>
                                                 <option value="Insubordination">Insubordination</option>
                                                 <option value="Violation of Rules">Violation of Rules</option>
-                                                <option value="Unsatisfactory Performance">Unsatisfactory Performance</option>
+                                                <option value="Unsatisfactory Performance">Unsatisfactory Performance
+                                                </option>
                                                 <option value="Medical Leave">Medical Leave</option>
                                                 <option value="Personal Leave">Personal Leave</option>
                                                 <option value="Returning to School">Returning to School</option>
@@ -711,7 +744,8 @@
 
                                     <div class="form-group">
                                         <label>General Staffing Notes / Explain Reason in Detail</label>
-                                        <textarea id="stfNotes" placeholder="Enter detailed explanation here..."></textarea>
+                                        <textarea id="stfNotes"
+                                            placeholder="Enter detailed explanation here..."></textarea>
                                     </div>
 
                                     <div class="form-group">
@@ -722,9 +756,12 @@
                             </div>
 
                             <!-- Additional / Prior Employment Stints Sub-Form -->
-                            <div id="stfPriorStintsWrapper" style="margin-top: 14px; background: #faf5ed; border: 1.5px dashed #c29d62; border-radius: 8px; padding: 14px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <div style="font-family: 'Subhead1', sans-serif; font-size: 15px; color: #472b10; font-weight: bold;">
+                            <div id="stfPriorStintsWrapper"
+                                style="margin-top: 14px; background: #faf5ed; border: 1.5px dashed #c29d62; border-radius: 8px; padding: 14px;">
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div
+                                        style="font-family: 'Subhead1', sans-serif; font-size: 15px; color: #472b10; font-weight: bold;">
                                         🔁 Add Historical / Past Stint to File
                                     </div>
                                     <button type="button" onclick="addPriorStintCard()"
@@ -732,10 +769,13 @@
                                         <span>➕ Add Prior Stint</span>
                                     </button>
                                 </div>
-                                <div style="font-size: 13px; color: #795548; margin-bottom: 10px; font-family: 'Condensed', sans-serif;">
-                                    Enter any previous employment terms for this rehire. Each stint will be recorded with its own dates, store, reasons, and detailed notes.
+                                <div
+                                    style="font-size: 13px; color: #795548; margin-bottom: 10px; font-family: 'Condensed', sans-serif;">
+                                    Enter any previous employment terms for this rehire. Each stint will be recorded
+                                    with its own dates, store, reasons, and detailed notes.
                                 </div>
-                                <div id="priorStintsContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                                <div id="priorStintsContainer"
+                                    style="display: flex; flex-direction: column; gap: 12px;"></div>
                             </div>
                         </div>
 
@@ -820,8 +860,8 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Class Start Time</label>
-                                    <input type="text" id="ntoStartTime" list="time15MinList" placeholder="e.g., 6:00 PM"
-                                        onblur="autoFormatTimeInput(this)">
+                                    <input type="text" id="ntoStartTime" list="time15MinList"
+                                        placeholder="e.g., 6:00 PM" onblur="autoFormatTimeInput(this)">
                                 </div>
                                 <div class="form-group">
                                     <label>Class End Time</label>
@@ -871,11 +911,15 @@
                         <!-- 6. CONTACTS DIRECTORY TEMPLATE -->
                         <div id="contactsFormFields" class="hidden">
                             <!-- Controls Row: Filter by DO & Quick Search -->
-                            <div style="display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: flex-end;">
+                            <div
+                                style="display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: flex-end;">
                                 <div style="flex: 2; min-width: 200px;">
                                     <label
-                                        style="font-family: 'Subhead2'; font-size: 14px; color: var(--text-dark);">Search Store / GM / IP / Address:</label>
-                                    <input type="text" id="contactSearchInput" placeholder="🔍 Type Store #, GM Name, IP, Address..." oninput="renderContactsView()"
+                                        style="font-family: 'Subhead2'; font-size: 14px; color: var(--text-dark);">Search
+                                        Store / GM / IP / Address:</label>
+                                    <input type="text" id="contactSearchInput"
+                                        placeholder="🔍 Type Store #, GM Name, IP, Address..."
+                                        oninput="renderContactsView()"
                                         style="padding: 7px 10px; font-size: 16px; border-radius: 6px; border: 1.5px solid var(--crust-dark); width: 100%; box-sizing: border-box; background: white; margin-top: 4px;">
                                 </div>
                                 <div style="flex: 1; min-width: 140px;">
@@ -1092,12 +1136,15 @@
                 <!-- Pay Rate Reference & Input Form for Welcome Letters -->
                 <div id="brandModalPayRateForm" class="hidden"
                     style="margin-top: 12px; display: flex; flex-direction: column; gap: 12px; text-align: left;">
-                    
+
                     <!-- Store Pay Rates Reference Card -->
-                    <div id="payRateRefContainer" style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px 12px;">
-                        <div style="font-family: 'Subhead1', sans-serif; font-size: 13.5px; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                    <div id="payRateRefContainer"
+                        style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px 12px;">
+                        <div
+                            style="font-family: 'Subhead1', sans-serif; font-size: 13.5px; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
                             <span id="payRateRefHeader">💰 Store Pay Rates</span>
-                            <span id="payRateRefStoreBadge" style="font-size: 12px; color: var(--brand-grey); font-family: 'Condensed', sans-serif;"></span>
+                            <span id="payRateRefStoreBadge"
+                                style="font-size: 12px; color: var(--brand-grey); font-family: 'Condensed', sans-serif;"></span>
                         </div>
                         <div id="payRateRefBody" style="font-size: 13px;">
                             <!-- Populated dynamically via JS -->
@@ -1106,24 +1153,31 @@
 
                     <!-- Input Fields -->
                     <div id="payRateSingleInputGroup" class="form-group hidden" style="margin-bottom: 0;">
-                        <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; font-weight: bold; color: var(--dark-blue);">
+                        <label
+                            style="font-family: 'Subhead2', sans-serif; font-size: 13px; font-weight: bold; color: var(--dark-blue);">
                             Starting Hourly Wage ($/hr):
                         </label>
-                        <input type="text" id="payRateSingleInput" placeholder="e.g., 9.00" style="width: 100%; font-size: 15px; padding: 8px 10px; margin-top: 4px; box-sizing: border-box;">
+                        <input type="text" id="payRateSingleInput" placeholder="e.g., 9.00"
+                            style="width: 100%; font-size: 15px; padding: 8px 10px; margin-top: 4px; box-sizing: border-box;">
                     </div>
 
-                    <div id="payRateDualInputGroup" class="hidden" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div id="payRateDualInputGroup" class="hidden"
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div class="form-group" style="margin-bottom: 0;">
-                            <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; font-weight: bold; color: var(--dark-blue);">
+                            <label
+                                style="font-family: 'Subhead2', sans-serif; font-size: 13px; font-weight: bold; color: var(--dark-blue);">
                                 In-Store Hourly Wage ($/hr):
                             </label>
-                            <input type="text" id="payRateInStoreInput" placeholder="e.g., 9.00" style="width: 100%; font-size: 15px; padding: 8px 10px; margin-top: 4px; box-sizing: border-box;">
+                            <input type="text" id="payRateInStoreInput" placeholder="e.g., 9.00"
+                                style="width: 100%; font-size: 15px; padding: 8px 10px; margin-top: 4px; box-sizing: border-box;">
                         </div>
                         <div class="form-group" style="margin-bottom: 0;">
-                            <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; font-weight: bold; color: var(--dark-blue);">
+                            <label
+                                style="font-family: 'Subhead2', sans-serif; font-size: 13px; font-weight: bold; color: var(--dark-blue);">
                                 On-The-Road Wage ($/hr):
                             </label>
-                            <input type="text" id="payRateRoadInput" placeholder="e.g., 4.35" style="width: 100%; font-size: 15px; padding: 8px 10px; margin-top: 4px; box-sizing: border-box;">
+                            <input type="text" id="payRateRoadInput" placeholder="e.g., 4.35"
+                                style="width: 100%; font-size: 15px; padding: 8px 10px; margin-top: 4px; box-sizing: border-box;">
                         </div>
                     </div>
                 </div>
@@ -1149,13 +1203,18 @@
                             / Pulse Setup Link:</label>
                         <input type="text" id="reminderStoreSetupInput" placeholder="Paste system setup link here...">
                     </div>
-                    <div id="reminderAttachmentGroup" class="form-group" style="margin-top: 4px; background: #fdfaf7; border: 1.5px dashed var(--crust-dark); padding: 10px; border-radius: 8px;">
-                        <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; font-weight: bold; color: var(--dark-blue); display: flex; align-items: center; justify-content: space-between;">
+                    <div id="reminderAttachmentGroup" class="form-group"
+                        style="margin-top: 4px; background: #fdfaf7; border: 1.5px dashed var(--crust-dark); padding: 10px; border-radius: 8px;">
+                        <label
+                            style="font-family: 'Subhead2', sans-serif; font-size: 13px; font-weight: bold; color: var(--dark-blue); display: flex; align-items: center; justify-content: space-between;">
                             <span>📎 Attach PDF / Document (Optional):</span>
-                            <span id="attachedFileStatus" style="font-size: 12px; color: var(--brand-blue); font-weight: bold;"></span>
+                            <span id="attachedFileStatus"
+                                style="font-size: 12px; color: var(--brand-blue); font-weight: bold;"></span>
                         </label>
-                        <input type="file" id="reminderFileInput" accept="application/pdf,image/*" style="margin-top: 6px; font-size: 14px; width: 100%;">
-                        <div style="font-size: 11px; color: var(--brand-grey); margin-top: 4px;">Upload a downloaded AllPay I-9 PDF or doc from your computer to attach directly to the email.</div>
+                        <input type="file" id="reminderFileInput" accept="application/pdf,image/*"
+                            style="margin-top: 6px; font-size: 14px; width: 100%;">
+                        <div style="font-size: 11px; color: var(--brand-grey); margin-top: 4px;">Upload a downloaded
+                            AllPay I-9 PDF or doc from your computer to attach directly to the email.</div>
                     </div>
                 </div>
 
@@ -1172,13 +1231,16 @@
         <div class="brand-modal-card" style="max-width: 620px; width: 95%;">
             <div class="brand-modal-brand-stripe"></div>
             <div class="brand-modal-content" style="padding: 20px; text-align: left;">
-                
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--crust-med); padding-bottom: 8px; margin-bottom: 14px;">
+
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--crust-med); padding-bottom: 8px; margin-bottom: 14px;">
                     <div>
-                        <h3 style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 19px; text-transform: uppercase;">
+                        <h3
+                            style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 19px; text-transform: uppercase;">
                             🍕 ATS Phone Interview Outreach
                         </h3>
-                        <div style="font-family: 'Compact', sans-serif; font-size: 13.5px; color: var(--crust-deep); margin-top: 2px;">
+                        <div
+                            style="font-family: 'Compact', sans-serif; font-size: 13.5px; color: var(--crust-deep); margin-top: 2px;">
                             SmartRecruiters One-Click Email Template
                         </div>
                     </div>
@@ -1189,9 +1251,12 @@
                 </div>
 
                 <!-- Section 1: Subject Line -->
-                <div style="margin-bottom: 14px; background: var(--crust-base); border: 1px solid var(--crust-dark); border-radius: 8px; padding: 10px 12px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                        <span style="font-family: 'Subhead2', sans-serif; font-size: 12.5px; font-weight: bold; color: var(--dark-blue); text-transform: uppercase;">
+                <div
+                    style="margin-bottom: 14px; background: var(--crust-base); border: 1px solid var(--crust-dark); border-radius: 8px; padding: 10px 12px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span
+                            style="font-family: 'Subhead2', sans-serif; font-size: 12.5px; font-weight: bold; color: var(--dark-blue); text-transform: uppercase;">
                             Email Subject Line:
                         </span>
                         <button type="button" id="btnCopySrSubject" onclick="copySrSubject()"
@@ -1199,41 +1264,58 @@
                             📋 Copy Subject
                         </button>
                     </div>
-                    <input type="text" id="srSubjectInput" readonly value="🍕 Invitation to Phone Interview - Team Wow! Domino’s"
+                    <input type="text" id="srSubjectInput" readonly
+                        value="🍕 Invitation to Phone Interview - Team Wow! Domino’s"
                         style="width: 100%; font-size: 14.5px; padding: 6px 10px; background: white; border: 1px solid var(--crust-med); font-weight: bold; color: var(--text-dark);">
                 </div>
 
                 <!-- Section 2: Google Booking Link -->
-                <div style="margin-bottom: 14px; background: #fdfaf7; border: 1px solid var(--crust-dark); border-radius: 8px; padding: 10px 12px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                        <label for="srBookingUrlInput" style="font-family: 'Subhead2', sans-serif; font-size: 12.5px; font-weight: bold; color: var(--dark-blue); text-transform: uppercase;">
+                <div
+                    style="margin-bottom: 14px; background: #fdfaf7; border: 1px solid var(--crust-dark); border-radius: 8px; padding: 10px 12px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <label for="srBookingUrlInput"
+                            style="font-family: 'Subhead2', sans-serif; font-size: 12.5px; font-weight: bold; color: var(--dark-blue); text-transform: uppercase;">
                             📅 Google Appointment Booking Link:
                         </label>
-                        <span id="srLinkSavedStatus" style="font-size: 11.5px; color: var(--success-green); font-weight: bold; font-family: 'Compact', sans-serif;">✓ Saved</span>
+                        <span id="srLinkSavedStatus"
+                            style="font-size: 11.5px; color: var(--success-green); font-weight: bold; font-family: 'Compact', sans-serif;">✓
+                            Saved</span>
                     </div>
                     <input type="text" id="srBookingUrlInput" placeholder="https://calendar.app.google/..."
                         oninput="handleSrBookingUrlChange(this.value)"
                         style="width: 100%; font-size: 14px; padding: 6px 10px; background: white; border: 1px solid var(--crust-med); color: var(--dark-blue); font-family: 'Condensed', sans-serif;">
-                    <div style="font-size: 11.5px; color: var(--brand-grey); font-family: 'Condensed', sans-serif; margin-top: 4px;">
-                        ℹ️ Updating this link updates the clickable <strong>CLICK HERE</strong> link below in real time and remembers it for next time.
+                    <div
+                        style="font-size: 11.5px; color: var(--brand-grey); font-family: 'Condensed', sans-serif; margin-top: 4px;">
+                        ℹ️ Updating this link updates the clickable <strong>CLICK HERE</strong> link below in real time
+                        and remembers it for next time.
                     </div>
                 </div>
 
                 <!-- Section 3: Body Preview -->
                 <div style="margin-bottom: 14px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                        <span style="font-family: 'Subhead2', sans-serif; font-size: 12.5px; font-weight: bold; color: var(--dark-blue); text-transform: uppercase;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span
+                            style="font-family: 'Subhead2', sans-serif; font-size: 12.5px; font-weight: bold; color: var(--dark-blue); text-transform: uppercase;">
                             Message Body (Formatted Preview):
                         </span>
                         <span style="font-size: 11.5px; color: var(--brand-grey); font-family: 'Compact', sans-serif;">
                             Includes SmartRecruiters merge tags
                         </span>
                     </div>
-                    <div id="srTemplateBodyPreview" style="background: white; border: 1.5px solid var(--crust-dark); border-radius: 8px; padding: 14px 16px; font-family: 'Condensed', sans-serif; font-size: 15.5px; line-height: 1.5; color: var(--text-dark); max-height: 220px; overflow-y: auto;">
+                    <div id="srTemplateBodyPreview"
+                        style="background: white; border: 1.5px solid var(--crust-dark); border-radius: 8px; padding: 14px 16px; font-family: 'Condensed', sans-serif; font-size: 15.5px; line-height: 1.5; color: var(--text-dark); max-height: 220px; overflow-y: auto;">
                         <p style="margin: 0 0 10px 0;">Hello [m_applicant_first_name],</p>
                         <p style="margin: 0 0 10px 0;">Thank you for your interest in joining the Domino’s team!</p>
-                        <p style="margin: 0 0 10px 0;">I would like to schedule a brief phone call to discuss our current opportunities and see if we are a good match. If so, we can get you on the schedule for an in-person interview.</p>
-                        <p style="margin: 0 0 10px 0;">Please <a id="srPreviewHyperlink" href="https://calendar.app.google/rCFq2H2Z7VCc8Ks17" target="_blank" style="color: var(--brand-blue); font-weight: bold; text-decoration: underline;">CLICK HERE</a> to view my Google Appointment Bookings page and select a time that works for you. I will call you at the time you select.</p>
+                        <p style="margin: 0 0 10px 0;">I would like to schedule a brief phone call to discuss our
+                            current opportunities and see if we are a good match. If so, we can get you on the schedule
+                            for an in-person interview.</p>
+                        <p style="margin: 0 0 10px 0;">Please <a id="srPreviewHyperlink"
+                                href="https://calendar.app.google/rCFq2H2Z7VCc8Ks17" target="_blank"
+                                style="color: var(--brand-blue); font-weight: bold; text-decoration: underline;">CLICK
+                                HERE</a> to view my Google Appointment Bookings page and select a time that works for
+                            you. I will call you at the time you select.</p>
                         <p style="margin: 0 0 3px 0;">Best regards,</p>
                         <p style="margin: 0;">[m_employee_first_name] [m_employee_last_name]</p>
                     </div>
@@ -1310,30 +1392,49 @@
                 </div>
 
                 <!-- Summary Totals Banner -->
-                <div id="trendSummaryBanner" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; background: var(--crust-light); border: 1.5px solid var(--crust-dark); border-radius: 8px; padding: 10px 14px;">
+                <div id="trendSummaryBanner"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; background: var(--crust-light); border: 1.5px solid var(--crust-dark); border-radius: 8px; padding: 10px 14px;">
                     <div style="display: flex; flex-direction: column;">
-                        <span style="font-size: 12px; font-family: 'Subhead2'; color: var(--crust-deep); text-transform: uppercase;">Period Hires</span>
-                        <strong id="trendSumPeriodHires" style="font-size: 22px; font-family: 'ExtraBold'; color: var(--med-blue);">0</strong>
+                        <span
+                            style="font-size: 12px; font-family: 'Subhead2'; color: var(--crust-deep); text-transform: uppercase;">Period
+                            Hires</span>
+                        <strong id="trendSumPeriodHires"
+                            style="font-size: 22px; font-family: 'ExtraBold'; color: var(--med-blue);">0</strong>
                     </div>
                     <div style="display: flex; flex-direction: column;">
-                        <span style="font-size: 12px; font-family: 'Subhead2'; color: var(--crust-deep); text-transform: uppercase;">Period Terms</span>
-                        <strong id="trendSumPeriodTerms" style="font-size: 22px; font-family: 'ExtraBold'; color: var(--brand-red);">0</strong>
+                        <span
+                            style="font-size: 12px; font-family: 'Subhead2'; color: var(--crust-deep); text-transform: uppercase;">Period
+                            Terms</span>
+                        <strong id="trendSumPeriodTerms"
+                            style="font-size: 22px; font-family: 'ExtraBold'; color: var(--brand-red);">0</strong>
                     </div>
                     <div style="display: flex; flex-direction: column;">
-                        <span style="font-size: 12px; font-family: 'Subhead2'; color: var(--crust-deep); text-transform: uppercase;">Period Net Gain</span>
-                        <strong id="trendSumPeriodNet" style="font-size: 22px; font-family: 'ExtraBold'; color: var(--dark-blue);">+0</strong>
+                        <span
+                            style="font-size: 12px; font-family: 'Subhead2'; color: var(--crust-deep); text-transform: uppercase;">Period
+                            Net Gain</span>
+                        <strong id="trendSumPeriodNet"
+                            style="font-size: 22px; font-family: 'ExtraBold'; color: var(--dark-blue);">+0</strong>
                     </div>
                     <div style="display: flex; flex-direction: column;">
-                        <span style="font-size: 12px; font-family: 'Subhead2'; color: var(--crust-deep); text-transform: uppercase;">YTD Total Hires</span>
-                        <strong id="trendSumYtdHires" style="font-size: 22px; font-family: 'ExtraBold'; color: var(--med-blue);">0</strong>
+                        <span
+                            style="font-size: 12px; font-family: 'Subhead2'; color: var(--crust-deep); text-transform: uppercase;">YTD
+                            Total Hires</span>
+                        <strong id="trendSumYtdHires"
+                            style="font-size: 22px; font-family: 'ExtraBold'; color: var(--med-blue);">0</strong>
                     </div>
                     <div style="display: flex; flex-direction: column;">
-                        <span style="font-size: 12px; font-family: 'Subhead2'; color: var(--crust-deep); text-transform: uppercase;">YTD Total Terms</span>
-                        <strong id="trendSumYtdTerms" style="font-size: 22px; font-family: 'ExtraBold'; color: var(--brand-red);">0</strong>
+                        <span
+                            style="font-size: 12px; font-family: 'Subhead2'; color: var(--crust-deep); text-transform: uppercase;">YTD
+                            Total Terms</span>
+                        <strong id="trendSumYtdTerms"
+                            style="font-size: 22px; font-family: 'ExtraBold'; color: var(--brand-red);">0</strong>
                     </div>
                     <div style="display: flex; flex-direction: column;">
-                        <span style="font-size: 12px; font-family: 'Subhead2'; color: var(--crust-deep); text-transform: uppercase;">YTD Net Gain</span>
-                        <strong id="trendSumYtdNet" style="font-size: 22px; font-family: 'ExtraBold'; color: var(--success-green);">+0</strong>
+                        <span
+                            style="font-size: 12px; font-family: 'Subhead2'; color: var(--crust-deep); text-transform: uppercase;">YTD
+                            Net Gain</span>
+                        <strong id="trendSumYtdNet"
+                            style="font-size: 22px; font-family: 'ExtraBold'; color: var(--success-green);">+0</strong>
                     </div>
                 </div>
 
@@ -1355,7 +1456,9 @@
                             </tr>
                         </thead>
                         <tbody id="storeTrendsTableBody"></tbody>
-                        <tfoot id="storeTrendsTableFoot" style="position: sticky; bottom: 0; background: #eef3f8; border-top: 2px solid var(--dark-blue); font-family: 'Subhead2'; font-size: 15px; font-weight: bold; z-index: 2;"></tfoot>
+                        <tfoot id="storeTrendsTableFoot"
+                            style="position: sticky; bottom: 0; background: #eef3f8; border-top: 2px solid var(--dark-blue); font-family: 'Subhead2'; font-size: 15px; font-weight: bold; z-index: 2;">
+                        </tfoot>
                     </table>
                 </div>
             </div>
@@ -1969,7 +2072,7 @@
                 if (fileStatus) fileStatus.innerText = "";
 
                 if (fileInput) {
-                    fileInput.onchange = function() {
+                    fileInput.onchange = function () {
                         if (fileInput.files && fileInput.files[0]) {
                             fileStatus.innerText = `✓ ${fileInput.files[0].name}`;
                         } else {
@@ -2127,7 +2230,7 @@
                 let html = '';
                 if (storeContact) {
                     if (refStoreBadge) refStoreBadge.innerText = storeContact.doName ? `DO: ${storeContact.doName}` : `Store #${store}`;
-                    
+
                     const csrStart = parseCleanRate(storeContact.csrStart);
                     const csrMid = parseCleanRate(storeContact.csrMid);
                     const csrTop = parseCleanRate(storeContact.csrTop);
@@ -3121,7 +3224,7 @@
                     const item = emp.primary;
                     const card = document.createElement('div');
                     card.className = 'candidate-card';
-                    
+
                     const isCardSelected = emp.allStints.some(s => s.id === currentSelectedId);
                     if (isCardSelected) card.classList.add('selected');
 
@@ -3129,8 +3232,8 @@
                     card.classList.add(isTerm ? 'status-red' : 'status-green');
 
                     const totalStints = getEmploymentPeriods(item.name, item.email, item.id).length;
-                    const rehireBadge = totalStints > 1 
-                        ? `<span class="badge-review" style="background: #e8f0fe; color: #1a73e8; border: 1px solid #cce0ff; font-weight: bold; margin-left: 4px;">🔁 Re-Hire (${totalStints})</span>` 
+                    const rehireBadge = totalStints > 1
+                        ? `<span class="badge-review" style="background: #e8f0fe; color: #1a73e8; border: 1px solid #cce0ff; font-weight: bold; margin-left: 4px;">🔁 Re-Hire (${totalStints})</span>`
                         : '';
 
                     card.innerHTML = `
@@ -3966,7 +4069,7 @@
                             else if (currentView === 'paycards') cached.paycards = paycards;
                             localStorage.setItem(`cached_workspace_data_${u}`, JSON.stringify(cached));
                         }
-                    } catch (e) {}
+                    } catch (e) { }
                 }
 
                 currentSelectedId = assignedId;
@@ -5423,7 +5526,7 @@
                 const endDisplay = p.endDate ? formatDisplayDate(p.endDate) : '<span style="color: #137333; font-weight: bold;">Active</span>';
                 const duration = calculateTenureDuration(p.beginDate, p.endDate);
                 const reason = [p.causeOfAction, p.reasonOfAction].filter(Boolean).join(' - ') || (p.notes ? p.notes.substring(0, 35) : '—');
-                
+
                 let rehireBadgeStint = '';
                 if (p.rehireEligible === 'No') {
                     rehireBadgeStint = '<span style="color: #c5221f; font-weight: bold; font-size: 13px;">🚫 Ineligible</span>';
@@ -5527,7 +5630,7 @@
             const card = document.createElement('div');
             card.className = 'prior-stint-card';
             card.style.cssText = 'background: white; border: 1px solid #e0d0ba; border-radius: 8px; padding: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); position: relative;';
-            
+
             card.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #f0e6d6; padding-bottom: 4px;">
                     <strong style="color: #1f4e79; font-size: 14px; font-family: 'Subhead1', sans-serif;">Prior Stint #${stintIdx}</strong>
@@ -5608,7 +5711,7 @@
                     <textarea class="stint-notes" placeholder="Enter specific details for this past stint..." style="height: 55px; font-size: 14px; padding: 6px 8px; font-family: 'Condensed', sans-serif;"></textarea>
                 </div>
             `;
-            
+
             const notesEl = card.querySelector('.stint-notes');
             if (notesEl && stint.notes) notesEl.value = stint.notes;
 
@@ -6214,13 +6317,13 @@
                     const matchesDo = String(item.doName || '').toLowerCase().includes(searchQuery);
                     const matchesGm = String(item.manager || '').toLowerCase().includes(searchQuery);
                     const matchesPhone = String(item.storePhone || '').includes(searchQuery) ||
-                                         String(item.gmPhone || '').includes(searchQuery) ||
-                                         String(item.doCell || '').includes(searchQuery) ||
-                                         (searchDigits.length >= 4 && (
-                                             String(item.storePhone || '').replace(/\D/g, '').includes(searchDigits) ||
-                                             String(item.gmPhone || '').replace(/\D/g, '').includes(searchDigits) ||
-                                             String(item.doCell || '').replace(/\D/g, '').includes(searchDigits)
-                                         ));
+                        String(item.gmPhone || '').includes(searchQuery) ||
+                        String(item.doCell || '').includes(searchQuery) ||
+                        (searchDigits.length >= 4 && (
+                            String(item.storePhone || '').replace(/\D/g, '').includes(searchDigits) ||
+                            String(item.gmPhone || '').replace(/\D/g, '').includes(searchDigits) ||
+                            String(item.doCell || '').replace(/\D/g, '').includes(searchDigits)
+                        ));
                     const matchesEmail = String(item.storeEmail || '').toLowerCase().includes(searchQuery) || String(item.doEmail || '').toLowerCase().includes(searchQuery);
                     const matchesAddress = String(item.address || '').toLowerCase().includes(searchQuery);
                     const matchesIp = String(item.ipAddress || '').toLowerCase().includes(searchQuery);
@@ -6312,7 +6415,7 @@
                     const matchesName = d.doName.toLowerCase().includes(searchQuery);
                     const matchesEmail = d.doEmail.toLowerCase().includes(searchQuery);
                     const matchesCell = String(d.doCell || '').includes(searchQuery) ||
-                                        (searchDigits.length >= 4 && String(d.doCell || '').replace(/\D/g, '').includes(searchDigits));
+                        (searchDigits.length >= 4 && String(d.doCell || '').replace(/\D/g, '').includes(searchDigits));
                     const matchesStore = d.stores.some(s => String(s).toLowerCase().includes(searchQuery));
                     return matchesName || matchesEmail || matchesCell || matchesStore;
                 }
@@ -6985,7 +7088,7 @@
                             cached.contacts = contacts;
                             localStorage.setItem(`cached_workspace_data_${u}`, JSON.stringify(cached));
                         }
-                    } catch(e) {}
+                    } catch (e) { }
                 }
 
                 showLoader(false);
@@ -7000,7 +7103,7 @@
         }
 
         // Global auto-format for any phone/cell input field on blur
-        document.addEventListener('focusout', function(e) {
+        document.addEventListener('focusout', function (e) {
             if (e.target && (e.target.type === 'tel' || (e.target.id && (e.target.id.toLowerCase().includes('phone') || e.target.id.toLowerCase().includes('cell'))))) {
                 if (e.target.value) {
                     e.target.value = formatPhoneNumber(e.target.value);
@@ -7032,8 +7135,7 @@
                         style="font-family: 'ExtraBold'; font-size: 18px; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 12px;">
                         ➕ Schedule New NTO Class Session</div>
 
-                    <div
-                        style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                         <div>
                             <label
                                 style="font-family: 'Subhead2'; font-size: 16px; font-weight: bold; color: var(--crust-burnt);">Class
@@ -7045,7 +7147,8 @@
                             <label
                                 style="font-family: 'Subhead2'; font-size: 16px; font-weight: bold; color: var(--crust-burnt);">Start
                                 Time:</label>
-                            <input type="text" id="newClassStart" list="time15MinList" value="" placeholder="e.g. 6:00 PM"
+                            <input type="text" id="newClassStart" list="time15MinList" value=""
+                                placeholder="e.g. 6:00 PM"
                                 style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
                         </div>
                         <div>
@@ -7057,8 +7160,7 @@
                         </div>
                     </div>
 
-                    <div
-                        style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 12px; align-items: flex-end;">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 12px; align-items: flex-end;">
                         <div>
                             <label
                                 style="font-family: 'Subhead2'; font-size: 16px; font-weight: bold; color: var(--crust-burnt);">Trainer
@@ -7116,124 +7218,189 @@
             <div class="brand-modal-brand-stripe"></div>
             <div class="brand-modal-content" style="padding: 24px;">
                 <!-- Modal Title & Close Button -->
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--crust-med); padding-bottom: 10px; margin-bottom: 16px;">
-                    <h3 id="editContactModalTitle" style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 22px; text-transform: uppercase;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--crust-med); padding-bottom: 10px; margin-bottom: 16px;">
+                    <h3 id="editContactModalTitle"
+                        style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 22px; text-transform: uppercase;">
                         🏬 Edit Store Contact Info
                     </h3>
-                    <button type="button" onclick="closeEditContactModal()" style="background: var(--brand-grey); font-size: 15px; padding: 6px 14px; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Subhead2';">✕ Close</button>
+                    <button type="button" onclick="closeEditContactModal()"
+                        style="background: var(--brand-grey); font-size: 15px; padding: 6px 14px; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Subhead2';">✕
+                        Close</button>
                 </div>
 
                 <form id="editContactForm" onsubmit="event.preventDefault(); saveStoreContact();">
                     <input type="hidden" id="editContactStore">
-                    
+
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
                         <div>
-                            <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">Store #:</label>
-                            <input type="text" id="editContactStoreDisplay" disabled style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; background: var(--crust-light); font-weight: bold;">
+                            <label
+                                style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">Store
+                                #:</label>
+                            <input type="text" id="editContactStoreDisplay" disabled
+                                style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; background: var(--crust-light); font-weight: bold;">
                         </div>
                         <div>
-                            <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">District Owner (DO):</label>
-                            <input type="text" id="editContactDo" placeholder="e.g. Aaron" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                            <label
+                                style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">District
+                                Owner (DO):</label>
+                            <input type="text" id="editContactDo" placeholder="e.g. Aaron"
+                                style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
                         </div>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
                         <div>
-                            <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">General Manager (GM) Name:</label>
-                            <input type="text" id="editContactGm" placeholder="e.g. Michael Nezvensky" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                            <label
+                                style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">General
+                                Manager (GM) Name:</label>
+                            <input type="text" id="editContactGm" placeholder="e.g. Michael Nezvensky"
+                                style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
                         </div>
                         <div>
-                            <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">GM Phone Number:</label>
-                            <input type="text" id="editContactGmPhone" placeholder="e.g. (720) 492-3007" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
-                        </div>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
-                        <div>
-                            <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">Store Landline Phone:</label>
-                            <input type="text" id="editContactStorePhone" placeholder="e.g. (303) 703-9494" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
-                        </div>
-                        <div>
-                            <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">Store Email:</label>
-                            <input type="text" id="editContactStoreEmail" placeholder="e.g. 6200@team-wow.com" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                            <label
+                                style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">GM
+                                Phone Number:</label>
+                            <input type="text" id="editContactGmPhone" placeholder="e.g. (720) 492-3007"
+                                style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
                         </div>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
                         <div>
-                            <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">DO Email:</label>
-                            <input type="text" id="editContactDoEmail" placeholder="e.g. aaron@team-wow.com" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                            <label
+                                style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">Store
+                                Landline Phone:</label>
+                            <input type="text" id="editContactStorePhone" placeholder="e.g. (303) 703-9494"
+                                style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
                         </div>
                         <div>
-                            <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">DO Cell Phone:</label>
-                            <input type="text" id="editContactDoCell" placeholder="e.g. (303) 555-1234" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                            <label
+                                style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">Store
+                                Email:</label>
+                            <input type="text" id="editContactStoreEmail" placeholder="e.g. 6200@team-wow.com"
+                                style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                        <div>
+                            <label
+                                style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">DO
+                                Email:</label>
+                            <input type="text" id="editContactDoEmail" placeholder="e.g. aaron@team-wow.com"
+                                style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label
+                                style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">DO
+                                Cell Phone:</label>
+                            <input type="text" id="editContactDoCell" placeholder="e.g. (303) 555-1234"
+                                style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
                         </div>
                     </div>
 
                     <div style="margin-bottom: 14px;">
-                        <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">Store Physical Address:</label>
-                        <input type="text" id="editContactAddress" placeholder="e.g. 6709 W Coal Mine, Littleton 80123" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                        <label
+                            style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">Store
+                            Physical Address:</label>
+                        <input type="text" id="editContactAddress" placeholder="e.g. 6709 W Coal Mine, Littleton 80123"
+                            style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
                     </div>
 
                     <div style="margin-bottom: 16px;">
-                        <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">🌐 Network IP Address (Router / WAN / Equipment IP):</label>
-                        <input type="text" id="editContactIp" placeholder="e.g. 192.168.1.1 or Static WAN IP" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; font-family: monospace; font-weight: bold; color: #005c91;">
+                        <label
+                            style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">🌐
+                            Network IP Address (Router / WAN / Equipment IP):</label>
+                        <input type="text" id="editContactIp" placeholder="e.g. 192.168.1.1 or Static WAN IP"
+                            style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; font-family: monospace; font-weight: bold; color: #005c91;">
                     </div>
 
                     <!-- PAY RATES SECTION -->
-                    <div style="background: var(--crust-light); border: 1.5px solid var(--crust-dark); border-radius: 8px; padding: 14px; margin-bottom: 20px;">
-                        <div style="font-family: 'ExtraBold'; font-size: 16px; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                    <div
+                        style="background: var(--crust-light); border: 1.5px solid var(--crust-dark); border-radius: 8px; padding: 14px; margin-bottom: 20px;">
+                        <div
+                            style="font-family: 'ExtraBold'; font-size: 16px; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
                             <span>💰 Store Pay Rates</span>
                         </div>
 
                         <!-- CSR Sub-grid -->
                         <div style="margin-bottom: 14px;">
-                            <div style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt); margin-bottom: 6px;">🍕 Customer Service Rep (CSR) Rates:</div>
+                            <div
+                                style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt); margin-bottom: 6px;">
+                                🍕 Customer Service Rep (CSR) Rates:</div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
                                 <div>
-                                    <label style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Start (P/T No Exp):</label>
-                                    <input type="text" id="editContactCsrStart" placeholder="e.g. 9.00" style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                                    <label
+                                        style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Start
+                                        (P/T No Exp):</label>
+                                    <input type="text" id="editContactCsrStart" placeholder="e.g. 9.00"
+                                        style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
                                 </div>
                                 <div>
-                                    <label style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Mid (P/T Exp / F/T No Exp):</label>
-                                    <input type="text" id="editContactCsrMid" placeholder="e.g. 10.00" style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                                    <label style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Mid
+                                        (P/T Exp / F/T No Exp):</label>
+                                    <input type="text" id="editContactCsrMid" placeholder="e.g. 10.00"
+                                        style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
                                 </div>
                                 <div>
-                                    <label style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Top (F/T w/ Exp):</label>
-                                    <input type="text" id="editContactCsrTop" placeholder="e.g. 11.00" style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                                    <label style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Top
+                                        (F/T w/ Exp):</label>
+                                    <input type="text" id="editContactCsrTop" placeholder="e.g. 11.00"
+                                        style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
                                 </div>
                             </div>
                         </div>
 
                         <!-- Driver Sub-grid -->
                         <div>
-                            <div style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt); margin-bottom: 6px;">🚗 Delivery Expert (DE) Rates:</div>
+                            <div
+                                style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt); margin-bottom: 6px;">
+                                🚗 Delivery Expert (DE) Rates:</div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px;">
                                 <div>
-                                    <label style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Driver Base (In-Store):</label>
-                                    <input type="text" id="editContactDeBase" placeholder="e.g. 9.00" style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                                    <label
+                                        style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Driver
+                                        Base (In-Store):</label>
+                                    <input type="text" id="editContactDeBase" placeholder="e.g. 9.00"
+                                        style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
                                 </div>
                                 <div>
-                                    <label style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Driver OTR (On-The-Road):</label>
-                                    <input type="text" id="editContactDeOtr" placeholder="e.g. 4.35" style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                                    <label
+                                        style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Driver
+                                        OTR (On-The-Road):</label>
+                                    <input type="text" id="editContactDeOtr" placeholder="e.g. 4.35"
+                                        style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
                                 </div>
                             </div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                                 <div>
-                                    <label style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Closer In-Store (Optional):</label>
-                                    <input type="text" id="editContactDeCloserBase" placeholder="e.g. 10.50 (Blank = Base)" style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                                    <label
+                                        style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Closer
+                                        In-Store (Optional):</label>
+                                    <input type="text" id="editContactDeCloserBase"
+                                        placeholder="e.g. 10.50 (Blank = Base)"
+                                        style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
                                 </div>
                                 <div>
-                                    <label style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Closer OTR (Optional):</label>
-                                    <input type="text" id="editContactDeCloserOtr" placeholder="e.g. 8.00 (Blank = Std OTR)" style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                                    <label
+                                        style="font-size: 12px; color: #555; display: block; margin-bottom: 2px;">Closer
+                                        OTR (Optional):</label>
+                                    <input type="text" id="editContactDeCloserOtr"
+                                        placeholder="e.g. 8.00 (Blank = Std OTR)"
+                                        style="width: 100%; padding: 7px 8px; font-size: 15px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1.5px solid var(--crust-med); padding-top: 14px;">
-                        <button type="button" onclick="closeEditContactModal()" style="background: var(--crust-med); color: var(--crust-burnt); border: none; padding: 10px 18px; border-radius: 6px; font-family: 'Subhead2'; font-size: 16px; cursor: pointer;">Cancel</button>
-                        <button type="submit" style="background: var(--brand-blue); color: white; border: none; padding: 10px 22px; border-radius: 6px; font-family: 'Subhead1'; font-size: 16px; text-transform: uppercase; cursor: pointer;">💾 Save Contact Info</button>
+                    <div
+                        style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1.5px solid var(--crust-med); padding-top: 14px;">
+                        <button type="button" onclick="closeEditContactModal()"
+                            style="background: var(--crust-med); color: var(--crust-burnt); border: none; padding: 10px 18px; border-radius: 6px; font-family: 'Subhead2'; font-size: 16px; cursor: pointer;">Cancel</button>
+                        <button type="submit"
+                            style="background: var(--brand-blue); color: white; border: none; padding: 10px 22px; border-radius: 6px; font-family: 'Subhead1'; font-size: 16px; text-transform: uppercase; cursor: pointer;">💾
+                            Save Contact Info</button>
                     </div>
                 </form>
             </div>
