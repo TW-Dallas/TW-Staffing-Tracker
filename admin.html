@@ -6095,21 +6095,33 @@
             document.getElementById('rescheduleNtoModal').classList.remove('hidden');
 
             try {
-                let classes = window.ntoCalendarClassesCache;
-                if (!classes || classes.length === 0) {
-                    const res = await apiCall('POST', { action: 'getNtoClasses' });
-                    if (res && res.success && res.classes) {
-                        window.ntoCalendarClassesCache = res.classes;
-                        classes = res.classes;
-                    }
-                }
+                // Fetch fresh classes directly from D1 (with real-time roster counts)
+                const res = await apiCall('POST', { action: 'getNtoClasses' });
+                let classes = (res && res.success && res.classes) ? res.classes : (window.ntoCalendarClassesCache || []);
+                window.ntoCalendarClassesCache = classes;
 
                 if (!classes || classes.length === 0) {
                     select.innerHTML = '<option value="">No classes available to schedule</option>';
                     return;
                 }
 
-                const sorted = [...classes].sort((a, b) => {
+                // Filter out past classes! Only show today and future classes
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                const upcomingClasses = classes.filter(cls => {
+                    const dt = parseCandidateDate(cls.classDate);
+                    if (!dt) return false;
+                    dt.setHours(0, 0, 0, 0);
+                    return dt.getTime() >= today.getTime();
+                });
+
+                if (upcomingClasses.length === 0) {
+                    select.innerHTML = '<option value="">No upcoming classes found</option>';
+                    return;
+                }
+
+                const sorted = upcomingClasses.sort((a, b) => {
                     const dtA = parseCandidateDate(a.classDate);
                     const dtB = parseCandidateDate(b.classDate);
                     return (dtA ? dtA.getTime() : 0) - (dtB ? dtB.getTime() : 0);
@@ -6117,13 +6129,15 @@
 
                 select.innerHTML = '';
                 sorted.forEach(cls => {
-                    const spotsRemaining = Math.max(0, (cls.capacity || cls.spotsTotal || 15) - (cls.spotsTaken || 0));
+                    const totalSpots = parseInt(cls.capacity || cls.spotsTotal || 15, 10);
+                    const spotsTaken = parseInt(cls.spotsTaken !== undefined ? cls.spotsTaken : (cls.attendees ? cls.attendees.length : 0), 10) || 0;
+                    const spotsRemaining = Math.max(0, totalSpots - spotsTaken);
                     const opt = document.createElement('option');
                     opt.value = cls.classId || cls.id;
                     const startDisp = formatTimeDisplayFrontEnd(cls.startTime) || cls.startTime;
                     const endDisp = formatTimeDisplayFrontEnd(cls.endTime) || cls.endTime;
                     const isCurrent = (cls.classDate === currentNtoDate || formatDateForInput(cls.classDate) === formatDateForInput(currentNtoDate));
-                    opt.textContent = `${cls.classDate} (${startDisp} - ${endDisp}) — ${spotsRemaining} spots left${isCurrent ? ' [CURRENT]' : ''}`;
+                    opt.textContent = `${cls.classDate} (${startDisp} - ${endDisp}) — ${spotsRemaining} spots left (${spotsTaken}/${totalSpots} filled)${isCurrent ? ' [CURRENT CLASS]' : ''}`;
                     if (!isCurrent && !select.value) {
                         opt.selected = true;
                     }
@@ -7404,7 +7418,7 @@
                                 style="font-family: 'Subhead2'; font-size: 16px; font-weight: bold; color: var(--crust-burnt);">Class
                                 Date:</label>
                             <input type="date" id="newClassDate"
-                                style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
+                                style="width: 100%; padding: 8px 10px; font-size: 16px; font-family: 'Condensed', sans-serif; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
                         </div>
                         <div>
                             <label
@@ -7412,14 +7426,14 @@
                                 Time:</label>
                             <input type="text" id="newClassStart" list="time15MinList" value=""
                                 placeholder="e.g. 6:00 PM"
-                                style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
+                                style="width: 100%; padding: 8px 10px; font-size: 16px; font-family: 'Condensed', sans-serif; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
                         </div>
                         <div>
                             <label
                                 style="font-family: 'Subhead2'; font-size: 16px; font-weight: bold; color: var(--crust-burnt);">Est.
                                 End Time:</label>
                             <input type="text" id="newClassEnd" list="time15MinList" value="" placeholder="e.g. 7:15 PM"
-                                style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
+                                style="width: 100%; padding: 8px 10px; font-size: 16px; font-family: 'Condensed', sans-serif; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
                         </div>
                     </div>
 
@@ -7429,14 +7443,14 @@
                                 style="font-family: 'Subhead2'; font-size: 16px; font-weight: bold; color: var(--crust-burnt);">Trainer
                                 Name:</label>
                             <input type="text" id="newClassTrainer" value="Mike" placeholder="e.g. Mike"
-                                style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
+                                style="width: 100%; padding: 8px 10px; font-size: 16px; font-family: 'Condensed', sans-serif; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
                         </div>
                         <div>
                             <label
                                 style="font-family: 'Subhead2'; font-size: 16px; font-weight: bold; color: var(--crust-burnt);">Capacity
                                 Limit:</label>
                             <input type="number" id="newClassCapacity" value="15"
-                                style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
+                                style="width: 100%; padding: 8px 10px; font-size: 16px; font-family: 'Condensed', sans-serif; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
                         </div>
                         <button type="button" onclick="addNtoClassSession()"
                             style="background: var(--brand-blue); color: white; padding: 10px 20px; font-family: 'Subhead1'; font-size: 16px; border: none; border-radius: 6px; cursor: pointer; white-space: nowrap; height: 42px;">

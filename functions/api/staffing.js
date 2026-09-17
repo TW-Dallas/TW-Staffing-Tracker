@@ -655,8 +655,49 @@ export async function onRequestPost(context) {
             });
         }
 
+        // 3b. Fetch NTO Classes directly from D1 with live attendee rosters and accurate counts
+        if (action === "getNtoClasses") {
+            const [classesRes, regsRes] = await Promise.all([
+                db.prepare("SELECT * FROM training_classes WHERE program = 'NTO' AND (market = ? OR market = 'Virtual') AND is_active = 1 ORDER BY class_date ASC").bind(market).all(),
+                db.prepare("SELECT class_id, candidate_name FROM class_registrations").all()
+            ]);
+
+            const regMap = {};
+            (regsRes.results || []).forEach(r => {
+                if (!regMap[r.class_id]) regMap[r.class_id] = [];
+                regMap[r.class_id].push(r.candidate_name);
+            });
+
+            const classes = (classesRes.results || []).map(cl => {
+                const attendees = regMap[cl.id] || [];
+                return {
+                    id: cl.id,
+                    classId: cl.id,
+                    market: cl.market,
+                    name: cl.name,
+                    classDate: cl.class_date,
+                    startTime: cl.start_time,
+                    endTime: cl.end_time,
+                    trainer: cl.trainer,
+                    trainerName: cl.trainer,
+                    location: cl.location,
+                    meetLink: cl.meet_link,
+                    spotsTotal: cl.spots_total,
+                    capacity: cl.spots_total,
+                    spotsTaken: attendees.length > 0 ? attendees.length : cl.spots_taken,
+                    attendees: attendees
+                };
+            });
+
+            return new Response(JSON.stringify({
+                success: true,
+                market,
+                classes: classes
+            }), { status: 200, headers: corsHeaders() });
+        }
+
         // 4. Email & NTO Automation Actions: Proxy to Google Apps Script Gmail microservice
-        if (action === "sendEmail" || action === "sendNtoMeetLinks" || action === "sendWelcomeLetter" || action === "concludeNtoClass" || action === "getNtoClasses") {
+        if (action === "sendEmail" || action === "sendNtoMeetLinks" || action === "sendWelcomeLetter" || action === "concludeNtoClass") {
             try {
                 const gasRes = await fetch(APPS_SCRIPT_URL, {
                     method: "POST",
