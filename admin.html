@@ -2529,11 +2529,29 @@
                 adminContacts = data.adminContacts || [];
                 paycards = processPayCards(data);
 
+                // Scratchpad Safeguard: Never let a blank server response clobber existing local notes
+                const localScratchText = localStorage.getItem(`scratchpad_text_${u}`) || '';
                 if (data.scratchpadText !== undefined && data.scratchpadText !== null) {
-                    localStorage.setItem(`scratchpad_text_${u}`, data.scratchpadText);
+                    if (data.scratchpadText.trim() !== '') {
+                        if (localScratchText.trim() !== '' && localScratchText !== data.scratchpadText) {
+                            try { localStorage.setItem(`scratchpad_backup_${u}`, localScratchText); } catch(e) {}
+                        }
+                        localStorage.setItem(`scratchpad_text_${u}`, data.scratchpadText);
+                    } else if (localScratchText.trim() !== '') {
+                        // Server is empty but local has notes: retain local notes and push back to server
+                        syncNotesToBackend(u, localScratchText, 'text');
+                    }
                 }
+
+                const localChecklistRaw = localStorage.getItem(`scratchpad_checklist_${u}`);
                 if (data.scratchpadChecklist !== undefined && data.scratchpadChecklist !== null) {
-                    localStorage.setItem(`scratchpad_checklist_${u}`, data.scratchpadChecklist);
+                    const serverListStr = typeof data.scratchpadChecklist === 'string' ? data.scratchpadChecklist : JSON.stringify(data.scratchpadChecklist);
+                    if (serverListStr && serverListStr !== '[]' && serverListStr !== '""') {
+                        localStorage.setItem(`scratchpad_checklist_${u}`, serverListStr);
+                    } else if (localChecklistRaw && localChecklistRaw !== '[]' && localChecklistRaw !== '""') {
+                        // Server has empty list but local has items: retain and sync back
+                        syncNotesToBackend(u, localChecklistRaw, 'list');
+                    }
                 }
 
                 renderList();
@@ -4667,6 +4685,7 @@
             const username = localStorage.getItem('onb_user');
             const textVal = document.getElementById('scratchpad').value;
             localStorage.setItem(`scratchpad_text_${username}`, textVal);
+            try { localStorage.setItem(`scratchpad_backup_${username}`, textVal); } catch(e) {}
             clearTimeout(scratchpadTimeout);
             scratchpadTimeout = setTimeout(() => syncNotesToBackend(username, textVal, 'text'), 1500);
         }

@@ -659,13 +659,35 @@ export async function onRequestPost(context) {
 
         // 3. Save Scratchpad & Checklist
         if (action === "saveScratchpad") {
-            const scratchText = payload.scratchpadText || "";
-            const checklistJson = JSON.stringify(payload.scratchpadChecklist || []);
-            await db.prepare(`INSERT OR REPLACE INTO scratchpad (market, scratchpad_text, checklist_json, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)`).bind(
-                market,
-                scratchText,
-                checklistJson
-            ).run();
+            const mode = payload.scratchpadMode || (payload.scratchpadText !== undefined ? "text" : "list");
+            const content = payload.scratchpadContent !== undefined ? payload.scratchpadContent : (mode === "text" ? payload.scratchpadText : payload.scratchpadChecklist);
+
+            if (mode === "text") {
+                const textVal = (typeof content === "string") ? content : (payload.scratchpadText || "");
+                await db.prepare(`
+                    INSERT INTO scratchpad (market, scratchpad_text, checklist_json, updated_at)
+                    VALUES (?, ?, '[]', CURRENT_TIMESTAMP)
+                    ON CONFLICT(market) DO UPDATE SET
+                        scratchpad_text = excluded.scratchpad_text,
+                        updated_at = CURRENT_TIMESTAMP
+                `).bind(market, textVal).run();
+            } else {
+                let checklistJson = "[]";
+                if (typeof content === "string") {
+                    checklistJson = content;
+                } else if (Array.isArray(content)) {
+                    checklistJson = JSON.stringify(content);
+                } else if (payload.scratchpadChecklist) {
+                    checklistJson = typeof payload.scratchpadChecklist === "string" ? payload.scratchpadChecklist : JSON.stringify(payload.scratchpadChecklist);
+                }
+                await db.prepare(`
+                    INSERT INTO scratchpad (market, scratchpad_text, checklist_json, updated_at)
+                    VALUES (?, '', ?, CURRENT_TIMESTAMP)
+                    ON CONFLICT(market) DO UPDATE SET
+                        checklist_json = excluded.checklist_json,
+                        updated_at = CURRENT_TIMESTAMP
+                `).bind(market, checklistJson).run();
+            }
             return new Response(JSON.stringify({ success: true }), { status: 200, headers: corsHeaders() });
         }
 
