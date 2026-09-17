@@ -311,8 +311,220 @@ export async function onRequestPost(context) {
             return new Response(JSON.stringify({ success: true }), { status: 200, headers: corsHeaders() });
         }
 
-        // 4. Update Single Candidate
+        // 4. Handle ADD Operations (Interviews, Staffing, Onboarding)
+        if (action === "add") {
+            const target = payload.target || "onboarding";
+
+            if (target === "interviews") {
+                const newId = payload.id || `INT-ID-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+                await db.prepare(`
+                    INSERT INTO interviews (
+                        id, market, store_num, do_name, name, position, phone_number, email,
+                        interview_date, interview_day, interview_time, status, gm_date, gm_time,
+                        status_updates, availability, notes, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                `).bind(
+                    newId,
+                    market,
+                    payload.store || payload.store_num || '',
+                    payload.doName || '',
+                    payload.name || '',
+                    payload.position || '',
+                    payload.phoneNumber || '',
+                    payload.email || '',
+                    payload.date || '',
+                    payload.day || '',
+                    payload.time || '',
+                    payload.status || 'Scheduled',
+                    payload.gmDate || '',
+                    payload.gmTime || '',
+                    payload.statusUpdates || '',
+                    payload.availability || '',
+                    payload.notes || ''
+                ).run();
+
+                return new Response(JSON.stringify({ success: true, id: newId }), { status: 200, headers: corsHeaders() });
+            }
+
+            if (target === "staffing") {
+                const newId = payload.id || `STF-ID-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+                await db.prepare(`
+                    INSERT INTO staffing_records (
+                        id, market, fiscal_year, period, store_num, do_name, gm_name, name, position,
+                        hire_date, term_date, rehire_eligible, cause_of_action, reason_of_action, notes,
+                        received_date, source_sheet, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                `).bind(
+                    newId,
+                    market,
+                    2026,
+                    payload.period || '',
+                    payload.store || payload.store_num || '',
+                    payload.doName || '',
+                    payload.gmName || '',
+                    payload.name || '',
+                    payload.position || '',
+                    payload.hireDate || '',
+                    payload.termDate || '',
+                    payload.rehireEligible || 'Yes',
+                    payload.causeOfAction || '',
+                    payload.reasonOfAction || '',
+                    payload.notes || '',
+                    payload.receivedDate || '',
+                    'Hiring Data (2026)'
+                ).run();
+
+                return new Response(JSON.stringify({ success: true, id: newId }), { status: 200, headers: corsHeaders() });
+            }
+
+            // Default target: Onboarding candidate
+            const cand = payload.candidate || payload.record || payload;
+            const newId = cand.id || `ID-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+            const boolToInt = v => (v === true || v === 1 || v === '1' || v === 'true' ? 1 : 0);
+
+            await db.prepare(`
+                INSERT INTO onboarding_candidates (
+                    id, market, name, position, store_num, do_name, nto_date, nto_attendance, notes,
+                    shirt_size, hat_style, pay_card, phone_number, email, submission_received, onboarding_sent,
+                    bgc_complete, allpay_completed, allpay_error, nto_signup_link_sent, nto_scheduled,
+                    hired, incorrect_email, ineligible, inactive, missing_docs, pulse_form_complete,
+                    missed_nto, card_received, registered, dd_received, dd_entered, notice_sent_date,
+                    withdrawn, last_updated, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            `).bind(
+                newId,
+                market,
+                cand.name || '',
+                cand.position || '',
+                cand.store || cand.store_num || '',
+                cand.doName || '',
+                cand.ntoDate || '',
+                cand.ntoAttendance || '',
+                cand.notes || '',
+                cand.shirtSize || '',
+                cand.hatStyle || '',
+                cand.payCard || '',
+                cand.phoneNumber || '',
+                cand.email || '',
+                boolToInt(cand.submissionReceived),
+                boolToInt(cand.onboardingSent),
+                boolToInt(cand.bgcComplete),
+                boolToInt(cand.allPayCompleted),
+                cand.allPayError || cand.allPayErrorText || '',
+                boolToInt(cand.ntoSignupLinkSent),
+                boolToInt(cand.ntoScheduled),
+                boolToInt(cand.hired),
+                boolToInt(cand.incorrectEmail),
+                boolToInt(cand.ineligible),
+                boolToInt(cand.inactive),
+                cand.missingDocs || cand.missingDocsText || '',
+                boolToInt(cand.pulseFormComplete),
+                boolToInt(cand.missedNto),
+                boolToInt(cand.cardReceived),
+                boolToInt(cand.registered),
+                boolToInt(cand.ddReceived),
+                boolToInt(cand.ddEntered),
+                cand.noticeSentDate || '',
+                boolToInt(cand.withdrawn),
+                cand.lastUpdated || ''
+            ).run();
+
+            return new Response(JSON.stringify({ success: true, id: newId }), { status: 200, headers: corsHeaders() });
+        }
+
+        // 5. Handle UPDATE Operations (Interviews, Staffing, Onboarding)
         if (action === "updateCandidate" || action === "update") {
+            const target = payload.target || "onboarding";
+
+            if (target === "interviews") {
+                if (!payload.id) {
+                    return new Response(JSON.stringify({ error: "Missing interview ID" }), { status: 400, headers: corsHeaders() });
+                }
+
+                await db.prepare(`
+                    UPDATE interviews SET
+                        store_num = COALESCE(?, store_num),
+                        do_name = COALESCE(?, do_name),
+                        name = COALESCE(?, name),
+                        position = COALESCE(?, position),
+                        phone_number = COALESCE(?, phone_number),
+                        email = COALESCE(?, email),
+                        interview_date = COALESCE(?, interview_date),
+                        interview_day = COALESCE(?, interview_day),
+                        interview_time = COALESCE(?, interview_time),
+                        status = COALESCE(?, status),
+                        gm_date = COALESCE(?, gm_date),
+                        gm_time = COALESCE(?, gm_time),
+                        status_updates = COALESCE(?, status_updates),
+                        availability = COALESCE(?, availability),
+                        notes = COALESCE(?, notes),
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                `).bind(
+                    payload.store !== undefined ? payload.store : (payload.store_num !== undefined ? payload.store_num : null),
+                    payload.doName !== undefined ? payload.doName : null,
+                    payload.name !== undefined ? payload.name : null,
+                    payload.position !== undefined ? payload.position : null,
+                    payload.phoneNumber !== undefined ? payload.phoneNumber : null,
+                    payload.email !== undefined ? payload.email : null,
+                    payload.date !== undefined ? payload.date : null,
+                    payload.day !== undefined ? payload.day : null,
+                    payload.time !== undefined ? payload.time : null,
+                    payload.status !== undefined ? payload.status : null,
+                    payload.gmDate !== undefined ? payload.gmDate : null,
+                    payload.gmTime !== undefined ? payload.gmTime : null,
+                    payload.statusUpdates !== undefined ? payload.statusUpdates : null,
+                    payload.availability !== undefined ? payload.availability : null,
+                    payload.notes !== undefined ? payload.notes : null,
+                    payload.id
+                ).run();
+
+                return new Response(JSON.stringify({ success: true, id: payload.id }), { status: 200, headers: corsHeaders() });
+            }
+
+            if (target === "staffing") {
+                if (!payload.id) {
+                    return new Response(JSON.stringify({ error: "Missing staffing record ID" }), { status: 400, headers: corsHeaders() });
+                }
+
+                await db.prepare(`
+                    UPDATE staffing_records SET
+                        store_num = COALESCE(?, store_num),
+                        do_name = COALESCE(?, do_name),
+                        gm_name = COALESCE(?, gm_name),
+                        name = COALESCE(?, name),
+                        position = COALESCE(?, position),
+                        period = COALESCE(?, period),
+                        hire_date = COALESCE(?, hire_date),
+                        term_date = COALESCE(?, term_date),
+                        rehire_eligible = COALESCE(?, rehire_eligible),
+                        cause_of_action = COALESCE(?, cause_of_action),
+                        reason_of_action = COALESCE(?, reason_of_action),
+                        notes = COALESCE(?, notes),
+                        received_date = COALESCE(?, received_date),
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                `).bind(
+                    payload.store !== undefined ? payload.store : (payload.store_num !== undefined ? payload.store_num : null),
+                    payload.doName !== undefined ? payload.doName : null,
+                    payload.gmName !== undefined ? payload.gmName : null,
+                    payload.name !== undefined ? payload.name : null,
+                    payload.position !== undefined ? payload.position : null,
+                    payload.period !== undefined ? payload.period : null,
+                    payload.hireDate !== undefined ? payload.hireDate : null,
+                    payload.termDate !== undefined ? payload.termDate : null,
+                    payload.rehireEligible !== undefined ? payload.rehireEligible : null,
+                    payload.causeOfAction !== undefined ? payload.causeOfAction : null,
+                    payload.reasonOfAction !== undefined ? payload.reasonOfAction : null,
+                    payload.notes !== undefined ? payload.notes : null,
+                    payload.receivedDate !== undefined ? payload.receivedDate : null,
+                    payload.id
+                ).run();
+
+                return new Response(JSON.stringify({ success: true, id: payload.id }), { status: 200, headers: corsHeaders() });
+            }
+
+            // Default target: Onboarding candidate
             const cand = payload.candidate || payload.record || payload;
             if (!cand || !cand.id) {
                 return new Response(JSON.stringify({ error: "Missing candidate ID" }), { status: 400, headers: corsHeaders() });

@@ -1518,7 +1518,7 @@
                     throw new Error("Server returned an invalid response page. Please try again.");
                 }
                 if (data.error) {
-                    if (data.error.includes("Invalid username") || data.error.includes("Unauthorized")) {
+                    if (fullPayload.action === 'login' && (data.error.includes("Invalid username") || data.error.includes("Unauthorized"))) {
                         localStorage.removeItem('onb_user');
                         localStorage.removeItem('onb_pass');
                     }
@@ -1569,7 +1569,7 @@
             }
 
             if (data.error) {
-                if (data.error.includes("Invalid username") || data.error.includes("Unauthorized")) {
+                if (fullPayload.action === 'login' && (data.error.includes("Invalid username") || data.error.includes("Unauthorized"))) {
                     localStorage.removeItem('onb_user');
                     localStorage.removeItem('onb_pass');
                 }
