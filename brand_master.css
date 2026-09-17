@@ -62,11 +62,11 @@
     --dark-red: #910000;            /* Deep Red: Hover States, Urgency Alerts, Low-Spot Indicators */
     --red-soft-bg: #fff1f1;         /* Warm Red Tint: Alert Cards, Missed Attendance Badges */
 
-    /* --- Authentic Crust Palette (Canvas, Cards & Content) --- */
+/* --- Authentic Crust Palette (Canvas, Cards & Content) --- */
     --crust-base: #fefaf6;          /* Main Page Canvas Background */
     --crust-light: #faf2e9;         /* Card Background: Session Cards, Menu Tiles, Dashboard Containers */
-    --crust-med: #f0decc;           /* Warm Crust Borders, Card Dividers, Separators */
-    --crust-dark: #c0a588;          /* Input Field Outlines, Outline Pill Borders, Subtle Shadows */
+    --crust-med: #f0decc;           /* Accent: Warm Crust Borders, Card Dividers, Separator Hairlines */
+    --crust-dark: #c0a588;          /* Accent: Input Field Outlines, Outline Pill Borders ("RECENT ITEMS") */
     --crust-deep: #603913;          /* Category Labels ("BUILD YOUR PIZZA", "BREADS"), Subhead Text */
     --crust-burnt: #472b10;         /* Primary High-Contrast Text, Crust Button Fill ("MENU" pill) */
 
@@ -94,9 +94,51 @@
 body {
     background-color: var(--crust-base);
     color: var(--crust-burnt);
-    font-family: 'Condensed', sans-serif;
+    font-family: 'Compact', 'Condensed', sans-serif;
     margin: 0;
     padding: 0;
+}
+
+/* --------------------------------------------------------------------------
+   4. THE MASTER 6-TIER DOMINO'S TYPOGRAPHY SYSTEM
+   -------------------------------------------------------------------------- */
+/* Tier 1: Display & Page Heroes ("WHAT'S NEW", "START YOUR ORDER") */
+.font-hero, h1.brand-hero {
+    font-family: 'ExtraBlack', serif;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+/* Tier 2: Primary Headers (Major feature containers, dialog titles) */
+.font-primary-header, h2.brand-header {
+    font-family: 'ExtraBold', sans-serif;
+    font-weight: normal;
+    letter-spacing: 0.5px;
+}
+
+/* Tier 3: Action, Buttons & Banners ("ADD DEAL", "TRACK ORDER", "MENU") */
+.font-action, .btn-pill-red, .btn-pill-crust, .btn-pill-outline, .btn-pill-blue {
+    font-family: 'Subhead1', sans-serif;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+/* Tier 4: Labels & Badges (Card tags, status badges, secondary labels) */
+.font-badge, .badge-spots-blue, .badge-spots-low, .badge-date-blue {
+    font-family: 'Subhead2', sans-serif;
+    letter-spacing: 0.5px;
+}
+
+/* Tier 5: Body & Reading (Long-form descriptions, policies, articles) */
+.font-reading, p.brand-reading {
+    font-family: 'Compact', sans-serif;
+    line-height: 1.55;
+}
+
+/* Tier 6: Data Tables, Form Numbers & Compact Values */
+.font-data, table.brand-data, input.input-dominos {
+    font-family: 'Condensed', sans-serif;
+    letter-spacing: 0.3px;
 }
 
 /* --------------------------------------------------------------------------
