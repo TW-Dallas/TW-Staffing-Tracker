@@ -479,6 +479,129 @@ export async function onRequestPost(context) {
             }), { status: 200, headers: corsHeaders() });
         }
 
+        // 1b. Reschedule / Move NTO Candidate to a Different Class
+        if (action === "rescheduleNtoCandidate") {
+            const candidateId = payload.candidateId || "";
+            const candidateName = (payload.name || payload.candidateName || "").trim();
+            const candidateEmail = (payload.email || "").trim();
+            const targetClassId = payload.targetClassId || payload.newClassId || "";
+            const targetClassDate = payload.targetClassDate || payload.classDate || "";
+            const sendEmailNotification = payload.sendEmail !== false;
+            const regMarket = payload.market || market || "Dallas";
+
+            if (!targetClassId && !targetClassDate) {
+                return new Response(JSON.stringify({ success: false, error: "Missing target class ID or date." }), { status: 400, headers: corsHeaders() });
+            }
+
+            // 1. Fetch target class from D1
+            let targetClass = null;
+            if (targetClassId) {
+                targetClass = await db.prepare("SELECT * FROM training_classes WHERE id = ?").bind(targetClassId).first();
+            }
+            if (!targetClass && targetClassDate) {
+                targetClass = await db.prepare("SELECT * FROM training_classes WHERE (class_date = ? OR REPLACE(class_date, ' ', '') = ?) AND (market = ? OR market = 'Virtual') AND is_active = 1 LIMIT 1")
+                    .bind(targetClassDate, targetClassDate.replace(/\s/g, ''), regMarket).first();
+            }
+
+            if (!targetClass) {
+                return new Response(JSON.stringify({ success: false, error: "Target orientation class session not found." }), { status: 404, headers: corsHeaders() });
+            }
+
+            // 2. Locate existing registration in class_registrations
+            let currentReg = null;
+            if (candidateId) {
+                currentReg = await db.prepare("SELECT * FROM class_registrations WHERE candidate_id = ? ORDER BY created_at DESC").bind(candidateId).first();
+            }
+            if (!currentReg && candidateEmail) {
+                currentReg = await db.prepare("SELECT * FROM class_registrations WHERE LOWER(email) = LOWER(?) ORDER BY created_at DESC").bind(candidateEmail).first();
+            }
+            if (!currentReg && candidateName) {
+                currentReg = await db.prepare("SELECT * FROM class_registrations WHERE LOWER(candidate_name) = LOWER(?) ORDER BY created_at DESC").bind(candidateName).first();
+            }
+
+            const oldClassId = currentReg ? currentReg.class_id : null;
+
+            // 3. Move registration or insert new if missing
+            if (currentReg) {
+                if (oldClassId && oldClassId !== targetClass.id) {
+                    await db.prepare("UPDATE training_classes SET spots_taken = MAX(0, spots_taken - 1), updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(oldClassId).run();
+                }
+                await db.prepare("UPDATE class_registrations SET class_id = ?, status = 'Confirmed', updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(targetClass.id, currentReg.id).run();
+            } else {
+                const regId = "REG-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
+                await db.prepare("INSERT INTO class_registrations (id, class_id, candidate_id, candidate_name, store_num, position, phone, email, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Confirmed')")
+                    .bind(regId, targetClass.id, candidateId, candidateName, payload.storeNum || "", payload.position || "CSR", payload.phone || "", candidateEmail).run();
+            }
+
+            // 4. Increment spots on new class if different
+            if (oldClassId !== targetClass.id) {
+                await db.prepare("UPDATE training_classes SET spots_taken = spots_taken + 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(targetClass.id).run();
+            }
+
+            // 5. Update onboarding_candidates record
+            const tz = regMarket.toLowerCase() === "denver" ? "America/Denver" : "America/Chicago";
+            const nowFormatted = getNowFormatted(tz);
+
+            let matchedCand = null;
+            if (candidateId) {
+                matchedCand = await db.prepare("SELECT * FROM onboarding_candidates WHERE id = ?").bind(candidateId).first();
+            }
+            if (!matchedCand && candidateEmail) {
+                matchedCand = await db.prepare("SELECT * FROM onboarding_candidates WHERE LOWER(email) = LOWER(?)").bind(candidateEmail).first();
+            }
+            if (!matchedCand && candidateName) {
+                matchedCand = await db.prepare("SELECT * FROM onboarding_candidates WHERE LOWER(name) = LOWER(?)").bind(candidateName).first();
+            }
+
+            if (matchedCand) {
+                await db.prepare(`
+                    UPDATE onboarding_candidates SET
+                        nto_date = ?,
+                        nto_scheduled = 1,
+                        last_updated = ?,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                `).bind(targetClass.class_date, nowFormatted, matchedCand.id).run();
+            }
+
+            // 6. Send updated Google Meet link & notification email
+            let emailSent = false;
+            const recipientEmail = candidateEmail || (matchedCand ? matchedCand.email : (currentReg ? currentReg.email : ""));
+            const recipientName = candidateName || (matchedCand ? matchedCand.name : (currentReg ? currentReg.candidate_name : ""));
+
+            if (sendEmailNotification && recipientEmail && recipientEmail.includes("@")) {
+                try {
+                    await fetch(APPS_SCRIPT_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify({
+                            username: "dallas_admin",
+                            password: "dallas_password_123",
+                            action: "sendNtoMeetLinks",
+                            classDate: targetClass.class_date,
+                            classTime: targetClass.start_time,
+                            meetLink: targetClass.meet_link || "https://meet.google.com/zwc-afuu-hgh",
+                            trainerName: targetClass.trainer || "Mike Jacobs",
+                            trainees: [{ name: recipientName, email: recipientEmail }]
+                        })
+                    });
+                    emailSent = true;
+                } catch (mailErr) {
+                    console.warn("Reschedule Meet link email failed:", mailErr);
+                }
+            }
+
+            return new Response(JSON.stringify({
+                success: true,
+                message: `Successfully moved ${recipientName} to class on ${targetClass.class_date}!`,
+                classDate: targetClass.class_date,
+                startTime: targetClass.start_time,
+                endTime: targetClass.end_time,
+                meetLink: targetClass.meet_link,
+                emailSent: emailSent
+            }), { status: 200, headers: corsHeaders() });
+        }
+
         // 2. Add NTO Class directly to D1 (with GAS backup)
         if (action === "addNtoClass") {
             const classDate = payload.classDate || "";

@@ -6020,6 +6020,9 @@
                     <button type="button" onclick="sendSingleNtoMeetLink('${escapeText(item.name || '')}', '${escapeText(item.email || '')}')" style="background: var(--brand-blue); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 15px; font-family: 'Subhead2', sans-serif; cursor: pointer; white-space: nowrap;" title="Send Google Meet link to this candidate only">
                         ✉️ Send Link
                     </button>
+                    <button type="button" onclick="openRescheduleNtoModal('${escapeText(candId)}', '${escapeText(item.name || '')}', '${escapeText(item.email || '')}', '${escapeText(ntoDateVal || '')}')" style="background: var(--dark-blue); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 15px; font-family: 'Subhead2', sans-serif; cursor: pointer; white-space: nowrap;" title="Change orientation class date for this trainee">
+                        📅 Change Date
+                    </button>
                 </div>
             `;
                 container.appendChild(row);
@@ -6073,6 +6076,124 @@
             } catch (err) {
                 showLoader(false);
                 showBrandAlert("Error sending link: " + err.message, "Delivery Error");
+            }
+        }
+
+        async function openRescheduleNtoModal(candId, name, email, currentNtoDate) {
+            document.getElementById('rescheduleCandidateId').value = candId || '';
+            document.getElementById('rescheduleCandidateName').value = name || '';
+            document.getElementById('rescheduleCandidateEmail').value = email || '';
+
+            document.getElementById('rescheduleModalName').textContent = name || 'Trainee';
+            document.getElementById('rescheduleModalCurrentDate').textContent = `Current Scheduled Date: ${currentNtoDate || 'None'}`;
+            document.getElementById('rescheduleModalEmail').textContent = `Email: ${email || 'No email on file'}`;
+            document.getElementById('rescheduleSendEmailCheck').checked = Boolean(email && email.includes('@'));
+
+            const select = document.getElementById('rescheduleTargetClassSelect');
+            select.innerHTML = '<option value="">Loading available sessions...</option>';
+
+            document.getElementById('rescheduleNtoModal').classList.remove('hidden');
+
+            try {
+                let classes = window.ntoCalendarClassesCache;
+                if (!classes || classes.length === 0) {
+                    const res = await apiCall('POST', { action: 'getNtoClasses' });
+                    if (res && res.success && res.classes) {
+                        window.ntoCalendarClassesCache = res.classes;
+                        classes = res.classes;
+                    }
+                }
+
+                if (!classes || classes.length === 0) {
+                    select.innerHTML = '<option value="">No classes available to schedule</option>';
+                    return;
+                }
+
+                const sorted = [...classes].sort((a, b) => {
+                    const dtA = parseCandidateDate(a.classDate);
+                    const dtB = parseCandidateDate(b.classDate);
+                    return (dtA ? dtA.getTime() : 0) - (dtB ? dtB.getTime() : 0);
+                });
+
+                select.innerHTML = '';
+                sorted.forEach(cls => {
+                    const spotsRemaining = Math.max(0, (cls.capacity || cls.spotsTotal || 15) - (cls.spotsTaken || 0));
+                    const opt = document.createElement('option');
+                    opt.value = cls.classId || cls.id;
+                    const startDisp = formatTimeDisplayFrontEnd(cls.startTime) || cls.startTime;
+                    const endDisp = formatTimeDisplayFrontEnd(cls.endTime) || cls.endTime;
+                    const isCurrent = (cls.classDate === currentNtoDate || formatDateForInput(cls.classDate) === formatDateForInput(currentNtoDate));
+                    opt.textContent = `${cls.classDate} (${startDisp} - ${endDisp}) — ${spotsRemaining} spots left${isCurrent ? ' [CURRENT]' : ''}`;
+                    if (!isCurrent && !select.value) {
+                        opt.selected = true;
+                    }
+                    select.appendChild(opt);
+                });
+            } catch (err) {
+                console.error("Error loading reschedule classes:", err);
+                select.innerHTML = '<option value="">Failed to load classes</option>';
+            }
+        }
+
+        function closeRescheduleNtoModal() {
+            document.getElementById('rescheduleNtoModal').classList.add('hidden');
+        }
+
+        async function submitRescheduleNtoCandidate() {
+            const candId = document.getElementById('rescheduleCandidateId').value;
+            const name = document.getElementById('rescheduleCandidateName').value;
+            const email = document.getElementById('rescheduleCandidateEmail').value;
+            const targetClassId = document.getElementById('rescheduleTargetClassSelect').value;
+            const sendEmail = document.getElementById('rescheduleSendEmailCheck').checked;
+
+            if (!targetClassId) {
+                showBrandAlert("Please select a target orientation class date.", "Selection Required");
+                return;
+            }
+
+            const btn = document.getElementById('btnConfirmReschedule');
+            btn.disabled = true;
+            btn.innerHTML = '<span>Processing Move...</span>';
+            showLoader(true);
+
+            try {
+                const res = await apiCall('POST', {
+                    action: 'rescheduleNtoCandidate',
+                    candidateId: candId,
+                    name: name,
+                    email: email,
+                    targetClassId: targetClassId,
+                    sendEmail: sendEmail
+                });
+
+                if (!res.success) {
+                    throw new Error(res.error || "Failed to reschedule trainee.");
+                }
+
+                // Update candidate locally in candidates array
+                const cand = candidates.find(c => c.id === candId || (c.email && c.email.toLowerCase() === email.toLowerCase()) || c.name === name);
+                if (cand) {
+                    cand.ntoDate = res.classDate;
+                    cand.ntoScheduled = true;
+                }
+
+                // Invalidate calendar cache to force fresh reload
+                window.ntoCalendarClassesCache = null;
+
+                closeRescheduleNtoModal();
+                showLoader(false);
+
+                showBrandAlert(`✅ ${name} has been rescheduled to ${res.classDate}!\n\n• Roster counts updated.\n• ${res.emailSent ? 'Google Meet invite & link emailed to candidate.' : 'Email notification was skipped.'}`, "Reschedule Complete");
+
+                // Refresh views
+                renderNtoClassView();
+                renderList();
+            } catch (err) {
+                showLoader(false);
+                showBrandAlert("Error rescheduling candidate: " + err.message, "Reschedule Error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Confirm & Move Class</span>';
             }
         }
 
@@ -7202,6 +7323,58 @@
         });
     </script>
     <datalist id="time15MinList"></datalist>
+    <!-- RESCHEDULE NTO CANDIDATE MODAL -->
+    <div id="rescheduleNtoModal" class="brand-modal-overlay hidden">
+        <div class="brand-modal-card" style="max-width: 560px; width: 95%;">
+            <div class="brand-modal-brand-stripe"></div>
+            <div class="brand-modal-content" style="padding: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--crust-med); padding-bottom: 10px; margin-bottom: 16px;">
+                    <h3 style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 22px; text-transform: uppercase;">
+                        📅 Reschedule NTO Class
+                    </h3>
+                    <button type="button" onclick="closeRescheduleNtoModal()" style="background: var(--brand-grey); font-size: 15px; padding: 6px 14px; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Subhead2';">
+                        ✕ Close
+                    </button>
+                </div>
+
+                <div style="background: var(--crust-light); border: 1.5px solid var(--crust-dark); padding: 14px 16px; border-radius: 8px; margin-bottom: 18px;">
+                    <div id="rescheduleModalName" style="font-family: 'ExtraBold'; font-size: 20px; color: var(--dark-blue);">Trainee Name</div>
+                    <div id="rescheduleModalCurrentDate" style="font-family: 'Subhead2'; font-size: 16px; color: var(--crust-deep); margin-top: 4px;">Current Class: Loading...</div>
+                    <div id="rescheduleModalEmail" style="font-family: 'Condensed'; font-size: 15px; color: var(--brand-grey); margin-top: 2px;">Email: -</div>
+                </div>
+
+                <input type="hidden" id="rescheduleCandidateId">
+                <input type="hidden" id="rescheduleCandidateName">
+                <input type="hidden" id="rescheduleCandidateEmail">
+
+                <div style="margin-bottom: 18px;">
+                    <label style="display: block; font-family: 'Subhead1'; font-size: 16px; font-weight: bold; color: var(--dark-blue); margin-bottom: 6px; text-transform: uppercase;">
+                        Select New Orientation Class Date:
+                    </label>
+                    <select id="rescheduleTargetClassSelect" style="width: 100%; padding: 11px 14px; font-size: 17px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1.5px solid var(--crust-dark); cursor: pointer; background: white;">
+                        <option value="">Loading available sessions...</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 22px; background: #eef7fd; border: 1px solid #bee5eb; border-radius: 8px; padding: 12px 14px;">
+                    <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-family: 'Subhead2'; font-size: 16px; color: var(--dark-blue); line-height: 1.4;">
+                        <input type="checkbox" id="rescheduleSendEmailCheck" checked style="width: 20px; height: 20px; accent-color: var(--brand-blue); margin-top: 2px; flex-shrink: 0; cursor: pointer;">
+                        <span><strong>Notify Trainee via Email:</strong> Send updated Google Meet link, date, and orientation instructions to their email immediately.</span>
+                    </label>
+                </div>
+
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button type="button" onclick="closeRescheduleNtoModal()" style="background: var(--brand-grey); color: white; border: none; padding: 10px 18px; border-radius: 6px; font-size: 16px; font-family: 'Subhead2'; cursor: pointer;">
+                        Cancel
+                    </button>
+                    <button type="button" id="btnConfirmReschedule" onclick="submitRescheduleNtoCandidate()" style="background: var(--brand-red); color: white; border: none; padding: 10px 22px; border-radius: 6px; font-size: 17px; font-family: 'Subhead1'; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        <span>Confirm & Move Class</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- NTO CLASS CALENDAR MANAGEMENT MODAL -->
     <div id="classCalendarModal" class="brand-modal-overlay hidden">
         <div class="brand-modal-card" style="max-width: 800px; width: 95%;">
