@@ -60,8 +60,8 @@
             --crust-dark: #c0a588;
             --crust-deep: #603913;
             --crust-burnt: #472b10;
-            --bg-color: var(--crust-light);
-            --card-bg: #FFFFFF;
+            --bg-color: var(--crust-base);
+            --card-bg: var(--crust-light);
             --border-radius: 12px;
         }
 
@@ -147,7 +147,7 @@
 
         /* TRAINER INFO STRIP */
         .info-strip {
-            background-color: white;
+            background-color: var(--crust-light);
             border-bottom: 1.5px solid var(--crust-med);
             padding: 10px 20px;
             display: flex;
@@ -193,7 +193,7 @@
 
         /* PERSONALIZED GREETING BANNER */
         .personal-banner {
-            background: linear-gradient(135deg, #ffffff 0%, var(--crust-light) 100%);
+            background-color: var(--crust-light);
             border: 2px solid var(--crust-med);
             border-left: 6px solid var(--brand-blue);
             border-radius: var(--border-radius);
@@ -522,7 +522,7 @@
         }
 
         .modal-card {
-            background-color: var(--crust-base);
+            background-color: var(--crust-light);
             border-radius: 12px;
             max-width: 660px;
             width: 100%;
@@ -716,7 +716,7 @@
             outline: none;
             border-color: var(--brand-blue);
             box-shadow: 0 0 0 3px rgba(0, 144, 226, 0.2);
-            background-color: var(--crust-base);
+            background-color: #ffffff;
         }
 
         .form-group input:read-only {
