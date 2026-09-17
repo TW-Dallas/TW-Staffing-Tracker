@@ -63,7 +63,6 @@
             --bg-color: var(--crust-light);
             --card-bg: #FFFFFF;
             --border-radius: 12px;
-            --brand-green: #28a745;
         }
 
         * {
@@ -327,21 +326,21 @@
         }
 
         .spots-available {
-            background-color: #e6f7ec;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background-color: #eef7fd;
+            color: var(--dark-blue);
+            border: 1px solid #c9e6f8;
         }
 
         .spots-low {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
+            background-color: #fff1f1;
+            color: var(--dark-red);
+            border: 1px solid #f8c8c8;
         }
 
         .spots-full {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background-color: #f5f5f5;
+            color: #777777;
+            border: 1px solid #dddddd;
         }
 
         .card-body {
@@ -966,7 +965,7 @@
     <div id="successModal" class="modal-overlay">
         <div class="modal-card">
             <div class="modal-header" style="background-color: var(--brand-blue);">
-                <h3>🎉 You're Registered!</h3>
+                <h3>Registration Confirmed!</h3>
                 <button type="button" class="modal-close-btn" onclick="closeSuccessModal()">&times;</button>
             </div>
             <div class="modal-body" style="text-align: center; padding: 28px 20px;">
@@ -988,8 +987,9 @@
 
                 <div id="successMeetLinkBox" style="margin-bottom: 20px; display: none;">
                     <span style="display: block; font-size: 13px; color: #666; margin-bottom: 6px;">Direct Google Meet Access Link:</span>
-                    <a id="successMeetLink" href="#" target="_blank" style="background-color: var(--dark-blue); color: white; padding: 10px 18px; border-radius: 6px; text-decoration: none; font-weight: bold; font-family: 'Subhead1', sans-serif; display: inline-block;">
-                        📹 Open Google Meet Room
+                    <a id="successMeetLink" href="#" target="_blank" style="background-color: var(--dark-blue); color: white; padding: 10px 18px; border-radius: 6px; text-decoration: none; font-weight: bold; font-family: 'Subhead1', sans-serif; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                        <svg style="width: 16px; height: 16px; fill: white;" viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                        <span>Open Google Meet Room</span>
                     </a>
                 </div>
 
