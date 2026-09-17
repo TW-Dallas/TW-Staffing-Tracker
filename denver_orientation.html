@@ -479,14 +479,14 @@
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
 
         .modal-card {
-            background: white;
+            background-color: var(--crust-base);
             border-radius: 12px;
-            max-width: 600px;
+            max-width: 660px;
             width: 100%;
-            max-height: 90vh;
+            max-height: 88vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 16px 40px rgba(71, 43, 16, 0.28);
             border: 2px solid var(--crust-med);
             animation: modalSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             overflow: hidden;
@@ -500,7 +500,7 @@
         .modal-header {
             background-color: var(--dark-blue);
             color: white;
-            padding: 16px 20px;
+            padding: 16px 22px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -509,7 +509,7 @@
         .modal-header h3 {
             margin: 0;
             font-family: 'Subhead1', sans-serif;
-            font-size: 19px;
+            font-size: 21px;
             letter-spacing: 0.5px;
             text-transform: uppercase;
         }
@@ -518,23 +518,24 @@
             background: none;
             border: none;
             color: white;
-            font-size: 24px;
+            font-size: 26px;
             cursor: pointer;
             line-height: 1;
             padding: 0;
         }
 
         .modal-body {
-            padding: 20px;
+            padding: 22px;
             overflow-y: auto;
             flex: 1;
-            line-height: 1.5;
-            font-size: 15px;
+            line-height: 1.55;
+            font-size: 16px;
+            color: var(--crust-burnt);
         }
 
         .modal-footer {
-            padding: 16px 20px;
-            background-color: #faf6f0;
+            padding: 18px 22px;
+            background-color: var(--crust-light);
             border-top: 1.5px solid var(--crust-med);
             display: flex;
             flex-direction: column;
@@ -543,23 +544,23 @@
 
         /* POLICY SECTIONS */
         .policy-block {
-            background-color: white;
+            background-color: var(--crust-light);
             border: 1.5px solid var(--crust-med);
-            border-left: 5px solid var(--brand-blue);
+            border-left: 6px solid var(--brand-blue);
             border-radius: 8px;
-            padding: 14px 16px;
-            margin-bottom: 14px;
+            padding: 16px 18px;
+            margin-bottom: 16px;
         }
 
         .policy-block.alert-block {
             border-left-color: var(--brand-red);
-            background-color: #fff9f9;
+            background-color: #fdf5f5;
         }
 
         .policy-block h4 {
-            margin: 0 0 6px 0;
+            margin: 0 0 8px 0;
             font-family: 'Subhead1', sans-serif;
-            font-size: 16px;
+            font-size: 18.5px;
             color: var(--dark-blue);
             display: flex;
             align-items: center;
@@ -568,34 +569,38 @@
         }
 
         .policy-block.alert-block h4 { color: var(--brand-red); }
-        .policy-block h4 svg { width: 18px; height: 18px; fill: currentColor; }
+        .policy-block h4 svg { width: 20px; height: 20px; fill: currentColor; }
 
         .policy-block ul {
             margin: 0;
             padding-left: 20px;
-            font-size: 14px;
+            font-size: 15.5px;
+            line-height: 1.6;
             color: var(--crust-burnt);
         }
 
-        .policy-block li { margin-bottom: 4px; }
+        .policy-block li { margin-bottom: 6px; }
 
         .agree-container {
             display: flex;
             align-items: flex-start;
             gap: 10px;
             padding: 6px 0;
-            font-size: 14.5px;
+            font-size: 16px;
+            line-height: 1.45;
             color: var(--crust-burnt);
             font-family: 'Subhead2', sans-serif;
             cursor: pointer;
+            transition: opacity 0.2s;
         }
 
         .agree-container input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             margin-top: 2px;
             accent-color: var(--dark-blue);
             cursor: pointer;
+            flex-shrink: 0;
         }
 
         .confirm-reqs-btn {
@@ -603,9 +608,9 @@
             color: white;
             border: none;
             border-radius: 6px;
-            padding: 12px;
+            padding: 14px 20px;
             font-family: 'Subhead1', sans-serif;
-            font-size: 16px;
+            font-size: 17px;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -629,20 +634,21 @@
 
         .form-group input {
             width: 100%;
-            padding: 10px 12px;
-            border: 1.5px solid var(--crust-med);
+            padding: 11px 14px;
+            border: 1.5px solid var(--crust-dark);
             border-radius: 6px;
-            font-size: 16px;
+            font-size: 16.5px;
             font-family: 'Condensed', sans-serif;
             color: var(--crust-burnt);
-            background-color: white;
-            transition: border-color 0.2s;
+            background-color: var(--crust-base);
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .form-group input:focus {
             outline: none;
             border-color: var(--brand-blue);
-            box-shadow: 0 0 0 3px rgba(0, 144, 226, 0.15);
+            box-shadow: 0 0 0 3px rgba(0, 144, 226, 0.2);
+            background-color: var(--crust-base);
         }
 
         .selected-class-summary {
@@ -764,7 +770,7 @@
                 <h3>Class Requirements & Attendance Policy</h3>
                 <button type="button" class="modal-close-btn" id="btnCloseReqs" onclick="closeRequirementsModal()" style="display: none;">&times;</button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" id="reqsModalBody" onscroll="handleRequirementsScroll()">
                 <div class="policy-block">
                     <h4>
                         <svg viewBox="0 0 24 24"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/></svg>
@@ -816,8 +822,11 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <label class="agree-container">
-                    <input type="checkbox" id="chkAgreeRequirements" onchange="toggleRequirementsButton()">
+                <div id="scrollPromptText" style="font-size: 14px; color: var(--dark-red); font-family: 'Subhead1', sans-serif; text-align: center; font-weight: bold; margin-bottom: 2px;">
+                    ⬇️ Please scroll through all policies to unlock agreement
+                </div>
+                <label class="agree-container" id="agreeLabel" style="opacity: 0.45; cursor: not-allowed;">
+                    <input type="checkbox" id="chkAgreeRequirements" disabled onchange="toggleRequirementsButton()">
                     <span>I have read, understand, and agree to the orientation requirements and attendance policies.</span>
                 </label>
                 <button type="button" class="confirm-reqs-btn" id="btnContinueSchedule" disabled onclick="acceptRequirements()">
@@ -969,6 +978,49 @@
             const closeBtn = document.getElementById('btnCloseReqs');
             if (closeBtn) closeBtn.style.display = allowClose ? 'block' : 'none';
             modal.classList.add('active');
+
+            const body = document.getElementById('reqsModalBody');
+            const chk = document.getElementById('chkAgreeRequirements');
+            const btn = document.getElementById('btnContinueSchedule');
+            const label = document.getElementById('agreeLabel');
+            const prompt = document.getElementById('scrollPromptText');
+
+            if (body) {
+                body.scrollTop = 0;
+                if (!sessionStorage.getItem('nto_reqs_accepted')) {
+                    if (chk) { chk.checked = false; chk.disabled = true; }
+                    if (btn) btn.disabled = true;
+                    if (label) { label.style.opacity = '0.45'; label.style.cursor = 'not-allowed'; }
+                    if (prompt) prompt.style.display = 'block';
+
+                    setTimeout(handleRequirementsScroll, 200);
+                } else {
+                    if (chk) { chk.checked = true; chk.disabled = false; }
+                    if (btn) btn.disabled = false;
+                    if (label) { label.style.opacity = '1'; label.style.cursor = 'pointer'; }
+                    if (prompt) prompt.style.display = 'none';
+                }
+            }
+        }
+
+        function handleRequirementsScroll() {
+            const body = document.getElementById('reqsModalBody');
+            const chk = document.getElementById('chkAgreeRequirements');
+            const label = document.getElementById('agreeLabel');
+            const prompt = document.getElementById('scrollPromptText');
+            if (!body || !chk) return;
+
+            const atBottom = (body.scrollHeight - body.scrollTop <= body.clientHeight + 35);
+            if (atBottom) {
+                chk.disabled = false;
+                if (label) {
+                    label.style.opacity = '1';
+                    label.style.cursor = 'pointer';
+                }
+                if (prompt) {
+                    prompt.style.display = 'none';
+                }
+            }
         }
 
         function closeRequirementsModal() {
