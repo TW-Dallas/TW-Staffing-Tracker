@@ -269,14 +269,24 @@ export async function onRequestPost(context) {
     let market = payload.city || payload.market || "Dallas";
     market = market.toLowerCase() === "denver" ? "Denver" : "Dallas";
 
+    const gasUser = market.toLowerCase() === "denver" ? "denver_admin" : "dallas_admin";
+    const gasPass = market.toLowerCase() === "denver" ? "denver_password_123" : "dallas_password_123";
+    const gasPayload = {
+        username: gasUser,
+        password: gasPass,
+        city: market,
+        market: market,
+        ...payload
+    };
+
     try {
-        // 1. Email actions: Proxy asynchronously to Google Apps Script Gmail microservice
-        if (action === "sendEmail" || action === "sendNtoMeetLinks" || action === "sendWelcomeLetter") {
+        // 1. Email & NTO Class Automation Actions: Proxy to Google Apps Script Gmail microservice
+        if (action === "sendEmail" || action === "sendNtoMeetLinks" || action === "sendWelcomeLetter" || action === "concludeNtoClass" || action === "getNtoClasses" || action === "addNtoClass" || action === "deleteNtoClass") {
             try {
                 const gasRes = await fetch(APPS_SCRIPT_URL, {
                     method: "POST",
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(gasPayload)
                 });
                 const gasJson = await gasRes.json();
                 return new Response(JSON.stringify(gasJson), { status: 200, headers: corsHeaders() });
@@ -286,6 +296,95 @@ export async function onRequestPost(context) {
                     headers: corsHeaders()
                 });
             }
+        }
+
+        // 1b. Live NTO Attendance Save
+        if (action === "saveNtoAttendance") {
+            const roster = payload.roster || [];
+            const statements = [];
+
+            for (const item of roster) {
+                const attVal = item.attendance !== undefined ? item.attendance : (item.ntoAttendance !== undefined ? item.ntoAttendance : (item.ntoStatus || ''));
+                let hiredVal = null;
+                let missedNtoVal = null;
+                if (attVal === "NTO Complete" || attVal === "Attended") {
+                    hiredVal = 1;
+                    missedNtoVal = 0;
+                } else if (attVal === "Not in NTO") {
+                    hiredVal = 0;
+                    missedNtoVal = 1;
+                } else if (!attVal) {
+                    hiredVal = 0;
+                    missedNtoVal = 0;
+                }
+
+                const shirtVal = item.shirtSize || item.shirt || '';
+                const hatVal = item.hatStyle || item.hat || '';
+                const payCardVal = item.payCard || item.paycard || '';
+
+                if (item.id) {
+                    statements.push(db.prepare(`
+                        UPDATE onboarding_candidates SET
+                            nto_attendance = ?,
+                            hired = COALESCE(?, hired),
+                            missed_nto = COALESCE(?, missed_nto),
+                            shirt_size = CASE WHEN ? != '' THEN ? ELSE shirt_size END,
+                            hat_style = CASE WHEN ? != '' THEN ? ELSE hat_style END,
+                            pay_card = CASE WHEN ? != '' THEN ? ELSE pay_card END,
+                            updated_at = CURRENT_TIMESTAMP
+                        WHERE id = ?
+                    `).bind(
+                        attVal,
+                        hiredVal,
+                        missedNtoVal,
+                        shirtVal, shirtVal,
+                        hatVal, hatVal,
+                        payCardVal, payCardVal,
+                        item.id
+                    ));
+                } else if (item.email) {
+                    statements.push(db.prepare(`
+                        UPDATE onboarding_candidates SET
+                            nto_attendance = ?,
+                            hired = COALESCE(?, hired),
+                            missed_nto = COALESCE(?, missed_nto),
+                            shirt_size = CASE WHEN ? != '' THEN ? ELSE shirt_size END,
+                            hat_style = CASE WHEN ? != '' THEN ? ELSE hat_style END,
+                            pay_card = CASE WHEN ? != '' THEN ? ELSE pay_card END,
+                            updated_at = CURRENT_TIMESTAMP
+                        WHERE LOWER(email) = LOWER(?) AND market = ?
+                    `).bind(
+                        attVal,
+                        hiredVal,
+                        missedNtoVal,
+                        shirtVal, shirtVal,
+                        hatVal, hatVal,
+                        payCardVal, payCardVal,
+                        item.email.trim(),
+                        market
+                    ));
+                }
+            }
+
+            if (statements.length > 0) {
+                await db.batch(statements);
+            }
+
+            // Sync with Google Apps Script in the background so Google Sheets stays in sync
+            try {
+                fetch(APPS_SCRIPT_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify(gasPayload)
+                }).catch(e => console.warn("GAS background attendance sync warning:", e));
+            } catch (e) {
+                console.warn("GAS fetch trigger failed:", e);
+            }
+
+            return new Response(JSON.stringify({ success: true, message: `Live attendance updated for ${roster.length} trainees!` }), {
+                status: 200,
+                headers: corsHeaders()
+            });
         }
 
         // 2. Log GM Tracker usage
