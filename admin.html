@@ -3662,6 +3662,9 @@
                 return;
             }
 
+            const batchNowTime = formatDisplayDateTime(new Date());
+            drafts.forEach(d => { d.lastUpdated = batchNowTime; });
+
             const confirmMsg = `Save and push batch updates for ${drafts.length} candidate(s)?`;
             const confirmed = await showBrandConfirm(confirmMsg, "Confirm Batch Save");
             if (!confirmed) return;
@@ -3977,6 +3980,7 @@
             const finalId = id || (existingCand ? existingCand.id : '');
             let payload = { action: finalId ? 'update' : 'add', target: currentView };
             if (finalId) payload.id = finalId;
+            payload.lastUpdated = formatDisplayDateTime(new Date());
 
             if (currentView === 'paycards') {
                 payload.name = document.getElementById('payName').value.trim();
@@ -6272,6 +6276,7 @@
             }
 
             const rosterData = [];
+            const attNowTime = formatDisplayDateTime(new Date());
             rosterElements.forEach(el => {
                 const attVal = el.value || '';
                 rosterData.push({
@@ -6287,7 +6292,8 @@
                     attendance: attVal,
                     ntoAttendance: attVal,
                     ntoStatus: attVal,
-                    liveStatus: attVal
+                    liveStatus: attVal,
+                    lastUpdated: attNowTime
                 });
             });
 

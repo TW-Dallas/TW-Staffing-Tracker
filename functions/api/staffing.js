@@ -13,6 +13,21 @@ function corsHeaders() {
     };
 }
 
+// Current timestamp formatted for Team Wow (e.g. "9/17/2026 10:20 AM")
+function getNowFormatted(timeZone = "America/Chicago") {
+    const d = new Date();
+    const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone: timeZone,
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true
+    });
+    return formatter.format(d).replace(',', '');
+}
+
 export async function onRequestOptions() {
     return new Response(null, { headers: corsHeaders(), status: 204 });
 }
@@ -117,7 +132,7 @@ export async function onRequestGet(context) {
             ddEntered: Boolean(c.dd_entered),
             noticeSentDate: c.notice_sent_date || '',
             withdrawn: Boolean(c.withdrawn),
-            lastUpdated: c.last_updated || c.updated_at || ''
+            lastUpdated: c.last_updated || ''
         }));
 
         // Map stores/contacts
@@ -302,6 +317,8 @@ export async function onRequestPost(context) {
         if (action === "saveNtoAttendance") {
             const roster = payload.roster || [];
             const statements = [];
+            const tz = market.toLowerCase() === "denver" ? "America/Denver" : "America/Chicago";
+            const nowFormatted = getNowFormatted(tz);
 
             for (const item of roster) {
                 const attVal = item.attendance !== undefined ? item.attendance : (item.ntoAttendance !== undefined ? item.ntoAttendance : (item.ntoStatus || ''));
@@ -321,6 +338,7 @@ export async function onRequestPost(context) {
                 const shirtVal = item.shirtSize || item.shirt || '';
                 const hatVal = item.hatStyle || item.hat || '';
                 const payCardVal = item.payCard || item.paycard || '';
+                const itemTime = item.lastUpdated || nowFormatted;
 
                 if (item.id) {
                     statements.push(db.prepare(`
@@ -331,6 +349,7 @@ export async function onRequestPost(context) {
                             shirt_size = CASE WHEN ? != '' THEN ? ELSE shirt_size END,
                             hat_style = CASE WHEN ? != '' THEN ? ELSE hat_style END,
                             pay_card = CASE WHEN ? != '' THEN ? ELSE pay_card END,
+                            last_updated = ?,
                             updated_at = CURRENT_TIMESTAMP
                         WHERE id = ?
                     `).bind(
@@ -340,6 +359,7 @@ export async function onRequestPost(context) {
                         shirtVal, shirtVal,
                         hatVal, hatVal,
                         payCardVal, payCardVal,
+                        itemTime,
                         item.id
                     ));
                 } else if (item.email) {
@@ -351,6 +371,7 @@ export async function onRequestPost(context) {
                             shirt_size = CASE WHEN ? != '' THEN ? ELSE shirt_size END,
                             hat_style = CASE WHEN ? != '' THEN ? ELSE hat_style END,
                             pay_card = CASE WHEN ? != '' THEN ? ELSE pay_card END,
+                            last_updated = ?,
                             updated_at = CURRENT_TIMESTAMP
                         WHERE LOWER(email) = LOWER(?) AND market = ?
                     `).bind(
@@ -360,6 +381,7 @@ export async function onRequestPost(context) {
                         shirtVal, shirtVal,
                         hatVal, hatVal,
                         payCardVal, payCardVal,
+                        itemTime,
                         item.email.trim(),
                         market
                     ));
@@ -480,6 +502,8 @@ export async function onRequestPost(context) {
             const cand = payload.candidate || payload.record || payload;
             const newId = cand.id || `ID-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
             const boolToInt = v => (v === true || v === 1 || v === '1' || v === 'true' ? 1 : 0);
+            const tz = market.toLowerCase() === "denver" ? "America/Denver" : "America/Chicago";
+            const nowFormatted = cand.lastUpdated || getNowFormatted(tz);
 
             await db.prepare(`
                 INSERT INTO onboarding_candidates (
@@ -525,7 +549,7 @@ export async function onRequestPost(context) {
                 boolToInt(cand.ddEntered),
                 cand.noticeSentDate || '',
                 boolToInt(cand.withdrawn),
-                cand.lastUpdated || ''
+                nowFormatted
             ).run();
 
             return new Response(JSON.stringify({ success: true, id: newId }), { status: 200, headers: corsHeaders() });
@@ -630,6 +654,8 @@ export async function onRequestPost(context) {
             }
 
             const boolToInt = v => (v === true || v === 1 || v === '1' || v === 'true' ? 1 : 0);
+            const tz = market.toLowerCase() === "denver" ? "America/Denver" : "America/Chicago";
+            const nowFormatted = cand.lastUpdated || getNowFormatted(tz);
 
             await db.prepare(`
                 UPDATE onboarding_candidates SET
@@ -665,7 +691,7 @@ export async function onRequestPost(context) {
                     dd_entered = COALESCE(?, dd_entered),
                     notice_sent_date = COALESCE(?, notice_sent_date),
                     withdrawn = COALESCE(?, withdrawn),
-                    last_updated = COALESCE(?, last_updated),
+                    last_updated = ?,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
             `).bind(
@@ -701,7 +727,7 @@ export async function onRequestPost(context) {
                 cand.ddEntered !== undefined ? boolToInt(cand.ddEntered) : null,
                 cand.noticeSentDate !== undefined ? cand.noticeSentDate : null,
                 cand.withdrawn !== undefined ? boolToInt(cand.withdrawn) : null,
-                cand.lastUpdated !== undefined ? cand.lastUpdated : null,
+                nowFormatted,
                 cand.id
             ).run();
 
@@ -717,6 +743,8 @@ export async function onRequestPost(context) {
 
             const statements = [];
             const boolToInt = v => (v === true || v === 1 || v === '1' || v === 'true' ? 1 : 0);
+            const tz = market.toLowerCase() === "denver" ? "America/Denver" : "America/Chicago";
+            const nowFormatted = getNowFormatted(tz);
 
             for (const item of updates) {
                 if (!item.id) continue;
@@ -728,6 +756,7 @@ export async function onRequestPost(context) {
                         inactive = COALESCE(?, inactive),
                         withdrawn = COALESCE(?, withdrawn),
                         notes = COALESCE(?, notes),
+                        last_updated = ?,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE id = ?
                 `).bind(
@@ -737,6 +766,7 @@ export async function onRequestPost(context) {
                     item.inactive !== undefined ? boolToInt(item.inactive) : null,
                     item.withdrawn !== undefined ? boolToInt(item.withdrawn) : null,
                     item.notes !== undefined ? item.notes : null,
+                    item.lastUpdated || nowFormatted,
                     item.id
                 ));
             }
