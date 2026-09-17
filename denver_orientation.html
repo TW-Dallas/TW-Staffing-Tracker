@@ -80,7 +80,7 @@
 
         /* HEADER */
         header {
-            background-color: var(--dark-blue);
+            background-color: var(--brand-blue);
             color: white;
             padding: 14px 20px;
             padding-top: calc(14px + env(safe-area-inset-top, 0px));
@@ -219,11 +219,11 @@
         }
 
         .view-reqs-btn {
-            background-color: var(--dark-blue);
+            background-color: var(--crust-burnt);
             color: white;
             border: none;
-            border-radius: 6px;
-            padding: 8px 14px;
+            border-radius: 50px;
+            padding: 9px 18px;
             font-family: 'Subhead1', sans-serif;
             font-size: 14px;
             cursor: pointer;
@@ -233,7 +233,7 @@
             transition: background-color 0.2s;
         }
 
-        .view-reqs-btn:hover { background-color: var(--brand-blue); }
+        .view-reqs-btn:hover { background-color: var(--crust-deep); }
         .view-reqs-btn svg { width: 15px; height: 15px; fill: white; }
 
         /* SECTION TITLE */
@@ -250,7 +250,7 @@
             margin: 0;
             font-family: 'ExtraBlack', serif;
             font-size: 22px;
-            color: var(--dark-blue);
+            color: var(--med-blue);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -270,7 +270,7 @@
 
         /* CLASS CARD */
         .class-card {
-            background: white;
+            background: var(--crust-light);
             border-radius: var(--border-radius);
             border: 1.5px solid var(--crust-med);
             box-shadow: 0 4px 12px rgba(71, 43, 16, 0.06);
@@ -286,7 +286,7 @@
         }
 
         .card-top {
-            background-color: #fcf9f5;
+            background-color: var(--crust-light);
             border-bottom: 1px solid var(--crust-med);
             padding: 16px 18px;
             display: flex;
@@ -317,9 +317,23 @@
             gap: 5px;
         }
 
-        .spots-available { background-color: #eef7fd; color: var(--dark-blue); border: 1px solid #c9e6f8; }
-        .spots-low { background-color: #fff1f1; color: var(--dark-red); border: 1px solid #f8c8c8; }
-        .spots-full { background-color: #f5f5f5; color: #777777; border: 1px solid #dddddd; }
+        .spots-available {
+            background-color: #eef7fd;
+            color: var(--dark-blue);
+            border: 1px solid #c9e6f8;
+        }
+
+        .spots-low {
+            background-color: #fff1f1;
+            color: var(--dark-red);
+            border: 1px solid #f8c8c8;
+        }
+
+        .spots-full {
+            background-color: #f5f5f5;
+            color: #777777;
+            border: 1px solid #dddddd;
+        }
 
         .card-body {
             padding: 18px;
@@ -344,7 +358,7 @@
         .card-title {
             font-size: 17px;
             font-weight: bold;
-            color: var(--crust-burnt);
+            color: var(--crust-deep);
             margin: 0;
             font-family: 'Subhead1', sans-serif;
         }
@@ -361,7 +375,7 @@
 
         /* ROSTER BOX */
         .roster-box {
-            background-color: var(--crust-light);
+            background-color: var(--crust-base);
             border: 1px solid var(--crust-med);
             border-radius: 8px;
             padding: 12px;
@@ -409,7 +423,7 @@
         /* CARD FOOTER */
         .card-footer {
             padding: 14px 18px;
-            background-color: white;
+            background-color: var(--crust-light);
             border-top: 1px solid var(--crust-med);
         }
 
@@ -418,7 +432,7 @@
             background-color: var(--brand-red);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 50px;
             padding: 12px;
             font-family: 'Subhead1', sans-serif;
             font-size: 16px;
@@ -499,7 +513,7 @@
         }
 
         .modal-header {
-            background-color: var(--dark-blue);
+            background-color: var(--brand-blue);
             color: white;
             padding: 16px 22px;
             display: flex;
@@ -599,16 +613,16 @@
             width: 20px;
             height: 20px;
             margin-top: 2px;
-            accent-color: var(--dark-blue);
+            accent-color: var(--brand-blue);
             cursor: pointer;
             flex-shrink: 0;
         }
 
         .confirm-reqs-btn {
-            background-color: var(--dark-blue);
+            background-color: var(--brand-blue);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 50px;
             padding: 14px 20px;
             font-family: 'Subhead1', sans-serif;
             font-size: 17px;
@@ -616,11 +630,12 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             cursor: pointer;
+            box-shadow: var(--shadow-blue-glow);
             transition: background-color 0.2s;
         }
 
         .confirm-reqs-btn:disabled { background-color: #bcc6cc; cursor: not-allowed; }
-        .confirm-reqs-btn:hover:not(:disabled) { background-color: var(--brand-blue); }
+        .confirm-reqs-btn:hover:not(:disabled) { background-color: var(--med-blue); }
 
         .form-group { margin-bottom: 14px; }
         .form-group label {

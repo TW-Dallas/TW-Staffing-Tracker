@@ -1,0 +1,369 @@
+/* ==========================================================================
+   TEAM WOW / DOMINO'S MASTER BRAND DESIGN SYSTEM
+   Authoritative CSS tokens and component rules extracted from dominos.com
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. BRAND TYPOGRAPHY
+   -------------------------------------------------------------------------- */
+@font-face {
+    font-family: 'ExtraBlack';
+    src: url('fonts/Dominos Sans Header 1.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'ExtraBold';
+    src: url('fonts/Dominos Sans Header 2.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Subhead1';
+    src: url('fonts/Dominos Sans Subhead 1.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Subhead2';
+    src: url('fonts/Dominos Sans Subhead 2.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Condensed';
+    src: url('fonts/Dominos Sans Body Condensed.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Compact';
+    src: url('fonts/Dominos Sans Body Compact.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* --------------------------------------------------------------------------
+   2. AUTHORITATIVE BRAND TOKENS
+   -------------------------------------------------------------------------- */
+:root {
+    /* --- Blue Hierarchy --- */
+    --brand-blue: #0090e2;          /* Primary Brand Blue: Top Nav Header, Tracker Bar Segments, Badges */
+    --med-blue: #0077bd;            /* Medium Blue: Major Page Section Headers ("WHAT'S NEW", "START YOUR ORDER") */
+    --dark-blue: #005c91;           /* Dark Blue: Card-Level Hero Depth ("TRY THE NEW DOMINO™"), Rare Depth Accents */
+
+    /* --- Red Hierarchy --- */
+    --brand-red: #ff0000;           /* Domino's Red: Primary Action Buttons ("ADD DEAL", "TRACK ORDER"), "NEW!" Tags */
+    --dark-red: #910000;            /* Deep Red: Hover States, Urgency Alerts, Low-Spot Indicators */
+    --red-soft-bg: #fff1f1;         /* Warm Red Tint: Alert Cards, Missed Attendance Badges */
+
+    /* --- Authentic Crust Palette (Canvas, Cards & Content) --- */
+    --crust-base: #fefaf6;          /* Main Page Canvas Background */
+    --crust-light: #faf2e9;         /* Card Background: Session Cards, Menu Tiles, Dashboard Containers */
+    --crust-med: #f0decc;           /* Warm Crust Borders, Card Dividers, Separators */
+    --crust-dark: #c0a588;          /* Input Field Outlines, Outline Pill Borders, Subtle Shadows */
+    --crust-deep: #603913;          /* Category Labels ("BUILD YOUR PIZZA", "BREADS"), Subhead Text */
+    --crust-burnt: #472b10;         /* Primary High-Contrast Text, Crust Button Fill ("MENU" pill) */
+
+    /* --- Rare Inner Container & Neutrals --- */
+    --inner-white: #ffffff;         /* Inner Sub-Cards (e.g. Tracker Input Box, White Card Tiles) */
+    --brand-grey: #6c757d;          /* Muted Secondary Text, Disabled State Backgrounds */
+    --disabled-bg: #bcc6cc;         /* Disabled Action Buttons */
+
+    /* --- Radii & Elevation --- */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-pill: 9999px;          /* Authentic Domino's Pill Buttons */
+
+    --shadow-sm: 0 2px 6px rgba(71, 43, 16, 0.08);
+    --shadow-md: 0 4px 14px rgba(71, 43, 16, 0.12);
+    --shadow-lg: 0 10px 24px rgba(71, 43, 16, 0.16);
+    --shadow-blue-glow: 0 2px 8px rgba(0, 144, 226, 0.28);
+    --shadow-red-glow: 0 3px 10px rgba(255, 0, 0, 0.32);
+}
+
+/* --------------------------------------------------------------------------
+   3. GLOBAL FOUNDATIONS
+   -------------------------------------------------------------------------- */
+body {
+    background-color: var(--crust-base);
+    color: var(--crust-burnt);
+    font-family: 'Condensed', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* --------------------------------------------------------------------------
+   4. BUTTON STYLES (MATCHING DOMINOS.COM)
+   -------------------------------------------------------------------------- */
+/* Primary Red Pill Button ("TRACK ORDER", "ADD DEAL", "REGISTER") */
+.btn-pill-red {
+    background-color: var(--brand-red);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 12px 24px;
+    font-family: 'Subhead1', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: var(--shadow-red-glow);
+    transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.btn-pill-red:hover:not(:disabled) {
+    background-color: var(--dark-red);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(145, 0, 0, 0.4);
+}
+
+.btn-pill-red:disabled {
+    background-color: var(--disabled-bg);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Solid Crust Burnt Pill Button ("MENU" pill in Screenshot 2) */
+.btn-pill-crust {
+    background-color: var(--crust-burnt);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 12px 24px;
+    font-family: 'Subhead1', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: background-color 0.2s, transform 0.1s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.btn-pill-crust:hover:not(:disabled) {
+    background-color: var(--crust-deep);
+    transform: translateY(-1px);
+}
+
+/* Inactive / Outline Pill Button ("RECENT ITEMS" in Screenshot 2) */
+.btn-pill-outline {
+    background-color: transparent;
+    color: var(--crust-deep);
+    border: 2px solid var(--crust-dark);
+    border-radius: var(--radius-pill);
+    padding: 10px 22px;
+    font-family: 'Subhead1', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.btn-pill-outline:hover:not(:disabled) {
+    background-color: var(--crust-light);
+    border-color: var(--crust-deep);
+    color: var(--crust-burnt);
+}
+
+/* Vibrant Brand-Blue Button (Badges, Navigation Links, Secondary Triggers) */
+.btn-pill-blue {
+    background-color: var(--brand-blue);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 10px 20px;
+    font-family: 'Subhead1', sans-serif;
+    font-size: 15px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: var(--shadow-blue-glow);
+    transition: background-color 0.2s, transform 0.1s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.btn-pill-blue:hover:not(:disabled) {
+    background-color: var(--med-blue);
+    transform: translateY(-1px);
+}
+
+/* --------------------------------------------------------------------------
+   5. CARD & CONTAINER ARCHITECTURE
+   -------------------------------------------------------------------------- */
+/* Standard Outer Card (Warm Crust Background #faf2e9) */
+.card-dominos {
+    background-color: var(--crust-light);
+    border: 1.5px solid var(--crust-med);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card-dominos:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Rare Inner White Container (Screenshot 3: Tracker Input Container) */
+.card-inner-white {
+    background-color: var(--inner-white);
+    border: 1.5px solid var(--crust-med);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+}
+
+/* --------------------------------------------------------------------------
+   6. BADGES & PILL TAGS
+   -------------------------------------------------------------------------- */
+/* "NEW!" Badge (Red Pill) */
+.badge-new {
+    background-color: var(--brand-red);
+    color: #ffffff;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    font-family: 'Subhead1', sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Date / Status Badge (Brand Blue) */
+.badge-date-blue {
+    background-color: var(--brand-blue);
+    color: #ffffff;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-family: 'Subhead1', sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: var(--shadow-blue-glow);
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Spots Available Badge (Domino's Blue Tint) */
+.badge-spots-blue {
+    background-color: #eef7fd;
+    color: var(--dark-blue);
+    border: 1px solid #c9e6f8;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Spots Low Badge (Domino's Red Tint) */
+.badge-spots-low {
+    background-color: var(--red-soft-bg);
+    color: var(--dark-red);
+    border: 1px solid #f8c8c8;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   7. FORM INPUTS & TEXT CONTROLS
+   -------------------------------------------------------------------------- */
+.input-dominos {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid var(--crust-dark);
+    border-radius: var(--radius-md);
+    background-color: var(--crust-base);
+    color: var(--crust-burnt);
+    font-family: 'Condensed', sans-serif;
+    font-size: 17px;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-dominos:focus {
+    outline: none;
+    border-color: var(--brand-blue);
+    box-shadow: 0 0 0 3px rgba(0, 144, 226, 0.25);
+    background-color: #ffffff;
+}
+
+.input-dominos::placeholder {
+    color: #998877;
+}
+
+/* --------------------------------------------------------------------------
+   8. TYPOGRAPHY UTILITIES
+   -------------------------------------------------------------------------- */
+/* Page Level Section Headers ("WHAT'S NEW", "AVAILABLE ORIENTATION SESSIONS") */
+.title-section-med-blue {
+    color: var(--med-blue);
+    font-family: 'ExtraBlack', serif;
+    font-size: 24px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+/* Card-Level Hero Depth ("TRY THE NEW DOMINO™") */
+.title-card-dark-blue {
+    color: var(--dark-blue);
+    font-family: 'Subhead1', sans-serif;
+    font-size: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+/* Category Labels ("BUILD YOUR PIZZA", "BREADS", "CHICKEN") */
+.title-category-crust {
+    color: var(--crust-deep);
+    font-family: 'Subhead1', sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
