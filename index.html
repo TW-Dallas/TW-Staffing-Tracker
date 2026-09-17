@@ -479,8 +479,19 @@
             document.getElementById('loader').classList.remove('hidden');
         }
 
-        fetch(API_URL)
-            .then(response => response.json())
+        const d1Url = (window.location.origin.includes('pages.dev') || window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1'))
+            ? '/api/staffing?market=Dallas'
+            : 'https://tw-dallas-staffing.pages.dev/api/staffing?market=Dallas';
+
+        fetch(d1Url)
+            .then(res => {
+                if (!res.ok) throw new Error("D1 fetch failed");
+                return res.json();
+            })
+            .catch(d1Err => {
+                console.warn("D1 edge fetch failed, falling back to Google Sheets:", d1Err);
+                return fetch(API_URL).then(r => r.json());
+            })
             .then(data => {
                 if (data.error) {
                     document.getElementById('loader').innerHTML = `
@@ -503,7 +514,7 @@
                 if (showFullScreenLoader) {
                     document.getElementById('loader').innerText = "Error Loading Data";
                 }
-                console.error(err);
+                console.error("Fetch error:", err);
             });
     }
 

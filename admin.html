@@ -1467,6 +1467,9 @@
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbxQVuU0uQ3TdkfsBwJpZ-K1iUDXTuLgvqEayPeqZgSRLDNxHOEUsOrjaSZAujI8p_874g/exec";
+        const D1_API_URL = (window.location.origin.includes('pages.dev') || window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1'))
+            ? '/api/staffing'
+            : 'https://tw-dallas-staffing.pages.dev/api/staffing';
 
         // Add this helper near the top of your script tag:
         async function apiCall(actionOrMethod = 'getData', payload = {}) {
@@ -1487,10 +1490,23 @@
 
             if (!requestPayload.action) requestPayload.action = 'getData';
 
-            const fullPayload = { username: u, password: p, city: city, ...requestPayload };
+            const fullPayload = { username: u, password: p, city: city, market: city, ...requestPayload };
 
-            // For read requests (getData, login, fetchData), use HTTP GET to avoid 302 POST->GET redirect 404 bug
+            // For read requests (getData, login, fetchData), try lightning-fast D1 first
             if (fullPayload.action === 'getData' || fullPayload.action === 'login' || fullPayload.action === 'fetchData') {
+                try {
+                    const queryParams = new URLSearchParams({ market: city, city: city }).toString();
+                    const d1Url = `${D1_API_URL}?${queryParams}`;
+                    const response = await fetch(d1Url);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (!data.error) return data;
+                    }
+                } catch (d1Err) {
+                    console.warn("D1 edge fetch failed, falling back to Google Sheets:", d1Err);
+                }
+
+                // Fallback to Google Apps Script
                 const queryParams = new URLSearchParams(fullPayload).toString();
                 const url = `${API_URL}${API_URL.includes('?') ? '&' : '?'}${queryParams}`;
                 const response = await fetch(url);
@@ -1511,7 +1527,33 @@
                 return data;
             }
 
-            // For write requests (POST, delete, save, etc.), send text/plain body to avoid CORS preflight issues
+            // For email actions, dispatch directly to Google Apps Script Gmail service
+            if (fullPayload.action === 'sendEmail' || fullPayload.action === 'sendNtoMeetLinks' || fullPayload.action === 'sendWelcomeLetter') {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(fullPayload)
+                });
+                const text = await response.text();
+                return JSON.parse(text);
+            }
+
+            // For data modifications (update, batchUpdate, saveScratchpad, delete, updateContact), use D1 with GAS fallback
+            try {
+                const response = await fetch(D1_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(fullPayload)
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (!data.error) return data;
+                }
+            } catch (d1Err) {
+                console.warn("D1 edge write failed, falling back to Google Sheets:", d1Err);
+            }
+
+            // Fallback to Google Apps Script
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1519,7 +1561,6 @@
             });
 
             const text = await response.text();
-
             let data;
             try {
                 data = JSON.parse(text);
