@@ -7089,13 +7089,13 @@
 
                 window.ntoCalendarClassesCache = data.classes;
 
-                // Sort classes descending by date (furthest out / latest class at TOP)
+                // Sort classes chronologically (upcoming / earliest class at TOP)
                 data.classes.sort((a, b) => {
                     const dtA = parseCandidateDate(a.classDate);
                     const dtB = parseCandidateDate(b.classDate);
                     const timeA = dtA ? dtA.getTime() : 0;
                     const timeB = dtB ? dtB.getTime() : 0;
-                    return timeB - timeA;
+                    return timeA - timeB;
                 });
 
                 if (tbody) {
@@ -7142,9 +7142,13 @@
             }
 
             const [year, month, day] = rawDate.split('-');
-            const dateObj = new Date(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10), 12, 0, 0);
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const formattedDateStr = dateObj.toLocaleDateString('en-US', options);
+            const formattedDateStr = `${parseInt(month, 10)}/${parseInt(day, 10)}/${year}`;
+
+            // Prevent duplicate classes on the same date
+            if (window.ntoCalendarClassesCache && window.ntoCalendarClassesCache.some(c => c.classDate === formattedDateStr)) {
+                showBrandAlert(`A session is already scheduled on ${formattedDateStr}. Duplicate classes on the same date are not allowed.`, "Duplicate Session");
+                return;
+            }
 
             showLoader(true, "Adding new NTO class session...");
 

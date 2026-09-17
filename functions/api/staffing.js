@@ -28,6 +28,21 @@ function getNowFormatted(timeZone = "America/Chicago") {
     return formatter.format(d).replace(',', '');
 }
 
+// Helper to parse dates into timestamps for chronological sorting
+function parseDateForSort(dateStr) {
+    if (!dateStr) return 0;
+    const parts = String(dateStr).split('/');
+    if (parts.length === 3) {
+        const m = parseInt(parts[0], 10);
+        const d = parseInt(parts[1], 10);
+        let y = parseInt(parts[2], 10);
+        if (y < 100) y += 2000;
+        return new Date(y, m - 1, d).getTime();
+    }
+    const t = Date.parse(dateStr);
+    return isNaN(t) ? 0 : t;
+}
+
 export async function onRequestOptions() {
     return new Response(null, { headers: corsHeaders(), status: 204 });
 }
@@ -289,6 +304,8 @@ export async function onRequestGet(context) {
                 isoDate: isoDate
             };
         });
+
+        ntoClasses.sort((a, b) => parseDateForSort(a.classDate) - parseDateForSort(b.classDate));
 
         if (reqAction === "getNtoClasses") {
             return new Response(JSON.stringify({
@@ -610,7 +627,25 @@ export async function onRequestPost(context) {
             const trainer = payload.trainerName || payload.trainer || (market === "Denver" ? "Richard" : "Mike");
             const capacity = parseInt(payload.capacity || 15, 10);
             const meetLink = payload.meetLink || (market === "Denver" ? "" : "https://meet.google.com/zwc-afuu-hgh");
-            const classId = payload.classId || (classDate.replace(/[^0-9]/g, '') + '-' + (market === "Denver" ? "Ric" : "Mik") + '-' + Date.now().toString().slice(-4));
+
+            // Duplicate guard: prevent multiple sessions on the same date for this market
+            const existing = await db.prepare("SELECT id FROM training_classes WHERE class_date = ? AND market = ? AND is_active = 1").bind(classDate, market).first();
+            if (existing) {
+                return new Response(JSON.stringify({ error: `A session is already scheduled on ${classDate}. Duplicate sessions on the same date are not allowed.` }), {
+                    status: 400,
+                    headers: corsHeaders()
+                });
+            }
+
+            let idDatePart = "";
+            const parts = classDate.split('/');
+            if (parts.length === 3) {
+                idDatePart = parts[2] + parts[0].padStart(2, '0') + parts[1].padStart(2, '0');
+            } else {
+                idDatePart = classDate.replace(/[^0-9]/g, '');
+            }
+            const trainerCode = market === "Denver" ? "Ric" : "Mik";
+            const classId = payload.classId || `${idDatePart}-00-${trainerCode}`;
 
             await db.prepare(`
                 INSERT INTO training_classes (
@@ -688,6 +723,8 @@ export async function onRequestPost(context) {
                     attendees: attendees
                 };
             });
+
+            classes.sort((a, b) => parseDateForSort(a.classDate) - parseDateForSort(b.classDate));
 
             return new Response(JSON.stringify({
                 success: true,
