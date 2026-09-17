@@ -1,8 +1,10 @@
 # Cloudflare Pages Redirects & Clean Rewrites
-/tw-dallas-orientation    /orientation.html           200
-/dallas-orientation       /orientation.html           200
-/orientation              /orientation.html           200
-/tw-denver-orientation    /denver_orientation.html    200
-/denver-orientation       /denver_orientation.html    200
-/admin                    /admin.html                 200
-/denver                   /denver_index.html          200
+# Note: Cloudflare Pages automatically serves *.html files at clean URLs (e.g. orientation.html -> /orientation, admin.html -> /admin)
+# Adding /orientation -> /orientation.html creates an infinite 308 redirect loop.
+
+/tw-dallas-orientation    /orientation           200
+/dallas-orientation       /orientation           200
+/tw-denver-orientation    /denver_orientation    200
+/denver-orientation       /denver_orientation    200
+/denver                   /denver_index          200
+
