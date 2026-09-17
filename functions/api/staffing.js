@@ -287,11 +287,11 @@ export async function onRequestPost(context) {
     const gasUser = market.toLowerCase() === "denver" ? "denver_admin" : "dallas_admin";
     const gasPass = market.toLowerCase() === "denver" ? "denver_password_123" : "dallas_password_123";
     const gasPayload = {
+        ...payload,
         username: gasUser,
         password: gasPass,
         city: market,
-        market: market,
-        ...payload
+        market: market
     };
 
     try {
