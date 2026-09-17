@@ -47,8 +47,38 @@ export async function onRequestGet(context) {
     }
 
     const url = new URL(request.url);
+    const reqAction = url.searchParams.get("action");
     let market = url.searchParams.get("market") || url.searchParams.get("city") || "Dallas";
     market = market.toLowerCase() === "denver" ? "Denver" : "Dallas";
+
+    // Fast endpoint for candidate lookup (for personalized registration pre-fills)
+    if (reqAction === "getCandidate") {
+        const candId = url.searchParams.get("id") || url.searchParams.get("candId") || "";
+        const candEmail = url.searchParams.get("email") || "";
+        let cand = null;
+        if (candId) {
+            cand = await db.prepare("SELECT * FROM onboarding_candidates WHERE id = ?").bind(candId).first();
+        } else if (candEmail) {
+            cand = await db.prepare("SELECT * FROM onboarding_candidates WHERE LOWER(email) = LOWER(?)").bind(candEmail).first();
+        }
+        if (cand) {
+            return new Response(JSON.stringify({
+                success: true,
+                candidate: {
+                    id: cand.id,
+                    name: cand.name,
+                    email: cand.email,
+                    phone: cand.phone_number,
+                    storeNum: cand.store_num,
+                    position: cand.position,
+                    market: cand.market,
+                    ntoDate: cand.nto_date,
+                    ntoScheduled: Boolean(cand.nto_scheduled)
+                }
+            }), { status: 200, headers: corsHeaders() });
+        }
+        return new Response(JSON.stringify({ success: false, error: "Candidate not found" }), { status: 404, headers: corsHeaders() });
+    }
 
     const storeNum = url.searchParams.get("storeNum") || url.searchParams.get("store");
 
@@ -61,7 +91,8 @@ export async function onRequestGet(context) {
             interviewsRes,
             staffingRes,
             scratchpadRes,
-            ntoClassesRes
+            ntoClassesRes,
+            classRegsRes
         ] = await Promise.all([
             // 1. Onboarding Candidates
             storeNum
@@ -90,7 +121,10 @@ export async function onRequestGet(context) {
             db.prepare("SELECT * FROM scratchpad WHERE market = ?").bind(market).first(),
 
             // 7. NTO Classes
-            db.prepare("SELECT * FROM training_classes WHERE program = 'NTO' AND (market = ? OR market = 'Virtual') AND is_active = 1 ORDER BY class_date ASC").bind(market).all()
+            db.prepare("SELECT * FROM training_classes WHERE program = 'NTO' AND (market = ? OR market = 'Virtual') AND is_active = 1 ORDER BY class_date ASC").bind(market).all(),
+
+            // 8. Class Registrations for attendee roster
+            db.prepare("SELECT class_id, candidate_name FROM class_registrations").all()
         ]);
 
         // Map candidates to frontend camelCase
@@ -215,20 +249,57 @@ export async function onRequestGet(context) {
             }
         }
 
+        // Map class registrations into attendee roster
+        const regMap = {};
+        (classRegsRes.results || []).forEach(r => {
+            if (!regMap[r.class_id]) regMap[r.class_id] = [];
+            regMap[r.class_id].push(r.candidate_name);
+        });
+
         // NTO Classes
-        const ntoClasses = (ntoClassesRes.results || []).map(cl => ({
-            id: cl.id,
-            market: cl.market,
-            name: cl.name,
-            classDate: cl.class_date,
-            startTime: cl.start_time,
-            endTime: cl.end_time,
-            trainer: cl.trainer,
-            location: cl.location,
-            meetLink: cl.meet_link,
-            spotsTotal: cl.spots_total,
-            spotsTaken: cl.spots_taken
-        }));
+        const ntoClasses = (ntoClassesRes.results || []).map(cl => {
+            const attendees = regMap[cl.id] || [];
+            let isoDate = null;
+            try {
+                const parts = (cl.class_date || '').split('/');
+                if (parts.length === 3) {
+                    const m = parts[0].padStart(2, '0');
+                    const d = parts[1].padStart(2, '0');
+                    const y = parts[2];
+                    isoDate = `${y}-${m}-${d}T16:00:00`;
+                }
+            } catch (e) {}
+
+            return {
+                id: cl.id,
+                classId: cl.id,
+                market: cl.market,
+                name: cl.name,
+                classDate: cl.class_date,
+                startTime: cl.start_time,
+                endTime: cl.end_time,
+                trainer: cl.trainer,
+                trainerName: cl.trainer,
+                location: cl.location,
+                meetLink: cl.meet_link,
+                spotsTotal: cl.spots_total,
+                capacity: cl.spots_total,
+                spotsTaken: attendees.length > 0 ? attendees.length : cl.spots_taken,
+                attendees: attendees,
+                isoDate: isoDate
+            };
+        });
+
+        if (reqAction === "getNtoClasses") {
+            return new Response(JSON.stringify({
+                success: true,
+                market,
+                classes: ntoClasses
+            }), {
+                status: 200,
+                headers: corsHeaders()
+            });
+        }
 
         return new Response(JSON.stringify({
             success: true,
@@ -295,8 +366,174 @@ export async function onRequestPost(context) {
     };
 
     try {
-        // 1. Email & NTO Class Automation Actions: Proxy to Google Apps Script Gmail microservice
-        if (action === "sendEmail" || action === "sendNtoMeetLinks" || action === "sendWelcomeLetter" || action === "concludeNtoClass" || action === "getNtoClasses" || action === "addNtoClass" || action === "deleteNtoClass") {
+        // 1. Candidate NTO Registration Flow (Phase 2 Unified Registration)
+        if (action === "registerNtoClass") {
+            const classId = payload.classId;
+            const name = (payload.name || "").trim();
+            const phone = (payload.phone || "").trim();
+            const email = (payload.email || "").trim();
+            const storeNum = (payload.storeNum || payload.store || "").toString().trim();
+            const position = payload.position || "CSR";
+            const candidateId = payload.candidateId || payload.id || "";
+            const regMarket = payload.market || market || "Dallas";
+
+            if (!classId || !name || !email) {
+                return new Response(JSON.stringify({ success: false, error: "Missing required registration details (class, name, or email)" }), { status: 400, headers: corsHeaders() });
+            }
+
+            // 1a. Fetch class from D1
+            const cls = await db.prepare("SELECT * FROM training_classes WHERE id = ?").bind(classId).first();
+            if (!cls) {
+                return new Response(JSON.stringify({ success: false, error: "Orientation class session not found." }), { status: 404, headers: corsHeaders() });
+            }
+
+            if (cls.spots_taken >= cls.spots_total) {
+                return new Response(JSON.stringify({ success: false, error: "This orientation class is currently full. Please select another date." }), { status: 400, headers: corsHeaders() });
+            }
+
+            // 1b. Check for duplicate registration in this exact class
+            const existingReg = await db.prepare("SELECT * FROM class_registrations WHERE class_id = ? AND (LOWER(email) = LOWER(?) OR (phone != '' AND phone = ?))").bind(classId, email, phone).first();
+            if (existingReg) {
+                return new Response(JSON.stringify({
+                    success: true,
+                    message: "You are already registered for this session!",
+                    classDate: cls.class_date,
+                    startTime: cls.start_time,
+                    meetLink: cls.meet_link,
+                    alreadyRegistered: true
+                }), { status: 200, headers: corsHeaders() });
+            }
+
+            // 1c. Insert class registration
+            const regId = "REG-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
+            await db.prepare("INSERT INTO class_registrations (id, class_id, candidate_id, candidate_name, store_num, position, phone, email, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Confirmed')").bind(regId, classId, candidateId, name, storeNum, position, phone, email).run();
+
+            // 1d. Update spots_taken in training_classes
+            await db.prepare("UPDATE training_classes SET spots_taken = spots_taken + 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(classId).run();
+
+            // 1e. Update onboarding_candidates in D1
+            const tz = regMarket.toLowerCase() === "denver" ? "America/Denver" : "America/Chicago";
+            const nowFormatted = getNowFormatted(tz);
+
+            let matchedCand = null;
+            if (candidateId) {
+                matchedCand = await db.prepare("SELECT * FROM onboarding_candidates WHERE id = ?").bind(candidateId).first();
+            }
+            if (!matchedCand && email) {
+                matchedCand = await db.prepare("SELECT * FROM onboarding_candidates WHERE LOWER(email) = LOWER(?)").bind(email).first();
+            }
+            if (!matchedCand && phone) {
+                const cleanP = phone.replace(/\D/g, '').slice(-10);
+                if (cleanP.length === 10) {
+                    matchedCand = await db.prepare("SELECT * FROM onboarding_candidates WHERE REPLACE(REPLACE(phone_number, '-', ''), ' ', '') LIKE ?").bind('%' + cleanP).first();
+                }
+            }
+            if (!matchedCand && name) {
+                matchedCand = await db.prepare("SELECT * FROM onboarding_candidates WHERE LOWER(name) = LOWER(?)").bind(name).first();
+            }
+
+            if (matchedCand) {
+                await db.prepare(`
+                    UPDATE onboarding_candidates SET
+                        nto_date = ?,
+                        nto_scheduled = 1,
+                        phone_number = CASE WHEN (phone_number IS NULL OR phone_number = '') AND ? != '' THEN ? ELSE phone_number END,
+                        email = CASE WHEN (email IS NULL OR email = '') AND ? != '' THEN ? ELSE email END,
+                        store_num = CASE WHEN (store_num IS NULL OR store_num = '') AND ? != '' THEN ? ELSE store_num END,
+                        last_updated = ?,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                `).bind(cls.class_date, phone, phone, email, email, storeNum, storeNum, nowFormatted, matchedCand.id).run();
+            }
+
+            // 1f. Trigger confirmation email via Google Apps Script microservice
+            try {
+                if (regMarket.toLowerCase() === "dallas") {
+                    await fetch(APPS_SCRIPT_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify({
+                            username: "dallas_admin",
+                            password: "dallas_password_123",
+                            action: "sendNtoMeetLinks",
+                            classDate: cls.class_date,
+                            classTime: cls.start_time,
+                            meetLink: cls.meet_link || "https://meet.google.com/zwc-afuu-hgh",
+                            trainerName: "Mike Jacobs",
+                            trainees: [{ name: name, email: email }]
+                        })
+                    });
+                }
+            } catch (mailErr) {
+                console.warn("Confirmation email proxy failed:", mailErr);
+            }
+
+            return new Response(JSON.stringify({
+                success: true,
+                message: "Registration confirmed!",
+                classDate: cls.class_date,
+                startTime: cls.start_time,
+                endTime: cls.end_time,
+                meetLink: cls.meet_link,
+                trainer: cls.trainer
+            }), { status: 200, headers: corsHeaders() });
+        }
+
+        // 2. Add NTO Class directly to D1 (with GAS backup)
+        if (action === "addNtoClass") {
+            const classDate = payload.classDate || "";
+            const startTime = payload.startTime || "6:00 PM";
+            const endTime = payload.endTime || "7:15 PM";
+            const trainer = payload.trainerName || payload.trainer || (market === "Denver" ? "Richard" : "Mike");
+            const capacity = parseInt(payload.capacity || 15, 10);
+            const meetLink = payload.meetLink || (market === "Denver" ? "" : "https://meet.google.com/zwc-afuu-hgh");
+            const classId = payload.classId || (classDate.replace(/[^0-9]/g, '') + '-' + (market === "Denver" ? "Ric" : "Mik") + '-' + Date.now().toString().slice(-4));
+
+            await db.prepare(`
+                INSERT INTO training_classes (
+                    id, market, program, name, level, class_date, start_time, end_time, trainer, location, meet_link, spots_total, spots_taken, is_active
+                ) VALUES (?, ?, 'NTO', 'New Team Member Orientation', 1, ?, ?, ?, ?, 'Virtual', ?, ?, 0, 1)
+            `).bind(classId, market, classDate, startTime, endTime, trainer, meetLink, capacity).run();
+
+            try {
+                fetch(APPS_SCRIPT_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify(gasPayload)
+                }).catch(() => {});
+            } catch(e) {}
+
+            return new Response(JSON.stringify({ success: true, message: "New orientation session added!", id: classId }), {
+                status: 200,
+                headers: corsHeaders()
+            });
+        }
+
+        // 3. Delete NTO Class directly from D1 (with GAS backup)
+        if (action === "deleteNtoClass") {
+            const classId = payload.classId;
+            if (classId) {
+                await db.prepare("UPDATE training_classes SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(classId).run();
+            } else if (payload.classDate) {
+                await db.prepare("UPDATE training_classes SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE class_date = ? AND market = ?").bind(payload.classDate, market).run();
+            }
+
+            try {
+                fetch(APPS_SCRIPT_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify(gasPayload)
+                }).catch(() => {});
+            } catch(e) {}
+
+            return new Response(JSON.stringify({ success: true, message: "Orientation session removed." }), {
+                status: 200,
+                headers: corsHeaders()
+            });
+        }
+
+        // 4. Email & NTO Automation Actions: Proxy to Google Apps Script Gmail microservice
+        if (action === "sendEmail" || action === "sendNtoMeetLinks" || action === "sendWelcomeLetter" || action === "concludeNtoClass" || action === "getNtoClasses") {
             try {
                 const gasRes = await fetch(APPS_SCRIPT_URL, {
                     method: "POST",

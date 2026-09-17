@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link class="favicon" rel="icon" type="image/png" href="images/tile_blue.png">
+    <title>Team Wow Orientation • Denver Market</title>
+    <meta name="theme-color" content="#005c91">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+
+    <style>
+        @font-face {
+            font-family: 'ExtraBlack';
+            src: url('fonts/Dominos Sans Header 1.ttf') format('truetype');
+            font-weight: bold;
+        }
+
+        @font-face {
+            font-family: 'ExtraBold';
+            src: url('fonts/Dominos Sans Header 2.ttf') format('truetype');
+            font-weight: normal;
+        }
+
+        @font-face {
+            font-family: 'Subhead1';
+            src: url('fonts/Dominos Sans Subhead 1.ttf') format('truetype');
+            font-weight: normal;
+        }
+
+        @font-face {
+            font-family: 'Subhead2';
+            src: url('fonts/Dominos Sans Subhead 2.ttf') format('truetype');
+            font-weight: normal;
+        }
+
+        @font-face {
+            font-family: 'Body';
+            src: url('fonts/Dominos Sans Body.ttf') format('truetype');
+            font-weight: normal;
+        }
+
+        @font-face {
+            font-family: 'Condensed';
+            src: url('fonts/Dominos Sans Body Condensed.ttf') format('truetype');
+            font-weight: normal;
+        }
+
+        :root {
+            --brand-red: #ff0000;
+            --dark-red: #910000;
+            --brand-blue: #0090e2;
+            --med-blue: #0077bd;
+            --dark-blue: #005c91;
+            --crust-base: #fefaf6;
+            --crust-light: #faf2e9;
+            --crust-med: #f0decc;
+            --crust-dark: #c0a588;
+            --crust-deep: #603913;
+            --crust-burnt: #472b10;
+            --bg-color: var(--crust-light);
+            --card-bg: #FFFFFF;
+            --border-radius: 12px;
+            --brand-green: #28a745;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Condensed', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            color: var(--crust-burnt);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        header {
+            background-color: var(--dark-blue);
+            color: white;
+            padding: 14px 20px;
+            padding-top: calc(14px + env(safe-area-inset-top, 0px));
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(71, 43, 16, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .header-logo {
+            height: 38px;
+            width: auto;
+        }
+
+        .header-titles h1 {
+            margin: 0;
+            font-family: 'ExtraBlack', serif;
+            font-size: 24px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            line-height: 1.1;
+            color: white;
+        }
+
+        .header-titles p {
+            margin: 2px 0 0 0;
+            font-family: 'Subhead2', sans-serif;
+            font-size: 13px;
+            color: #d1ecf1;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .market-pill {
+            background-color: var(--brand-red);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-family: 'Subhead1', sans-serif;
+            font-size: 13px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            box-shadow: 0 2px 6px rgba(255, 0, 0, 0.3);
+        }
+
+        /* SIGNATURE RED ACCENT STRIPE */
+        .brand-stripe {
+            height: 4px;
+            background-color: var(--brand-red);
+            width: 100%;
+        }
+
+        /* TRAINER INFO STRIP */
+        .info-strip {
+            background-color: white;
+            border-bottom: 1.5px solid var(--crust-med);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 18px;
+            font-size: 15px;
+            color: var(--crust-deep);
+            font-family: 'Subhead2', sans-serif;
+        }
+
+        .info-strip-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-strip-item svg {
+            width: 16px;
+            height: 16px;
+            fill: var(--dark-blue);
+        }
+
+        .info-strip-item a {
+            color: var(--dark-blue);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .info-strip-item a:hover {
+            text-decoration: underline;
+        }
+
+        /* MAIN CONTAINER */
+        main {
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 24px 20px 60px 20px;
+            flex: 1;
+        }
+
+        /* PERSONALIZED GREETING BANNER */
+        .personal-banner {
+            background: linear-gradient(135deg, #ffffff 0%, var(--crust-light) 100%);
+            border: 2px solid var(--crust-med);
+            border-left: 6px solid var(--brand-blue);
+            border-radius: var(--border-radius);
+            padding: 18px 22px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .personal-banner-text h2 {
+            margin: 0;
+            font-family: 'Subhead1', sans-serif;
+            font-size: 20px;
+            color: var(--dark-blue);
+        }
+
+        .personal-banner-text p {
+            margin: 4px 0 0 0;
+            font-size: 15px;
+            color: var(--crust-deep);
+        }
+
+        .view-reqs-btn {
+            background-color: var(--dark-blue);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 14px;
+            font-family: 'Subhead1', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background-color 0.2s;
+        }
+
+        .view-reqs-btn:hover { background-color: var(--brand-blue); }
+        .view-reqs-btn svg { width: 15px; height: 15px; fill: white; }
+
+        /* SECTION TITLE */
+        .section-header {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            border-bottom: 2px solid var(--crust-med);
+            padding-bottom: 10px;
+        }
+
+        .section-header h2 {
+            margin: 0;
+            font-family: 'ExtraBlack', serif;
+            font-size: 22px;
+            color: var(--dark-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .section-header span {
+            font-size: 14px;
+            color: var(--crust-deep);
+            font-family: 'Subhead2', sans-serif;
+        }
+
+        /* CLASS GRID */
+        .class-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 22px;
+        }
+
+        /* CLASS CARD */
+        .class-card {
+            background: white;
+            border-radius: var(--border-radius);
+            border: 1.5px solid var(--crust-med);
+            box-shadow: 0 4px 12px rgba(71, 43, 16, 0.06);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .class-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(71, 43, 16, 0.12);
+        }
+
+        .card-top {
+            background-color: #fcf9f5;
+            border-bottom: 1px solid var(--crust-med);
+            padding: 16px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .date-badge {
+            background-color: var(--dark-blue);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: 'Subhead1', sans-serif;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .spots-badge {
+            font-size: 13px;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .spots-available { background-color: #e6f7ec; color: #155724; border: 1px solid #c3e6cb; }
+        .spots-low { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .spots-full { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        .card-body {
+            padding: 18px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .card-time {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--dark-blue);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Subhead1', sans-serif;
+        }
+
+        .card-time svg { width: 18px; height: 18px; fill: var(--brand-blue); }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: bold;
+            color: var(--crust-burnt);
+            margin: 0;
+            font-family: 'Subhead1', sans-serif;
+        }
+
+        .card-details {
+            font-size: 14px;
+            color: var(--crust-deep);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-details svg { width: 16px; height: 16px; fill: var(--brand-red); }
+
+        /* ROSTER BOX */
+        .roster-box {
+            background-color: var(--crust-light);
+            border: 1px solid var(--crust-med);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 4px;
+        }
+
+        .roster-header {
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: var(--crust-deep);
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .roster-header svg { width: 14px; height: 14px; fill: var(--dark-blue); }
+
+        .roster-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
+        .roster-chip {
+            background-color: white;
+            border: 1px solid var(--crust-med);
+            color: var(--dark-blue);
+            font-size: 13px;
+            padding: 3px 9px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+
+        .roster-empty {
+            font-size: 13px;
+            color: #888;
+            font-style: italic;
+        }
+
+        /* CARD FOOTER */
+        .card-footer {
+            padding: 14px 18px;
+            background-color: white;
+            border-top: 1px solid var(--crust-med);
+        }
+
+        .register-btn {
+            width: 100%;
+            background-color: var(--brand-red);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px;
+            font-family: 'Subhead1', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(255, 0, 0, 0.2);
+            transition: background-color 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .register-btn:hover:not(:disabled) {
+            background-color: var(--dark-red);
+            transform: translateY(-1px);
+        }
+
+        .register-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .register-btn svg { width: 16px; height: 16px; fill: white; }
+
+        /* FOOTER */
+        footer {
+            background-color: var(--dark-blue);
+            color: white;
+            padding: 16px 20px;
+            text-align: center;
+            font-size: 14px;
+            font-family: 'Subhead2', sans-serif;
+            margin-top: auto;
+        }
+
+        /* MODALS */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(30, 20, 10, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .modal-card {
+            background: white;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
+            border: 2px solid var(--crust-med);
+            animation: modalSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+
+        @keyframes modalSlide {
+            from { transform: translateY(20px) scale(0.98); }
+            to { transform: translateY(0) scale(1); }
+        }
+
+        .modal-header {
+            background-color: var(--dark-blue);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-family: 'Subhead1', sans-serif;
+            font-size: 19px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+            line-height: 1.5;
+            font-size: 15px;
+        }
+
+        .modal-footer {
+            padding: 16px 20px;
+            background-color: #faf6f0;
+            border-top: 1.5px solid var(--crust-med);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* POLICY SECTIONS */
+        .policy-block {
+            background-color: white;
+            border: 1.5px solid var(--crust-med);
+            border-left: 5px solid var(--brand-blue);
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 14px;
+        }
+
+        .policy-block.alert-block {
+            border-left-color: var(--brand-red);
+            background-color: #fff9f9;
+        }
+
+        .policy-block h4 {
+            margin: 0 0 6px 0;
+            font-family: 'Subhead1', sans-serif;
+            font-size: 16px;
+            color: var(--dark-blue);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+        }
+
+        .policy-block.alert-block h4 { color: var(--brand-red); }
+        .policy-block h4 svg { width: 18px; height: 18px; fill: currentColor; }
+
+        .policy-block ul {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 14px;
+            color: var(--crust-burnt);
+        }
+
+        .policy-block li { margin-bottom: 4px; }
+
+        .agree-container {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 6px 0;
+            font-size: 14.5px;
+            color: var(--crust-burnt);
+            font-family: 'Subhead2', sans-serif;
+            cursor: pointer;
+        }
+
+        .agree-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            accent-color: var(--dark-blue);
+            cursor: pointer;
+        }
+
+        .confirm-reqs-btn {
+            background-color: var(--dark-blue);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px;
+            font-family: 'Subhead1', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .confirm-reqs-btn:disabled { background-color: #bcc6cc; cursor: not-allowed; }
+        .confirm-reqs-btn:hover:not(:disabled) { background-color: var(--brand-blue); }
+
+        .form-group { margin-bottom: 14px; }
+        .form-group label {
+            display: block;
+            font-size: 13.5px;
+            font-family: 'Subhead1', sans-serif;
+            color: var(--dark-blue);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid var(--crust-med);
+            border-radius: 6px;
+            font-size: 16px;
+            font-family: 'Condensed', sans-serif;
+            color: var(--crust-burnt);
+            background-color: white;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--brand-blue);
+            box-shadow: 0 0 0 3px rgba(0, 144, 226, 0.15);
+        }
+
+        .selected-class-summary {
+            background-color: #eef7fd;
+            border: 1.5px solid #bee5eb;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            font-size: 14.5px;
+            color: var(--dark-blue);
+        }
+
+        .selected-class-summary strong {
+            display: block;
+            margin-bottom: 4px;
+            font-family: 'Subhead1', sans-serif;
+            text-transform: uppercase;
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--dark-blue);
+            font-family: 'Subhead1', sans-serif;
+            font-size: 18px;
+        }
+
+        .spinner {
+            width: 44px;
+            height: 44px;
+            border: 4px solid var(--crust-med);
+            border-top: 4px solid var(--brand-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            .header-titles h1 { font-size: 20px; }
+            .market-pill { padding: 4px 10px; font-size: 12px; }
+            main { padding: 16px 14px 40px 14px; }
+            .class-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- BRAND HEADER -->
+    <header>
+        <div class="header-left">
+            <img src="images/New_Logo_v2.png" alt="Team Wow Logo" class="header-logo" onerror="this.src='tile_blue.png'">
+            <div class="header-titles">
+                <h1>Team Wow Orientation</h1>
+                <p>Virtual Classroom • New Team Member Portal</p>
+            </div>
+        </div>
+        <div class="market-pill">Denver Market</div>
+    </header>
+
+    <!-- SIGNATURE RED ACCENT STRIPE -->
+    <div class="brand-stripe"></div>
+
+    <!-- TRAINER INFO STRIP -->
+    <div class="info-strip">
+        <div class="info-strip-item">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            <span>Trainer: <strong>Richard</strong></span>
+        </div>
+        <div class="info-strip-item">
+            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            <span>Email: <a href="mailto:richard@team-wow.com">richard@team-wow.com</a></span>
+        </div>
+        <div class="info-strip-item">
+            <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+            <span>Format: <strong>Google Meet (Virtual)</strong></span>
+        </div>
+    </div>
+
+    <!-- MAIN BODY -->
+    <main>
+        <div id="personalizedBanner" class="personal-banner" style="display: none;">
+            <div class="personal-banner-text">
+                <h2 id="personalGreeting">Welcome to Team Wow!</h2>
+                <p>Please review our orientation requirements and select your preferred class date below.</p>
+            </div>
+            <button type="button" class="view-reqs-btn" onclick="openRequirementsModal(true)">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                View Class Policies
+            </button>
+        </div>
+
+        <div class="section-header">
+            <h2>Available Orientation Sessions</h2>
+            <span>Registration closes 2 hours before class</span>
+        </div>
+
+        <div id="loadingSchedule" class="loading-container">
+            <div class="spinner"></div>
+            Loading available class sessions...
+        </div>
+
+        <div id="classGrid" class="class-grid" style="display: none;"></div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <p style="margin: 0;">&copy; 2026 Team Wow! All rights reserved.</p>
+    </footer>
+
+    <!-- 1. ENTRY POLICY & REQUIREMENTS MODAL -->
+    <div id="requirementsModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Class Requirements & Attendance Policy</h3>
+                <button type="button" class="modal-close-btn" id="btnCloseReqs" onclick="closeRequirementsModal()" style="display: none;">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="policy-block">
+                    <h4>
+                        <svg viewBox="0 0 24 24"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/></svg>
+                        Device & Check-In Policy
+                    </h4>
+                    <ul>
+                        <li><strong>Laptop or Desktop Computer STRONGLY RECOMMENDED.</strong></li>
+                        <li>Your camera and microphone must be operational throughout the session.</li>
+                        <li>You must remain visible on camera for the duration of the class.</li>
+                        <li>Log in using the exact legal name shown on your state/government ID.</li>
+                        <li>Join the waiting room with camera and microphone muted until instructed.</li>
+                    </ul>
+                </div>
+
+                <div class="policy-block">
+                    <h4>
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                        Learning Environment
+                    </h4>
+                    <ul>
+                        <li><strong>NO MOVING VEHICLES:</strong> You cannot attend while operating or riding in a moving vehicle.</li>
+                        <li>Must be in a quiet, indoor space free of background noise and distractions.</li>
+                        <li>Distractions will result in removal from the session and require GM review.</li>
+                    </ul>
+                </div>
+
+                <div class="policy-block alert-block">
+                    <h4>
+                        <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                        Multiple Sign-Ups & Attendance Policy
+                    </h4>
+                    <ul>
+                        <li><strong>Choose your date with care:</strong> Any duplicate or multiple submissions require administrative review.</li>
+                        <li>Your <strong>first scheduled date</strong> is treated as your confirmed attendance expectation unless your trainer or store General Manager is notified in advance.</li>
+                        <li>Enrollment closes strictly <strong>2 hours before</strong> class start time.</li>
+                    </ul>
+                </div>
+
+                <div class="policy-block">
+                    <h4>
+                        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                        Google Meet Link Delivery
+                    </h4>
+                    <ul>
+                        <li>Your class trainer (Richard) will email your Google Meet video link to you after the registration window closes.</li>
+                        <li><strong>Please check your email and spam/junk folder</strong> prior to class start.</li>
+                        <li>Contact Richard (<a href="mailto:richard@team-wow.com" style="color:var(--dark-blue); font-weight:bold;">richard@team-wow.com</a>) before class if you have questions.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <label class="agree-container">
+                    <input type="checkbox" id="chkAgreeRequirements" onchange="toggleRequirementsButton()">
+                    <span>I have read, understand, and agree to the orientation requirements and attendance policies.</span>
+                </label>
+                <button type="button" class="confirm-reqs-btn" id="btnContinueSchedule" disabled onclick="acceptRequirements()">
+                    Continue to Class Schedule
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. REGISTRATION CONFIRMATION MODAL -->
+    <div id="signupModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Confirm Orientation Registration</h3>
+                <button type="button" class="modal-close-btn" onclick="closeSignupModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="selected-class-summary">
+                    <strong>Selected Session:</strong>
+                    <div id="summaryClassDate">Class Date</div>
+                    <div id="summaryClassTime">Class Time</div>
+                    <div id="summaryClassFormat">Google Meet (Virtual) • Trainer: Richard</div>
+                </div>
+
+                <form id="signupForm" onsubmit="submitRegistration(event)">
+                    <input type="hidden" id="formClassId">
+                    <input type="hidden" id="formCandidateId">
+
+                    <div class="form-group">
+                        <label>Full Legal Name (as on ID) *</label>
+                        <input type="text" id="formName" required placeholder="First and Last Name">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email Address *</label>
+                        <input type="email" id="formEmail" required placeholder="name@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cell Phone Number *</label>
+                        <input type="tel" id="formPhone" required placeholder="(123) 456-7890">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Store Number *</label>
+                        <input type="text" id="formStore" required placeholder="e.g. 6514, 6579">
+                    </div>
+
+                    <div id="signupError" style="color: var(--brand-red); font-size: 14px; margin-bottom: 12px; display: none;"></div>
+
+                    <button type="submit" class="register-btn" id="btnSubmitSignup">
+                        Confirm Registration
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. SUCCESS / CONFIRMATION MODAL -->
+    <div id="successModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header" style="background-color: var(--brand-blue);">
+                <h3>🎉 You're Registered!</h3>
+                <button type="button" class="modal-close-btn" onclick="closeSuccessModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: center; padding: 28px 20px;">
+                <h4 style="margin: 0 0 10px 0; font-family: 'Subhead1', sans-serif; font-size: 20px; color: var(--dark-blue);">
+                    Congratulations, <span id="successName">Team Member</span>!
+                </h4>
+                <p style="font-size: 16px; margin: 0 0 16px 0; color: var(--crust-burnt);">
+                    Your spot is confirmed for orientation on <strong id="successDate">Date</strong> at <strong id="successTime">Time</strong>.
+                </p>
+
+                <div style="background-color: #faf2e9; border: 1.5px solid var(--crust-med); border-radius: 8px; padding: 16px; text-align: left; margin-bottom: 20px; font-size: 14.5px;">
+                    <strong style="color: var(--dark-blue); display: block; margin-bottom: 6px;">Next Steps:</strong>
+                    <ul style="margin: 0; padding-left: 18px; line-height: 1.5;">
+                        <li>Your trainer (Richard) will email your Google Meet link to <strong id="successEmail">email</strong> prior to class start.</li>
+                        <li>Check your spam/junk folder before class if you do not see it.</li>
+                        <li>Log in 5–10 minutes before class with your camera and microphone ready.</li>
+                    </ul>
+                </div>
+
+                <button type="button" class="confirm-reqs-btn" onclick="closeSuccessModal()" style="width: 100%;">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        const API_URL = "/api/staffing";
+        let classesData = [];
+        let candidateProfile = null;
+        let selectedClass = null;
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            await checkPersonalizedLink();
+
+            const reqsAccepted = sessionStorage.getItem('nto_reqs_accepted');
+            if (!reqsAccepted) {
+                openRequirementsModal(false);
+            }
+
+            await fetchClasses();
+        });
+
+        async function checkPersonalizedLink() {
+            const params = new URLSearchParams(window.location.search);
+            const candId = params.get('candId') || params.get('id');
+            const email = params.get('email');
+            const nameParam = params.get('name');
+
+            if (candId || email) {
+                try {
+                    const query = candId ? `action=getCandidate&id=${encodeURIComponent(candId)}` : `action=getCandidate&email=${encodeURIComponent(email)}`;
+                    const res = await fetch(`${API_URL}?${query}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.success && data.candidate) {
+                            candidateProfile = data.candidate;
+                            renderPersonalBanner(data.candidate);
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Could not fetch candidate details:", e);
+                }
+            }
+
+            if (nameParam) {
+                candidateProfile = { name: nameParam, email: email || '', phone: '', storeNum: '' };
+                renderPersonalBanner(candidateProfile);
+            }
+        }
+
+        function renderPersonalBanner(cand) {
+            const banner = document.getElementById('personalizedBanner');
+            const greeting = document.getElementById('personalGreeting');
+            if (banner && greeting && cand.name) {
+                const firstName = cand.name.trim().split(/\s+/)[0];
+                greeting.textContent = `Welcome, ${firstName}!`;
+                banner.style.display = 'flex';
+            }
+        }
+
+        function openRequirementsModal(allowClose) {
+            const modal = document.getElementById('requirementsModal');
+            const closeBtn = document.getElementById('btnCloseReqs');
+            if (closeBtn) closeBtn.style.display = allowClose ? 'block' : 'none';
+            modal.classList.add('active');
+        }
+
+        function closeRequirementsModal() {
+            document.getElementById('requirementsModal').classList.remove('active');
+        }
+
+        function toggleRequirementsButton() {
+            const chk = document.getElementById('chkAgreeRequirements');
+            const btn = document.getElementById('btnContinueSchedule');
+            btn.disabled = !chk.checked;
+        }
+
+        function acceptRequirements() {
+            sessionStorage.setItem('nto_reqs_accepted', 'true');
+            closeRequirementsModal();
+        }
+
+        async function fetchClasses() {
+            const loading = document.getElementById('loadingSchedule');
+            const grid = document.getElementById('classGrid');
+
+            try {
+                const res = await fetch(`${API_URL}?action=getNtoClasses&market=Denver`);
+                if (!res.ok) throw new Error("Failed to load class schedule");
+                const data = await res.json();
+
+                classesData = data.classes || [];
+                renderClassGrid(classesData);
+                loading.style.display = 'none';
+                grid.style.display = 'grid';
+            } catch (err) {
+                loading.innerHTML = `<span style="color:var(--brand-red);">Unable to load class schedule. Please contact your store General Manager.</span>`;
+            }
+        }
+
+        function renderClassGrid(classes) {
+            const grid = document.getElementById('classGrid');
+            grid.innerHTML = '';
+
+            if (!classes || classes.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px 20px; color: var(--crust-deep); font-size: 17px; background: white; border-radius: var(--border-radius); border: 1.5px solid var(--crust-med);">
+                        There are currently no open orientation sessions scheduled for the Denver market.<br>
+                        <span style="font-size: 15px; color: #777;">Please check back soon or contact your store General Manager.</span>
+                    </div>
+                `;
+                return;
+            }
+
+            const now = new Date();
+
+            classes.forEach(cls => {
+                const card = document.createElement('div');
+                card.className = 'class-card';
+
+                const totalSpots = cls.spotsTotal || cls.capacity || 10;
+                const takenSpots = cls.spotsTaken !== undefined ? cls.spotsTaken : (cls.attendees ? cls.attendees.length : 0);
+                const remaining = Math.max(0, totalSpots - takenSpots);
+
+                let spotsClass = 'spots-available';
+                let spotsText = `${remaining} Spots Available`;
+                let isFull = remaining <= 0;
+
+                if (isFull) {
+                    spotsClass = 'spots-full';
+                    spotsText = 'Class Full';
+                } else if (remaining <= 3) {
+                    spotsClass = 'spots-low';
+                    spotsText = `Only ${remaining} Left`;
+                }
+
+                let isClosed = false;
+                if (cls.isoDate) {
+                    const classTime = new Date(cls.isoDate);
+                    const cutoff = new Date(classTime.getTime() - (2 * 60 * 60 * 1000));
+                    if (now > cutoff) {
+                        isClosed = true;
+                    }
+                }
+
+                const dateDisplay = cls.classDate || "Scheduled Date";
+                const timeRange = (cls.startTime || "1:00 PM") + (cls.endTime ? ` – ${cls.endTime}` : "");
+
+                const attendees = cls.attendees || [];
+                let rosterHTML = '';
+                if (attendees.length > 0) {
+                    rosterHTML = attendees.map(name => `<span class="roster-chip">${formatAttendeeName(name)}</span>`).join('');
+                } else {
+                    rosterHTML = `<span class="roster-empty">No trainees registered yet — be the first!</span>`;
+                }
+
+                let btnText = "Select This Date";
+                let btnDisabled = false;
+
+                if (isClosed) {
+                    btnText = "Registration Closed";
+                    btnDisabled = true;
+                } else if (isFull) {
+                    btnText = "Class Full";
+                    btnDisabled = true;
+                }
+
+                card.innerHTML = `
+                    <div class="card-top">
+                        <span class="date-badge">${dateDisplay}</span>
+                        <span class="spots-badge ${spotsClass}">${spotsText}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-time">
+                            <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                            <span>${timeRange}</span>
+                        </div>
+                        <h3 class="card-title">Virtual Orientation Session</h3>
+                        <div class="card-details">
+                            <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                            <span>Live Video Classroom • Google Meet</span>
+                        </div>
+                        <div class="roster-box">
+                            <div class="roster-header">
+                                <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                                <span>Who's Attending:</span>
+                            </div>
+                            <div class="roster-chips">${rosterHTML}</div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="button" class="register-btn" ${btnDisabled ? 'disabled' : ''} onclick="openSignupModal('${cls.id}')">
+                            <svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+                            ${btnText}
+                        </button>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        function formatAttendeeName(fullName) {
+            if (!fullName) return "";
+            const parts = fullName.trim().split(/\s+/);
+            if (parts.length > 1) {
+                return `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
+            }
+            return parts[0];
+        }
+
+        function openSignupModal(classId) {
+            selectedClass = classesData.find(c => c.id === classId);
+            if (!selectedClass) return;
+
+            document.getElementById('formClassId').value = classId;
+            document.getElementById('summaryClassDate').textContent = `Date: ${selectedClass.classDate}`;
+            document.getElementById('summaryClassTime').textContent = `Time: ${selectedClass.startTime} – ${selectedClass.endTime || ''}`;
+
+            if (candidateProfile) {
+                document.getElementById('formCandidateId').value = candidateProfile.id || '';
+                document.getElementById('formName').value = candidateProfile.name || '';
+                document.getElementById('formEmail').value = candidateProfile.email || '';
+                document.getElementById('formPhone').value = candidateProfile.phone || '';
+                document.getElementById('formStore').value = candidateProfile.storeNum || '';
+            }
+
+            document.getElementById('signupError').style.display = 'none';
+            document.getElementById('signupModal').classList.add('active');
+        }
+
+        function closeSignupModal() {
+            document.getElementById('signupModal').classList.remove('active');
+        }
+
+        async function submitRegistration(e) {
+            e.preventDefault();
+
+            const classId = document.getElementById('formClassId').value;
+            const candidateId = document.getElementById('formCandidateId').value;
+            const name = document.getElementById('formName').value.trim();
+            const email = document.getElementById('formEmail').value.trim();
+            const phone = document.getElementById('formPhone').value.trim();
+            const storeNum = document.getElementById('formStore').value.trim();
+
+            const btn = document.getElementById('btnSubmitSignup');
+            const errBox = document.getElementById('signupError');
+
+            btn.disabled = true;
+            btn.innerHTML = `<span>Processing...</span>`;
+            errBox.style.display = 'none';
+
+            try {
+                const payload = {
+                    action: "registerNtoClass",
+                    classId: classId,
+                    candidateId: candidateId,
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    storeNum: storeNum,
+                    market: "Denver"
+                };
+
+                const res = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (!res.ok || data.error) {
+                    throw new Error(data.error || "Failed to submit registration");
+                }
+
+                closeSignupModal();
+                showSuccessModal(name, email, data.classDate || (selectedClass ? selectedClass.classDate : ''), data.startTime || (selectedClass ? selectedClass.startTime : ''));
+
+                await fetchClasses();
+            } catch (err) {
+                errBox.textContent = err.message;
+                errBox.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg> Confirm Registration`;
+            }
+        }
+
+        function showSuccessModal(name, email, classDate, classTime) {
+            document.getElementById('successName').textContent = name.split(' ')[0] || name;
+            document.getElementById('successEmail').textContent = email;
+            document.getElementById('successDate').textContent = classDate;
+            document.getElementById('successTime').textContent = classTime;
+            document.getElementById('successModal').classList.add('active');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.remove('active');
+        }
+    </script>
+</body>
+
+</html>

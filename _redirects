@@ -1,2 +1,8 @@
-# Cloudflare Pages Redirects
-# (Pages natively serves /admin for admin.html and /denver for denver_index.html)
+# Cloudflare Pages Redirects & Clean Rewrites
+/tw-dallas-orientation    /orientation.html           200
+/dallas-orientation       /orientation.html           200
+/orientation              /orientation.html           200
+/tw-denver-orientation    /denver_orientation.html    200
+/denver-orientation       /denver_orientation.html    200
+/admin                    /admin.html                 200
+/denver                   /denver_index.html          200
