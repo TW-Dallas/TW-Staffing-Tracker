@@ -469,10 +469,19 @@
     // Initial load
     fetchData(true);
 
-    // Silent background sync timer (every 30 seconds)
+    // Smart background sync: only poll if user is actively looking at the page, and at a safe 3-minute interval
     setInterval(() => {
-        fetchData(false);
-    }, 30000);
+        if (document.visibilityState === 'visible') {
+            fetchData(false);
+        }
+    }, 180000);
+
+    // Auto-refresh when user switches back to this tab
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            fetchData(false);
+        }
+    });
 
     function fetchData(showFullScreenLoader) {
         if (showFullScreenLoader) {

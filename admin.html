@@ -2558,7 +2558,12 @@
                 initScratchpad();
                 showLoader(false);
 
-                if (!window.syncInterval) window.syncInterval = setInterval(silentSync, 90000);
+                if (!window.syncInterval) {
+                    window.syncInterval = setInterval(silentSync, 180000);
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.visibilityState === 'visible') silentSync();
+                    });
+                }
 
             } catch (err) {
                 showLoader(false);
@@ -2585,6 +2590,7 @@
         }
 
         async function silentSync() {
+            if (document.visibilityState !== 'visible') return;
             const loader = document.getElementById('loadingOverlay');
             if (loader && !loader.classList.contains('hidden')) return;
 

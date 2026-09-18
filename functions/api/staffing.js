@@ -3,14 +3,20 @@
 
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQVuU0uQ3TdkfsBwJpZ-K1iUDXTuLgvqEayPeqZgSRLDNxHOEUsOrjaSZAujI8p_874g/exec";
 
-// CORS Headers Helper
-function corsHeaders() {
-    return {
+// CORS Headers Helper with optional Edge Cache-Control
+function corsHeaders(cacheSecs = 0) {
+    const h = {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
         "Content-Type": "application/json;charset=utf-8"
     };
+    if (cacheSecs > 0) {
+        h["Cache-Control"] = `public, max-age=${cacheSecs}, s-maxage=${cacheSecs}`;
+    } else {
+        h["Cache-Control"] = "no-store";
+    }
+    return h;
 }
 
 // Current timestamp formatted for Team Wow (e.g. "9/17/2026 10:20 AM")
@@ -90,9 +96,67 @@ export async function onRequestGet(context) {
                     ntoDate: cand.nto_date,
                     ntoScheduled: Boolean(cand.nto_scheduled)
                 }
-            }), { status: 200, headers: corsHeaders() });
+            }), { status: 200, headers: corsHeaders(60) });
         }
         return new Response(JSON.stringify({ success: false, error: "Candidate not found" }), { status: 404, headers: corsHeaders() });
+    }
+
+    // Fast endpoint for NTO classes: only query active classes and active registrations (prevents full database scans!)
+    if (reqAction === "getNtoClasses") {
+        const [classesRes, regsRes] = await Promise.all([
+            db.prepare("SELECT * FROM training_classes WHERE program = 'NTO' AND (market = ? OR market = 'Virtual') AND is_active = 1").bind(market).all(),
+            db.prepare("SELECT class_id, candidate_name FROM class_registrations WHERE class_id IN (SELECT id FROM training_classes WHERE program = 'NTO' AND (market = ? OR market = 'Virtual') AND is_active = 1)").bind(market).all()
+        ]);
+
+        const regMap = {};
+        (regsRes.results || []).forEach(r => {
+            if (!regMap[r.class_id]) regMap[r.class_id] = [];
+            regMap[r.class_id].push(r.candidate_name);
+        });
+
+        const ntoClasses = (classesRes.results || []).map(cl => {
+            const attendees = regMap[cl.id] || [];
+            let isoDate = null;
+            try {
+                const parts = (cl.class_date || '').split('/');
+                if (parts.length === 3) {
+                    const m = parts[0].padStart(2, '0');
+                    const d = parts[1].padStart(2, '0');
+                    const y = parts[2];
+                    isoDate = `${y}-${m}-${d}T16:00:00`;
+                }
+            } catch (e) {}
+
+            return {
+                id: cl.id,
+                classId: cl.id,
+                market: cl.market,
+                name: cl.name,
+                classDate: cl.class_date,
+                startTime: cl.start_time,
+                endTime: cl.end_time,
+                trainer: cl.trainer,
+                trainerName: cl.trainer,
+                location: cl.location,
+                meetLink: cl.meet_link,
+                spotsTotal: cl.spots_total,
+                capacity: cl.spots_total,
+                spotsTaken: attendees.length > 0 ? attendees.length : cl.spots_taken,
+                attendees: attendees,
+                isoDate: isoDate
+            };
+        });
+
+        ntoClasses.sort((a, b) => parseDateForSort(a.classDate) - parseDateForSort(b.classDate));
+
+        return new Response(JSON.stringify({
+            success: true,
+            market,
+            classes: ntoClasses
+        }), {
+            status: 200,
+            headers: corsHeaders(60)
+        });
     }
 
     const storeNum = url.searchParams.get("storeNum") || url.searchParams.get("store");
@@ -138,8 +202,8 @@ export async function onRequestGet(context) {
             // 7. NTO Classes
             db.prepare("SELECT * FROM training_classes WHERE program = 'NTO' AND (market = ? OR market = 'Virtual') AND is_active = 1 ORDER BY class_date ASC").bind(market).all(),
 
-            // 8. Class Registrations for attendee roster
-            db.prepare("SELECT class_id, candidate_name FROM class_registrations").all()
+            // 8. Class Registrations for attendee roster (filtered to active classes)
+            db.prepare("SELECT class_id, candidate_name FROM class_registrations WHERE class_id IN (SELECT id FROM training_classes WHERE program = 'NTO' AND (market = ? OR market = 'Virtual') AND is_active = 1)").bind(market).all()
         ]);
 
         // Map candidates to frontend camelCase
@@ -305,19 +369,6 @@ export async function onRequestGet(context) {
             };
         });
 
-        ntoClasses.sort((a, b) => parseDateForSort(a.classDate) - parseDateForSort(b.classDate));
-
-        if (reqAction === "getNtoClasses") {
-            return new Response(JSON.stringify({
-                success: true,
-                market,
-                classes: ntoClasses
-            }), {
-                status: 200,
-                headers: corsHeaders()
-            });
-        }
-
         return new Response(JSON.stringify({
             success: true,
             market,
@@ -332,7 +383,7 @@ export async function onRequestGet(context) {
             version: "d1-v1.0"
         }), {
             status: 200,
-            headers: corsHeaders()
+            headers: corsHeaders(30)
         });
 
     } catch (err) {
