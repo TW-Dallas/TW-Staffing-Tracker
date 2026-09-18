@@ -282,7 +282,7 @@
         /* CLASS GRID - 4 per row on desktop, 1 on mobile */
         .class-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 14px;
             align-items: stretch;
         }
@@ -392,17 +392,19 @@
             background-color: var(--crust-base);
             border: 1px solid var(--crust-med);
             border-radius: 8px;
-            padding: 6px 10px;
+            padding: 8px 10px;
             margin-top: 2px;
+            display: flex;
+            flex-direction: column;
         }
 
         .roster-header {
-            font-size: 12px;
+            font-size: 11.5px;
             font-weight: bold;
             text-transform: uppercase;
             color: var(--crust-deep);
             letter-spacing: 0.5px;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             display: flex;
             align-items: center;
             gap: 5px;
@@ -418,25 +420,46 @@
         .roster-chips {
             display: flex;
             flex-wrap: wrap;
-            gap: 4px;
-            max-height: 50px;
+            gap: 5px;
+            min-height: 60px;
+            max-height: 110px;
             overflow-y: auto;
+            padding-right: 4px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--crust-dark) transparent;
+        }
+
+        .roster-chips::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .roster-chips::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 4px;
+        }
+
+        .roster-chips::-webkit-scrollbar-thumb {
+            background: var(--crust-dark);
+            border-radius: 4px;
         }
 
         .roster-chip {
             background-color: white;
             border: 1px solid var(--crust-med);
             color: var(--dark-blue);
-            font-size: 12.5px;
-            padding: 2px 7px;
-            border-radius: 10px;
+            font-size: 12px;
+            padding: 2.5px 8px;
+            border-radius: 8px;
             font-weight: bold;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+            white-space: nowrap;
         }
 
         .roster-empty {
             font-size: 12.5px;
             color: #888;
             font-style: italic;
+            padding: 10px 0;
         }
 
         /* CARD FOOTER */
@@ -1365,7 +1388,16 @@
             const grid = document.getElementById('classGrid');
             grid.innerHTML = '';
 
-            if (!classes || classes.length === 0) {
+            const now = new Date();
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+            // Filter out past classes: only show classes scheduled for today or in the future
+            const upcomingClasses = (classes || []).filter(cls => {
+                const classDay = parseClassDate(cls.classDate);
+                return classDay >= todayStart;
+            });
+
+            if (!upcomingClasses || upcomingClasses.length === 0) {
                 grid.innerHTML = `
                     <div style="grid-column: 1/-1; text-align: center; padding: 40px 20px; color: var(--crust-deep); font-size: 17px; background: white; border-radius: var(--border-radius); border: 1.5px solid var(--crust-med);">
                         There are currently no open orientation sessions scheduled for the Dallas market.<br>
@@ -1375,9 +1407,7 @@
                 return;
             }
 
-            const now = new Date();
-
-            classes.forEach(cls => {
+            upcomingClasses.forEach(cls => {
                 const card = document.createElement('div');
                 card.className = 'class-card';
 
