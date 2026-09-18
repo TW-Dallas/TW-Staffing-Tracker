@@ -498,15 +498,6 @@ export async function onRequestPost(context) {
                 `).bind('%' + cleanDigits).first();
             }
 
-            if (priorReg) {
-                return new Response(JSON.stringify({
-                    success: false,
-                    error: "Our records show you have previously registered for an orientation session. Rescheduling an orientation class is a store-level decision. If you would like to request a reschedule for a future orientation date, please contact the General Manager of the store you applied to.",
-                    isDuplicate: true,
-                    priorClassDate: priorReg.class_date || "Previous Session"
-                }), { status: 400, headers: corsHeaders() });
-            }
-
             // 1b-iii. Check onboarding_candidates for prior scheduled NTO
             let candMatch = null;
             if (email && cleanDigits.length === 10) {
@@ -514,12 +505,38 @@ export async function onRequestPost(context) {
             } else if (email) {
                 candMatch = await db.prepare("SELECT * FROM onboarding_candidates WHERE (nto_scheduled = 1 OR (nto_date IS NOT NULL AND nto_date != '')) AND LOWER(email) = LOWER(?)").bind(email).first();
             }
-            if (candMatch) {
+
+            if (priorReg || candMatch) {
+                try {
+                    await fetch(APPS_SCRIPT_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify({
+                            username: "dallas_admin",
+                            password: "dallas_password_123",
+                            action: "sendNtoDuplicateAlert",
+                            name: name,
+                            email: email,
+                            phone: phone,
+                            storeNum: storeNum,
+                            classId: classId,
+                            classDate: cls.class_date,
+                            classTime: cls.start_time
+                        })
+                    });
+                } catch (dupMailErr) {
+                    console.warn("Duplicate alert proxy failed:", dupMailErr);
+                }
+
                 return new Response(JSON.stringify({
-                    success: false,
-                    error: "Our records show you have previously registered for an orientation session. Rescheduling an orientation class is a store-level decision. If you would like to request a reschedule for a future orientation date, please contact the General Manager of the store you applied to.",
-                    isDuplicate: true
-                }), { status: 400, headers: corsHeaders() });
+                    success: true,
+                    pending: true,
+                    message: "Request received and pending review.",
+                    name: name,
+                    email: email,
+                    classDate: cls.class_date,
+                    classTime: cls.start_time
+                }), { status: 200, headers: corsHeaders() });
             }
 
             // 1c. Insert class registration

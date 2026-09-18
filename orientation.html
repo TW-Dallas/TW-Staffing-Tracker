@@ -1237,6 +1237,37 @@
         </div>
     </div>
 
+    <!-- 4. PENDING APPROVAL MODAL -->
+    <div id="pendingModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header" style="background-color: #d97706;">
+                <h3>Request Pending Review</h3>
+                <button type="button" class="modal-close-btn" onclick="closePendingModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: center; padding: 28px 20px;">
+                <div style="font-size: 44px; margin-bottom: 12px; line-height: 1;">⏳</div>
+                <h4 style="margin: 0 0 10px 0; font-family: 'Subhead1', sans-serif; font-size: 20px; color: #92400e;">
+                    Request Received, <span id="pendingName">Team Member</span>
+                </h4>
+                <p style="font-size: 15.5px; margin: 0 0 16px 0; color: var(--crust-burnt); line-height: 1.5;">
+                    Our records indicate you have previously registered for an orientation session. This signup is currently <strong>PENDING trainer review</strong> and will not appear on the class roster until reviewed.
+                </p>
+
+                <div style="background-color: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 16px; text-align: left; margin-bottom: 20px; font-size: 14px; color: #92400e;">
+                    <strong style="display: block; margin-bottom: 6px; font-size: 15px;">Important Notice:</strong>
+                    <ul style="margin: 0; padding-left: 18px; line-height: 1.5;">
+                        <li><strong>Do not submit multiple requests.</strong> Repeated submissions will not speed up the review.</li>
+                        <li><strong>Rescheduling is a store-level decision.</strong> If you need to reschedule or have questions about your status, please contact the <strong>General Manager</strong> of the store you applied to.</li>
+                    </ul>
+                </div>
+
+                <button type="button" class="confirm-reqs-btn" onclick="closePendingModal()" style="width: 100%; background-color: #d97706;">
+                    Understood
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- JAVASCRIPT LOGIC -->
     <script>
         const API_URL = "/api/staffing";
@@ -1587,7 +1618,13 @@
                 }
 
                 closeSignupModal();
-                showSuccessModal(name, email, data.classDate || (selectedClass ? selectedClass.classDate : ''), data.startTime || (selectedClass ? selectedClass.startTime : ''), data.meetLink || (selectedClass ? selectedClass.meetLink : ''));
+
+                if (data.pending) {
+                    showPendingModal(name);
+                    return;
+                }
+
+                showSuccessModal(name, email, data.classDate || (selectedClass ? selectedClass.classDate : ''), data.startTime || (selectedClass ? selectedClass.startTime : ''));
 
                 // Refresh schedule
                 await fetchClasses();
@@ -1600,20 +1637,26 @@
             }
         }
 
+        // Pending Approval Modal
+        function showPendingModal(name) {
+            document.getElementById('pendingName').textContent = (name ? name.split(' ')[0] : '') || name || 'Team Member';
+            document.getElementById('pendingModal').classList.add('active');
+        }
+
+        function closePendingModal() {
+            document.getElementById('pendingModal').classList.remove('active');
+        }
+
         // Success Confirmation Modal
-        function showSuccessModal(name, email, classDate, classTime, meetLink) {
-            document.getElementById('successName').textContent = name.split(' ')[0] || name;
+        function showSuccessModal(name, email, classDate, classTime) {
+            document.getElementById('successName').textContent = (name ? name.split(' ')[0] : '') || name || 'Team Member';
             document.getElementById('successEmail').textContent = email;
             document.getElementById('successDate').textContent = classDate;
             document.getElementById('successTime').textContent = classTime;
 
             const linkBox = document.getElementById('successMeetLinkBox');
-            const linkBtn = document.getElementById('successMeetLink');
-            if (meetLink) {
-                linkBtn.href = meetLink;
-                linkBox.style.display = 'block';
-            } else {
-                linkBox.style.display = 'none';
+            if (linkBox) {
+                linkBox.style.display = 'none'; // Require candidates to check their email for schedule & link
             }
 
             document.getElementById('successModal').classList.add('active');
