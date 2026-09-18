@@ -383,7 +383,7 @@ export async function onRequestGet(context) {
             version: "d1-v1.0"
         }), {
             status: 200,
-            headers: corsHeaders(30)
+            headers: corsHeaders(0)
         });
 
     } catch (err) {
@@ -528,6 +528,9 @@ export async function onRequestPost(context) {
                             classTime: cls.start_time,
                             meetLink: cls.meet_link || "https://meet.google.com/zwc-afuu-hgh",
                             trainerName: "Mike Jacobs",
+                            notifyAdmin: true,
+                            studentPhone: phone,
+                            storeNum: storeNum,
                             trainees: [{ name: name, email: email }]
                         })
                     });
