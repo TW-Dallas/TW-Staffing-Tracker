@@ -472,6 +472,56 @@ export async function onRequestPost(context) {
                 }), { status: 200, headers: corsHeaders() });
             }
 
+            // 1b-ii. Global Duplicate / Prior Registration Check across all historical sessions
+            const cleanDigits = phone.replace(/\D/g, '').slice(-10);
+            let priorReg = null;
+            if (email && cleanDigits.length === 10) {
+                priorReg = await db.prepare(`
+                    SELECT cr.*, tc.class_date, tc.start_time 
+                    FROM class_registrations cr
+                    LEFT JOIN training_classes tc ON cr.class_id = tc.id
+                    WHERE LOWER(cr.email) = LOWER(?) OR (cr.phone != '' AND REPLACE(REPLACE(REPLACE(REPLACE(cr.phone, '-', ''), ' ', ''), '(', ''), ')', '') LIKE ?)
+                `).bind(email, '%' + cleanDigits).first();
+            } else if (email) {
+                priorReg = await db.prepare(`
+                    SELECT cr.*, tc.class_date, tc.start_time 
+                    FROM class_registrations cr
+                    LEFT JOIN training_classes tc ON cr.class_id = tc.id
+                    WHERE LOWER(cr.email) = LOWER(?)
+                `).bind(email).first();
+            } else if (cleanDigits.length === 10) {
+                priorReg = await db.prepare(`
+                    SELECT cr.*, tc.class_date, tc.start_time 
+                    FROM class_registrations cr
+                    LEFT JOIN training_classes tc ON cr.class_id = tc.id
+                    WHERE cr.phone != '' AND REPLACE(REPLACE(REPLACE(REPLACE(cr.phone, '-', ''), ' ', ''), '(', ''), ')', '') LIKE ?
+                `).bind('%' + cleanDigits).first();
+            }
+
+            if (priorReg) {
+                return new Response(JSON.stringify({
+                    success: false,
+                    error: "Our records show you have previously registered for an orientation session. Rescheduling an orientation class is a store-level decision. If you would like to request a reschedule for a future orientation date, please contact the General Manager of the store you applied to.",
+                    isDuplicate: true,
+                    priorClassDate: priorReg.class_date || "Previous Session"
+                }), { status: 400, headers: corsHeaders() });
+            }
+
+            // 1b-iii. Check onboarding_candidates for prior scheduled NTO
+            let candMatch = null;
+            if (email && cleanDigits.length === 10) {
+                candMatch = await db.prepare("SELECT * FROM onboarding_candidates WHERE (nto_scheduled = 1 OR (nto_date IS NOT NULL AND nto_date != '')) AND (LOWER(email) = LOWER(?) OR (phone_number != '' AND REPLACE(REPLACE(REPLACE(REPLACE(phone_number, '-', ''), ' ', ''), '(', ''), ')', '') LIKE ?))").bind(email, '%' + cleanDigits).first();
+            } else if (email) {
+                candMatch = await db.prepare("SELECT * FROM onboarding_candidates WHERE (nto_scheduled = 1 OR (nto_date IS NOT NULL AND nto_date != '')) AND LOWER(email) = LOWER(?)").bind(email).first();
+            }
+            if (candMatch) {
+                return new Response(JSON.stringify({
+                    success: false,
+                    error: "Our records show you have previously registered for an orientation session. Rescheduling an orientation class is a store-level decision. If you would like to request a reschedule for a future orientation date, please contact the General Manager of the store you applied to.",
+                    isDuplicate: true
+                }), { status: 400, headers: corsHeaders() });
+            }
+
             // 1c. Insert class registration
             const regId = "REG-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
             await db.prepare("INSERT INTO class_registrations (id, class_id, candidate_id, candidate_name, store_num, position, phone, email, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Confirmed')").bind(regId, classId, candidateId, name, storeNum, position, phone, email).run();
