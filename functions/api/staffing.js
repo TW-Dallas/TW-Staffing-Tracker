@@ -49,6 +49,39 @@ function parseDateForSort(dateStr) {
     return isNaN(t) ? 0 : t;
 }
 
+// HTML renderer for 1-click email actions (approval, denial, deletion)
+function renderActionHtml(title, message, headerColor) {
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title} • Team Wow Orientation</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #fefaf6; margin: 0; padding: 40px 16px; color: #472b10; display: flex; justify-content: center; align-items: center; min-height: 80vh; }
+        .card { background: white; max-width: 520px; width: 100%; border-radius: 12px; border: 2px solid #f0decc; box-shadow: 0 10px 25px rgba(71, 43, 16, 0.1); overflow: hidden; text-align: center; }
+        .header { background-color: ${headerColor || '#005c91'}; color: white; padding: 22px 24px; }
+        .header h2 { margin: 0; font-size: 21px; letter-spacing: 0.5px; }
+        .body { padding: 30px 24px; font-size: 15.5px; line-height: 1.6; }
+        .footer { font-size: 13px; color: #888; border-top: 1px dashed #f0decc; padding: 14px; background-color: #faf2e9; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header">
+            <h2>${title}</h2>
+        </div>
+        <div class="body">
+            <p>${message}</p>
+        </div>
+        <div class="footer">
+            You can safely close this window now.
+        </div>
+    </div>
+</body>
+</html>`;
+}
+
 export async function onRequestOptions() {
     return new Response(null, { headers: corsHeaders(), status: 204 });
 }
@@ -101,11 +134,143 @@ export async function onRequestGet(context) {
         return new Response(JSON.stringify({ success: false, error: "Candidate not found" }), { status: 404, headers: corsHeaders() });
     }
 
+    // 1-Click Action Routes for Pending NTO Applicants (triggered from Admin email alerts)
+    if (reqAction === "approvePendingNto" || reqAction === "denyPendingNto" || reqAction === "deletePendingNto") {
+        const regId = url.searchParams.get("id") || "";
+        if (!regId) {
+            return new Response(renderActionHtml("Missing Request ID", "Invalid request: No registration ID provided.", "#910000"), {
+                status: 400,
+                headers: { "Content-Type": "text/html;charset=utf-8" }
+            });
+        }
+
+        const reg = await db.prepare("SELECT * FROM class_registrations WHERE id = ?").bind(regId).first();
+        if (!reg) {
+            return new Response(renderActionHtml("Already Handled", "This request has already been processed or removed from the system.", "#005c91"), {
+                status: 200,
+                headers: { "Content-Type": "text/html;charset=utf-8" }
+            });
+        }
+
+        if (reg.status !== "Pending" && reqAction === "approvePendingNto") {
+            return new Response(renderActionHtml("Already Approved", `${reg.candidate_name} is already confirmed on the orientation roster.`, "#005c91"), {
+                status: 200,
+                headers: { "Content-Type": "text/html;charset=utf-8" }
+            });
+        }
+
+        const cls = await db.prepare("SELECT * FROM training_classes WHERE id = ?").bind(reg.class_id).first();
+
+        if (reqAction === "approvePendingNto") {
+            // 1. Mark registration as Confirmed
+            await db.prepare("UPDATE class_registrations SET status = 'Confirmed', updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(regId).run();
+
+            // 2. Increment spots_taken
+            await db.prepare("UPDATE training_classes SET spots_taken = spots_taken + 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(reg.class_id).run();
+
+            // 3. Update candidate profile if exists
+            if (cls) {
+                const nowFormatted = getNowFormatted("America/Chicago");
+                await db.prepare(`
+                    UPDATE onboarding_candidates SET
+                        nto_date = ?,
+                        nto_scheduled = 1,
+                        last_updated = ?,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE LOWER(email) = LOWER(?) OR (phone_number != '' AND phone_number = ?)
+                `).bind(cls.class_date, nowFormatted, reg.email, reg.phone).run();
+            }
+
+            // 4. Send Confirmation & Google Meet link via Apps Script microservice
+            try {
+                if (cls && reg.email) {
+                    await fetch(APPS_SCRIPT_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify({
+                            username: "dallas_admin",
+                            password: "dallas_password_123",
+                            action: "sendNtoMeetLinks",
+                            classDate: cls.class_date,
+                            classTime: cls.start_time,
+                            meetLink: cls.meet_link || "https://meet.google.com/zwc-afuu-hgh",
+                            trainerName: cls.trainer || "Mike Jacobs",
+                            notifyAdmin: false,
+                            studentPhone: reg.phone,
+                            storeNum: reg.store_num,
+                            trainees: [{ name: reg.candidate_name, email: reg.email }]
+                        })
+                    });
+                }
+            } catch (mailErr) {
+                console.warn("Apps Script confirmation email proxy failed:", mailErr);
+            }
+
+            const classInfo = cls ? `${cls.class_date} at ${cls.start_time}` : "the scheduled session";
+            return new Response(renderActionHtml(
+                "Approval Confirmed",
+                `Successfully <strong>APPROVED</strong> ${reg.candidate_name} for orientation on <strong>${classInfo}</strong>.<br><br>Their spot is confirmed on the class roster, and their Google Meet video link has been emailed to them.`,
+                "#005c91"
+            ), {
+                status: 200,
+                headers: { "Content-Type": "text/html;charset=utf-8" }
+            });
+        }
+
+        if (reqAction === "denyPendingNto") {
+            // 1. Mark as Denied
+            await db.prepare("UPDATE class_registrations SET status = 'Denied', updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(regId).run();
+
+            // 2. Send gentle GM reschedule notification to student via Apps Script
+            try {
+                if (reg.email) {
+                    await fetch(APPS_SCRIPT_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify({
+                            username: "dallas_admin",
+                            password: "dallas_password_123",
+                            action: "sendNtoStudentDenial",
+                            name: reg.candidate_name,
+                            email: reg.email,
+                            classDate: cls ? cls.class_date : ""
+                        })
+                    });
+                }
+            } catch (mailErr) {
+                console.warn("Apps Script denial email proxy failed:", mailErr);
+            }
+
+            return new Response(renderActionHtml(
+                "Denial Processed",
+                `Successfully <strong>DENIED</strong> ${reg.candidate_name}.<br><br>They have been sent the notification explaining that rescheduling is a store-level decision and directing them to contact their store General Manager.`,
+                "#910000"
+            ), {
+                status: 200,
+                headers: { "Content-Type": "text/html;charset=utf-8" }
+            });
+        }
+
+        if (reqAction === "deletePendingNto") {
+            // Silently delete registration record
+            await db.prepare("DELETE FROM class_registrations WHERE id = ?").bind(regId).run();
+
+            return new Response(renderActionHtml(
+                "Request Deleted",
+                `Successfully <strong>DELETED</strong> ${reg.candidate_name}'s pending request.<br><br>No notification was sent to the candidate.`,
+                "#472b10"
+            ), {
+                status: 200,
+                headers: { "Content-Type": "text/html;charset=utf-8" }
+            });
+        }
+    }
+
     // Fast endpoint for NTO classes: only query active classes and active registrations (prevents full database scans!)
     if (reqAction === "getNtoClasses") {
         const [classesRes, regsRes] = await Promise.all([
             db.prepare("SELECT * FROM training_classes WHERE program = 'NTO' AND (market = ? OR market = 'Virtual') AND is_active = 1").bind(market).all(),
-            db.prepare("SELECT class_id, candidate_name FROM class_registrations WHERE class_id IN (SELECT id FROM training_classes WHERE program = 'NTO' AND (market = ? OR market = 'Virtual') AND is_active = 1)").bind(market).all()
+            db.prepare("SELECT class_id, candidate_name FROM class_registrations WHERE (status = 'Confirmed' OR status IS NULL OR status = '') AND class_id IN (SELECT id FROM training_classes WHERE program = 'NTO' AND (market = ? OR market = 'Virtual') AND is_active = 1)").bind(market).all()
         ]);
 
         const regMap = {};
@@ -507,6 +672,9 @@ export async function onRequestPost(context) {
             }
 
             if (priorReg || candMatch) {
+                const regId = "REG-PEND-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
+                await db.prepare("INSERT INTO class_registrations (id, class_id, candidate_id, candidate_name, store_num, position, phone, email, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending')").bind(regId, classId, candidateId, name, storeNum, position, phone, email).run();
+
                 try {
                     await fetch(APPS_SCRIPT_URL, {
                         method: "POST",
@@ -521,7 +689,8 @@ export async function onRequestPost(context) {
                             storeNum: storeNum,
                             classId: classId,
                             classDate: cls.class_date,
-                            classTime: cls.start_time
+                            classTime: cls.start_time,
+                            requestId: regId
                         })
                     });
                 } catch (dupMailErr) {
