@@ -3779,7 +3779,7 @@
 
                 document.getElementById('stfHireDate').value = formatDateForInput(item.hireDate);
                 document.getElementById('stfTermDate').value = formatDateForInput(item.termDate);
-                document.getElementById('stfReceivedDate').value = formatDateForInput(item.receivedDate || item.lastUpdated || item.termDate);
+                document.getElementById('stfReceivedDate').value = item.receivedDate ? formatDateForInput(item.receivedDate) : formatDateForInput(new Date());
 
                 document.getElementById('stfPeriod').value = item.period || (item.termDate ? getDominosFiscalPeriod(item.termDate) : (item.hireDate ? getDominosFiscalPeriod(item.hireDate) : ''));
                 setSelectValueCaseInsensitive('stfRehire', item.rehireEligible || 'Yes');
@@ -3959,6 +3959,8 @@
                 document.getElementById('formTitle').innerText = "Pay Card & Payroll Details";
             } else if (currentView === 'staffing') {
                 document.getElementById('formTitle').innerText = "Hires & Terminations Details";
+                const stfRecEl = document.getElementById('stfReceivedDate');
+                if (stfRecEl) stfRecEl.value = formatDateForInput(new Date());
                 autoCalculatePeriodFromDates();
             } else if (currentView === 'interviews') {
                 document.getElementById('formTitle').innerText = "Interview Details";
