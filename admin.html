@@ -4178,7 +4178,6 @@
 
                     // IMMEDIATELY RE-RENDER THE EMPLOYMENT PERIODS CONTAINER AT THE TOP
                     renderEmploymentPeriodsCard(document.getElementById('stfEmploymentPeriodsContainer'), payload.name, payload.email, assignedId);
-                    showBrandAlert("Staffing record & employment history updated successfully!", "Saved Successfully");
                 } else if (currentView === 'paycards') {
                     let item = paycards.find(c => c.id === assignedId);
                     if (!item) {
