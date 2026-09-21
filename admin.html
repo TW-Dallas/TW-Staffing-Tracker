@@ -5477,11 +5477,12 @@
         }
 
         function autoCalculatePeriodFromDates() {
+            if (currentView !== 'staffing') return;
             const termVal = document.getElementById('stfTermDate') ? document.getElementById('stfTermDate').value : '';
             const hireVal = document.getElementById('stfHireDate') ? document.getElementById('stfHireDate').value : '';
             const periodEl = document.getElementById('stfPeriod');
             if (periodEl) {
-                const targetDate = termVal || hireVal;
+                const targetDate = (termVal && isValidEmploymentYear(termVal)) ? termVal : ((hireVal && isValidEmploymentYear(hireVal)) ? hireVal : '');
                 if (targetDate) {
                     periodEl.value = getDominosFiscalPeriod(targetDate);
                 }
