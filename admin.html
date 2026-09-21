@@ -3770,6 +3770,7 @@
                 document.getElementById('payNotes').value = displayNotes;
 
             } else if (currentView === 'staffing') {
+                staffing = staffing.filter(s => s && (s.sourceSheet || (s.id && !candidates.some(c => c.id === s.id))));
                 document.getElementById('fieldId').value = item.id;
                 document.getElementById('stfName').value = item.name || '';
                 document.getElementById('stfPosition').value = item.position || '';
@@ -3938,6 +3939,7 @@
         }
 
         function clearForm() {
+            staffing = staffing.filter(s => s && (s.sourceSheet || (s.id && !candidates.some(c => c.id === s.id))));
             document.getElementById('btnDelete').classList.add('hidden');
             document.getElementById('candidateForm').reset();
             document.getElementById('fieldId').value = '';
@@ -5493,23 +5495,15 @@
             const name = document.getElementById('stfName')?.value.trim();
             if (!assignedId || !name) return;
 
-            let item = staffing.find(c => String(c.id) === String(assignedId));
-            if (!item) {
-                item = { id: assignedId, name: name };
-                staffing.unshift(item);
-            }
-            if (document.getElementById('stfHireDate')) item.hireDate = document.getElementById('stfHireDate').value.trim();
-            if (document.getElementById('stfTermDate')) item.termDate = document.getElementById('stfTermDate').value.trim();
-            if (document.getElementById('stfStore')) item.store = document.getElementById('stfStore').value.trim();
-            if (document.getElementById('stfPosition')) item.position = document.getElementById('stfPosition').value;
-            if (document.getElementById('stfDo')) item.doName = document.getElementById('stfDo').value.trim();
-            if (document.getElementById('stfRehire')) item.rehireEligible = document.getElementById('stfRehire').value;
-            if (document.getElementById('stfCause')) item.causeOfAction = document.getElementById('stfCause').value.trim();
-            if (document.getElementById('stfReason')) item.reasonOfAction = document.getElementById('stfReason').value.trim();
-            if (document.getElementById('stfNotes')) item.notes = document.getElementById('stfNotes').value.trim();
-            if (document.getElementById('stfGmName')) item.gmName = document.getElementById('stfGmName').value.trim();
-
             renderEmploymentPeriodsCard(document.getElementById('stfEmploymentPeriodsContainer'), name, '', assignedId);
+        }
+
+        function isValidEmploymentYear(dateStr) {
+            if (!dateStr) return false;
+            const dt = parseCandidateDate(dateStr);
+            if (!dt) return false;
+            const y = dt.getFullYear();
+            return y >= 2020 && y <= 2035;
         }
 
         function formatDisplayDate(dateStr) {
@@ -5541,6 +5535,22 @@
 
             const matchedStints = [];
             const seenStintKeys = new Set();
+            const seenIds = new Set();
+
+            // Read live values from the active form if currently editing this candidate in Staffing view
+            const isEditingThisInForm = (currentView === 'staffing' && cleanId && String(document.getElementById('fieldId')?.value || '').toLowerCase().trim() === cleanId);
+            const formHireRaw = isEditingThisInForm ? (document.getElementById('stfHireDate')?.value.trim() || '') : '';
+            const formTermRaw = isEditingThisInForm ? (document.getElementById('stfTermDate')?.value.trim() || '') : '';
+            const formStore = isEditingThisInForm ? (document.getElementById('stfStore')?.value.trim() || '') : '';
+            const formPos = isEditingThisInForm ? (document.getElementById('stfPosition')?.value || '') : '';
+            const formRehire = isEditingThisInForm ? (document.getElementById('stfRehire')?.value || 'Yes') : 'Yes';
+            const formCause = isEditingThisInForm ? (document.getElementById('stfCause')?.value || '') : '';
+            const formReason = isEditingThisInForm ? (document.getElementById('stfReason')?.value || '') : '';
+            const formNotes = isEditingThisInForm ? (document.getElementById('stfNotes')?.value.trim() || '') : '';
+            const formGm = isEditingThisInForm ? (document.getElementById('stfGmName')?.value.trim() || '') : '';
+            const formDo = isEditingThisInForm ? (document.getElementById('stfDo')?.value.trim() || '') : '';
+
+            const liveTermDate = (formTermRaw && isValidEmploymentYear(formTermRaw)) ? formTermRaw : '';
 
             // 1. Scan Staffing Records (2026, 2025, and all loaded historical records)
             (staffing || []).forEach(stf => {
@@ -5554,28 +5564,41 @@
                 const emailMismatch = cleanEmail && sEmail && (sEmail !== cleanEmail);
 
                 if (idMatch || emailMatch || (nameMatch && !emailMismatch)) {
-                    const hDate = stf.hireDate || '';
-                    const tDate = stf.termDate || '';
-                    const normHDate = formatDateForInput(hDate) || hDate;
-                    const normTDate = tDate ? (formatDateForInput(tDate) || tDate) : 'active';
-                    const stintKey = `${stf.store}_${normHDate}_${normTDate}`;
+                    // Check if this is the active record being edited in the form
+                    const isFormItem = isEditingThisInForm && (idMatch || (cleanName && sName === cleanName));
+                    
+                    const rawH = isFormItem && formHireRaw ? formHireRaw : (stf.hireDate || '');
+                    const rawT = isFormItem ? liveTermDate : (stf.termDate || '');
+                    const storeNum = isFormItem && formStore ? formStore : (stf.store || '');
+                    const pos = isFormItem && formPos ? formPos : (stf.position || 'CSR');
+                    const cause = isFormItem && formCause ? formCause : (stf.causeOfAction || '');
+                    const reason = isFormItem && formReason ? formReason : (stf.reasonOfAction || '');
+                    const notes = isFormItem && formNotes ? formNotes : (stf.notes || '');
+                    const rehire = isFormItem && formRehire ? formRehire : (stf.rehireEligible || 'Yes');
+                    const gm = isFormItem && formGm ? formGm : (stf.gmName || stf.gm || '');
+                    const doN = isFormItem && formDo ? formDo : (stf.doName || '');
+
+                    const normHDate = formatDateForInput(rawH) || rawH;
+                    const stintKey = `${storeNum}_${normHDate}`;
+                    
                     if (!seenStintKeys.has(stintKey)) {
                         seenStintKeys.add(stintKey);
+                        if (stf.id) seenIds.add(String(stf.id).toLowerCase());
                         matchedStints.push({
                             id: stf.id || '',
-                            beginDate: hDate,
-                            endDate: tDate,
-                            hireDate: hDate,
-                            termDate: tDate,
-                            store: stf.store || '',
-                            doName: stf.doName || '',
-                            position: stf.position || 'CSR',
-                            causeOfAction: stf.causeOfAction || '',
-                            reasonOfAction: stf.reasonOfAction || '',
-                            notes: stf.notes || '',
-                            gmName: stf.gmName || stf.gm || '',
-                            rehireEligible: stf.rehireEligible || 'Yes',
-                            status: tDate ? 'Terminated' : 'Active',
+                            beginDate: rawH,
+                            endDate: rawT,
+                            hireDate: rawH,
+                            termDate: rawT,
+                            store: storeNum,
+                            doName: doN,
+                            position: pos,
+                            causeOfAction: cause,
+                            reasonOfAction: reason,
+                            notes: notes,
+                            gmName: gm,
+                            rehireEligible: rehire,
+                            status: rawT ? 'Terminated' : 'Active',
                             source: stf.sourceSheet || 'Staffing'
                         });
                     }
@@ -5594,22 +5617,43 @@
                 const emailMismatch = cleanEmail && cEmail && (cEmail !== cleanEmail);
 
                 if (idMatch || emailMatch || (nameMatch && !emailMismatch)) {
+                    // If candidate was already added via staffing records, skip!
+                    if (seenIds.has(cId)) return;
+
                     const hDate = cand.ntoDate || cand.hireDate || '';
                     const normHDate = formatDateForInput(hDate) || hDate;
-                    const stintKey = `${cand.store}_${normHDate}_active`;
-                    if (cand.hired && hDate && !seenStintKeys.has(stintKey)) {
+                    const stintKey = `${cand.store}_${normHDate}`;
+
+                    if (seenStintKeys.has(stintKey)) return;
+
+                    // If this onboarding candidate is the one currently being viewed/edited in the form
+                    const isFormItem = isEditingThisInForm && idMatch;
+                    const rawH = isFormItem && formHireRaw ? formHireRaw : hDate;
+                    const rawT = isFormItem ? liveTermDate : '';
+                    const storeNum = isFormItem && formStore ? formStore : (cand.store || '');
+                    const pos = isFormItem && formPos ? formPos : (cand.position || 'CSR');
+                    const cause = isFormItem ? formCause : '';
+                    const reason = isFormItem ? formReason : '';
+                    const notes = isFormItem && formNotes ? formNotes : (cand.notes || '');
+                    const rehire = isFormItem ? formRehire : 'Yes';
+
+                    if (cand.hired && rawH) {
                         seenStintKeys.add(stintKey);
+                        seenIds.add(cId);
                         matchedStints.push({
-                            beginDate: hDate,
-                            endDate: '',
-                            store: cand.store || '',
+                            id: cand.id,
+                            beginDate: rawH,
+                            endDate: rawT,
+                            hireDate: rawH,
+                            termDate: rawT,
+                            store: storeNum,
                             doName: cand.doName || '',
-                            position: cand.position || 'CSR',
-                            causeOfAction: '',
-                            reasonOfAction: '',
-                            notes: cand.notes || '',
-                            rehireEligible: 'Yes',
-                            status: 'Active (Current)',
+                            position: pos,
+                            causeOfAction: cause,
+                            reasonOfAction: reason,
+                            notes: notes,
+                            rehireEligible: rehire,
+                            status: rawT ? 'Terminated' : 'Active (Current)',
                             source: 'Onboarding'
                         });
                     }
@@ -5623,8 +5667,7 @@
                     const hDate = pstint.hireDate || '';
                     const tDate = pstint.termDate || '';
                     const normHDate = formatDateForInput(hDate) || hDate;
-                    const normTDate = tDate ? (formatDateForInput(tDate) || tDate) : 'active';
-                    const stintKey = `${pstint.store}_${normHDate}_${normTDate}`;
+                    const stintKey = `${pstint.store}_${normHDate}`;
                     if (!seenStintKeys.has(stintKey) && (hDate || tDate || pstint.store || pstint.notes)) {
                         seenStintKeys.add(stintKey);
                         matchedStints.push({
@@ -5724,13 +5767,10 @@
             const isRehire = periods.length > 1;
             const rehireBadge = isRehire ? `<span style="background: #e8f0fe; color: #1a73e8; font-size: 13.5px; font-weight: bold; padding: 3px 8px; border-radius: 4px; margin-left: 8px; border: 1px solid #cce0ff;">🔁 Re-Hire (${periods.length} Stints)</span>` : '';
 
-            // If multi-stint rehire, collapse the top editor by default to avoid clutter
-            if (isRehire) {
-                const titleEl = document.getElementById('stfActiveEditorTitle');
-                if (titleEl) titleEl.innerText = `✏️ Edit Stint / Staffing Record Form`;
-                toggleActiveStintEditor(false);
-            } else {
-                toggleActiveStintEditor(true);
+            // Update title without auto-collapsing the form under user's hands
+            const titleEl = document.getElementById('stfActiveEditorTitle');
+            if (titleEl) {
+                titleEl.innerText = isRehire ? `✏️ Edit Stint / Staffing Record Form` : `✏️ Active Record / Stint Details`;
             }
 
             let rowsHtml = periods.map((p, idx) => {
