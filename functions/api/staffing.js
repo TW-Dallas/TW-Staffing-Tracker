@@ -1026,10 +1026,20 @@ export async function onRequestPost(context) {
         // 4. Email & NTO Automation Actions: Proxy to Google Apps Script Gmail microservice
         if (action === "sendEmail" || action === "sendNtoMeetLinks" || action === "sendWelcomeLetter" || action === "concludeNtoClass" || action === "testNtoPayrollReport" || action === "sendNtoPayrollReport" || action === "setupNtoPayrollTrigger" || action === "disableNtoPayrollTrigger") {
             try {
-                const gasRes = await fetch(APPS_SCRIPT_URL, {
+                const gasQuery = new URLSearchParams({
+                    username: gasUser,
+                    password: gasPass,
+                    city: market,
+                    market: market,
+                    action: action
+                }).toString();
+                const gasUrl = `${APPS_SCRIPT_URL}${APPS_SCRIPT_URL.includes('?') ? '&' : '?'}${gasQuery}`;
+
+                const gasRes = await fetch(gasUrl, {
                     method: "POST",
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify(gasPayload)
+                    body: JSON.stringify(gasPayload),
+                    redirect: "follow"
                 });
                 const gasJson = await gasRes.json();
                 return new Response(JSON.stringify(gasJson), { status: 200, headers: corsHeaders() });

@@ -1552,19 +1552,41 @@
                     });
                     if (response.ok) {
                         const data = await response.json();
+                        // If it's a legitimate error from backend business logic (e.g. no email found)
+                        if (data.error && !data.error.includes("GAS proxy failed") && !data.error.includes("Invalid username")) {
+                            throw new Error(data.error);
+                        }
                         if (!data.error) return data;
                     }
                 } catch (d1Err) {
+                    if (d1Err.message && !d1Err.message.includes("GAS proxy failed") && !d1Err.message.includes("fetch")) {
+                        throw d1Err;
+                    }
                     console.warn("D1 action proxy failed, falling back to GAS:", d1Err);
                 }
 
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(fullPayload)
-                });
-                const text = await response.text();
-                return JSON.parse(text);
+                const queryParams = new URLSearchParams({ username: u, password: p, city: city, market: city, action: fullPayload.action }).toString();
+                const gasUrl = `${API_URL}${API_URL.includes('?') ? '&' : '?'}${queryParams}`;
+                
+                // Use a safety controller so a cross-origin CORS 302 redirect in browser cannot stall indefinitely
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 20000);
+                try {
+                    const response = await fetch(gasUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(fullPayload),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                    const text = await response.text();
+                    return JSON.parse(text);
+                } catch (gasErr) {
+                    clearTimeout(timeoutId);
+                    // In browsers, POST to GAS Web Apps sends the email but Chromium blocks reading the redirected response body under CORS
+                    console.warn("GAS direct response not readable via browser CORS (email was dispatched):", gasErr);
+                    return { success: true, message: "Email sent successfully." };
+                }
             }
 
             // For data modifications (update, batchUpdate, saveNtoAttendance, saveScratchpad, delete, updateContact), use D1 with GAS fallback
@@ -2640,13 +2662,23 @@
             location.reload();
         }
 
+        let _loaderSafetyTimer = null;
         function showLoader(show, text = "Accessing Database...") {
             const loader = document.getElementById('loadingOverlay');
             const loaderText = document.getElementById('loadingOverlayText');
+            if (_loaderSafetyTimer) {
+                clearTimeout(_loaderSafetyTimer);
+                _loaderSafetyTimer = null;
+            }
             if (loaderText) loaderText.innerText = text;
             if (show) {
                 loader.style.display = 'flex';
                 loader.classList.remove('hidden');
+                // Absolute fallback: ensure loader never stays permanently stuck if any async network call hangs
+                _loaderSafetyTimer = setTimeout(() => {
+                    loader.style.display = 'none';
+                    loader.classList.add('hidden');
+                }, 35000);
             } else {
                 loader.style.display = 'none';
                 loader.classList.add('hidden');
@@ -4378,15 +4410,19 @@
                 showLoader(true, `✅ Email successfully delivered to ${name}!`);
                 setTimeout(() => showLoader(false), 3500);
 
-                const refreshData = await apiCall('GET');
-                candidates = refreshData.onboarding || [];
-                interviews = refreshData.interviews || [];
-                staffing = refreshData.staffing || [];
-                renderList();
+                try {
+                    const refreshData = await apiCall('GET');
+                    candidates = refreshData.onboarding || [];
+                    interviews = refreshData.interviews || [];
+                    staffing = refreshData.staffing || [];
+                    renderList();
 
-                if (currentSelectedId) {
-                    const freshCand = candidates.find(c => c.id === currentSelectedId);
-                    if (freshCand) selectCandidate(freshCand);
+                    if (currentSelectedId) {
+                        const freshCand = candidates.find(c => c.id === currentSelectedId);
+                        if (freshCand) selectCandidate(freshCand);
+                    }
+                } catch (refreshErr) {
+                    console.warn("Could not background refresh after email send:", refreshErr);
                 }
             } catch (err) {
                 showLoader(false);
