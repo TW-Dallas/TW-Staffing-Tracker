@@ -1024,7 +1024,7 @@ export async function onRequestPost(context) {
         }
 
         // 4. Email & NTO Automation Actions: Proxy to Google Apps Script Gmail microservice
-        if (action === "sendEmail" || action === "sendNtoMeetLinks" || action === "sendWelcomeLetter" || action === "concludeNtoClass") {
+        if (action === "sendEmail" || action === "sendNtoMeetLinks" || action === "sendWelcomeLetter" || action === "concludeNtoClass" || action === "testNtoPayrollReport" || action === "sendNtoPayrollReport") {
             try {
                 const gasRes = await fetch(APPS_SCRIPT_URL, {
                     method: "POST",
