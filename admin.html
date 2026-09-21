@@ -3779,7 +3779,7 @@
 
                 document.getElementById('stfHireDate').value = formatDateForInput(item.hireDate);
                 document.getElementById('stfTermDate').value = formatDateForInput(item.termDate);
-                document.getElementById('stfReceivedDate').value = item.receivedDate ? formatDateForInput(item.receivedDate) : formatDateForInput(new Date());
+                document.getElementById('stfReceivedDate').value = (item.termDate && item.receivedDate) ? formatDateForInput(item.receivedDate) : formatDateForInput(new Date());
 
                 document.getElementById('stfPeriod').value = item.period || (item.termDate ? getDominosFiscalPeriod(item.termDate) : (item.hireDate ? getDominosFiscalPeriod(item.hireDate) : ''));
                 setSelectValueCaseInsensitive('stfRehire', item.rehireEligible || 'Yes');
@@ -5482,6 +5482,13 @@
             if (currentView !== 'staffing') return;
             const termVal = document.getElementById('stfTermDate') ? document.getElementById('stfTermDate').value : '';
             const hireVal = document.getElementById('stfHireDate') ? document.getElementById('stfHireDate').value : '';
+            const recEl = document.getElementById('stfReceivedDate');
+
+            // When entering a termination date, if Date Received is blank or matches the hire date, set it to today
+            if (termVal && recEl && (!recEl.value || recEl.value === hireVal)) {
+                recEl.value = formatDateForInput(new Date());
+            }
+
             const periodEl = document.getElementById('stfPeriod');
             if (periodEl) {
                 const targetDate = (termVal && isValidEmploymentYear(termVal)) ? termVal : ((hireVal && isValidEmploymentYear(hireVal)) ? hireVal : '');
