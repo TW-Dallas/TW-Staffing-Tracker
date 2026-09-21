@@ -1245,7 +1245,102 @@ export async function onRequestPost(context) {
                     'Hiring Data (2026)'
                 ).run();
 
-                return new Response(JSON.stringify({ success: true, id: newId }), { status: 200, headers: corsHeaders() });
+                const savedStints = [];
+                if (Array.isArray(payload.priorStints) && payload.priorStints.length > 0) {
+                    for (let sIdx = 0; sIdx < payload.priorStints.length; sIdx++) {
+                        const stint = payload.priorStints[sIdx];
+                        const sStore = (stint.store || payload.store || payload.store_num || '').toString().trim();
+                        const sHire = stint.hireDate || '';
+                        const sTerm = stint.termDate || '';
+                        const sRehire = stint.rehireEligible || 'Yes';
+                        const sCause = stint.causeOfAction || '';
+                        const sReason = stint.reasonOfAction || '';
+                        const sNotes = stint.notes || '';
+                        const sGm = stint.gmName || '';
+                        const sPos = stint.position || payload.position || 'CSR';
+                        const sRecDate = stint.receivedDate || sTerm || '';
+                        const sPeriod = stint.period || payload.period || '';
+
+                        if (stint.id) {
+                            await db.prepare(`
+                                UPDATE staffing_records SET
+                                    store_num = COALESCE(?, store_num),
+                                    hire_date = COALESCE(?, hire_date),
+                                    term_date = COALESCE(?, term_date),
+                                    position = COALESCE(?, position),
+                                    rehire_eligible = COALESCE(?, rehire_eligible),
+                                    cause_of_action = COALESCE(?, cause_of_action),
+                                    reason_of_action = COALESCE(?, reason_of_action),
+                                    notes = COALESCE(?, notes),
+                                    gm_name = COALESCE(?, gm_name),
+                                    updated_at = CURRENT_TIMESTAMP
+                                WHERE id = ?
+                            `).bind(
+                                sStore || null,
+                                sHire || null,
+                                sTerm || null,
+                                sPos || null,
+                                sRehire || null,
+                                sCause || null,
+                                sReason || null,
+                                sNotes || null,
+                                sGm || null,
+                                stint.id
+                            ).run();
+                            savedStints.push({ ...stint, id: stint.id });
+                        } else if (sHire || sTerm || sNotes) {
+                            const newStintId = `STF-ID-${Date.now() + sIdx + 1}-${Math.floor(Math.random() * 1000)}`;
+                            await db.prepare(`
+                                INSERT INTO staffing_records (
+                                    id, market, fiscal_year, period, store_num, do_name, gm_name, name, position,
+                                    hire_date, term_date, rehire_eligible, cause_of_action, reason_of_action, notes,
+                                    received_date, source_sheet, updated_at
+                                ) VALUES (?, ?, 2026, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Staffing Prior Stint', CURRENT_TIMESTAMP)
+                            `).bind(
+                                newStintId,
+                                market,
+                                sPeriod,
+                                sStore,
+                                payload.doName || '',
+                                sGm,
+                                payload.name || '',
+                                sPos,
+                                sHire,
+                                sTerm,
+                                sRehire,
+                                sCause,
+                                sReason,
+                                sNotes,
+                                sRecDate
+                            ).run();
+                            savedStints.push({
+                                ...stint,
+                                id: newStintId,
+                                store: sStore,
+                                hireDate: sHire,
+                                termDate: sTerm,
+                                position: sPos,
+                                rehireEligible: sRehire,
+                                causeOfAction: sCause,
+                                reasonOfAction: sReason,
+                                notes: sNotes,
+                                gmName: sGm,
+                                name: payload.name
+                            });
+                        }
+                    }
+                }
+
+                // Background sync to GAS
+                try {
+                    fetch(APPS_SCRIPT_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify(gasPayload)
+                    }).catch(e => console.warn("GAS background staffing sync warning:", e));
+                } catch (e) {}
+
+                return new Response(JSON.stringify({ success: true, id: newId, savedStints: savedStints }), { status: 200, headers: corsHeaders() });
             }
 
             // Default target: Onboarding candidate
@@ -1394,7 +1489,102 @@ export async function onRequestPost(context) {
                     payload.id
                 ).run();
 
-                return new Response(JSON.stringify({ success: true, id: payload.id }), { status: 200, headers: corsHeaders() });
+                const savedStints = [];
+                if (Array.isArray(payload.priorStints) && payload.priorStints.length > 0) {
+                    for (let sIdx = 0; sIdx < payload.priorStints.length; sIdx++) {
+                        const stint = payload.priorStints[sIdx];
+                        const sStore = (stint.store || payload.store || payload.store_num || '').toString().trim();
+                        const sHire = stint.hireDate || '';
+                        const sTerm = stint.termDate || '';
+                        const sRehire = stint.rehireEligible || 'Yes';
+                        const sCause = stint.causeOfAction || '';
+                        const sReason = stint.reasonOfAction || '';
+                        const sNotes = stint.notes || '';
+                        const sGm = stint.gmName || '';
+                        const sPos = stint.position || payload.position || 'CSR';
+                        const sRecDate = stint.receivedDate || sTerm || '';
+                        const sPeriod = stint.period || payload.period || '';
+
+                        if (stint.id) {
+                            await db.prepare(`
+                                UPDATE staffing_records SET
+                                    store_num = COALESCE(?, store_num),
+                                    hire_date = COALESCE(?, hire_date),
+                                    term_date = COALESCE(?, term_date),
+                                    position = COALESCE(?, position),
+                                    rehire_eligible = COALESCE(?, rehire_eligible),
+                                    cause_of_action = COALESCE(?, cause_of_action),
+                                    reason_of_action = COALESCE(?, reason_of_action),
+                                    notes = COALESCE(?, notes),
+                                    gm_name = COALESCE(?, gm_name),
+                                    updated_at = CURRENT_TIMESTAMP
+                                WHERE id = ?
+                            `).bind(
+                                sStore || null,
+                                sHire || null,
+                                sTerm || null,
+                                sPos || null,
+                                sRehire || null,
+                                sCause || null,
+                                sReason || null,
+                                sNotes || null,
+                                sGm || null,
+                                stint.id
+                            ).run();
+                            savedStints.push({ ...stint, id: stint.id });
+                        } else if (sHire || sTerm || sNotes) {
+                            const newStintId = `STF-ID-${Date.now() + sIdx + 1}-${Math.floor(Math.random() * 1000)}`;
+                            await db.prepare(`
+                                INSERT INTO staffing_records (
+                                    id, market, fiscal_year, period, store_num, do_name, gm_name, name, position,
+                                    hire_date, term_date, rehire_eligible, cause_of_action, reason_of_action, notes,
+                                    received_date, source_sheet, updated_at
+                                ) VALUES (?, ?, 2026, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Staffing Prior Stint', CURRENT_TIMESTAMP)
+                            `).bind(
+                                newStintId,
+                                market,
+                                sPeriod,
+                                sStore,
+                                payload.doName || '',
+                                sGm,
+                                payload.name || '',
+                                sPos,
+                                sHire,
+                                sTerm,
+                                sRehire,
+                                sCause,
+                                sReason,
+                                sNotes,
+                                sRecDate
+                            ).run();
+                            savedStints.push({
+                                ...stint,
+                                id: newStintId,
+                                store: sStore,
+                                hireDate: sHire,
+                                termDate: sTerm,
+                                position: sPos,
+                                rehireEligible: sRehire,
+                                causeOfAction: sCause,
+                                reasonOfAction: sReason,
+                                notes: sNotes,
+                                gmName: sGm,
+                                name: payload.name
+                            });
+                        }
+                    }
+                }
+
+                // Background sync to GAS
+                try {
+                    fetch(APPS_SCRIPT_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify(gasPayload)
+                    }).catch(e => console.warn("GAS background staffing sync warning:", e));
+                } catch (e) {}
+
+                return new Response(JSON.stringify({ success: true, id: payload.id, savedStints: savedStints }), { status: 200, headers: corsHeaders() });
             }
 
             // Default target: Onboarding candidate

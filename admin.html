@@ -661,7 +661,7 @@
                                     <div class="form-row flex-three">
                                         <div class="form-group">
                                             <label>Position</label>
-                                            <select id="stfPosition">
+                                            <select id="stfPosition" onchange="refreshActiveStintPreview()">
                                                 <option value="">Select Position</option>
                                                 <option value="CSR">🍕 CSR</option>
                                                 <option value="BIKE">🚲 BIKE</option>
@@ -671,11 +671,11 @@
                                         </div>
                                         <div class="form-group">
                                             <label>Store #</label>
-                                            <input type="text" id="stfStore">
+                                            <input type="text" id="stfStore" oninput="refreshActiveStintPreview()">
                                         </div>
                                         <div class="form-group">
                                             <label>DO Name</label>
-                                            <input type="text" id="stfDo">
+                                            <input type="text" id="stfDo" oninput="refreshActiveStintPreview()">
                                         </div>
                                     </div>
 
@@ -709,7 +709,7 @@
                                     <div class="form-row flex-three">
                                         <div class="form-group">
                                             <label>Re-Hire Eligible?</label>
-                                            <select id="stfRehire">
+                                            <select id="stfRehire" onchange="refreshActiveStintPreview()">
                                                 <option value="Yes">✅ Yes - Eligible for Re-Hire</option>
                                                 <option value="No">🚫 No - Ineligible / Do Not Rehire</option>
                                                 <option value="Review Required">⚠️ Review Required</option>
@@ -717,7 +717,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label>Cause of Action</label>
-                                            <select id="stfCause">
+                                            <select id="stfCause" onchange="refreshActiveStintPreview()">
                                                 <option value="">Select Action Cause</option>
                                                 <option value="Abandoned job">Abandoned job</option>
                                                 <option value="Resignation">Resignation</option>
@@ -727,7 +727,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label>Reason for Action</label>
-                                            <select id="stfReason">
+                                            <select id="stfReason" onchange="refreshActiveStintPreview()">
                                                 <option value="">Select Reason</option>
                                                 <option value="Quit without notice">Quit without notice</option>
                                                 <option value="Illness">Illness</option>
@@ -749,13 +749,13 @@
 
                                     <div class="form-group">
                                         <label>General Staffing Notes / Explain Reason in Detail</label>
-                                        <textarea id="stfNotes"
+                                        <textarea id="stfNotes" oninput="refreshActiveStintPreview()"
                                             placeholder="Enter detailed explanation here..."></textarea>
                                     </div>
 
                                     <div class="form-group">
                                         <label>Submitted by:</label>
-                                        <input type="text" id="stfGmName" placeholder="Manager who completed form">
+                                        <input type="text" id="stfGmName" oninput="refreshActiveStintPreview()" placeholder="Manager who completed form">
                                     </div>
                                 </div>
                             </div>
@@ -4133,13 +4133,52 @@
                     Object.assign(item, payload);
                     item.lastUpdated = currentNowIso;
                 } else if (currentView === 'staffing') {
-                    let item = staffing.find(c => c.id === assignedId);
+                    let item = staffing.find(c => String(c.id) === String(assignedId));
                     if (!item) {
                         item = { id: assignedId };
                         staffing.unshift(item);
                     }
                     Object.assign(item, payload);
                     item.lastUpdated = currentNowIso;
+
+                    // Immediately sync saved prior stints into local memory
+                    const savedStints = (result && Array.isArray(result.savedStints) && result.savedStints.length > 0)
+                        ? result.savedStints
+                        : (Array.isArray(payload.priorStints) ? payload.priorStints : []);
+
+                    if (savedStints.length > 0) {
+                        savedStints.forEach((stint, idx) => {
+                            const stintId = stint.id || `STF-SAVED-${Date.now()}-${idx}`;
+                            let sItem = staffing.find(s => String(s.id) === String(stintId));
+                            if (!sItem) {
+                                sItem = { id: stintId };
+                                staffing.unshift(sItem);
+                            }
+                            Object.assign(sItem, {
+                                id: stintId,
+                                name: payload.name,
+                                store: stint.store || payload.store || '',
+                                position: stint.position || payload.position || 'CSR',
+                                hireDate: stint.hireDate || '',
+                                termDate: stint.termDate || '',
+                                rehireEligible: stint.rehireEligible || 'Yes',
+                                causeOfAction: stint.causeOfAction || '',
+                                reasonOfAction: stint.reasonOfAction || '',
+                                notes: stint.notes || '',
+                                gmName: stint.gmName || '',
+                                doName: stint.doName || payload.doName || '',
+                                lastUpdated: currentNowIso
+                            });
+                        });
+                    }
+
+                    // Clear the prior stints entry form container now that they are saved to history
+                    const priorCont = document.getElementById('priorStintsContainer');
+                    if (priorCont) priorCont.innerHTML = '';
+
+                    // IMMEDIATELY RE-RENDER THE EMPLOYMENT PERIODS CONTAINER AT THE TOP
+                    renderEmploymentPeriodsCard(document.getElementById('stfEmploymentPeriodsContainer'), payload.name, payload.email, assignedId);
+                    showBrandAlert("Staffing record & employment history updated successfully!", "Saved Successfully");
                 } else if (currentView === 'paycards') {
                     let item = paycards.find(c => c.id === assignedId);
                     if (!item) {
@@ -5446,6 +5485,32 @@
                     periodEl.value = getDominosFiscalPeriod(targetDate);
                 }
             }
+            refreshActiveStintPreview();
+        }
+
+        function refreshActiveStintPreview() {
+            if (currentView !== 'staffing') return;
+            const assignedId = document.getElementById('fieldId')?.value;
+            const name = document.getElementById('stfName')?.value.trim();
+            if (!assignedId || !name) return;
+
+            let item = staffing.find(c => String(c.id) === String(assignedId));
+            if (!item) {
+                item = { id: assignedId, name: name };
+                staffing.unshift(item);
+            }
+            if (document.getElementById('stfHireDate')) item.hireDate = document.getElementById('stfHireDate').value.trim();
+            if (document.getElementById('stfTermDate')) item.termDate = document.getElementById('stfTermDate').value.trim();
+            if (document.getElementById('stfStore')) item.store = document.getElementById('stfStore').value.trim();
+            if (document.getElementById('stfPosition')) item.position = document.getElementById('stfPosition').value;
+            if (document.getElementById('stfDo')) item.doName = document.getElementById('stfDo').value.trim();
+            if (document.getElementById('stfRehire')) item.rehireEligible = document.getElementById('stfRehire').value;
+            if (document.getElementById('stfCause')) item.causeOfAction = document.getElementById('stfCause').value.trim();
+            if (document.getElementById('stfReason')) item.reasonOfAction = document.getElementById('stfReason').value.trim();
+            if (document.getElementById('stfNotes')) item.notes = document.getElementById('stfNotes').value.trim();
+            if (document.getElementById('stfGmName')) item.gmName = document.getElementById('stfGmName').value.trim();
+
+            renderEmploymentPeriodsCard(document.getElementById('stfEmploymentPeriodsContainer'), name, '', assignedId);
         }
 
         function formatDisplayDate(dateStr) {
@@ -5552,6 +5617,38 @@
                 }
             });
 
+            // 3. Scan Unsaved Prior Stints currently entered into the form
+            if (typeof collectPriorStintsFromForm === 'function') {
+                const formPriorStints = collectPriorStintsFromForm();
+                formPriorStints.forEach((pstint, pIdx) => {
+                    const hDate = pstint.hireDate || '';
+                    const tDate = pstint.termDate || '';
+                    const normHDate = formatDateForInput(hDate) || hDate;
+                    const normTDate = tDate ? (formatDateForInput(tDate) || tDate) : 'active';
+                    const stintKey = `${pstint.store}_${normHDate}_${normTDate}`;
+                    if (!seenStintKeys.has(stintKey) && (hDate || tDate || pstint.store || pstint.notes)) {
+                        seenStintKeys.add(stintKey);
+                        matchedStints.push({
+                            id: pstint.id || `stf-draft-${pIdx}`,
+                            beginDate: hDate,
+                            endDate: tDate,
+                            hireDate: hDate,
+                            termDate: tDate,
+                            store: pstint.store || '',
+                            doName: '',
+                            position: pstint.position || 'CSR',
+                            causeOfAction: pstint.causeOfAction || '',
+                            reasonOfAction: pstint.reasonOfAction || '',
+                            notes: pstint.notes || '',
+                            gmName: pstint.gmName || '',
+                            rehireEligible: pstint.rehireEligible || 'Yes',
+                            status: tDate ? 'Terminated' : 'Active',
+                            source: 'Prior Stint'
+                        });
+                    }
+                });
+            }
+
             // Sort chronologically: newest / most recent stint on TOP
             matchedStints.sort((a, b) => {
                 const dateA = a.endDate || a.beginDate;
@@ -5656,7 +5753,9 @@
 
                 return `
                     <tr style="background: ${rowBg}; border-bottom: 1px solid #e0e0e0; font-size: 14px;">
-                        <td style="padding: 8px 6px; font-weight: bold; color: #1f4e79; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Stint ${idx + 1}</td>
+                        <td style="padding: 8px 6px; font-weight: bold; color: #1f4e79; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            ${p.id ? `<a href="javascript:void(0)" onclick="loadSpecificStintIntoForm('${escapeText(p.id)}')" style="color: #005c91; text-decoration: underline; cursor: pointer;" title="Click to edit Stint #${idx + 1}">Stint ${idx + 1}</a>` : `Stint ${idx + 1}`}
+                        </td>
                         <td style="padding: 8px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${beginDisplay}</td>
                         <td style="padding: 8px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${endDisplay}</td>
                         <td style="padding: 8px 6px; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${duration}</td>
@@ -5686,6 +5785,12 @@
                                             ${p.doName ? `<span><strong>DO:</strong> ${escapeText(p.doName)}</span>` : ''}
                                         </div>
                                     </div>
+                                    ${p.id ? `
+                                        <button type="button" onclick="loadSpecificStintIntoForm('${escapeText(p.id)}')"
+                                            style="background: var(--brand-blue); color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 13.5px; font-family: 'Subhead1', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                            ✏️ Edit This Stint in Form
+                                        </button>
+                                    ` : ''}
                                 </div>
                                 <div>
                                     <div style="font-size: 15px; font-weight: bold; color: #472b10; margin-bottom: 6px; font-family: 'Subhead1', sans-serif;">📝 Full Termination & Staffing Notes:</div>
@@ -5750,7 +5855,7 @@
             card.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #f0e6d6; padding-bottom: 4px;">
                     <strong style="color: #1f4e79; font-size: 14px; font-family: 'Subhead1', sans-serif;">Prior Stint #${stintIdx}</strong>
-                    <button type="button" onclick="this.closest('.prior-stint-card').remove(); updatePriorStintIndexes();"
+                    <button type="button" onclick="this.closest('.prior-stint-card').remove(); updatePriorStintIndexes(); refreshActiveStintPreview();"
                         style="background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; border-radius: 4px; padding: 2px 8px; font-size: 12px; cursor: pointer; font-family: 'Subhead1', sans-serif;">
                         🗑️ Remove
                     </button>
@@ -5759,19 +5864,19 @@
                 <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px;">
                     <div class="form-group" style="margin-bottom: 0;">
                         <label style="font-size: 12px;">Hire Date</label>
-                        <input type="date" class="stint-hire-date" value="${formatDateForInput(stint.hireDate || stint.beginDate)}">
+                        <input type="date" class="stint-hire-date" onchange="refreshActiveStintPreview()" value="${formatDateForInput(stint.hireDate || stint.beginDate)}">
                     </div>
                     <div class="form-group" style="margin-bottom: 0;">
                         <label style="font-size: 12px;">Term Date</label>
-                        <input type="date" class="stint-term-date" value="${formatDateForInput(stint.termDate || stint.endDate)}">
+                        <input type="date" class="stint-term-date" onchange="refreshActiveStintPreview()" value="${formatDateForInput(stint.termDate || stint.endDate)}">
                     </div>
                     <div class="form-group" style="margin-bottom: 0;">
                         <label style="font-size: 12px;">Store #</label>
-                        <input type="text" class="stint-store" value="${escapeText(stint.store || '')}" placeholder="e.g. 6836">
+                        <input type="text" class="stint-store" oninput="refreshActiveStintPreview()" value="${escapeText(stint.store || '')}" placeholder="e.g. 6836">
                     </div>
                     <div class="form-group" style="margin-bottom: 0;">
                         <label style="font-size: 12px;">Position</label>
-                        <select class="stint-position">
+                        <select class="stint-position" onchange="refreshActiveStintPreview()">
                             <option value="CSR" ${stint.position === 'CSR' ? 'selected' : ''}>🍕 CSR</option>
                             <option value="DE" ${stint.position === 'DE' ? 'selected' : ''}>🚗 DE</option>
                             <option value="BIKE" ${stint.position === 'BIKE' ? 'selected' : ''}>🚲 BIKE</option>
@@ -5782,7 +5887,7 @@
                 <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px;">
                     <div class="form-group" style="margin-bottom: 0;">
                         <label style="font-size: 12px;">Re-Hire Eligible?</label>
-                        <select class="stint-rehire">
+                        <select class="stint-rehire" onchange="refreshActiveStintPreview()">
                             <option value="Yes" ${stint.rehireEligible === 'Yes' ? 'selected' : ''}>✅ Yes - Eligible</option>
                             <option value="No" ${stint.rehireEligible === 'No' ? 'selected' : ''}>🚫 No - Ineligible</option>
                             <option value="Review Required" ${stint.rehireEligible === 'Review Required' ? 'selected' : ''}>⚠️ Review Required</option>
@@ -5790,7 +5895,7 @@
                     </div>
                     <div class="form-group" style="margin-bottom: 0;">
                         <label style="font-size: 12px;">Cause of Action</label>
-                        <select class="stint-cause">
+                        <select class="stint-cause" onchange="refreshActiveStintPreview()">
                             <option value="">Select Cause</option>
                             <option value="Resignation" ${stint.causeOfAction === 'Resignation' ? 'selected' : ''}>Resignation</option>
                             <option value="Abandoned job" ${stint.causeOfAction === 'Abandoned job' ? 'selected' : ''}>Abandoned job</option>
@@ -5800,7 +5905,7 @@
                     </div>
                     <div class="form-group" style="margin-bottom: 0;">
                         <label style="font-size: 12px;">Reason for Action</label>
-                        <select class="stint-reason">
+                        <select class="stint-reason" onchange="refreshActiveStintPreview()">
                             <option value="">Select Reason</option>
                             <option value="Quit without notice" ${stint.reasonOfAction === 'Quit without notice' ? 'selected' : ''}>Quit without notice</option>
                             <option value="Illness" ${stint.reasonOfAction === 'Illness' ? 'selected' : ''}>Illness</option>
@@ -5819,12 +5924,12 @@
                     </div>
                     <div class="form-group" style="margin-bottom: 0;">
                         <label style="font-size: 12px;">Submitted by (GM):</label>
-                        <input type="text" class="stint-gm" value="${escapeText(stint.gmName || stint.gm || '')}" placeholder="Manager name">
+                        <input type="text" class="stint-gm" oninput="refreshActiveStintPreview()" value="${escapeText(stint.gmName || stint.gm || '')}" placeholder="Manager name">
                     </div>
                 </div>
                 <div class="form-group" style="margin-bottom: 0;">
                     <label style="font-size: 12px;">Stint Notes & Specific Reason Details</label>
-                    <textarea class="stint-notes" placeholder="Enter specific details for this past stint..." style="height: 55px; font-size: 14px; padding: 6px 8px; font-family: 'Condensed', sans-serif;"></textarea>
+                    <textarea class="stint-notes" oninput="refreshActiveStintPreview()" placeholder="Enter specific details for this past stint..." style="height: 55px; font-size: 14px; padding: 6px 8px; font-family: 'Condensed', sans-serif;"></textarea>
                 </div>
             `;
 
@@ -5832,6 +5937,7 @@
             if (notesEl && stint.notes) notesEl.value = stint.notes;
 
             container.appendChild(card);
+            refreshActiveStintPreview();
         }
 
         function updatePriorStintIndexes() {
