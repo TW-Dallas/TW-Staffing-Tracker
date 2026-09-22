@@ -178,6 +178,53 @@
             box-shadow: 0 0 0 3px rgba(0, 144, 226, 0.2);
         }
 
+        /* Pulsing SSN Input */
+        .input-ssn-pulse {
+            border: 2px solid var(--brand-blue) !important;
+            animation: ssnPulseBlue 2.2s infinite ease-in-out;
+            letter-spacing: 6px;
+            font-size: 22px !important;
+            text-align: center;
+        }
+
+        @keyframes ssnPulseBlue {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 144, 226, 0.55);
+                border-color: var(--brand-blue);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(0, 144, 226, 0);
+                border-color: #38b6ff;
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 144, 226, 0);
+                border-color: var(--brand-blue);
+            }
+        }
+
+        /* Progressive Disclosure Quiz Steps */
+        .quiz-step-hidden {
+            display: none !important;
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+
+        .quiz-step-visible {
+            display: block !important;
+            animation: quizStepFadeIn 0.35s ease-out forwards;
+        }
+
+        @keyframes quizStepFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* Big Action Buttons */
         .btn-brand-primary {
             background-color: var(--brand-red);
@@ -661,17 +708,17 @@
                             <div class="card-header-band">
                                 <span class="band-icon">🔒</span>
                                 <div>
-                                    <h3 class="band-title">Pulse Profile & Uniform</h3>
-                                    <p class="band-subtitle">Verify details for store setup & payroll</p>
+                                    <h3 class="band-title">Payroll & Uniform</h3>
+                                    <p class="band-subtitle">Verify details for payroll setup</p>
                                 </div>
                             </div>
 
                             <!-- SSN Last 4 -->
                             <div class="input-group">
                                 <label for="ssnInput" class="input-label">Last 4 Digits of SSN <span style="color: var(--brand-red);">*</span></label>
-                                <input type="password" id="ssnInput" class="text-input" maxlength="4" pattern="\d{4}" placeholder="••••" inputmode="numeric" required>
+                                <input type="password" id="ssnInput" class="text-input input-ssn-pulse" maxlength="4" pattern="\d{4}" placeholder="••••" inputmode="numeric" required>
                                 <p style="font-family: 'Compact', sans-serif; font-size: 12px; color: var(--crust-deep); margin: 4px 0 0 0;">
-                                    Required by your General Manager to match your profile in the Pulse POS store system.
+                                    Required by the payroll department to set up your employee pay profile.
                                 </p>
                             </div>
 
@@ -709,19 +756,22 @@
                         </div>
                     </div>
 
-                    <!-- COLUMN 2: 4-Question Orientation Review -->
+                    <!-- COLUMN 2: 4-Question Orientation Review (Progressive Disclosure) -->
                     <div>
                         <div class="brand-card">
-                            <div class="card-header-band">
-                                <span class="band-icon">📝</span>
-                                <div>
-                                    <h3 class="band-title">Orientation Review</h3>
-                                    <p class="band-subtitle">Quick check on Team Wow standards</p>
+                            <div class="card-header-band" style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span class="band-icon">📝</span>
+                                    <div>
+                                        <h3 class="band-title">Orientation Review</h3>
+                                        <p class="band-subtitle">Quick check on Team Wow standards</p>
+                                    </div>
                                 </div>
+                                <span id="quizProgressBadge" style="font-family: 'Subhead1'; font-size: 12px; background: var(--crust-med); color: var(--crust-burnt); padding: 4px 10px; border-radius: var(--radius-pill);">Question 1 of 4</span>
                             </div>
 
                             <!-- Question 1: #1 Priority -->
-                            <div class="quiz-question-box">
+                            <div id="quizBox1" class="quiz-question-box">
                                 <p class="quiz-title">1. What is Team Wow’s #1 priority? <span style="color: var(--brand-red);">*</span></p>
                                 <div class="quiz-options-list">
                                     <label class="quiz-option-label">
@@ -744,7 +794,7 @@
                             </div>
 
                             <!-- Question 2: Franchise Owner -->
-                            <div class="quiz-question-box">
+                            <div id="quizBox2" class="quiz-question-box quiz-step-hidden">
                                 <p class="quiz-title">2. What is the name of the franchise owner? <span style="color: var(--brand-red);">*</span></p>
                                 <div class="quiz-options-list">
                                     <label class="quiz-option-label">
@@ -767,7 +817,7 @@
                             </div>
 
                             <!-- Question 3: Wrong Order -->
-                            <div class="quiz-question-box">
+                            <div id="quizBox3" class="quiz-question-box quiz-step-hidden">
                                 <p class="quiz-title">3. If the order is wrong, it is ______: <span style="color: var(--brand-red);">*</span></p>
                                 <div class="quiz-options-list">
                                     <label class="quiz-option-label">
@@ -790,7 +840,7 @@
                             </div>
 
                             <!-- Question 4: Uniform Standards (Check all that apply) -->
-                            <div class="quiz-question-box">
+                            <div id="quizBox4" class="quiz-question-box quiz-step-hidden">
                                 <p class="quiz-title">4. When you are in uniform you SHOULD (check all that apply): <span style="color: var(--brand-red);">*</span></p>
                                 <div class="quiz-options-list">
                                     <label class="quiz-option-label">
@@ -1062,10 +1112,48 @@
             document.querySelectorAll(`input[name="${groupName}"]`).forEach(inp => {
                 inp.closest('.quiz-option-label').classList.toggle('selected', inp.checked);
             });
+
+            const badge = document.getElementById('quizProgressBadge');
+
+            if (groupName === 'q1') {
+                const box2 = document.getElementById('quizBox2');
+                if (box2 && box2.classList.contains('quiz-step-hidden')) {
+                    box2.classList.remove('quiz-step-hidden');
+                    box2.classList.add('quiz-step-visible');
+                    if (badge) badge.textContent = 'Question 2 of 4';
+                }
+            } else if (groupName === 'q2') {
+                const box3 = document.getElementById('quizBox3');
+                if (box3 && box3.classList.contains('quiz-step-hidden')) {
+                    box3.classList.remove('quiz-step-hidden');
+                    box3.classList.add('quiz-step-visible');
+                    if (badge) badge.textContent = 'Question 3 of 4';
+                }
+            } else if (groupName === 'q3') {
+                const box4 = document.getElementById('quizBox4');
+                if (box4 && box4.classList.contains('quiz-step-hidden')) {
+                    box4.classList.remove('quiz-step-hidden');
+                    box4.classList.add('quiz-step-visible');
+                    if (badge) badge.textContent = 'Question 4 of 4';
+                }
+            }
         }
 
         function updateCheckboxHighlight(checkboxInput) {
             checkboxInput.closest('.quiz-option-label').classList.toggle('selected', checkboxInput.checked);
+            const anyChecked = document.querySelectorAll('input[name="q4"]:checked').length > 0;
+            const badge = document.getElementById('quizProgressBadge');
+            if (badge) {
+                if (anyChecked) {
+                    badge.textContent = '✓ Review Completed!';
+                    badge.style.background = '#e8f5e9';
+                    badge.style.color = '#2e7d32';
+                } else {
+                    badge.textContent = 'Question 4 of 4';
+                    badge.style.background = 'var(--crust-med)';
+                    badge.style.color = 'var(--crust-burnt)';
+                }
+            }
         }
 
         // 3. Form Submission
