@@ -266,6 +266,34 @@ export async function onRequestGet(context) {
         }
     }
 
+    // Endpoint for live NTO roster directly from Cloudflare D1 (powers morning reminders & attendance)
+    if (reqAction === "getNtoRoster" || reqAction === "exportRoster") {
+        const targetMarket = (url.searchParams.get("market") || market || "Dallas").toLowerCase() === "denver" ? "Denver" : "Dallas";
+        const dateFilter = url.searchParams.get("date");
+
+        let query = `
+            SELECT cr.id AS reg_id, cr.class_id, cr.candidate_name, cr.email, cr.phone, cr.store_num, cr.position, cr.status,
+                   tc.class_date, tc.start_time, tc.end_time, tc.trainer, tc.meet_link
+            FROM class_registrations cr
+            JOIN training_classes tc ON cr.class_id = tc.id
+            WHERE (cr.status = 'Confirmed' OR cr.status IS NULL OR cr.status = '')
+              AND tc.is_active = 1
+              AND (tc.market = ? OR tc.market = 'Virtual')
+        `;
+        const params = [targetMarket];
+        if (dateFilter) {
+            query += " AND tc.class_date = ?";
+            params.push(dateFilter);
+        }
+        query += " ORDER BY tc.class_date ASC, cr.candidate_name ASC";
+
+        const { results } = await db.prepare(query).bind(...params).all();
+        return new Response(JSON.stringify({ success: true, roster: results || [] }), {
+            status: 200,
+            headers: corsHeaders(0)
+        });
+    }
+
     // Fast endpoint for NTO classes: only query active classes and active registrations (prevents full database scans!)
     if (reqAction === "getNtoClasses") {
         const [classesRes, regsRes] = await Promise.all([
