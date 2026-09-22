@@ -39,6 +39,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 16px;
         }
 
         .portal-logo-wrap {
@@ -46,6 +47,7 @@
             align-items: center;
             gap: 12px;
             text-decoration: none;
+            flex-shrink: 0;
         }
 
         .portal-logo-img {
@@ -54,15 +56,78 @@
             display: block;
         }
 
+        /* Header Center Trainee Badge */
+        .header-trainee-badge {
+            background-color: var(--dark-blue);
+            border: 1.5px solid rgba(255, 255, 255, 0.25);
+            border-radius: var(--radius-pill);
+            padding: 4px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .trainee-badge-info {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .trainee-badge-label {
+            font-family: 'Subhead2', sans-serif;
+            font-size: 11px;
+            letter-spacing: 0.6px;
+            color: rgba(255, 255, 255, 0.85);
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+
+        .trainee-badge-name {
+            font-family: 'ExtraBold', sans-serif;
+            font-size: 17px;
+            color: #ffffff;
+            letter-spacing: 0.3px;
+            line-height: 1.2;
+        }
+
+        .trainee-badge-store {
+            font-family: 'Subhead1', sans-serif;
+            font-size: 15px;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 3px 10px;
+            border-radius: var(--radius-pill);
+            white-space: nowrap;
+        }
+
         .portal-tagline {
             font-family: 'Subhead1', sans-serif;
             color: #ffffff;
-            font-size: 13px;
+            font-size: 14px;
             letter-spacing: 0.5px;
             text-transform: uppercase;
             background: rgba(0, 0, 0, 0.15);
-            padding: 3px 10px;
+            padding: 4px 12px;
             border-radius: var(--radius-pill);
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 760px) {
+            .portal-header-inner {
+                flex-wrap: wrap;
+                justify-content: space-between;
+                gap: 8px;
+            }
+            .header-trainee-badge {
+                order: 3;
+                width: 100%;
+                justify-content: space-between;
+                box-sizing: border-box;
+                padding: 6px 14px;
+                margin-top: 4px;
+            }
         }
 
         /* Main Container: Expanded Desktop Max-Width 1180px */
@@ -101,14 +166,14 @@
 
         .band-title {
             font-family: 'ExtraBold', sans-serif;
-            font-size: 20px;
+            font-size: 22px;
             color: var(--dark-blue);
             margin: 0;
         }
 
         .band-subtitle {
             font-family: 'Subhead2', sans-serif;
-            font-size: 13px;
+            font-size: 14.5px;
             color: var(--crust-deep);
             margin: 3px 0 0 0;
         }
@@ -126,14 +191,14 @@
 
         .hero-banner h1 {
             font-family: 'ExtraBlack', serif;
-            font-size: 24px;
+            font-size: 25px;
             margin: 0 0 6px 0;
             letter-spacing: 0.5px;
         }
 
         .hero-banner p {
             font-family: 'Compact', sans-serif;
-            font-size: 14px;
+            font-size: 15px;
             margin: 0;
             opacity: 0.95;
             line-height: 1.4;
@@ -154,7 +219,7 @@
         .input-label {
             display: block;
             font-family: 'Subhead1', sans-serif;
-            font-size: 14px;
+            font-size: 15.5px;
             color: var(--dark-blue);
             margin-bottom: 6px;
         }
@@ -374,12 +439,12 @@
         }
 
         .selector-pill {
-            padding: 9px 16px;
+            padding: 10px 18px;
             border: 2px solid var(--crust-dark);
             border-radius: var(--radius-pill);
             background-color: #ffffff;
             font-family: 'Subhead2', sans-serif;
-            font-size: 14px;
+            font-size: 15.5px;
             color: var(--crust-burnt);
             cursor: pointer;
             user-select: none;
@@ -404,13 +469,13 @@
             background-color: var(--crust-light);
             border: 1px solid var(--crust-med);
             border-radius: var(--radius-md);
-            padding: 16px;
+            padding: 18px;
             margin-bottom: 16px;
         }
 
         .quiz-title {
             font-family: 'Subhead1', sans-serif;
-            font-size: 15px;
+            font-size: 17px;
             color: var(--dark-blue);
             margin: 0 0 10px 0;
             line-height: 1.4;
@@ -425,14 +490,14 @@
         .quiz-option-label {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             background: #ffffff;
             border: 1.5px solid var(--crust-dark);
             border-radius: var(--radius-md);
-            padding: 10px 14px;
+            padding: 12px 16px;
             cursor: pointer;
             font-family: 'Compact', sans-serif;
-            font-size: 14px;
+            font-size: 15.5px;
             color: var(--crust-burnt);
             transition: border-color 0.15s, background-color 0.15s;
         }
@@ -445,8 +510,8 @@
         .quiz-option-label input[type="radio"],
         .quiz-option-label input[type="checkbox"] {
             accent-color: var(--brand-blue);
-            width: 18px;
-            height: 18px;
+            width: 19px;
+            height: 19px;
             margin: 0;
             cursor: pointer;
         }
@@ -469,7 +534,7 @@
 
         .policy-callout h4 {
             font-family: 'ExtraBold', sans-serif;
-            font-size: 16px;
+            font-size: 17.5px;
             margin: 0 0 6px 0;
             display: flex;
             align-items: center;
@@ -478,7 +543,7 @@
 
         .policy-callout p {
             font-family: 'Compact', sans-serif;
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.5;
             margin: 0;
         }
@@ -488,7 +553,7 @@
             display: flex;
             align-items: flex-start;
             gap: 12px;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             cursor: pointer;
         }
 
@@ -502,7 +567,7 @@
 
         .agreement-text {
             font-family: 'Compact', sans-serif;
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.5;
             color: var(--crust-burnt);
         }
@@ -734,6 +799,16 @@
             <a href="/orientation" class="portal-logo-wrap">
                 <img src="images/dominos_logo.png" alt="Domino's Pizza" class="portal-logo-img" onerror="this.src='https://raw.githubusercontent.com/TW-Dallas/TW-Career-Path/main/New_Logo_v2.png'">
             </a>
+
+            <!-- Header Center Trainee Badge (Matches Mike's mockup) -->
+            <div id="headerTraineeBadge" class="header-trainee-badge hidden">
+                <div class="trainee-badge-info">
+                    <span class="trainee-badge-label">Completing Orientation For</span>
+                    <span id="activeTraineeTitle" class="trainee-badge-name">Trainee Name</span>
+                </div>
+                <span id="activeStoreBadge" class="trainee-badge-store">Store #0000</span>
+            </div>
+
             <span class="portal-tagline">NTO Completion Portal</span>
         </div>
     </header>
@@ -755,7 +830,7 @@
             <div class="input-group">
                 <label for="lookupInput" class="input-label">Your 10-Digit Phone Number</label>
                 <input type="tel" id="lookupInput" class="text-input" placeholder="(214) 555-0199" autocomplete="tel">
-                <p style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); margin: 6px 0 0 0;">
+                <p style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-deep); margin: 6px 0 0 0;">
                     Or enter the email address used during your application.
                 </p>
             </div>
@@ -786,18 +861,6 @@
         <!-- ============================================================== -->
         <div id="formState" class="hidden">
 
-            <div class="brand-card" style="padding: 18px 24px; margin-bottom: 20px; background-color: #f1f8fc; border-color: var(--brand-blue);">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                    <div>
-                        <span style="font-family: 'Subhead2'; font-size: 12px; color: var(--dark-blue); text-transform: uppercase;">Completing Orientation For</span>
-                        <h2 id="activeTraineeTitle" style="font-family: 'ExtraBold'; font-size: 20px; color: var(--dark-blue); margin: 2px 0 0 0;">Kevin Galvan</h2>
-                    </div>
-                    <span id="activeStoreBadge" style="background: var(--dark-blue); color: #fff; font-family: 'Subhead1'; font-size: 14px; padding: 6px 14px; border-radius: var(--radius-pill);">
-                        Store #6916
-                    </span>
-                </div>
-            </div>
-
             <form id="completionForm" onsubmit="handleFormSubmit(event)">
 
                 <div class="form-grid-2col">
@@ -817,13 +880,13 @@
                             <div class="input-group">
                                 <label for="ssnInput" class="input-label">Last 4 Digits of SSN <span style="color: var(--brand-red);">*</span></label>
                                 <input type="password" id="ssnInput" class="text-input input-ssn-pulse" maxlength="4" pattern="\d{4}" placeholder="••••" inputmode="numeric" required>
-                                <p style="font-family: 'Compact', sans-serif; font-size: 12px; color: var(--crust-deep); margin: 4px 0 0 0;">
+                                <p style="font-family: 'Compact', sans-serif; font-size: 13.5px; color: var(--crust-deep); margin: 6px 0 0 0;">
                                     Required by the payroll department to set up your employee pay profile.
                                 </p>
                             </div>
 
                             <!-- Uniform Shirt Size (Pre-filled) -->
-                            <div class="input-group" style="margin-top: 20px;">
+                            <div class="input-group" style="margin-top: 22px;">
                                 <label class="input-label">Uniform Shirt Size <span style="color: var(--brand-red);">*</span></label>
                                 <div class="pill-group" id="shirtPillGroup">
                                     <button type="button" class="selector-pill" data-val="S" onclick="selectShirt('S')">S</button>
@@ -837,20 +900,11 @@
                             </div>
 
                             <!-- Headwear Style (Pre-filled) -->
-                            <div class="input-group" style="margin-top: 20px;">
+                            <div class="input-group" style="margin-top: 22px;">
                                 <label class="input-label">Domino's Headwear Style <span style="color: var(--brand-red);">*</span></label>
                                 <div class="pill-group" id="hatPillGroup">
                                     <button type="button" class="selector-pill" data-val="Standard Cap" onclick="selectHat('Standard Cap')">Standard Cap</button>
                                     <button type="button" class="selector-pill" data-val="Visor" onclick="selectHat('Visor')">Visor</button>
-                                </div>
-                            </div>
-
-                            <!-- Pay Card / Direct Deposit (Pre-filled) -->
-                            <div class="input-group" style="margin-top: 20px;">
-                                <label class="input-label">Payment Distribution</label>
-                                <div class="pill-group" id="paycardPillGroup">
-                                    <button type="button" class="selector-pill" data-val="Direct Deposit" onclick="selectPaycard('Direct Deposit')">Direct Deposit on File</button>
-                                    <button type="button" class="selector-pill" data-val="Pay Card Requested" onclick="selectPaycard('Pay Card Requested')">Pay Card Requested</button>
                                 </div>
                             </div>
                         </div>
@@ -1169,6 +1223,7 @@
         function resetLookup() {
             currentCandidate = null;
             document.getElementById('identityConfirmCard').classList.add('hidden');
+            document.getElementById('headerTraineeBadge').classList.add('hidden');
             document.getElementById('lookupInput').value = '';
             document.getElementById('lookupInput').focus();
         }
@@ -1177,9 +1232,10 @@
         function confirmIdentityAndProceed() {
             if (!currentCandidate) return;
 
-            // Populate Form Header
+            // Populate Header Center Trainee Badge
             document.getElementById('activeTraineeTitle').textContent = currentCandidate.name;
             document.getElementById('activeStoreBadge').textContent = `Store #${currentCandidate.storeNum}`;
+            document.getElementById('headerTraineeBadge').classList.remove('hidden');
 
             // Pre-select uniform details
             if (currentCandidate.shirtSize) {
@@ -1193,13 +1249,6 @@
                 selectHat('Visor');
             } else {
                 selectHat('Standard Cap');
-            }
-
-            const rawPay = (currentCandidate.payCard || '').toLowerCase();
-            if (rawPay.includes('yes') || rawPay.includes('card')) {
-                selectPaycard('Pay Card Requested');
-            } else {
-                selectPaycard('Direct Deposit');
             }
 
             // Transition UI
@@ -1220,13 +1269,6 @@
             selectedHatStyle = style;
             document.querySelectorAll('#hatPillGroup .selector-pill').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.val === style);
-            });
-        }
-
-        function selectPaycard(choice) {
-            selectedPayCard = choice;
-            document.querySelectorAll('#paycardPillGroup .selector-pill').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.val === choice);
             });
         }
 
@@ -1312,7 +1354,7 @@
                 ssnLast4: ssnVal,
                 shirtSize: selectedShirtSize,
                 hatStyle: selectedHatStyle,
-                payCard: selectedPayCard,
+                payCard: currentCandidate.payCard || "",
                 quizAnswers: {
                     q1: q1Val,
                     q2: q2Val,
