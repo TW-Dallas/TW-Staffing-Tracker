@@ -34,7 +34,7 @@
         }
 
         .portal-header-inner {
-            max-width: 860px;
+            max-width: 1180px;
             margin: 0 auto;
             display: flex;
             align-items: center;
@@ -65,13 +65,13 @@
             border-radius: var(--radius-pill);
         }
 
-        /* Main Container: Desktop-first max-width 840px */
+        /* Main Container: Expanded Desktop Max-Width 1180px */
         .portal-main {
             flex: 1;
-            max-width: 840px;
+            max-width: 1180px;
             width: 100%;
             margin: 30px auto;
-            padding: 0 20px 40px 20px;
+            padding: 0 24px 48px 24px;
             box-sizing: border-box;
         }
 
@@ -185,6 +185,7 @@
             letter-spacing: 6px;
             font-size: 22px !important;
             text-align: center;
+            max-width: 280px;
         }
 
         @keyframes ssnPulseBlue {
@@ -336,11 +337,23 @@
         .form-grid-2col {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 24px;
+            gap: 28px;
         }
 
-        @media (max-width: 760px) {
+        /* Acknowledgments Layout: 2-column on desktop, 1-column on mobile */
+        .acknowledgments-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.15fr;
+            gap: 28px;
+            align-items: center;
+        }
+
+        @media (max-width: 860px) {
             .form-grid-2col {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .acknowledgments-layout {
                 grid-template-columns: 1fr;
                 gap: 16px;
             }
@@ -623,6 +636,93 @@
         .hidden {
             display: none !important;
         }
+
+        /* Success Screen Grid: 2-column on desktop, 1-column on mobile */
+        .success-grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            align-items: stretch;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 860px) {
+            .success-grid-2col {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+
+        /* Branded Footer */
+        .portal-footer {
+            background-color: var(--dark-blue);
+            border-top: 4px solid var(--brand-red);
+            color: #ffffff;
+            padding: 22px 24px;
+            padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+            margin-top: auto;
+        }
+
+        .portal-footer-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .footer-title {
+            font-family: 'Subhead1', sans-serif;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: #ffffff;
+        }
+
+        .footer-subtitle {
+            font-family: 'Compact', sans-serif;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .footer-meta {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .footer-copy {
+            margin: 0;
+            font-family: 'Compact', sans-serif;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .footer-security {
+            margin: 0;
+            font-family: 'Subhead2', sans-serif;
+            font-size: 12px;
+            color: #81c784;
+        }
+
+        @media (max-width: 760px) {
+            .portal-footer-inner {
+                flex-direction: column;
+                text-align: center;
+            }
+            .footer-meta {
+                text-align: center;
+            }
+        }
     </style>
 </head>
 
@@ -881,29 +981,35 @@
                         </div>
                     </div>
 
-                    <div class="policy-callout">
-                        <h4>🕒 In-Store Training Policy Reminder</h4>
-                        <p>All Domino's Team Wow training modules must be completed <strong>in-store while on the clock</strong> under certified trainer supervision. Training credentials are not authorized for at-home use.</p>
-                    </div>
+                    <div class="acknowledgments-layout">
+                        <!-- Left: In-store reminder callout -->
+                        <div class="policy-callout" style="margin: 0;">
+                            <h4>🕒 In-Store Training Policy Reminder</h4>
+                            <p>All Domino's Team Wow training modules must be completed <strong>in-store while on the clock</strong> under certified trainer supervision. Training credentials are not authorized for at-home use.</p>
+                        </div>
 
-                    <label class="agreement-item">
-                        <input type="checkbox" id="ackAttendance" required>
-                        <span class="agreement-text">
-                            <strong>Session Attendance:</strong> I certify that I attended and completed the live New Team Orientation virtual session today.
-                        </span>
-                    </label>
+                        <!-- Right: Agreements & Submit Button -->
+                        <div>
+                            <label class="agreement-item">
+                                <input type="checkbox" id="ackAttendance" required>
+                                <span class="agreement-text">
+                                    <strong>Session Attendance:</strong> I certify that I attended and completed the live New Team Orientation virtual session today.
+                                </span>
+                            </label>
 
-                    <label class="agreement-item">
-                        <input type="checkbox" id="ackInStore" required>
-                        <span class="agreement-text">
-                            <strong>In-Store Learning:</strong> I understand that my training credentials have been sent to my email and my store manager, and that I will begin Day 1 training in-store during my first scheduled shift.
-                        </span>
-                    </label>
+                            <label class="agreement-item">
+                                <input type="checkbox" id="ackInStore" required>
+                                <span class="agreement-text">
+                                    <strong>In-Store Learning:</strong> I understand that my training credentials have been sent to my email and my store manager, and that I will begin Day 1 training in-store during my first scheduled shift.
+                                </span>
+                            </label>
 
-                    <div style="margin-top: 24px;">
-                        <button type="submit" id="submitBtn" class="btn-brand-primary" style="font-size: 18px; padding: 16px 32px;">
-                            <span>Submit Orientation & Finish</span>
-                        </button>
+                            <div style="margin-top: 20px;">
+                                <button type="submit" id="submitBtn" class="btn-brand-primary" style="font-size: 18px; padding: 16px 32px;">
+                                    <span>Submit Orientation &amp; Finish</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -919,44 +1025,47 @@
                 <p id="successTraineeGreeting">Congratulations! Your New Team Orientation is officially recorded.</p>
             </div>
 
-            <!-- Primary Action Card: Text GM for Training Schedule -->
-            <div class="gm-action-card">
-                <div style="font-size: 32px; margin-bottom: 6px;">💬</div>
-                <h2 class="gm-title">Next Step: Text Your General Manager</h2>
-                <p class="gm-desc">
-                    Your store manager is waiting for your text to get you on the schedule for your first in-store shift!
-                </p>
+            <!-- 2-Column Success Grid on Desktop -->
+            <div class="success-grid-2col">
+                <!-- Column 1: Text GM for Training Schedule -->
+                <div class="gm-action-card" style="margin-bottom: 0;">
+                    <div style="font-size: 32px; margin-bottom: 6px;">💬</div>
+                    <h2 class="gm-title">Next Step: Text Your General Manager</h2>
+                    <p class="gm-desc">
+                        Your store manager is waiting for your text to get you on the schedule for your first in-store shift!
+                    </p>
 
-                <div class="gm-contact-row">
-                    <div>Store <strong id="successStoreNum">#6916</strong></div>
-                    <div>•</div>
-                    <div>GM: <strong id="successGmName">Manager Name</strong></div>
-                    <div>•</div>
-                    <div>Cell: <strong id="successGmPhone">(214) 555-0100</strong></div>
+                    <div class="gm-contact-row">
+                        <div>Store <strong id="successStoreNum">#6916</strong></div>
+                        <div>•</div>
+                        <div>GM: <strong id="successGmName">Manager Name</strong></div>
+                        <div>•</div>
+                        <div>Cell: <strong id="successGmPhone">(214) 555-0100</strong></div>
+                    </div>
+
+                    <div class="gm-button-group">
+                        <a id="textGmBtn" href="#" class="btn-brand-primary" style="font-size: 16px;">
+                            💬 Text GM for Training Schedule
+                        </a>
+                        <a id="callGmBtn" href="#" class="btn-brand-secondary" style="font-size: 15px;">
+                            📞 Call GM
+                        </a>
+                    </div>
                 </div>
 
-                <div class="gm-button-group">
-                    <a id="textGmBtn" href="#" class="btn-brand-primary" style="font-size: 16px;">
-                        💬 Text GM for Training Schedule
-                    </a>
-                    <a id="callGmBtn" href="#" class="btn-brand-secondary" style="font-size: 15px;">
-                        📞 Call GM
-                    </a>
+                <!-- Column 2: First Day Checklist -->
+                <div class="checklist-card" style="margin-bottom: 0;">
+                    <h3>👕 First Shift &amp; Dress Code Checklist</h3>
+                    <ul>
+                        <li><strong>Come Dressed to Work:</strong> Wear approved black pants or dark denim jeans (no rips, frays, or holes) and closed-toe, slip-resistant shoes.</li>
+                        <li><strong>Uniform Provided at Store:</strong> Your General Manager will issue your Domino's shirt and hat upon your arrival.</li>
+                        <li><strong>Welcome Letter Details:</strong> Refer back to the Welcome Letter emailed to you prior to onboarding forms for your exact store address and agreed pay rate.</li>
+                        <li><strong>In-Store Learning:</strong> Your login credentials have been delivered to your email and your manager. You will receive authorization to start Day 1 modules during your first shift.</li>
+                    </ul>
                 </div>
             </div>
 
-            <!-- First Day Checklist -->
-            <div class="checklist-card">
-                <h3>👕 First Shift & Dress Code Checklist</h3>
-                <ul>
-                    <li><strong>Come Dressed to Work:</strong> Wear approved black pants or dark denim jeans (no rips, frays, or holes) and closed-toe, slip-resistant shoes.</li>
-                    <li><strong>Uniform Provided at Store:</strong> Your General Manager will issue your Domino's shirt and hat upon your arrival.</li>
-                    <li><strong>Welcome Letter Details:</strong> Refer back to the Welcome Letter emailed to you prior to onboarding forms for your exact store address and agreed pay rate.</li>
-                    <li><strong>In-Store Learning:</strong> Your login credentials have been delivered to your email and your manager. You will receive authorization to start Day 1 modules during your first shift.</li>
-                </ul>
-            </div>
-
-            <div style="text-align: center; margin-top: 30px;">
+            <div style="text-align: center; margin-top: 24px;">
                 <p style="font-family: 'Subhead2'; font-size: 14px; color: var(--crust-deep);">
                     You may now close this window or return to the Google Meet. Welcome to the Team Wow family!
                 </p>
@@ -964,6 +1073,20 @@
         </div>
 
     </main>
+
+    <!-- Branded Team Wow Domino's Footer -->
+    <footer class="portal-footer">
+        <div class="portal-footer-inner">
+            <div class="footer-brand">
+                <span class="footer-title">Team Wow • Domino's Pizza</span>
+                <span class="footer-subtitle">Virtual New Team Orientation &amp; Store Onboarding</span>
+            </div>
+            <div class="footer-meta">
+                <p class="footer-copy">&copy; 2026 Team Wow, LLC. All rights reserved.</p>
+                <p class="footer-security">🔒 Encrypted &amp; transmitted directly to Team Wow Payroll &amp; Operations</p>
+            </div>
+        </div>
+    </footer>
 
     <script>
         // State variables
