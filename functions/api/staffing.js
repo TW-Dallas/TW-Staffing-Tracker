@@ -813,8 +813,7 @@ export async function onRequestPost(context) {
 
             await db.prepare(`
                 UPDATE onboarding_candidates
-                SET pulse_form_complete = 1,
-                    nto_attendance = 'NTO Complete',
+                SET nto_attendance = 'NTO Complete',
                     shirt_size = ?,
                     hat_style = ?,
                     pay_card = ?,
