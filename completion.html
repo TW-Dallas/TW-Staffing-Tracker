@@ -1015,14 +1015,16 @@
                 selectShirt('L'); // default fallback
             }
 
-            if (currentCandidate.hatStyle) {
-                selectHat(currentCandidate.hatStyle);
+            const rawHat = (currentCandidate.hatStyle || '').toLowerCase();
+            if (rawHat.includes('visor')) {
+                selectHat('Visor');
             } else {
                 selectHat('Standard Cap');
             }
 
-            if (currentCandidate.payCard) {
-                selectPaycard(currentCandidate.payCard);
+            const rawPay = (currentCandidate.payCard || '').toLowerCase();
+            if (rawPay.includes('yes') || rawPay.includes('card')) {
+                selectPaycard('Pay Card Requested');
             } else {
                 selectPaycard('Direct Deposit');
             }
