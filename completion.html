@@ -402,15 +402,21 @@
         .form-grid-2col {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 28px;
+            gap: 24px;
+            align-items: stretch;
         }
 
-        /* Acknowledgments Layout: 2-column on desktop, 1-column on mobile */
-        .acknowledgments-layout {
-            display: grid;
-            grid-template-columns: 1fr 1.15fr;
-            gap: 28px;
-            align-items: center;
+        .form-grid-2col > div {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-grid-2col .brand-card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 0;
+            box-sizing: border-box;
         }
 
         @media (max-width: 860px) {
@@ -418,15 +424,11 @@
                 grid-template-columns: 1fr;
                 gap: 16px;
             }
-            .acknowledgments-layout {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
             .hero-banner h1 {
                 font-size: 24px;
             }
             .brand-card {
-                padding: 20px;
+                padding: 18px;
             }
         }
 
@@ -469,16 +471,16 @@
             background-color: var(--crust-light);
             border: 1px solid var(--crust-med);
             border-radius: var(--radius-md);
-            padding: 12px 14px;
-            margin-bottom: 10px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
         }
 
         .quiz-title {
             font-family: 'Subhead1', sans-serif;
-            font-size: 15px;
+            font-size: 14px;
             color: var(--dark-blue);
-            margin: 0 0 6px 0;
-            line-height: 1.35;
+            margin: 0 0 5px 0;
+            line-height: 1.3;
         }
 
         .quiz-options-list {
@@ -500,10 +502,10 @@
             background: #ffffff;
             border: 1.5px solid var(--crust-dark);
             border-radius: var(--radius-md);
-            padding: 8px 12px;
+            padding: 6px 10px;
             cursor: pointer;
             font-family: 'Compact', sans-serif;
-            font-size: 14px;
+            font-size: 13.5px;
             color: var(--crust-burnt);
             transition: border-color 0.15s, background-color 0.15s;
         }
@@ -928,7 +930,7 @@
                                             <p class="band-subtitle">Quick check on Team Wow standards</p>
                                         </div>
                                     </div>
-                                    <span id="quizProgressBadge" style="font-family: 'Subhead1'; font-size: 12px; background: var(--crust-med); color: var(--crust-burnt); padding: 4px 10px; border-radius: var(--radius-pill);">Question 1 of 4</span>
+                                    <span id="quizProgressBadge" style="font-family: 'Subhead1'; font-size: 12px; background: var(--crust-med); color: var(--crust-burnt); padding: 4px 10px; border-radius: var(--radius-pill);">0 of 4 Answered</span>
                                 </div>
 
                                 <!-- Question 1: #1 Priority -->
@@ -955,7 +957,7 @@
                                 </div>
 
                                 <!-- Question 2: Franchise Owner -->
-                                <div id="quizBox2" class="quiz-question-box quiz-step-hidden">
+                                <div id="quizBox2" class="quiz-question-box">
                                     <p class="quiz-title">2. What is the name of the franchise owner? <span style="color: var(--brand-red);">*</span></p>
                                     <div class="quiz-options-list">
                                         <label class="quiz-option-label">
@@ -978,7 +980,7 @@
                                 </div>
 
                                 <!-- Question 3: Wrong Order -->
-                                <div id="quizBox3" class="quiz-question-box quiz-step-hidden">
+                                <div id="quizBox3" class="quiz-question-box">
                                     <p class="quiz-title">3. If the order is wrong, it is ______: <span style="color: var(--brand-red);">*</span></p>
                                     <div class="quiz-options-list">
                                         <label class="quiz-option-label">
@@ -1001,7 +1003,7 @@
                                 </div>
 
                                 <!-- Question 4: Uniform Standards (Check all that apply) -->
-                                <div id="quizBox4" class="quiz-question-box quiz-step-hidden">
+                                <div id="quizBox4" class="quiz-question-box">
                                     <p class="quiz-title">4. When in uniform you SHOULD (check all that apply): <span style="color: var(--brand-red);">*</span></p>
                                     <div class="quiz-options-list">
                                         <label class="quiz-option-label">
@@ -1025,10 +1027,11 @@
                                             <span>Buy Alcohol or Smoke</span>
                                         </label>
                                     </div>
-                                    <button type="button" id="btnGoToAck" class="btn-brand-primary quiz-step-hidden" style="margin-top: 10px; font-size: 15px; padding: 10px 20px;" onclick="goToAcknowledgmentStep()">
-                                        <span>Continue to Acknowledgments →</span>
-                                    </button>
                                 </div>
+
+                                <button type="button" id="btnGoToAck" class="btn-brand-primary" style="margin-top: 10px; font-size: 15px; padding: 12px 20px;" onclick="goToAcknowledgmentStep()">
+                                    <span>Continue to Acknowledgments →</span>
+                                </button>
                             </div>
 
                             <!-- STEP 2: Policy Acknowledgments & Submission (Transitions in-place) -->
@@ -1296,58 +1299,32 @@
             document.querySelectorAll(`input[name="${groupName}"]`).forEach(inp => {
                 inp.closest('.quiz-option-label').classList.toggle('selected', inp.checked);
             });
-
-            const badge = document.getElementById('quizProgressBadge');
-
-            if (groupName === 'q1') {
-                const box2 = document.getElementById('quizBox2');
-                if (box2 && box2.classList.contains('quiz-step-hidden')) {
-                    box2.classList.remove('quiz-step-hidden');
-                    box2.classList.add('quiz-step-visible');
-                    if (badge) badge.textContent = 'Question 2 of 4';
-                }
-            } else if (groupName === 'q2') {
-                const box3 = document.getElementById('quizBox3');
-                if (box3 && box3.classList.contains('quiz-step-hidden')) {
-                    box3.classList.remove('quiz-step-hidden');
-                    box3.classList.add('quiz-step-visible');
-                    if (badge) badge.textContent = 'Question 3 of 4';
-                }
-            } else if (groupName === 'q3') {
-                const box4 = document.getElementById('quizBox4');
-                if (box4 && box4.classList.contains('quiz-step-hidden')) {
-                    box4.classList.remove('quiz-step-hidden');
-                    box4.classList.add('quiz-step-visible');
-                    if (badge) badge.textContent = 'Question 4 of 4';
-                }
-            }
+            updateQuizProgress();
         }
 
         function updateCheckboxHighlight(checkboxInput) {
             checkboxInput.closest('.quiz-option-label').classList.toggle('selected', checkboxInput.checked);
-            const anyChecked = document.querySelectorAll('input[name="q4"]:checked').length > 0;
-            const badge = document.getElementById('quizProgressBadge');
-            const btnGoToAck = document.getElementById('btnGoToAck');
+            updateQuizProgress();
+        }
 
-            if (anyChecked) {
-                if (badge) {
-                    badge.textContent = 'Question 4 of 4 • Ready!';
+        function updateQuizProgress() {
+            const q1 = document.querySelector('input[name="q1"]:checked');
+            const q2 = document.querySelector('input[name="q2"]:checked');
+            const q3 = document.querySelector('input[name="q3"]:checked');
+            const q4 = document.querySelectorAll('input[name="q4"]:checked').length > 0;
+
+            let count = (q1 ? 1 : 0) + (q2 ? 1 : 0) + (q3 ? 1 : 0) + (q4 ? 1 : 0);
+            const badge = document.getElementById('quizProgressBadge');
+
+            if (badge) {
+                if (count === 4) {
+                    badge.textContent = '✓ 4 of 4 Completed';
                     badge.style.background = 'var(--brand-blue)';
                     badge.style.color = '#ffffff';
-                }
-                if (btnGoToAck) {
-                    btnGoToAck.classList.remove('quiz-step-hidden');
-                    btnGoToAck.classList.add('quiz-step-visible');
-                }
-            } else {
-                if (badge) {
-                    badge.textContent = 'Question 4 of 4';
+                } else {
+                    badge.textContent = `${count} of 4 Answered`;
                     badge.style.background = 'var(--crust-med)';
                     badge.style.color = 'var(--crust-burnt)';
-                }
-                if (btnGoToAck) {
-                    btnGoToAck.classList.add('quiz-step-hidden');
-                    btnGoToAck.classList.remove('quiz-step-visible');
                 }
             }
         }
