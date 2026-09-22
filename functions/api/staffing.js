@@ -294,6 +294,257 @@ export async function onRequestGet(context) {
         });
     }
 
+    // Endpoint for trainee identity lookup on /completion portal (by phone, email, or id)
+    if (reqAction === "getNtoCompletionProfile") {
+        const rawLookup = (url.searchParams.get("phone") || url.searchParams.get("email") || url.searchParams.get("lookup") || url.searchParams.get("id") || "").trim();
+        const cleanPhoneDigits = rawLookup.replace(/\D/g, "");
+        const isEmail = rawLookup.includes("@");
+
+        let candidate = null;
+
+        if (url.searchParams.get("id")) {
+            candidate = await db.prepare("SELECT * FROM onboarding_candidates WHERE id = ? LIMIT 1")
+                .bind(url.searchParams.get("id").trim())
+                .first();
+        }
+
+        if (!candidate && cleanPhoneDigits.length >= 7) {
+            const last10Digits = cleanPhoneDigits.slice(-10);
+            const { results } = await db.prepare(`
+                SELECT * FROM onboarding_candidates 
+                WHERE REPLACE(REPLACE(REPLACE(REPLACE(phone_number, ' ', ''), '-', ''), '(', ''), ')', '') LIKE ?
+                ORDER BY created_at DESC LIMIT 5
+            `).bind(`%${last10Digits}%`).all();
+            if (results && results.length > 0) {
+                candidate = results[0];
+            }
+        }
+
+        if (!candidate && isEmail) {
+            candidate = await db.prepare("SELECT * FROM onboarding_candidates WHERE LOWER(email) = LOWER(?) ORDER BY created_at DESC LIMIT 1")
+                .bind(rawLookup)
+                .first();
+        }
+
+        if (!candidate && rawLookup) {
+            // Partial name or generic search fallback
+            candidate = await db.prepare("SELECT * FROM onboarding_candidates WHERE id = ? OR LOWER(email) = LOWER(?) LIMIT 1")
+                .bind(rawLookup, rawLookup)
+                .first();
+        }
+
+        if (!candidate) {
+            return new Response(JSON.stringify({ success: false, error: "Candidate not found. Please double-check your phone number or email." }), {
+                status: 200,
+                headers: corsHeaders(0)
+            });
+        }
+
+        // Query GM details for their assigned store
+        const store = await db.prepare("SELECT * FROM stores WHERE store_number = ? LIMIT 1")
+            .bind(candidate.store_num)
+            .first();
+
+        const nameParts = (candidate.name || "").trim().split(/\s+/);
+        const firstName = nameParts[0] || "";
+        const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
+
+        return new Response(JSON.stringify({
+            success: true,
+            candidate: {
+                id: candidate.id,
+                name: candidate.name,
+                firstName: firstName,
+                lastName: lastName,
+                email: candidate.email || "",
+                phone: candidate.phone_number || "",
+                storeNum: candidate.store_num,
+                position: candidate.position || "Team Member",
+                market: candidate.market || "Dallas",
+                shirtSize: candidate.shirt_size || "",
+                hatStyle: candidate.hat_style || "Standard Cap",
+                payCard: candidate.pay_card || "",
+                pulseFormComplete: Boolean(candidate.pulse_form_complete),
+                ntoAttendance: candidate.nto_attendance || "",
+                gmName: store ? (store.manager_name || "") : "",
+                gmPhone: store ? (store.gm_phone || "") : "",
+                storeAddress: store ? (store.address || "") : "",
+                storePhone: store ? (store.store_phone || "") : ""
+            }
+        }), {
+            status: 200,
+            headers: corsHeaders(0)
+        });
+    }
+
+    // Endpoint for submitting NTO completion form, generating credentials, updating D1 and dual-writing
+    if (reqAction === "submitNtoCompletion") {
+        if (request.method !== "POST") {
+            return new Response(JSON.stringify({ success: false, error: "POST method required." }), {
+                status: 405,
+                headers: corsHeaders(0)
+            });
+        }
+
+        let body = {};
+        try {
+            body = await request.json();
+        } catch (e) {
+            return new Response(JSON.stringify({ success: false, error: "Invalid JSON payload." }), {
+                status: 400,
+                headers: corsHeaders(0)
+            });
+        }
+
+        const candidateId = (body.candidateId || "").trim();
+        const ssnLast4 = String(body.ssnLast4 || "").trim();
+
+        if (!candidateId) {
+            return new Response(JSON.stringify({ success: false, error: "Missing candidateId." }), {
+                status: 400,
+                headers: corsHeaders(0)
+            });
+        }
+
+        if (!/^\d{4}$/.test(ssnLast4)) {
+            return new Response(JSON.stringify({ success: false, error: "Please provide a valid 4-digit SSN." }), {
+                status: 400,
+                headers: corsHeaders(0)
+            });
+        }
+
+        // 1. Fetch candidate
+        const candidate = await db.prepare("SELECT * FROM onboarding_candidates WHERE id = ? LIMIT 1")
+            .bind(candidateId)
+            .first();
+
+        if (!candidate) {
+            return new Response(JSON.stringify({ success: false, error: "Candidate record not found." }), {
+                status: 404,
+                headers: corsHeaders(0)
+            });
+        }
+
+        const nameParts = (candidate.name || "").trim().split(/\s+/);
+        const firstName = nameParts[0] || "Team";
+        const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "Member";
+        const firstInit = firstName[0].toLowerCase();
+        const cleanedLastName = lastName.toLowerCase().replace(/[^a-z0-9]/g, "") || "user";
+        const baseId = (firstInit + cleanedLastName).slice(0, 15);
+
+        // 2. Generate unique Employee ID & password (or reuse existing if already created)
+        const existingEmp = await db.prepare("SELECT id, password FROM employees WHERE email = ? OR (LOWER(first_name) = ? AND LOWER(last_name) = ? AND store_num = ?) LIMIT 1")
+            .bind(candidate.email, firstName.toLowerCase(), lastName.toLowerCase(), candidate.store_num)
+            .first();
+
+        let employeeId = existingEmp ? existingEmp.id : "";
+        let password = existingEmp ? existingEmp.password : "";
+
+        if (!employeeId) {
+            let attempt = 0;
+            let candidateEmpId = "";
+            while (attempt < 20) {
+                const randNum = Math.floor(10 + Math.random() * 90);
+                candidateEmpId = `${baseId}${randNum}`;
+                const check = await db.prepare("SELECT id FROM employees WHERE id = ? LIMIT 1").bind(candidateEmpId).first();
+                if (!check) {
+                    employeeId = candidateEmpId;
+                    break;
+                }
+                attempt++;
+            }
+            if (!employeeId) {
+                employeeId = `${baseId}${Math.floor(100 + Math.random() * 900)}`;
+            }
+
+            const storeDigits = String(candidate.store_num || "0000").replace(/\D/g, "");
+            const firstInitCap = (firstName[0] || "X").toUpperCase();
+            const lastInitCap = (lastName[0] || "X").toUpperCase();
+            password = `Dominos${storeDigits}${firstInitCap}${lastInitCap}`;
+
+            const now = new Date();
+            const hireDateStr = `${now.getMonth() + 1}/${now.getDate()}/${now.getFullYear()}`;
+
+            // Insert into D1 employees table
+            await db.prepare(`
+                INSERT INTO employees (
+                    id, market, first_name, last_name, store_num, role, 
+                    phone, email, password, hire_date, progress, current_level, is_active
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Day 1 Mod 1', 1, 1)
+            `).bind(
+                employeeId,
+                candidate.market || "Dallas",
+                firstName,
+                lastName,
+                candidate.store_num,
+                candidate.position || "CSR",
+                candidate.phone_number || "",
+                candidate.email || "",
+                password,
+                hireDateStr
+            ).run();
+        }
+
+        // 3. Update onboarding_candidates record in D1
+        const now = new Date();
+        const timestampStr = `${now.getMonth() + 1}/${now.getDate()}/${now.getFullYear()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        const shirtSize = body.shirtSize || candidate.shirt_size || "";
+        const hatStyle = body.hatStyle || candidate.hat_style || "Standard Cap";
+        const payCard = body.payCard || candidate.pay_card || "";
+
+        await db.prepare(`
+            UPDATE onboarding_candidates
+            SET pulse_form_complete = 1,
+                nto_attendance = 'NTO Complete',
+                shirt_size = ?,
+                hat_style = ?,
+                pay_card = ?,
+                last_updated = ?
+            WHERE id = ?
+        `).bind(shirtSize, hatStyle, payCard, timestampStr, candidateId).run();
+
+        // 4. Fetch store & GM details
+        const store = await db.prepare("SELECT * FROM stores WHERE store_number = ? LIMIT 1")
+            .bind(candidate.store_num)
+            .first();
+
+        // 5. Dual-write to Apps Script (Dallas Credentials tab & Welcome Email)
+        const gasUrl = "https://script.google.com/macros/s/AKfycbxQVuU0uQ3TdkfsBwJpZ-K1iUDXTuLgvqEayPeqZgSRLDNxHOEUsOrjaSZAujI8p_874g/exec";
+        try {
+            fetch(gasUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    action: "syncDallasCredentialsFromD1",
+                    employeeId: employeeId,
+                    password: password,
+                    firstName: firstName,
+                    lastName: lastName,
+                    storeNum: candidate.store_num,
+                    role: candidate.position || "CSR",
+                    email: candidate.email || "",
+                    phone: candidate.phone_number || ""
+                })
+            }).catch(err => console.error("Dual-write fetch error:", err));
+        } catch (gasErr) {
+            console.error("Failed to dispatch dual-write to Apps Script:", gasErr);
+        }
+
+        // 6. Return response to trainee (omitting password/employeeId to enforce in-store training compliance)
+        return new Response(JSON.stringify({
+            success: true,
+            candidateName: candidate.name,
+            storeNum: candidate.store_num,
+            gmName: store ? (store.manager_name || "") : "",
+            gmPhone: store ? (store.gm_phone || "") : "",
+            storeAddress: store ? (store.address || "") : "",
+            storePhone: store ? (store.store_phone || "") : ""
+        }), {
+            status: 200,
+            headers: corsHeaders(0)
+        });
+    }
+
     // Fast endpoint for NTO classes: only query active classes and active registrations (prevents full database scans!)
     if (reqAction === "getNtoClasses") {
         const [classesRes, regsRes] = await Promise.all([

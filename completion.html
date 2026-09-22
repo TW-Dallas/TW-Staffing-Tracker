@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link class="favicon" rel="icon" type="image/png" href="images/tile_blue.png">
+    <title>Team Wow • NTO Completion & Review</title>
+    <meta name="theme-color" content="#005c91">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="brand_master.css">
+
+    <style>
+        body {
+            background-color: var(--crust-base);
+            color: var(--crust-burnt);
+            font-family: 'Compact', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Brand Navigation */
+        .portal-header {
+            background-color: var(--brand-blue);
+            border-bottom: 5px solid var(--brand-red);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-md);
+            text-align: center;
+        }
+
+        .portal-header-inner {
+            max-width: 860px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .portal-logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .portal-logo-img {
+            height: 38px;
+            width: auto;
+            display: block;
+        }
+
+        .portal-tagline {
+            font-family: 'Subhead1', sans-serif;
+            color: #ffffff;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            background: rgba(0, 0, 0, 0.15);
+            padding: 4px 12px;
+            border-radius: var(--radius-pill);
+        }
+
+        /* Main Container: Desktop-first max-width 840px */
+        .portal-main {
+            flex: 1;
+            max-width: 840px;
+            width: 100%;
+            margin: 30px auto;
+            padding: 0 20px 40px 20px;
+            box-sizing: border-box;
+        }
+
+        /* Cards & Section Containers */
+        .brand-card {
+            background-color: var(--inner-white);
+            border: 2px solid var(--crust-med);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 24px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card-header-band {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--crust-med);
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+        }
+
+        .band-icon {
+            font-size: 24px;
+        }
+
+        .band-title {
+            font-family: 'ExtraBold', sans-serif;
+            font-size: 20px;
+            color: var(--dark-blue);
+            margin: 0;
+        }
+
+        .band-subtitle {
+            font-family: 'Subhead2', sans-serif;
+            font-size: 13px;
+            color: var(--crust-deep);
+            margin: 3px 0 0 0;
+        }
+
+        /* Hero Callout Banner */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--dark-blue), var(--brand-blue));
+            color: #ffffff;
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            text-align: center;
+            margin-bottom: 28px;
+            box-shadow: var(--shadow-blue-glow);
+        }
+
+        .hero-banner h1 {
+            font-family: 'ExtraBlack', serif;
+            font-size: 28px;
+            margin: 0 0 8px 0;
+            letter-spacing: 0.5px;
+        }
+
+        .hero-banner p {
+            font-family: 'Compact', sans-serif;
+            font-size: 16px;
+            margin: 0;
+            opacity: 0.95;
+            line-height: 1.5;
+        }
+
+        /* Lookup State Container */
+        .lookup-box {
+            max-width: 520px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        .input-label {
+            display: block;
+            font-family: 'Subhead1', sans-serif;
+            font-size: 14px;
+            color: var(--dark-blue);
+            margin-bottom: 6px;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--crust-dark);
+            border-radius: var(--radius-md);
+            font-family: 'Condensed', sans-serif;
+            font-size: 18px;
+            color: var(--crust-burnt);
+            background-color: #ffffff;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .text-input:focus {
+            border-color: var(--brand-blue);
+            box-shadow: 0 0 0 3px rgba(0, 144, 226, 0.2);
+        }
+
+        /* Big Action Buttons */
+        .btn-brand-primary {
+            background-color: var(--brand-red);
+            color: #ffffff;
+            font-family: 'Subhead1', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            padding: 14px 28px;
+            border-radius: var(--radius-pill);
+            border: none;
+            cursor: pointer;
+            box-shadow: var(--shadow-red-glow);
+            transition: background-color 0.2s, transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .btn-brand-primary:hover {
+            background-color: var(--dark-red);
+        }
+
+        .btn-brand-primary:active {
+            transform: scale(0.99);
+        }
+
+        .btn-brand-blue {
+            background-color: var(--brand-blue);
+            color: #ffffff;
+            font-family: 'Subhead1', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            padding: 14px 28px;
+            border-radius: var(--radius-pill);
+            border: none;
+            cursor: pointer;
+            box-shadow: var(--shadow-blue-glow);
+            transition: background-color 0.2s, transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .btn-brand-blue:hover {
+            background-color: var(--med-blue);
+        }
+
+        .btn-brand-secondary {
+            background-color: var(--crust-light);
+            color: var(--crust-burnt);
+            font-family: 'Subhead2', sans-serif;
+            font-size: 14px;
+            padding: 10px 20px;
+            border-radius: var(--radius-pill);
+            border: 1px solid var(--crust-dark);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .btn-brand-secondary:hover {
+            background-color: var(--crust-med);
+        }
+
+        /* Identity Verification Card */
+        .identity-badge-card {
+            background-color: var(--crust-light);
+            border: 2px solid var(--brand-blue);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .identity-badge-details h3 {
+            font-family: 'ExtraBold', sans-serif;
+            font-size: 19px;
+            color: var(--dark-blue);
+            margin: 0 0 4px 0;
+        }
+
+        .identity-badge-details p {
+            font-family: 'Subhead2', sans-serif;
+            font-size: 14px;
+            color: var(--crust-deep);
+            margin: 0;
+        }
+
+        /* Form Grid: Desktop 2-column, Mobile 1-column */
+        .form-grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 760px) {
+            .form-grid-2col {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .hero-banner h1 {
+                font-size: 24px;
+            }
+            .brand-card {
+                padding: 20px;
+            }
+        }
+
+        /* Interactive Pill Selectors */
+        .pill-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .selector-pill {
+            padding: 9px 16px;
+            border: 2px solid var(--crust-dark);
+            border-radius: var(--radius-pill);
+            background-color: #ffffff;
+            font-family: 'Subhead2', sans-serif;
+            font-size: 14px;
+            color: var(--crust-burnt);
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s ease;
+        }
+
+        .selector-pill:hover {
+            border-color: var(--brand-blue);
+            background-color: var(--crust-light);
+        }
+
+        .selector-pill.active {
+            background-color: var(--brand-blue);
+            border-color: var(--brand-blue);
+            color: #ffffff;
+            font-weight: bold;
+            box-shadow: var(--shadow-blue-glow);
+        }
+
+        /* Quiz Review Cards */
+        .quiz-question-box {
+            background-color: var(--crust-light);
+            border: 1px solid var(--crust-med);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .quiz-title {
+            font-family: 'Subhead1', sans-serif;
+            font-size: 15px;
+            color: var(--dark-blue);
+            margin: 0 0 10px 0;
+            line-height: 1.4;
+        }
+
+        .quiz-options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .quiz-option-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #ffffff;
+            border: 1.5px solid var(--crust-dark);
+            border-radius: var(--radius-md);
+            padding: 10px 14px;
+            cursor: pointer;
+            font-family: 'Compact', sans-serif;
+            font-size: 14px;
+            color: var(--crust-burnt);
+            transition: border-color 0.15s, background-color 0.15s;
+        }
+
+        .quiz-option-label:hover {
+            border-color: var(--brand-blue);
+            background-color: #f2f8fc;
+        }
+
+        .quiz-option-label input[type="radio"],
+        .quiz-option-label input[type="checkbox"] {
+            accent-color: var(--brand-blue);
+            width: 18px;
+            height: 18px;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .quiz-option-label.selected {
+            border-color: var(--brand-blue);
+            background-color: #eaf4fb;
+            font-weight: bold;
+        }
+
+        /* Policy & In-Store Directives Box */
+        .policy-callout {
+            background-color: #ffebee;
+            border: 2px dashed #e57373;
+            border-radius: var(--radius-md);
+            padding: 18px 20px;
+            margin: 20px 0;
+            color: #b71c1c;
+        }
+
+        .policy-callout h4 {
+            font-family: 'ExtraBold', sans-serif;
+            font-size: 16px;
+            margin: 0 0 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .policy-callout p {
+            font-family: 'Compact', sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* Checkbox Agreements */
+        .agreement-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+
+        .agreement-item input[type="checkbox"] {
+            accent-color: var(--brand-red);
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+        }
+
+        .agreement-text {
+            font-family: 'Compact', sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--crust-burnt);
+        }
+
+        /* Success Step Cards */
+        .success-hero {
+            background: linear-gradient(135deg, #1b5e20, #2e7d32);
+            color: #ffffff;
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 14px rgba(46, 125, 50, 0.3);
+        }
+
+        .success-hero h1 {
+            font-family: 'ExtraBlack', serif;
+            font-size: 28px;
+            margin: 0 0 8px 0;
+        }
+
+        .success-hero p {
+            font-family: 'Compact', sans-serif;
+            font-size: 16px;
+            margin: 0;
+            opacity: 0.95;
+        }
+
+        .gm-action-card {
+            background-color: #f1f8e9;
+            border: 2px solid #81c784;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .gm-title {
+            font-family: 'ExtraBold', sans-serif;
+            font-size: 22px;
+            color: #1b5e20;
+            margin: 0 0 6px 0;
+        }
+
+        .gm-desc {
+            font-family: 'Compact', sans-serif;
+            font-size: 15px;
+            color: var(--crust-burnt);
+            margin: 0 0 18px 0;
+        }
+
+        .gm-contact-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            font-family: 'Subhead1', sans-serif;
+            font-size: 18px;
+            color: #2e7d32;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .gm-button-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .checklist-card {
+            background-color: var(--inner-white);
+            border: 2px solid var(--crust-med);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .checklist-card h3 {
+            font-family: 'ExtraBold', sans-serif;
+            font-size: 17px;
+            color: var(--dark-blue);
+            margin: 0 0 12px 0;
+        }
+
+        .checklist-card ul {
+            margin: 0;
+            padding-left: 20px;
+            font-family: 'Compact', sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--crust-burnt);
+        }
+
+        .checklist-card li {
+            margin-bottom: 8px;
+        }
+
+        /* Error Banner */
+        .error-alert {
+            background-color: var(--red-soft-bg);
+            border: 2px solid var(--brand-red);
+            color: var(--dark-red);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            font-family: 'Subhead2', sans-serif;
+            font-size: 14px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Hide elements dynamically */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header Band -->
+    <header class="portal-header">
+        <div class="portal-header-inner">
+            <a href="/orientation" class="portal-logo-wrap">
+                <img src="images/dominos_logo.png" alt="Domino's Pizza" class="portal-logo-img" onerror="this.src='https://raw.githubusercontent.com/TW-Dallas/TW-Career-Path/main/New_Logo_v2.png'">
+            </a>
+            <span class="portal-tagline">NTO Completion Portal</span>
+        </div>
+    </header>
+
+    <main class="portal-main">
+
+        <!-- Error Banner -->
+        <div id="errorBanner" class="error-alert"></div>
+
+        <!-- ============================================================== -->
+        <!-- STATE 1: Trainee Identity Lookup                               -->
+        <!-- ============================================================== -->
+        <div id="lookupState" class="brand-card lookup-box">
+            <div class="hero-banner" style="margin: -28px -28px 24px -28px; border-radius: var(--radius-lg) var(--radius-lg) 0 0;">
+                <h1>Virtual NTO Completion</h1>
+                <p>Welcome to the finish line of orientation! Please enter your phone number below to pull up your profile.</p>
+            </div>
+
+            <div class="input-group">
+                <label for="lookupInput" class="input-label">Your 10-Digit Phone Number</label>
+                <input type="tel" id="lookupInput" class="text-input" placeholder="(214) 555-0199" autocomplete="tel">
+                <p style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); margin: 6px 0 0 0;">
+                    Or enter the email address used during your application.
+                </p>
+            </div>
+
+            <button type="button" id="lookupBtn" class="btn-brand-blue" onclick="handleLookupTrainee()">
+                <span>Find My Record</span>
+            </button>
+
+            <!-- Verification Confirmation Modal/Badge -->
+            <div id="identityConfirmCard" class="identity-badge-card hidden">
+                <div class="identity-badge-details">
+                    <h3 id="confirmName">Trainee Name</h3>
+                    <p id="confirmStoreRole">Store #6916 • Customer Service Rep</p>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button type="button" class="btn-brand-primary" style="padding: 10px 20px; font-size: 14px;" onclick="confirmIdentityAndProceed()">
+                        ✓ Yes, That's Me
+                    </button>
+                    <button type="button" class="btn-brand-secondary" onclick="resetLookup()">
+                        Change
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- STATE 2: Verification, Uniform, SSN & 4-Question Quiz Form     -->
+        <!-- ============================================================== -->
+        <div id="formState" class="hidden">
+
+            <div class="brand-card" style="padding: 18px 24px; margin-bottom: 20px; background-color: #f1f8fc; border-color: var(--brand-blue);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <span style="font-family: 'Subhead2'; font-size: 12px; color: var(--dark-blue); text-transform: uppercase;">Completing Orientation For</span>
+                        <h2 id="activeTraineeTitle" style="font-family: 'ExtraBold'; font-size: 20px; color: var(--dark-blue); margin: 2px 0 0 0;">Kevin Galvan</h2>
+                    </div>
+                    <span id="activeStoreBadge" style="background: var(--dark-blue); color: #fff; font-family: 'Subhead1'; font-size: 14px; padding: 6px 14px; border-radius: var(--radius-pill);">
+                        Store #6916
+                    </span>
+                </div>
+            </div>
+
+            <form id="completionForm" onsubmit="handleFormSubmit(event)">
+
+                <div class="form-grid-2col">
+                    
+                    <!-- COLUMN 1: Profile & Uniform Verification -->
+                    <div>
+                        <div class="brand-card">
+                            <div class="card-header-band">
+                                <span class="band-icon">🔒</span>
+                                <div>
+                                    <h3 class="band-title">Pulse Profile & Uniform</h3>
+                                    <p class="band-subtitle">Verify details for store setup & payroll</p>
+                                </div>
+                            </div>
+
+                            <!-- SSN Last 4 -->
+                            <div class="input-group">
+                                <label for="ssnInput" class="input-label">Last 4 Digits of SSN <span style="color: var(--brand-red);">*</span></label>
+                                <input type="password" id="ssnInput" class="text-input" maxlength="4" pattern="\d{4}" placeholder="••••" inputmode="numeric" required>
+                                <p style="font-family: 'Compact', sans-serif; font-size: 12px; color: var(--crust-deep); margin: 4px 0 0 0;">
+                                    Required by your General Manager to match your profile in the Pulse POS store system.
+                                </p>
+                            </div>
+
+                            <!-- Uniform Shirt Size (Pre-filled) -->
+                            <div class="input-group" style="margin-top: 20px;">
+                                <label class="input-label">Uniform Shirt Size <span style="color: var(--brand-red);">*</span></label>
+                                <div class="pill-group" id="shirtPillGroup">
+                                    <button type="button" class="selector-pill" data-val="S" onclick="selectShirt('S')">S</button>
+                                    <button type="button" class="selector-pill" data-val="M" onclick="selectShirt('M')">M</button>
+                                    <button type="button" class="selector-pill" data-val="L" onclick="selectShirt('L')">L</button>
+                                    <button type="button" class="selector-pill" data-val="XL" onclick="selectShirt('XL')">XL</button>
+                                    <button type="button" class="selector-pill" data-val="2XL" onclick="selectShirt('2XL')">2XL</button>
+                                    <button type="button" class="selector-pill" data-val="3XL" onclick="selectShirt('3XL')">3XL</button>
+                                    <button type="button" class="selector-pill" data-val="4XL" onclick="selectShirt('4XL')">4XL</button>
+                                </div>
+                            </div>
+
+                            <!-- Headwear Style (Pre-filled) -->
+                            <div class="input-group" style="margin-top: 20px;">
+                                <label class="input-label">Domino's Headwear Style <span style="color: var(--brand-red);">*</span></label>
+                                <div class="pill-group" id="hatPillGroup">
+                                    <button type="button" class="selector-pill" data-val="Standard Cap" onclick="selectHat('Standard Cap')">Standard Cap</button>
+                                    <button type="button" class="selector-pill" data-val="Visor" onclick="selectHat('Visor')">Visor</button>
+                                </div>
+                            </div>
+
+                            <!-- Pay Card / Direct Deposit (Pre-filled) -->
+                            <div class="input-group" style="margin-top: 20px;">
+                                <label class="input-label">Payment Distribution</label>
+                                <div class="pill-group" id="paycardPillGroup">
+                                    <button type="button" class="selector-pill" data-val="Direct Deposit" onclick="selectPaycard('Direct Deposit')">Direct Deposit on File</button>
+                                    <button type="button" class="selector-pill" data-val="Pay Card Requested" onclick="selectPaycard('Pay Card Requested')">Pay Card Requested</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COLUMN 2: 4-Question Orientation Review -->
+                    <div>
+                        <div class="brand-card">
+                            <div class="card-header-band">
+                                <span class="band-icon">📝</span>
+                                <div>
+                                    <h3 class="band-title">Orientation Review</h3>
+                                    <p class="band-subtitle">Quick check on Team Wow standards</p>
+                                </div>
+                            </div>
+
+                            <!-- Question 1: #1 Priority -->
+                            <div class="quiz-question-box">
+                                <p class="quiz-title">1. What is Team Wow’s #1 priority? <span style="color: var(--brand-red);">*</span></p>
+                                <div class="quiz-options-list">
+                                    <label class="quiz-option-label">
+                                        <input type="radio" name="q1" value="Safety" required onchange="updateQuizHighlight(this)">
+                                        <span>Safety</span>
+                                    </label>
+                                    <label class="quiz-option-label">
+                                        <input type="radio" name="q1" value="Speed" onchange="updateQuizHighlight(this)">
+                                        <span>Speed</span>
+                                    </label>
+                                    <label class="quiz-option-label">
+                                        <input type="radio" name="q1" value="Profits" onchange="updateQuizHighlight(this)">
+                                        <span>Profits</span>
+                                    </label>
+                                    <label class="quiz-option-label">
+                                        <input type="radio" name="q1" value="Sales" onchange="updateQuizHighlight(this)">
+                                        <span>Sales</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Question 2: Franchise Owner -->
+                            <div class="quiz-question-box">
+                                <p class="quiz-title">2. What is the name of the franchise owner? <span style="color: var(--brand-red);">*</span></p>
+                                <div class="quiz-options-list">
+                                    <label class="quiz-option-label">
+                                        <input type="radio" name="q2" value="Brent Hamill" required onchange="updateQuizHighlight(this)">
+                                        <span>Brent Hamill</span>
+                                    </label>
+                                    <label class="quiz-option-label">
+                                        <input type="radio" name="q2" value="Tom Monaghan" onchange="updateQuizHighlight(this)">
+                                        <span>Tom Monaghan</span>
+                                    </label>
+                                    <label class="quiz-option-label">
+                                        <input type="radio" name="q2" value="David Brandon" onchange="updateQuizHighlight(this)">
+                                        <span>David Brandon</span>
+                                    </label>
+                                    <label class="quiz-option-label">
+                                        <input type="radio" name="q2" value="Richard Allison" onchange="updateQuizHighlight(this)">
+                                        <span>Richard Allison</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Question 3: Wrong Order -->
+                            <div class="quiz-question-box">
+                                <p class="quiz-title">3. If the order is wrong, it is ______: <span style="color: var(--brand-red);">*</span></p>
+                                <div class="quiz-options-list">
+                                    <label class="quiz-option-label">
+                                        <input type="radio" name="q3" value="Free" required onchange="updateQuizHighlight(this)">
+                                        <span>Free</span>
+                                    </label>
+                                    <label class="quiz-option-label">
+                                        <input type="radio" name="q3" value="50% Off" onchange="updateQuizHighlight(this)">
+                                        <span>50% Off</span>
+                                    </label>
+                                    <label class="quiz-option-label">
+                                        <input type="radio" name="q3" value="Replaced Next Time" onchange="updateQuizHighlight(this)">
+                                        <span>Replaced Next Time</span>
+                                    </label>
+                                    <label class="quiz-option-label">
+                                        <input type="radio" name="q3" value="Ignored" onchange="updateQuizHighlight(this)">
+                                        <span>Ignored</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Question 4: Uniform Standards (Check all that apply) -->
+                            <div class="quiz-question-box">
+                                <p class="quiz-title">4. When you are in uniform you SHOULD (check all that apply): <span style="color: var(--brand-red);">*</span></p>
+                                <div class="quiz-options-list">
+                                    <label class="quiz-option-label">
+                                        <input type="checkbox" name="q4" value="Be in Perfect Image" onchange="updateCheckboxHighlight(this)">
+                                        <span>Be in Perfect Image</span>
+                                    </label>
+                                    <label class="quiz-option-label">
+                                        <input type="checkbox" name="q4" value="Be Friendly" onchange="updateCheckboxHighlight(this)">
+                                        <span>Be Friendly</span>
+                                    </label>
+                                    <label class="quiz-option-label">
+                                        <input type="checkbox" name="q4" value="Carry more than $20" onchange="updateCheckboxHighlight(this)">
+                                        <span>Carry more than $20</span>
+                                    </label>
+                                    <label class="quiz-option-label">
+                                        <input type="checkbox" name="q4" value="Drive Safe & Courteously" onchange="updateCheckboxHighlight(this)">
+                                        <span>Drive Safe & Courteously</span>
+                                    </label>
+                                    <label class="quiz-option-label">
+                                        <input type="checkbox" name="q4" value="Buy Alcohol or Smoke" onchange="updateCheckboxHighlight(this)">
+                                        <span>Buy Alcohol or Smoke</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Policies & Acknowledgments -->
+                <div class="brand-card">
+                    <div class="card-header-band">
+                        <span class="band-icon">📋</span>
+                        <div>
+                            <h3 class="band-title">Training Policy Acknowledgments</h3>
+                            <p class="band-subtitle">Please read and confirm before submitting</p>
+                        </div>
+                    </div>
+
+                    <div class="policy-callout">
+                        <h4>🕒 In-Store Training Policy Reminder</h4>
+                        <p>All Domino's Team Wow training modules must be completed <strong>in-store while on the clock</strong> under certified trainer supervision. Training credentials are not authorized for at-home use.</p>
+                    </div>
+
+                    <label class="agreement-item">
+                        <input type="checkbox" id="ackAttendance" required>
+                        <span class="agreement-text">
+                            <strong>Session Attendance:</strong> I certify that I attended and completed the live New Team Orientation virtual session today.
+                        </span>
+                    </label>
+
+                    <label class="agreement-item">
+                        <input type="checkbox" id="ackInStore" required>
+                        <span class="agreement-text">
+                            <strong>In-Store Learning:</strong> I understand that my training credentials have been sent to my email and my store manager, and that I will begin Day 1 training in-store during my first scheduled shift.
+                        </span>
+                    </label>
+
+                    <div style="margin-top: 24px;">
+                        <button type="submit" id="submitBtn" class="btn-brand-primary" style="font-size: 18px; padding: 16px 32px;">
+                            <span>Submit Orientation & Finish</span>
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- STATE 3: Success Screen (Action-Oriented Next Steps)           -->
+        <!-- ============================================================== -->
+        <div id="successState" class="hidden">
+            <div class="success-hero">
+                <h1>🎉 Orientation Complete!</h1>
+                <p id="successTraineeGreeting">Congratulations! Your New Team Orientation is officially recorded.</p>
+            </div>
+
+            <!-- Primary Action Card: Text GM for Training Schedule -->
+            <div class="gm-action-card">
+                <div style="font-size: 32px; margin-bottom: 6px;">💬</div>
+                <h2 class="gm-title">Next Step: Text Your General Manager</h2>
+                <p class="gm-desc">
+                    Your store manager is waiting for your text to get you on the schedule for your first in-store shift!
+                </p>
+
+                <div class="gm-contact-row">
+                    <div>Store <strong id="successStoreNum">#6916</strong></div>
+                    <div>•</div>
+                    <div>GM: <strong id="successGmName">Manager Name</strong></div>
+                    <div>•</div>
+                    <div>Cell: <strong id="successGmPhone">(214) 555-0100</strong></div>
+                </div>
+
+                <div class="gm-button-group">
+                    <a id="textGmBtn" href="#" class="btn-brand-primary" style="font-size: 16px;">
+                        💬 Text GM for Training Schedule
+                    </a>
+                    <a id="callGmBtn" href="#" class="btn-brand-secondary" style="font-size: 15px;">
+                        📞 Call GM
+                    </a>
+                </div>
+            </div>
+
+            <!-- First Day Checklist -->
+            <div class="checklist-card">
+                <h3>👕 First Shift & Dress Code Checklist</h3>
+                <ul>
+                    <li><strong>Come Dressed to Work:</strong> Wear approved black pants or dark denim jeans (no rips, frays, or holes) and closed-toe, slip-resistant shoes.</li>
+                    <li><strong>Uniform Provided at Store:</strong> Your General Manager will issue your Domino's shirt and hat upon your arrival.</li>
+                    <li><strong>Welcome Letter Details:</strong> Refer back to the Welcome Letter emailed to you prior to onboarding forms for your exact store address and agreed pay rate.</li>
+                    <li><strong>In-Store Learning:</strong> Your login credentials have been delivered to your email and your manager. You will receive authorization to start Day 1 modules during your first shift.</li>
+                </ul>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <p style="font-family: 'Subhead2'; font-size: 14px; color: var(--crust-deep);">
+                    You may now close this window or return to the Google Meet. Welcome to the Team Wow family!
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // State variables
+        let currentCandidate = null;
+        let selectedShirtSize = "";
+        let selectedHatStyle = "Standard Cap";
+        let selectedPayCard = "";
+
+        // Auto-check URL parameters on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const lookupVal = params.get('phone') || params.get('email') || params.get('id') || params.get('lookup');
+            
+            // Format phone input as user types
+            const phoneInput = document.getElementById('lookupInput');
+            phoneInput.addEventListener('input', formatPhoneInput);
+
+            if (lookupVal) {
+                phoneInput.value = lookupVal;
+                handleLookupTrainee(lookupVal);
+            }
+        });
+
+        function formatPhoneInput(e) {
+            const input = e.target;
+            const isEmail = input.value.includes('@');
+            if (isEmail) return;
+
+            let x = input.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+            if (!x[2]) {
+                input.value = x[1];
+            } else if (!x[3]) {
+                input.value = `(${x[1]}) ${x[2]}`;
+            } else {
+                input.value = `(${x[1]}) ${x[2]}-${x[3]}`;
+            }
+        }
+
+        // 1. Identity Lookup
+        async function handleLookupTrainee(overrideVal) {
+            hideError();
+            const inputVal = (overrideVal || document.getElementById('lookupInput').value || '').trim();
+            if (!inputVal) {
+                showError("Please enter your 10-digit phone number or email address.");
+                return;
+            }
+
+            const btn = document.getElementById('lookupBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<span class="spinner"></span> <span>Searching...</span>`;
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`/api/staffing?action=getNtoCompletionProfile&lookup=${encodeURIComponent(inputVal)}`);
+                const data = await res.json();
+
+                if (!data.success || !data.candidate) {
+                    showError(data.error || "No candidate record found matching that phone number or email. Please check the spelling or ask your trainer in the chat.");
+                    document.getElementById('identityConfirmCard').classList.add('hidden');
+                    return;
+                }
+
+                currentCandidate = data.candidate;
+                displayIdentityConfirm(currentCandidate);
+            } catch (err) {
+                console.error("Lookup error:", err);
+                showError("Unable to connect to the database. Please try again or ask your trainer.");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function displayIdentityConfirm(cand) {
+            document.getElementById('confirmName').textContent = cand.name || `${cand.firstName} ${cand.lastName}`;
+            document.getElementById('confirmStoreRole').textContent = `Store #${cand.storeNum} • ${cand.position || 'Team Member'}`;
+            document.getElementById('identityConfirmCard').classList.remove('hidden');
+        }
+
+        function resetLookup() {
+            currentCandidate = null;
+            document.getElementById('identityConfirmCard').classList.add('hidden');
+            document.getElementById('lookupInput').value = '';
+            document.getElementById('lookupInput').focus();
+        }
+
+        // 2. Confirm Identity and transition to Form
+        function confirmIdentityAndProceed() {
+            if (!currentCandidate) return;
+
+            // Populate Form Header
+            document.getElementById('activeTraineeTitle').textContent = currentCandidate.name;
+            document.getElementById('activeStoreBadge').textContent = `Store #${currentCandidate.storeNum}`;
+
+            // Pre-select uniform details
+            if (currentCandidate.shirtSize) {
+                selectShirt(currentCandidate.shirtSize);
+            } else {
+                selectShirt('L'); // default fallback
+            }
+
+            if (currentCandidate.hatStyle) {
+                selectHat(currentCandidate.hatStyle);
+            } else {
+                selectHat('Standard Cap');
+            }
+
+            if (currentCandidate.payCard) {
+                selectPaycard(currentCandidate.payCard);
+            } else {
+                selectPaycard('Direct Deposit');
+            }
+
+            // Transition UI
+            document.getElementById('lookupState').classList.add('hidden');
+            document.getElementById('formState').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Interactive Selector Helpers
+        function selectShirt(size) {
+            selectedShirtSize = size;
+            document.querySelectorAll('#shirtPillGroup .selector-pill').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.val === size);
+            });
+        }
+
+        function selectHat(style) {
+            selectedHatStyle = style;
+            document.querySelectorAll('#hatPillGroup .selector-pill').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.val === style);
+            });
+        }
+
+        function selectPaycard(choice) {
+            selectedPayCard = choice;
+            document.querySelectorAll('#paycardPillGroup .selector-pill').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.val === choice);
+            });
+        }
+
+        function updateQuizHighlight(radioInput) {
+            const groupName = radioInput.name;
+            document.querySelectorAll(`input[name="${groupName}"]`).forEach(inp => {
+                inp.closest('.quiz-option-label').classList.toggle('selected', inp.checked);
+            });
+        }
+
+        function updateCheckboxHighlight(checkboxInput) {
+            checkboxInput.closest('.quiz-option-label').classList.toggle('selected', checkboxInput.checked);
+        }
+
+        // 3. Form Submission
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            hideError();
+
+            const ssnVal = document.getElementById('ssnInput').value.trim();
+            if (!/^\d{4}$/.test(ssnVal)) {
+                showError("Please enter the 4 digits of your Social Security Number.");
+                document.getElementById('ssnInput').focus();
+                return;
+            }
+
+            // Validate Quiz Q4: Check all that apply
+            const q4Checked = Array.from(document.querySelectorAll('input[name="q4"]:checked')).map(el => el.value);
+            if (q4Checked.length === 0) {
+                showError("Please answer Question #4 on the orientation review.");
+                return;
+            }
+
+            const q1Val = document.querySelector('input[name="q1"]:checked')?.value || "";
+            const q2Val = document.querySelector('input[name="q2"]:checked')?.value || "";
+            const q3Val = document.querySelector('input[name="q3"]:checked')?.value || "";
+
+            const submitBtn = document.getElementById('submitBtn');
+            const originalBtnHtml = submitBtn.innerHTML;
+            submitBtn.innerHTML = `<span class="spinner"></span> <span>Saving & Finalizing...</span>`;
+            submitBtn.disabled = true;
+
+            const payload = {
+                candidateId: currentCandidate.id,
+                ssnLast4: ssnVal,
+                shirtSize: selectedShirtSize,
+                hatStyle: selectedHatStyle,
+                payCard: selectedPayCard,
+                quizAnswers: {
+                    q1: q1Val,
+                    q2: q2Val,
+                    q3: q3Val,
+                    q4: q4Checked
+                }
+            };
+
+            try {
+                const res = await fetch('/api/staffing?action=submitNtoCompletion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (!data.success) {
+                    showError(data.error || "There was an issue saving your completion. Please ask your trainer.");
+                    submitBtn.innerHTML = originalBtnHtml;
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                displaySuccessState(data);
+            } catch (err) {
+                console.error("Submission error:", err);
+                showError("Network error while submitting. Please check your internet connection or ask your trainer.");
+                submitBtn.innerHTML = originalBtnHtml;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // 4. Success State Transition
+        function displaySuccessState(data) {
+            document.getElementById('formState').classList.add('hidden');
+            document.getElementById('successState').classList.remove('hidden');
+
+            const candidateName = currentCandidate.name || currentCandidate.firstName;
+            document.getElementById('successTraineeGreeting').textContent = `Congratulations, ${currentCandidate.firstName || candidateName}! Your orientation record is complete.`;
+            document.getElementById('successStoreNum').textContent = `#${data.storeNum || currentCandidate.storeNum}`;
+            
+            const gmName = data.gmName || currentCandidate.gmName || "Your General Manager";
+            const gmPhone = data.gmPhone || currentCandidate.gmPhone || "";
+            
+            document.getElementById('successGmName').textContent = gmName;
+            document.getElementById('successGmPhone').textContent = gmPhone || "Provided in Welcome Letter";
+
+            // Configure 1-Tap Text GM SMS button
+            const cleanPhone = gmPhone.replace(/\D/g, '');
+            const smsBody = encodeURIComponent(`Hi ${gmName}, this is ${currentCandidate.name}. I just completed NTO for Store #${data.storeNum || currentCandidate.storeNum} and am reaching out for my training schedule!`);
+
+            const textBtn = document.getElementById('textGmBtn');
+            const callBtn = document.getElementById('callGmBtn');
+
+            if (cleanPhone) {
+                textBtn.href = `sms:${cleanPhone}?body=${smsBody}`;
+                callBtn.href = `tel:${cleanPhone}`;
+                textBtn.classList.remove('hidden');
+                callBtn.classList.remove('hidden');
+            } else {
+                textBtn.classList.add('hidden');
+                callBtn.classList.add('hidden');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorBanner');
+            el.textContent = msg;
+            el.style.display = 'block';
+            window.scrollTo({ top: el.offsetTop - 20, behavior: 'smooth' });
+        }
+
+        function hideError() {
+            const el = document.getElementById('errorBanner');
+            el.style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>
