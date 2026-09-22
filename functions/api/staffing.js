@@ -814,6 +814,8 @@ export async function onRequestPost(context) {
             await db.prepare(`
                 UPDATE onboarding_candidates
                 SET nto_attendance = 'NTO Complete',
+                    hired = 1,
+                    missed_nto = 0,
                     shirt_size = ?,
                     hat_style = ?,
                     pay_card = ?,
