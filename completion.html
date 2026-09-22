@@ -469,35 +469,41 @@
             background-color: var(--crust-light);
             border: 1px solid var(--crust-med);
             border-radius: var(--radius-md);
-            padding: 18px;
-            margin-bottom: 16px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
         }
 
         .quiz-title {
             font-family: 'Subhead1', sans-serif;
-            font-size: 17px;
+            font-size: 15px;
             color: var(--dark-blue);
-            margin: 0 0 10px 0;
-            line-height: 1.4;
+            margin: 0 0 6px 0;
+            line-height: 1.35;
         }
 
         .quiz-options-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        @media (max-width: 580px) {
+            .quiz-options-list {
+                grid-template-columns: 1fr;
+            }
         }
 
         .quiz-option-label {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
             background: #ffffff;
             border: 1.5px solid var(--crust-dark);
             border-radius: var(--radius-md);
-            padding: 12px 16px;
+            padding: 8px 12px;
             cursor: pointer;
             font-family: 'Compact', sans-serif;
-            font-size: 15.5px;
+            font-size: 14px;
             color: var(--crust-burnt);
             transition: border-color 0.15s, background-color 0.15s;
         }
@@ -510,8 +516,8 @@
         .quiz-option-label input[type="radio"],
         .quiz-option-label input[type="checkbox"] {
             accent-color: var(--brand-blue);
-            width: 19px;
-            height: 19px;
+            width: 17px;
+            height: 17px;
             margin: 0;
             cursor: pointer;
         }
@@ -821,18 +827,16 @@
         <!-- ============================================================== -->
         <!-- STATE 1: Trainee Identity Lookup                               -->
         <!-- ============================================================== -->
-        <div id="lookupState" class="brand-card lookup-box" style="padding: 18px 20px;">
-            <div class="hero-banner" style="margin: -18px -20px 16px -20px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: 16px 18px;">
-                <h1>Virtual NTO Completion</h1>
-                <p>Welcome to the finish line of orientation! Please enter your phone number below to pull up your profile.</p>
+        <div id="lookupState" class="brand-card lookup-box" style="padding: 24px 22px; text-align: center;">
+            <div style="margin-bottom: 16px;">
+                <div style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; background: rgba(0, 144, 226, 0.1); border-radius: 50%; color: var(--brand-blue); font-size: 22px; margin-bottom: 8px;">📋</div>
+                <h1 style="font-family: 'ExtraBold', sans-serif; font-size: 22px; color: var(--dark-blue); margin: 0 0 4px 0;">Virtual NTO Completion</h1>
+                <p style="font-family: 'Compact', sans-serif; font-size: 14.5px; color: var(--crust-deep); margin: 0;">Enter your phone number or email to complete your orientation record.</p>
             </div>
 
-            <div class="input-group">
-                <label for="lookupInput" class="input-label">Your 10-Digit Phone Number</label>
+            <div class="input-group" style="text-align: left;">
+                <label for="lookupInput" class="input-label">10-Digit Phone Number or Email</label>
                 <input type="tel" id="lookupInput" class="text-input" placeholder="(214) 555-0199" autocomplete="tel">
-                <p style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-deep); margin: 6px 0 0 0;">
-                    Or enter the email address used during your application.
-                </p>
             </div>
 
             <button type="button" id="lookupBtn" class="btn-brand-blue" onclick="handleLookupTrainee()">
@@ -886,7 +890,7 @@
                             </div>
 
                             <!-- Uniform Shirt Size (Pre-filled) -->
-                            <div class="input-group" style="margin-top: 22px;">
+                            <div class="input-group" style="margin-top: 18px;">
                                 <label class="input-label">Uniform Shirt Size <span style="color: var(--brand-red);">*</span></label>
                                 <div class="pill-group" id="shirtPillGroup">
                                     <button type="button" class="selector-pill" data-val="S" onclick="selectShirt('S')">S</button>
@@ -900,7 +904,7 @@
                             </div>
 
                             <!-- Headwear Style (Pre-filled) -->
-                            <div class="input-group" style="margin-top: 22px;">
+                            <div class="input-group" style="margin-top: 18px;">
                                 <label class="input-label">Domino's Headwear Style <span style="color: var(--brand-red);">*</span></label>
                                 <div class="pill-group" id="hatPillGroup">
                                     <button type="button" class="selector-pill" data-val="Standard Cap" onclick="selectHat('Standard Cap')">Standard Cap</button>
@@ -910,161 +914,176 @@
                         </div>
                     </div>
 
-                    <!-- COLUMN 2: 4-Question Orientation Review (Progressive Disclosure) -->
+                    <!-- COLUMN 2: 4-Question Orientation Review & In-Place Policy Confirmation -->
                     <div>
-                        <div class="brand-card">
-                            <div class="card-header-band" style="display: flex; justify-content: space-between; align-items: center;">
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <span class="band-icon">📝</span>
-                                    <div>
-                                        <h3 class="band-title">Orientation Review</h3>
-                                        <p class="band-subtitle">Quick check on Team Wow standards</p>
+                        <div class="brand-card" id="quizCard">
+                            
+                            <!-- STEP 1: Quiz Questions -->
+                            <div id="quizQuestionsView">
+                                <div class="card-header-band" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span class="band-icon">📝</span>
+                                        <div>
+                                            <h3 class="band-title">Orientation Review</h3>
+                                            <p class="band-subtitle">Quick check on Team Wow standards</p>
+                                        </div>
+                                    </div>
+                                    <span id="quizProgressBadge" style="font-family: 'Subhead1'; font-size: 12px; background: var(--crust-med); color: var(--crust-burnt); padding: 4px 10px; border-radius: var(--radius-pill);">Question 1 of 4</span>
+                                </div>
+
+                                <!-- Question 1: #1 Priority -->
+                                <div id="quizBox1" class="quiz-question-box">
+                                    <p class="quiz-title">1. What is Team Wow’s #1 priority? <span style="color: var(--brand-red);">*</span></p>
+                                    <div class="quiz-options-list">
+                                        <label class="quiz-option-label">
+                                            <input type="radio" name="q1" value="Safety" required onchange="updateQuizHighlight(this)">
+                                            <span>Safety</span>
+                                        </label>
+                                        <label class="quiz-option-label">
+                                            <input type="radio" name="q1" value="Speed" onchange="updateQuizHighlight(this)">
+                                            <span>Speed</span>
+                                        </label>
+                                        <label class="quiz-option-label">
+                                            <input type="radio" name="q1" value="Profits" onchange="updateQuizHighlight(this)">
+                                            <span>Profits</span>
+                                        </label>
+                                        <label class="quiz-option-label">
+                                            <input type="radio" name="q1" value="Sales" onchange="updateQuizHighlight(this)">
+                                            <span>Sales</span>
+                                        </label>
                                     </div>
                                 </div>
-                                <span id="quizProgressBadge" style="font-family: 'Subhead1'; font-size: 12px; background: var(--crust-med); color: var(--crust-burnt); padding: 4px 10px; border-radius: var(--radius-pill);">Question 1 of 4</span>
-                            </div>
 
-                            <!-- Question 1: #1 Priority -->
-                            <div id="quizBox1" class="quiz-question-box">
-                                <p class="quiz-title">1. What is Team Wow’s #1 priority? <span style="color: var(--brand-red);">*</span></p>
-                                <div class="quiz-options-list">
-                                    <label class="quiz-option-label">
-                                        <input type="radio" name="q1" value="Safety" required onchange="updateQuizHighlight(this)">
-                                        <span>Safety</span>
-                                    </label>
-                                    <label class="quiz-option-label">
-                                        <input type="radio" name="q1" value="Speed" onchange="updateQuizHighlight(this)">
-                                        <span>Speed</span>
-                                    </label>
-                                    <label class="quiz-option-label">
-                                        <input type="radio" name="q1" value="Profits" onchange="updateQuizHighlight(this)">
-                                        <span>Profits</span>
-                                    </label>
-                                    <label class="quiz-option-label">
-                                        <input type="radio" name="q1" value="Sales" onchange="updateQuizHighlight(this)">
-                                        <span>Sales</span>
-                                    </label>
+                                <!-- Question 2: Franchise Owner -->
+                                <div id="quizBox2" class="quiz-question-box quiz-step-hidden">
+                                    <p class="quiz-title">2. What is the name of the franchise owner? <span style="color: var(--brand-red);">*</span></p>
+                                    <div class="quiz-options-list">
+                                        <label class="quiz-option-label">
+                                            <input type="radio" name="q2" value="Brent Hamill" required onchange="updateQuizHighlight(this)">
+                                            <span>Brent Hamill</span>
+                                        </label>
+                                        <label class="quiz-option-label">
+                                            <input type="radio" name="q2" value="Tom Monaghan" onchange="updateQuizHighlight(this)">
+                                            <span>Tom Monaghan</span>
+                                        </label>
+                                        <label class="quiz-option-label">
+                                            <input type="radio" name="q2" value="David Brandon" onchange="updateQuizHighlight(this)">
+                                            <span>David Brandon</span>
+                                        </label>
+                                        <label class="quiz-option-label">
+                                            <input type="radio" name="q2" value="Richard Allison" onchange="updateQuizHighlight(this)">
+                                            <span>Richard Allison</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Question 3: Wrong Order -->
+                                <div id="quizBox3" class="quiz-question-box quiz-step-hidden">
+                                    <p class="quiz-title">3. If the order is wrong, it is ______: <span style="color: var(--brand-red);">*</span></p>
+                                    <div class="quiz-options-list">
+                                        <label class="quiz-option-label">
+                                            <input type="radio" name="q3" value="Free" required onchange="updateQuizHighlight(this)">
+                                            <span>Free</span>
+                                        </label>
+                                        <label class="quiz-option-label">
+                                            <input type="radio" name="q3" value="50% Off" onchange="updateQuizHighlight(this)">
+                                            <span>50% Off</span>
+                                        </label>
+                                        <label class="quiz-option-label">
+                                            <input type="radio" name="q3" value="Replaced Next Time" onchange="updateQuizHighlight(this)">
+                                            <span>Replaced Next Time</span>
+                                        </label>
+                                        <label class="quiz-option-label">
+                                            <input type="radio" name="q3" value="Ignored" onchange="updateQuizHighlight(this)">
+                                            <span>Ignored</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Question 4: Uniform Standards (Check all that apply) -->
+                                <div id="quizBox4" class="quiz-question-box quiz-step-hidden">
+                                    <p class="quiz-title">4. When in uniform you SHOULD (check all that apply): <span style="color: var(--brand-red);">*</span></p>
+                                    <div class="quiz-options-list">
+                                        <label class="quiz-option-label">
+                                            <input type="checkbox" name="q4" value="Be in Perfect Image" onchange="updateCheckboxHighlight(this)">
+                                            <span>Be in Perfect Image</span>
+                                        </label>
+                                        <label class="quiz-option-label">
+                                            <input type="checkbox" name="q4" value="Be Friendly" onchange="updateCheckboxHighlight(this)">
+                                            <span>Be Friendly</span>
+                                        </label>
+                                        <label class="quiz-option-label">
+                                            <input type="checkbox" name="q4" value="Carry more than $20" onchange="updateCheckboxHighlight(this)">
+                                            <span>Carry more than $20</span>
+                                        </label>
+                                        <label class="quiz-option-label">
+                                            <input type="checkbox" name="q4" value="Drive Safe & Courteously" onchange="updateCheckboxHighlight(this)">
+                                            <span>Drive Safe & Courteously</span>
+                                        </label>
+                                        <label class="quiz-option-label" style="grid-column: span 2;">
+                                            <input type="checkbox" name="q4" value="Buy Alcohol or Smoke" onchange="updateCheckboxHighlight(this)">
+                                            <span>Buy Alcohol or Smoke</span>
+                                        </label>
+                                    </div>
+                                    <button type="button" id="btnGoToAck" class="btn-brand-primary quiz-step-hidden" style="margin-top: 10px; font-size: 15px; padding: 10px 20px;" onclick="goToAcknowledgmentStep()">
+                                        <span>Continue to Acknowledgments →</span>
+                                    </button>
                                 </div>
                             </div>
 
-                            <!-- Question 2: Franchise Owner -->
-                            <div id="quizBox2" class="quiz-question-box quiz-step-hidden">
-                                <p class="quiz-title">2. What is the name of the franchise owner? <span style="color: var(--brand-red);">*</span></p>
-                                <div class="quiz-options-list">
-                                    <label class="quiz-option-label">
-                                        <input type="radio" name="q2" value="Brent Hamill" required onchange="updateQuizHighlight(this)">
-                                        <span>Brent Hamill</span>
-                                    </label>
-                                    <label class="quiz-option-label">
-                                        <input type="radio" name="q2" value="Tom Monaghan" onchange="updateQuizHighlight(this)">
-                                        <span>Tom Monaghan</span>
-                                    </label>
-                                    <label class="quiz-option-label">
-                                        <input type="radio" name="q2" value="David Brandon" onchange="updateQuizHighlight(this)">
-                                        <span>David Brandon</span>
-                                    </label>
-                                    <label class="quiz-option-label">
-                                        <input type="radio" name="q2" value="Richard Allison" onchange="updateQuizHighlight(this)">
-                                        <span>Richard Allison</span>
-                                    </label>
+                            <!-- STEP 2: Policy Acknowledgments & Submission (Transitions in-place) -->
+                            <div id="quizAckView" class="quiz-step-hidden">
+                                <div class="card-header-band" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span class="band-icon">📋</span>
+                                        <div>
+                                            <h3 class="band-title">Policy Acknowledgments</h3>
+                                            <p class="band-subtitle">Confirm orientation &amp; policies</p>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn-brand-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="goToQuizStep()">
+                                        ← Edit Quiz
+                                    </button>
                                 </div>
-                            </div>
 
-                            <!-- Question 3: Wrong Order -->
-                            <div id="quizBox3" class="quiz-question-box quiz-step-hidden">
-                                <p class="quiz-title">3. If the order is wrong, it is ______: <span style="color: var(--brand-red);">*</span></p>
-                                <div class="quiz-options-list">
-                                    <label class="quiz-option-label">
-                                        <input type="radio" name="q3" value="Free" required onchange="updateQuizHighlight(this)">
-                                        <span>Free</span>
-                                    </label>
-                                    <label class="quiz-option-label">
-                                        <input type="radio" name="q3" value="50% Off" onchange="updateQuizHighlight(this)">
-                                        <span>50% Off</span>
-                                    </label>
-                                    <label class="quiz-option-label">
-                                        <input type="radio" name="q3" value="Replaced Next Time" onchange="updateQuizHighlight(this)">
-                                        <span>Replaced Next Time</span>
-                                    </label>
-                                    <label class="quiz-option-label">
-                                        <input type="radio" name="q3" value="Ignored" onchange="updateQuizHighlight(this)">
-                                        <span>Ignored</span>
-                                    </label>
+                                <!-- Review Passed Banner -->
+                                <div style="background: rgba(0, 144, 226, 0.08); border: 1.5px solid var(--brand-blue); border-radius: var(--radius-md); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                                    <div>
+                                        <strong style="color: var(--dark-blue); font-family: 'Subhead1'; font-size: 14.5px;">✓ Review Completed (4/4)</strong>
+                                        <p style="margin: 2px 0 0 0; font-family: 'Compact'; font-size: 13px; color: var(--crust-deep);">Team Wow standards acknowledged.</p>
+                                    </div>
+                                    <span style="font-size: 20px;">🎓</span>
                                 </div>
-                            </div>
 
-                            <!-- Question 4: Uniform Standards (Check all that apply) -->
-                            <div id="quizBox4" class="quiz-question-box quiz-step-hidden">
-                                <p class="quiz-title">4. When you are in uniform you SHOULD (check all that apply): <span style="color: var(--brand-red);">*</span></p>
-                                <div class="quiz-options-list">
-                                    <label class="quiz-option-label">
-                                        <input type="checkbox" name="q4" value="Be in Perfect Image" onchange="updateCheckboxHighlight(this)">
-                                        <span>Be in Perfect Image</span>
-                                    </label>
-                                    <label class="quiz-option-label">
-                                        <input type="checkbox" name="q4" value="Be Friendly" onchange="updateCheckboxHighlight(this)">
-                                        <span>Be Friendly</span>
-                                    </label>
-                                    <label class="quiz-option-label">
-                                        <input type="checkbox" name="q4" value="Carry more than $20" onchange="updateCheckboxHighlight(this)">
-                                        <span>Carry more than $20</span>
-                                    </label>
-                                    <label class="quiz-option-label">
-                                        <input type="checkbox" name="q4" value="Drive Safe & Courteously" onchange="updateCheckboxHighlight(this)">
-                                        <span>Drive Safe & Courteously</span>
-                                    </label>
-                                    <label class="quiz-option-label">
-                                        <input type="checkbox" name="q4" value="Buy Alcohol or Smoke" onchange="updateCheckboxHighlight(this)">
-                                        <span>Buy Alcohol or Smoke</span>
-                                    </label>
+                                <!-- In-Store Training Policy Callout -->
+                                <div class="policy-callout" style="margin: 0 0 12px 0; padding: 10px 14px;">
+                                    <h4 style="font-size: 14.5px; margin: 0 0 4px 0;">🕒 In-Store Training Reminder</h4>
+                                    <p style="font-size: 13px; line-height: 1.4;">All training modules must be completed <strong>in-store while on the clock</strong> under certified trainer supervision.</p>
                                 </div>
-                            </div>
 
-                        </div>
-                    </div>
+                                <!-- Agreements -->
+                                <label class="agreement-item" style="margin-bottom: 10px;">
+                                    <input type="checkbox" id="ackAttendance" required>
+                                    <span class="agreement-text" style="font-size: 13.5px; line-height: 1.4;">
+                                        <strong>Session Attendance:</strong> I attended and completed the live New Team Orientation virtual session today.
+                                    </span>
+                                </label>
 
-                </div>
+                                <label class="agreement-item" style="margin-bottom: 14px;">
+                                    <input type="checkbox" id="ackInStore" required>
+                                    <span class="agreement-text" style="font-size: 13.5px; line-height: 1.4;">
+                                        <strong>In-Store Learning:</strong> I understand my login credentials have been sent to my email and GM, and that I will begin Day 1 training in-store during my first scheduled shift.
+                                    </span>
+                                </label>
 
-                <!-- Policies & Acknowledgments -->
-                <div class="brand-card">
-                    <div class="card-header-band">
-                        <span class="band-icon">📋</span>
-                        <div>
-                            <h3 class="band-title">Training Policy Acknowledgments</h3>
-                            <p class="band-subtitle">Please read and confirm before submitting</p>
-                        </div>
-                    </div>
-
-                    <div class="acknowledgments-layout">
-                        <!-- Left: In-store reminder callout -->
-                        <div class="policy-callout" style="margin: 0;">
-                            <h4>🕒 In-Store Training Policy Reminder</h4>
-                            <p>All Domino's Team Wow training modules must be completed <strong>in-store while on the clock</strong> under certified trainer supervision. Training credentials are not authorized for at-home use.</p>
-                        </div>
-
-                        <!-- Right: Agreements & Submit Button -->
-                        <div>
-                            <label class="agreement-item">
-                                <input type="checkbox" id="ackAttendance" required>
-                                <span class="agreement-text">
-                                    <strong>Session Attendance:</strong> I certify that I attended and completed the live New Team Orientation virtual session today.
-                                </span>
-                            </label>
-
-                            <label class="agreement-item">
-                                <input type="checkbox" id="ackInStore" required>
-                                <span class="agreement-text">
-                                    <strong>In-Store Learning:</strong> I understand that my training credentials have been sent to my email and my store manager, and that I will begin Day 1 training in-store during my first scheduled shift.
-                                </span>
-                            </label>
-
-                            <div style="margin-top: 20px;">
-                                <button type="submit" id="submitBtn" class="btn-brand-primary" style="font-size: 18px; padding: 16px 32px;">
+                                <button type="submit" id="submitBtn" class="btn-brand-primary" style="font-size: 17px; padding: 14px 28px;">
                                     <span>Submit Orientation &amp; Finish</span>
                                 </button>
                             </div>
+
                         </div>
                     </div>
+
                 </div>
 
             </form>
@@ -1308,17 +1327,66 @@
             checkboxInput.closest('.quiz-option-label').classList.toggle('selected', checkboxInput.checked);
             const anyChecked = document.querySelectorAll('input[name="q4"]:checked').length > 0;
             const badge = document.getElementById('quizProgressBadge');
-            if (badge) {
-                if (anyChecked) {
-                    badge.textContent = '✓ Review Completed!';
+            const btnGoToAck = document.getElementById('btnGoToAck');
+
+            if (anyChecked) {
+                if (badge) {
+                    badge.textContent = 'Question 4 of 4 • Ready!';
                     badge.style.background = 'var(--brand-blue)';
                     badge.style.color = '#ffffff';
-                } else {
+                }
+                if (btnGoToAck) {
+                    btnGoToAck.classList.remove('quiz-step-hidden');
+                    btnGoToAck.classList.add('quiz-step-visible');
+                }
+            } else {
+                if (badge) {
                     badge.textContent = 'Question 4 of 4';
                     badge.style.background = 'var(--crust-med)';
                     badge.style.color = 'var(--crust-burnt)';
                 }
+                if (btnGoToAck) {
+                    btnGoToAck.classList.add('quiz-step-hidden');
+                    btnGoToAck.classList.remove('quiz-step-visible');
+                }
             }
+        }
+
+        function goToAcknowledgmentStep() {
+            hideError();
+            const q1Val = document.querySelector('input[name="q1"]:checked')?.value;
+            const q2Val = document.querySelector('input[name="q2"]:checked')?.value;
+            const q3Val = document.querySelector('input[name="q3"]:checked')?.value;
+            const q4Checked = Array.from(document.querySelectorAll('input[name="q4"]:checked')).map(el => el.value);
+
+            if (!q1Val) {
+                showError("Please answer Question #1 before continuing.");
+                return false;
+            }
+            if (!q2Val) {
+                showError("Please answer Question #2 before continuing.");
+                return false;
+            }
+            if (!q3Val) {
+                showError("Please answer Question #3 before continuing.");
+                return false;
+            }
+            if (q4Checked.length === 0) {
+                showError("Please answer Question #4 before continuing.");
+                return false;
+            }
+
+            document.getElementById('quizQuestionsView').classList.add('quiz-step-hidden');
+            document.getElementById('quizAckView').classList.remove('quiz-step-hidden');
+            document.getElementById('quizAckView').classList.add('quiz-step-visible');
+            return true;
+        }
+
+        function goToQuizStep() {
+            hideError();
+            document.getElementById('quizAckView').classList.add('quiz-step-hidden');
+            document.getElementById('quizAckView').classList.remove('quiz-step-visible');
+            document.getElementById('quizQuestionsView').classList.remove('quiz-step-hidden');
         }
 
         // 3. Form Submission
@@ -1330,6 +1398,22 @@
             if (!/^\d{4}$/.test(ssnVal)) {
                 showError("Please enter the 4 digits of your Social Security Number.");
                 document.getElementById('ssnInput').focus();
+                return;
+            }
+
+            // If the user hasn't transitioned to Acknowledgments yet, transition them now
+            const ackView = document.getElementById('quizAckView');
+            if (ackView.classList.contains('quiz-step-hidden')) {
+                const canProceed = goToAcknowledgmentStep();
+                if (!canProceed) return;
+                showError("Please check the training policy acknowledgment boxes to finalize.");
+                return;
+            }
+
+            const ackAttendance = document.getElementById('ackAttendance');
+            const ackInStore = document.getElementById('ackInStore');
+            if (!ackAttendance.checked || !ackInStore.checked) {
+                showError("Please check both policy acknowledgment boxes before submitting.");
                 return;
             }
 
