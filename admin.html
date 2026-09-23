@@ -862,8 +862,8 @@
                                     style="flex: 1.1; background: var(--brand-blue); color: white; padding: 9px 6px; font-size: 14.5px; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; border: none; white-space: nowrap; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px;" title="Save current class attendance marks">
                                     💾 Save Attendance
                                 </button>
-                                <button type="button" onclick="triggerSendNtoMeetLinks()"
-                                    style="flex: 1.1; background: var(--crust-burnt); color: white; padding: 9px 6px; font-size: 14.5px; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; border: none; white-space: nowrap; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px;" title="Send Google Meet class link emails to scheduled trainees">
+                                <button type="button" id="btnNtoSendMeetLinks" onclick="triggerSendNtoMeetLinks()"
+                                    style="flex: 1.2; background: var(--crust-burnt); color: white; padding: 9px 6px; font-size: 14.5px; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; border: none; white-space: nowrap; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px;" title="Send Google Meet class link emails to checked trainees">
                                     ✉️ Send Meet Links
                                 </button>
                                 <button type="button" onclick="concludeNtoClass()"
@@ -872,21 +872,21 @@
                                 </button>
                             </div>
 
-                            <!-- Compact Date & Times Row -->
-                            <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 10px; flex-shrink: 0;">
+                            <!-- Compact Date & Times Row (Equal Heights & Horizontal Alignment) -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; flex-shrink: 0;">
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label>Class Date</label>
+                                    <label style="height: 22px; line-height: 22px; margin-bottom: 4px; display: block; white-space: nowrap; overflow: hidden;">Class Date</label>
                                     <input type="date" id="ntoClassDate" onchange="renderNtoClassView()" style="padding: 7px 10px; font-size: 16px;">
                                 </div>
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label>Class Start Time</label>
+                                    <label style="height: 22px; line-height: 22px; margin-bottom: 4px; display: block; white-space: nowrap; overflow: hidden;">Class Start Time</label>
                                     <input type="text" id="ntoStartTime" list="time15MinList"
                                         placeholder="e.g., 6:00 PM" onblur="autoFormatTimeInput(this)" style="padding: 7px 10px; font-size: 16px;">
                                 </div>
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="display: flex; justify-content: space-between; align-items: baseline;">
+                                    <label style="height: 22px; line-height: 22px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; white-space: nowrap; overflow: hidden;">
                                         <span>Class End Time</span>
-                                        <small id="ntoEndTimeHint" style="display: none; font-size: 12px; color: var(--brand-blue); font-weight: bold;"></small>
+                                        <small id="ntoEndTimeHint" style="display: none; font-size: 11.5px; color: var(--brand-blue); font-weight: bold; cursor: default;"></small>
                                     </label>
                                     <input type="text" id="ntoEndTime" list="time15MinList" placeholder="e.g., 7:30 PM"
                                         onblur="autoFormatTimeInput(this)" style="padding: 7px 10px; font-size: 16px;">
@@ -895,8 +895,11 @@
 
                             <!-- Header + Halved Search + Show All Dates (Combined in 1 Row) -->
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 6px; flex-shrink: 0;">
-                                <div class="section-header" style="margin: 0; font-size: 15px; border-bottom: none; padding-bottom: 0;">
-                                    Class Trainee Roster & Attendance
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <label style="font-size: 15px; display: flex; align-items: center; gap: 6px; cursor: pointer; font-family: 'Subhead2', sans-serif; color: var(--dark-blue); margin: 0;" title="Select or deselect all trainees">
+                                        <input type="checkbox" id="ntoSelectAllTrainees" onchange="toggleSelectAllNtoTrainees(this)" style="width: 17px; height: 17px; accent-color: var(--brand-blue); cursor: pointer;">
+                                        <span class="section-header" style="margin: 0; font-size: 15px; border-bottom: none; padding-bottom: 0;">Class Trainee Roster & Attendance</span>
+                                    </label>
                                 </div>
                                 <div style="display: flex; gap: 10px; align-items: center;">
                                     <input type="text" id="ntoRosterSearch" placeholder="🔍 Search trainee..."
@@ -6230,12 +6233,16 @@
                     }
                     if (endHint) {
                         endHint.style.display = 'inline-block';
-                        endHint.innerHTML = `💡 Auto: <strong>${suggestedEnd.roundedTime}</strong> <span style="font-weight:normal; color: var(--brand-grey);">(last: ${suggestedEnd.rawTime})</span>`;
+                        endHint.title = `Last form submitted at ${suggestedEnd.rawTime}`;
+                        endHint.innerHTML = `💡 Auto: <strong>${suggestedEnd.roundedTime}</strong>`;
                     }
                 } else if (endHint) {
                     endHint.style.display = 'none';
                 }
             }
+
+            const masterCheck = document.getElementById('ntoSelectAllTrainees');
+            if (masterCheck) masterCheck.checked = false;
 
             if (activeClassList.length === 0) {
                 const dateDisplay = showAllDates ? "across all dates" : `scheduled for ${selectedDate}`;
@@ -6245,8 +6252,12 @@
                     <span style="font-size: 15px; color: var(--crust-deep);">Try searching a name or check <strong>"Show All Dates"</strong> to view the full roster.</span>
                 </div>
             `;
+                updateNtoSendMeetLinksButtonText();
                 return;
             }
+
+            const userKey = localStorage.getItem('onb_user') || '';
+            const isDenver = userKey.toLowerCase().startsWith('denver');
 
             activeClassList.forEach((item) => {
                 const row = document.createElement('div');
@@ -6261,29 +6272,35 @@
                 const candId = item.id || item.classId || item['Class ID'] || '';
                 const lastUpdatedVal = item.lastUpdated || item.last_updated || '';
 
+                const changeDateBtn = isDenver ? `
+                    <button type="button" onclick="openRescheduleNtoModal('${escapeText(candId)}', '${escapeText(item.name || '')}', '${escapeText(item.email || '')}', '${escapeText(ntoDateVal || '')}')" style="background: var(--dark-blue); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 15px; font-family: 'Subhead2', sans-serif; cursor: pointer; white-space: nowrap;" title="Change orientation class date for this trainee">
+                        📅 Change Date
+                    </button>
+                ` : '';
+
                 row.innerHTML = `
-                <div style="flex: 1.6;">
-                    <div style="font-family: 'Subhead2', sans-serif; font-size: 19px; color: var(--dark-blue);">${item.name}</div>
-                    <div style="font-family: 'Condensed', sans-serif; font-size: 16px; color: var(--text-dark); margin-top: 2px;">Store #${item.store} • ${item.position || 'CSR'} • Date: ${ntoDateVal || 'N/A'}</div>
-                </div>
+                <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; flex: 1.6; margin: 0;" title="Check to send Google Meet link">
+                    <input type="checkbox" class="nto-trainee-check" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" onchange="updateNtoSendMeetLinksButtonText()" style="width: 19px; height: 19px; accent-color: var(--brand-blue); cursor: pointer; flex-shrink: 0;">
+                    <div>
+                        <div style="font-family: 'Subhead2', sans-serif; font-size: 19px; color: var(--dark-blue);">${item.name}</div>
+                        <div style="font-family: 'Condensed', sans-serif; font-size: 16px; color: var(--text-dark); margin-top: 2px;">Store #${item.store} • ${item.position || 'CSR'} • Date: ${ntoDateVal || 'N/A'}</div>
+                    </div>
+                </label>
                 <div style="flex: 1.4; display: flex; gap: 8px; align-items: center; justify-content: flex-end;">
-                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" data-lastupdated="${escapeText(lastUpdatedVal)}" style="width: 205px; min-width: 195px; padding: 8px 10px; font-size: 18px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1.5px solid var(--crust-dark); cursor: pointer;">
+                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" data-lastupdated="${escapeText(lastUpdatedVal)}" style="width: 215px; min-width: 195px; padding: 8px 10px; font-size: 18px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1.5px solid var(--crust-dark); cursor: pointer;">
                         <option value="" ${!savedStatus ? 'selected' : ''}>Select Status...</option>
                         <option value="In Class" ${savedStatus === 'In Class' ? 'selected' : ''}>📖 In Class</option>                        
                         <option value="Not in NTO" ${savedStatus === 'Not in NTO' ? 'selected' : ''}>❌ Not in NTO (Absent)</option>
                         <option value="Left Early" ${savedStatus === 'Left Early' ? 'selected' : ''}>⚠️ Left Early</option>
                         <option value="NTO Complete" ${savedStatus === 'NTO Complete' ? 'selected' : ''}>🎓 NTO Complete</option>
                     </select>
-                    <button type="button" onclick="sendSingleNtoMeetLink('${escapeText(item.name || '')}', '${escapeText(item.email || '')}')" style="background: var(--brand-blue); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 15px; font-family: 'Subhead2', sans-serif; cursor: pointer; white-space: nowrap;" title="Send Google Meet link to this candidate only">
-                        ✉️ Send Link
-                    </button>
-                    <button type="button" onclick="openRescheduleNtoModal('${escapeText(candId)}', '${escapeText(item.name || '')}', '${escapeText(item.email || '')}', '${escapeText(ntoDateVal || '')}')" style="background: var(--dark-blue); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 15px; font-family: 'Subhead2', sans-serif; cursor: pointer; white-space: nowrap;" title="Change orientation class date for this trainee">
-                        📅 Change Date
-                    </button>
+                    ${changeDateBtn}
                 </div>
             `;
                 container.appendChild(row);
             });
+
+            updateNtoSendMeetLinksButtonText();
         }
 
         async function sendSingleNtoMeetLink(name, email) {
@@ -7336,6 +7353,25 @@
             }
         }
 
+        function toggleSelectAllNtoTrainees(master) {
+            const checkboxes = document.querySelectorAll('.nto-trainee-check');
+            checkboxes.forEach(cb => { cb.checked = master.checked; });
+            updateNtoSendMeetLinksButtonText();
+        }
+
+        function updateNtoSendMeetLinksButtonText() {
+            const btn = document.getElementById('btnNtoSendMeetLinks');
+            if (!btn) return;
+            const checked = document.querySelectorAll('.nto-trainee-check:checked');
+            if (checked.length === 0) {
+                btn.innerHTML = `✉️ Send Meet Links`;
+            } else if (checked.length === 1) {
+                btn.innerHTML = `✉️ Send Meet Link (1)`;
+            } else {
+                btn.innerHTML = `✉️ Send Meet Links (${checked.length} selected)`;
+            }
+        }
+
         async function triggerSendNtoMeetLinks() {
             const classDate = document.getElementById('ntoClassDate').value;
             if (!classDate) {
@@ -7343,26 +7379,21 @@
                 return;
             }
 
-            const classTrainees = candidates.filter(c => {
-                const isScheduled = c.ntoScheduled || c.hired || c.ntoDate;
-                if (!isScheduled) return false;
-                return formatDateForInput(c.ntoDate) === classDate;
-            });
-
-            if (classTrainees.length === 0) {
-                showBrandAlert(`No trainees were found scheduled for ${classDate}.`, "No Trainees Scheduled");
+            const checkedBoxes = Array.from(document.querySelectorAll('.nto-trainee-check:checked'));
+            if (checkedBoxes.length === 0) {
+                showBrandAlert("Please check at least one trainee in the roster below to send a Google Meet link to.", "No Trainees Selected");
                 return;
             }
 
-            const traineesWithEmails = classTrainees.filter(c => c.email && c.email.trim() !== "").map(c => ({
-                name: c.name,
-                email: c.email.trim(),
-                store: c.store,
-                position: c.position || "CSR"
-            }));
+            const traineesWithEmails = checkedBoxes.map(cb => ({
+                name: cb.getAttribute('data-name') || '',
+                email: (cb.getAttribute('data-email') || '').trim(),
+                store: cb.getAttribute('data-store') || '',
+                position: cb.getAttribute('data-position') || 'CSR'
+            })).filter(t => t.email && t.email.includes('@'));
 
             if (traineesWithEmails.length === 0) {
-                showBrandAlert("Trainees exist for this date, but none have email addresses listed in the database.", "Missing Emails");
+                showBrandAlert("The selected trainee(s) do not have a valid email address on file.", "Missing Email");
                 return;
             }
 
@@ -7380,11 +7411,13 @@
 
             if (!meetUrl || !meetUrl.trim()) return;
 
-            const confirmMsg = `Send Google Meet links to ${traineesWithEmails.length} trainee(s) for ${classDate}?\n\n` +
-                `• Meeting URL: ${meetUrl.trim()}\n` +
-                `• Recipients:\n  - ` + traineesWithEmails.map(t => `${t.name} (${t.email})`).join("\n  - ");
+            const confirmMsg = traineesWithEmails.length === 1
+                ? `Send Google Meet link to ${traineesWithEmails[0].name} (${traineesWithEmails[0].email}) for ${classDate}?\n\n• Meeting URL: ${meetUrl.trim()}`
+                : `Send Google Meet links to ${traineesWithEmails.length} selected trainee(s) for ${classDate}?\n\n` +
+                  `• Meeting URL: ${meetUrl.trim()}\n` +
+                  `• Recipients:\n  - ` + traineesWithEmails.map(t => `${t.name} (${t.email})`).join("\n  - ");
 
-            const confirmed = await showBrandConfirm(confirmMsg, "Confirm Batch Email Delivery");
+            const confirmed = await showBrandConfirm(confirmMsg, "Confirm Link Delivery");
             if (!confirmed) return;
 
             showLoader(true, "Delivering Google Meet links...");
@@ -7399,6 +7432,12 @@
 
                 showLoader(false);
                 showBrandAlert(result.message, "Class Links Sent!");
+
+                // Reset checkboxes after sending
+                checkedBoxes.forEach(cb => { cb.checked = false; });
+                const master = document.getElementById('ntoSelectAllTrainees');
+                if (master) master.checked = false;
+                updateNtoSendMeetLinksButtonText();
             } catch (err) {
                 showLoader(false);
                 showBrandAlert("Error sending links: " + err.message, "Delivery Error");
