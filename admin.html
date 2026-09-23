@@ -3976,7 +3976,6 @@
                 document.getElementById('payNotes').value = displayNotes;
 
             } else if (currentView === 'staffing') {
-                staffing = staffing.filter(s => s && (s.sourceSheet || (s.id && !candidates.some(c => c.id === s.id))));
                 document.getElementById('fieldId').value = item.id;
                 document.getElementById('stfName').value = item.name || '';
                 document.getElementById('stfPosition').value = item.position || '';
@@ -4145,7 +4144,6 @@
         }
 
         function clearForm() {
-            staffing = staffing.filter(s => s && (s.sourceSheet || (s.id && !candidates.some(c => c.id === s.id))));
             document.getElementById('btnDelete').classList.add('hidden');
             document.getElementById('candidateForm').reset();
             document.getElementById('fieldId').value = '';
@@ -5787,7 +5785,7 @@
 
                 if (idMatch || emailMatch || (nameMatch && !emailMismatch)) {
                     // Check if this is the active record being edited in the form
-                    const isFormItem = isEditingThisInForm && (idMatch || (cleanName && sName === cleanName));
+                    const isFormItem = isEditingThisInForm && Boolean(idMatch);
                     
                     const rawH = isFormItem && formHireRaw ? formHireRaw : (stf.hireDate || '');
                     const rawT = isFormItem ? liveTermDate : (stf.termDate || '');
@@ -5801,7 +5799,7 @@
                     const doN = isFormItem && formDo ? formDo : (stf.doName || '');
 
                     const normHDate = formatDateForInput(rawH) || rawH;
-                    const stintKey = `${storeNum}_${normHDate}`;
+                    const stintKey = `${storeNum}_${normHDate}_${formatDateForInput(rawT) || rawT}`;
                     
                     if (!seenStintKeys.has(stintKey)) {
                         seenStintKeys.add(stintKey);
@@ -5842,15 +5840,9 @@
                     // If candidate was already added via staffing records, skip!
                     if (seenIds.has(cId)) return;
 
-                    const hDate = cand.ntoDate || cand.hireDate || '';
-                    const normHDate = formatDateForInput(hDate) || hDate;
-                    const stintKey = `${cand.store}_${normHDate}`;
-
-                    if (seenStintKeys.has(stintKey)) return;
-
                     // If this onboarding candidate is the one currently being viewed/edited in the form
-                    const isFormItem = isEditingThisInForm && idMatch;
-                    const rawH = isFormItem && formHireRaw ? formHireRaw : hDate;
+                    const isFormItem = isEditingThisInForm && Boolean(idMatch);
+                    const rawH = isFormItem && formHireRaw ? formHireRaw : (cand.ntoDate || cand.hireDate || '');
                     const rawT = isFormItem ? liveTermDate : '';
                     const storeNum = isFormItem && formStore ? formStore : (cand.store || '');
                     const pos = isFormItem && formPos ? formPos : (cand.position || 'CSR');
@@ -5858,6 +5850,11 @@
                     const reason = isFormItem ? formReason : '';
                     const notes = isFormItem && formNotes ? formNotes : (cand.notes || '');
                     const rehire = isFormItem ? formRehire : 'Yes';
+
+                    const normHDate = formatDateForInput(rawH) || rawH;
+                    const stintKey = `${storeNum}_${normHDate}_${formatDateForInput(rawT) || rawT}`;
+
+                    if (seenStintKeys.has(stintKey)) return;
 
                     if (cand.hired && rawH) {
                         seenStintKeys.add(stintKey);
@@ -5911,6 +5908,32 @@
                         });
                     }
                 });
+            }
+
+            // 4. If creating a new staffing record from scratch for an existing person
+            if (currentView === 'staffing' && !cleanId && (formHireRaw || formStore)) {
+                const normHDate = formatDateForInput(formHireRaw) || formHireRaw;
+                const stintKey = `${formStore}_${normHDate}_${formatDateForInput(liveTermDate) || liveTermDate}`;
+                if (!seenStintKeys.has(stintKey)) {
+                    seenStintKeys.add(stintKey);
+                    matchedStints.push({
+                        id: '',
+                        beginDate: formHireRaw,
+                        endDate: liveTermDate,
+                        hireDate: formHireRaw,
+                        termDate: liveTermDate,
+                        store: formStore,
+                        doName: formDo,
+                        position: formPos || 'CSR',
+                        causeOfAction: formCause,
+                        reasonOfAction: formReason,
+                        notes: formNotes,
+                        gmName: formGm,
+                        rehireEligible: formRehire,
+                        status: liveTermDate ? 'Terminated' : 'Active (New Entry)',
+                        source: 'New Form Entry'
+                    });
+                }
             }
 
             // Sort chronologically: newest / most recent stint on TOP
