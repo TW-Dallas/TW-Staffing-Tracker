@@ -582,6 +582,8 @@ body {
 }
 
 .footer-crust-code {
+    margin: 0;
+    font-size: 12px;
     color: #81d4fa;
     font-family: 'Subhead2', sans-serif;
 }
