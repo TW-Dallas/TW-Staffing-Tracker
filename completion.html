@@ -977,21 +977,26 @@
                                     <p class="quiz-title">1. What is Team Wow’s #1 priority? <span style="color: var(--brand-red);">*</span></p>
                                     <div class="quiz-options-list">
                                         <label class="quiz-option-label">
-                                            <input type="radio" name="q1" value="Safety" required onchange="selectQuizRadio(this, 1)">
-                                            <span>Safety</span>
-                                        </label>
-                                        <label class="quiz-option-label">
                                             <input type="radio" name="q1" value="Speed" onchange="selectQuizRadio(this, 1)">
                                             <span>Speed</span>
-                                        </label>
-                                        <label class="quiz-option-label">
-                                            <input type="radio" name="q1" value="Profits" onchange="selectQuizRadio(this, 1)">
-                                            <span>Profits</span>
                                         </label>
                                         <label class="quiz-option-label">
                                             <input type="radio" name="q1" value="Sales" onchange="selectQuizRadio(this, 1)">
                                             <span>Sales</span>
                                         </label>
+                                        <label class="quiz-option-label">
+                                            <input type="radio" name="q1" value="Safety" required onchange="selectQuizRadio(this, 1)">
+                                            <span>Safety</span>
+                                        </label>
+                                        <label class="quiz-option-label">
+                                            <input type="radio" name="q1" value="Profits" onchange="selectQuizRadio(this, 1)">
+                                            <span>Profits</span>
+                                        </label>
+                                    </div>
+                                    <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 12px; min-height: 38px;">
+                                        <button type="button" id="btnNextQ1" class="btn-brand-primary" style="display: none; padding: 9px 18px; font-size: 14px; width: auto;" onclick="showQuizQuestion(2)">
+                                            <span>Next Question →</span>
+                                        </button>
                                     </div>
                                 </div>
 
@@ -1000,12 +1005,12 @@
                                     <p class="quiz-title">2. What is the name of the franchise owner? <span style="color: var(--brand-red);">*</span></p>
                                     <div class="quiz-options-list">
                                         <label class="quiz-option-label">
-                                            <input type="radio" name="q2" value="Brent Hamill" required onchange="selectQuizRadio(this, 2)">
-                                            <span>Brent Hamill</span>
-                                        </label>
-                                        <label class="quiz-option-label">
                                             <input type="radio" name="q2" value="Tom Monaghan" onchange="selectQuizRadio(this, 2)">
                                             <span>Tom Monaghan</span>
+                                        </label>
+                                        <label class="quiz-option-label">
+                                            <input type="radio" name="q2" value="Brent Hamill" required onchange="selectQuizRadio(this, 2)">
+                                            <span>Brent Hamill</span>
                                         </label>
                                         <label class="quiz-option-label">
                                             <input type="radio" name="q2" value="David Brandon" onchange="selectQuizRadio(this, 2)">
@@ -1016,8 +1021,11 @@
                                             <span>Richard Allison</span>
                                         </label>
                                     </div>
-                                    <div style="margin-top: 10px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; min-height: 38px;">
                                         <button type="button" class="quiz-nav-back" onclick="showQuizQuestion(1)">← Back to Question 1</button>
+                                        <button type="button" id="btnNextQ2" class="btn-brand-primary" style="display: none; padding: 9px 18px; font-size: 14px; width: auto;" onclick="showQuizQuestion(3)">
+                                            <span>Next Question →</span>
+                                        </button>
                                     </div>
                                 </div>
 
@@ -1025,10 +1033,6 @@
                                 <div id="quizBox3" class="quiz-question-box quiz-step-hidden">
                                     <p class="quiz-title">3. If the order is wrong, it is ______: <span style="color: var(--brand-red);">*</span></p>
                                     <div class="quiz-options-list">
-                                        <label class="quiz-option-label">
-                                            <input type="radio" name="q3" value="Free" required onchange="selectQuizRadio(this, 3)">
-                                            <span>Free</span>
-                                        </label>
                                         <label class="quiz-option-label">
                                             <input type="radio" name="q3" value="50% Off" onchange="selectQuizRadio(this, 3)">
                                             <span>50% Off</span>
@@ -1041,9 +1045,16 @@
                                             <input type="radio" name="q3" value="Ignored" onchange="selectQuizRadio(this, 3)">
                                             <span>Ignored</span>
                                         </label>
+                                        <label class="quiz-option-label">
+                                            <input type="radio" name="q3" value="Free" required onchange="selectQuizRadio(this, 3)">
+                                            <span>Free</span>
+                                        </label>
                                     </div>
-                                    <div style="margin-top: 10px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; min-height: 38px;">
                                         <button type="button" class="quiz-nav-back" onclick="showQuizQuestion(2)">← Back to Question 2</button>
+                                        <button type="button" id="btnNextQ3" class="btn-brand-primary" style="display: none; padding: 9px 18px; font-size: 14px; width: auto;" onclick="showQuizQuestion(4)">
+                                            <span>Next Question →</span>
+                                        </button>
                                     </div>
                                 </div>
 
@@ -1052,27 +1063,27 @@
                                     <p class="quiz-title">4. When in uniform you SHOULD (check all that apply): <span style="color: var(--brand-red);">*</span></p>
                                     <div class="quiz-options-list">
                                         <label class="quiz-option-label">
-                                            <input type="checkbox" name="q4" value="Be in Perfect Image" onchange="updateCheckboxHighlight(this)">
-                                            <span>Be in Perfect Image</span>
-                                        </label>
-                                        <label class="quiz-option-label">
-                                            <input type="checkbox" name="q4" value="Be Friendly" onchange="updateCheckboxHighlight(this)">
-                                            <span>Be Friendly</span>
+                                            <input type="checkbox" name="q4" value="Drive Safe & Courteously" onchange="updateCheckboxHighlight(this)">
+                                            <span>Drive Safe & Courteously</span>
                                         </label>
                                         <label class="quiz-option-label">
                                             <input type="checkbox" name="q4" value="Carry more than $20" onchange="updateCheckboxHighlight(this)">
                                             <span>Carry more than $20</span>
                                         </label>
                                         <label class="quiz-option-label">
-                                            <input type="checkbox" name="q4" value="Drive Safe & Courteously" onchange="updateCheckboxHighlight(this)">
-                                            <span>Drive Safe & Courteously</span>
+                                            <input type="checkbox" name="q4" value="Be Friendly" onchange="updateCheckboxHighlight(this)">
+                                            <span>Be Friendly</span>
                                         </label>
                                         <label class="quiz-option-label">
                                             <input type="checkbox" name="q4" value="Buy Alcohol or Smoke" onchange="updateCheckboxHighlight(this)">
                                             <span>Buy Alcohol or Smoke</span>
                                         </label>
+                                        <label class="quiz-option-label">
+                                            <input type="checkbox" name="q4" value="Be in Perfect Image" onchange="updateCheckboxHighlight(this)">
+                                            <span>Be in Perfect Image</span>
+                                        </label>
                                     </div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; gap: 8px; flex-wrap: wrap;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; gap: 8px; flex-wrap: wrap; min-height: 38px;">
                                         <button type="button" class="quiz-nav-back" onclick="showQuizQuestion(3)">← Back to Question 3</button>
                                         <button type="button" id="btnCheckResults" class="btn-brand-primary" style="padding: 10px 18px; font-size: 14.5px; width: auto;" onclick="calculateAndShowQuizResults()">
                                             <span>Check Answers & View Score →</span>
@@ -1401,6 +1412,15 @@
                 badge.style.background = 'var(--crust-med)';
                 badge.style.color = 'var(--crust-burnt)';
             }
+
+            // If an answer is already selected for this question, reveal its Next button immediately!
+            if (num >= 1 && num <= 3) {
+                const isAnswered = !!document.querySelector(`input[name="q${num}"]:checked`);
+                const nextBtn = document.getElementById(`btnNextQ${num}`);
+                if (nextBtn) {
+                    nextBtn.style.display = isAnswered ? 'inline-flex' : 'none';
+                }
+            }
         }
 
         function selectQuizRadio(radioInput, currentQNum) {
@@ -1410,12 +1430,18 @@
                 inp.closest('.quiz-option-label').classList.toggle('selected', inp.checked);
             });
 
+            // Immediately display the Next Question button
+            const nextBtn = document.getElementById(`btnNextQ${currentQNum}`);
+            if (nextBtn) {
+                nextBtn.style.display = 'inline-flex';
+            }
+
             if (quizAdvanceTimer) clearTimeout(quizAdvanceTimer);
 
-            // Auto-advance to the next question after brief 420ms delay (LMS style)
+            // Auto-advance after 550ms if they don't click Next first
             quizAdvanceTimer = setTimeout(() => {
                 showQuizQuestion(currentQNum + 1);
-            }, 420);
+            }, 550);
         }
 
         function updateCheckboxHighlight(checkboxInput) {
