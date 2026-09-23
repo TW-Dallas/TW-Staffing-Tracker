@@ -9,8 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="brand_master.css">
+    <link rel="stylesheet" href="https://teamwow-assets.pages.dev/brand_master.css">
 
     <style>
         body {
@@ -24,39 +23,7 @@
             flex-direction: column;
         }
 
-        /* Top Brand Navigation */
-        .portal-header {
-            background-color: var(--brand-blue);
-            border-bottom: 4px solid var(--brand-red);
-            padding: 5px 20px;
-            box-shadow: var(--shadow-md);
-            text-align: center;
-        }
-
-        .portal-header-inner {
-            max-width: 1180px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-        }
-
-        .portal-logo-wrap {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            flex-shrink: 0;
-        }
-
-        .portal-logo-img {
-            height: 44px;
-            width: auto;
-            display: block;
-            object-fit: contain;
-            transition: transform 0.2s ease;
-        }
+        /* Header styles canonically managed by brand_master.css */
 
         /* Header Center Trainee Badge */
         .header-trainee-badge {
@@ -847,23 +814,23 @@
 <body>
 
     <!-- Header Band -->
-    <header class="portal-header">
-        <div class="portal-header-inner">
-            <a href="/orientation" class="portal-logo-wrap">
-                <img src="images/dominos_logo.png" alt="Domino's Pizza" class="portal-logo-img" onerror="this.src='https://raw.githubusercontent.com/TW-Dallas/TW-Career-Path/main/New_Logo_v2.png'">
-            </a>
-
-            <!-- Header Center Trainee Badge (Matches Mike's mockup) -->
-            <div id="headerTraineeBadge" class="header-trainee-badge hidden">
-                <div class="trainee-badge-info">
-                    <span class="trainee-badge-label">Completing Orientation For</span>
-                    <span id="activeTraineeTitle" class="trainee-badge-name">Trainee Name</span>
-                </div>
-                <span id="activeStoreBadge" class="trainee-badge-store">Store #0000</span>
-            </div>
-
-            <span class="portal-tagline">NTO Completion Portal</span>
+    <header>
+        <img src="images/New_Logo_v2.png" alt="Team Wow Logo" class="logo" onerror="this.src='images/tile_blue.png'">
+        <div class="header-text">
+            <h1>NTO Completion</h1>
+            <div class="subtitle">Virtual Classroom • Orientation Sign-Off</div>
         </div>
+
+        <!-- Header Center Trainee Badge (shown once candidate is looked up) -->
+        <div id="headerTraineeBadge" class="header-trainee-badge hidden">
+            <div class="trainee-badge-info">
+                <span class="trainee-badge-label">Completing Orientation For</span>
+                <span id="activeTraineeTitle" class="trainee-badge-name">Trainee Name</span>
+            </div>
+            <span id="activeStoreBadge" class="trainee-badge-store">Store #0000</span>
+        </div>
+
+        <div id="completionMarketPill" class="market-pill">Dallas Market</div>
     </header>
 
     <main class="portal-main">
@@ -1260,6 +1227,14 @@
         window.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
             const lookupVal = params.get('phone') || params.get('email') || params.get('id') || params.get('lookup');
+            const marketParam = params.get('market');
+            if (marketParam) {
+                const pill = document.getElementById('completionMarketPill');
+                if (pill) {
+                    const mName = marketParam.charAt(0).toUpperCase() + marketParam.slice(1).toLowerCase();
+                    pill.textContent = `${mName} Market`;
+                }
+            }
             
             // Format phone input as user types
             const phoneInput = document.getElementById('lookupInput');
@@ -1343,6 +1318,10 @@
             document.getElementById('activeTraineeTitle').textContent = currentCandidate.name;
             document.getElementById('activeStoreBadge').textContent = `Store #${currentCandidate.storeNum}`;
             document.getElementById('headerTraineeBadge').classList.remove('hidden');
+            if (currentCandidate.market) {
+                const pill = document.getElementById('completionMarketPill');
+                if (pill) pill.textContent = `${currentCandidate.market} Market`;
+            }
 
             // Pre-select uniform details
             if (currentCandidate.shirtSize) {
