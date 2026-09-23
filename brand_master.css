@@ -656,18 +656,58 @@ header, .portal-header, header.gm-header {
     font-family: 'Subhead2', sans-serif;
 }
 
-@media (max-width: 760px) {
-    .portal-header {
-        padding: 8px 16px;
-    }
-    .portal-logo-img {
-        height: 32px;
-    }
-    .portal-header-inner {
+@media (max-width: 768px) {
+    header, .portal-header, header.gm-header {
+        padding: 10px 16px;
+        display: flex;
         flex-wrap: wrap;
+        align-items: center;
         justify-content: space-between;
-        gap: 8px;
+        row-gap: 8px;
     }
+
+    .header-left, .portal-header-left {
+        display: contents;
+    }
+
+    .header-logo, .logo, .portal-logo-img {
+        height: 34px;
+        width: auto;
+        order: 1;
+    }
+
+    .market-pill, .header-actions {
+        order: 2;
+        margin-left: auto;
+    }
+
+    .header-titles, .header-text, .portal-header-titles {
+        order: 3;
+        width: 100%;
+        margin-top: 2px;
+        padding-top: 6px;
+        border-top: 1px solid rgba(254, 250, 246, 0.2);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .header-titles h1, header h1, .portal-header-title {
+        font-size: 21px;
+        line-height: 1.15;
+        letter-spacing: 0.5px;
+        text-align: center;
+    }
+
+    .header-titles p, .subtitle, .portal-header-subtitle {
+        font-size: 12.5px;
+        margin-top: 2px;
+        letter-spacing: 0.8px;
+        line-height: 1.3;
+        text-align: center;
+    }
+
     .portal-footer {
         text-align: center;
     }
