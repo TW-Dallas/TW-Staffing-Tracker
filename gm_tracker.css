@@ -117,11 +117,28 @@ select {
     }
 }
 
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    background-color: var(--crust-light);
+}
+
 .container {
     padding: 16px;
     max-width: 900px;
+    width: 100%;
     margin: 0 auto;
-    min-height: calc(100vh - 180px);
+    flex: 1 0 auto;
+    box-sizing: border-box;
+}
+
+.portal-footer {
+    margin-top: auto;
+    flex-shrink: 0;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* --- CANDIDATE CARD STYLES --- */
