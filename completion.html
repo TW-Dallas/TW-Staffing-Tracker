@@ -299,6 +299,43 @@
             }
         }
 
+        .quiz-nav-back {
+            background: none;
+            border: none;
+            color: var(--brand-blue);
+            font-family: 'Subhead2', sans-serif;
+            font-size: 13.5px;
+            cursor: pointer;
+            padding: 4px 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            text-decoration: underline;
+            transition: color 0.15s;
+        }
+
+        .quiz-nav-back:hover {
+            color: var(--dark-blue);
+        }
+
+        .quiz-result-item {
+            background: #ffffff;
+            border: 1px solid var(--crust-med);
+            border-radius: var(--radius-md);
+            padding: 9px 12px;
+            font-size: 13.5px;
+            line-height: 1.4;
+            box-sizing: border-box;
+        }
+
+        .quiz-result-item.correct {
+            border-left: 4px solid var(--brand-blue);
+        }
+
+        .quiz-result-item.incorrect {
+            border-left: 4px solid var(--brand-red);
+        }
+
         /* Big Action Buttons */
         .btn-brand-primary {
             background-color: var(--brand-red);
@@ -922,7 +959,7 @@
                     <div>
                         <div class="brand-card" id="quizCard">
                             
-                            <!-- STEP 1: Quiz Questions -->
+                            <!-- STEP 1: Quiz Questions (One Question at a Time, Zero Growth / Zero Scroll) -->
                             <div id="quizQuestionsView">
                                 <div class="card-header-band" style="display: flex; justify-content: space-between; align-items: center;">
                                     <div style="display: flex; align-items: center; gap: 10px;">
@@ -940,19 +977,19 @@
                                     <p class="quiz-title">1. What is Team Wow’s #1 priority? <span style="color: var(--brand-red);">*</span></p>
                                     <div class="quiz-options-list">
                                         <label class="quiz-option-label">
-                                            <input type="radio" name="q1" value="Safety" required onchange="updateQuizHighlight(this)">
+                                            <input type="radio" name="q1" value="Safety" required onchange="selectQuizRadio(this, 1)">
                                             <span>Safety</span>
                                         </label>
                                         <label class="quiz-option-label">
-                                            <input type="radio" name="q1" value="Speed" onchange="updateQuizHighlight(this)">
+                                            <input type="radio" name="q1" value="Speed" onchange="selectQuizRadio(this, 1)">
                                             <span>Speed</span>
                                         </label>
                                         <label class="quiz-option-label">
-                                            <input type="radio" name="q1" value="Profits" onchange="updateQuizHighlight(this)">
+                                            <input type="radio" name="q1" value="Profits" onchange="selectQuizRadio(this, 1)">
                                             <span>Profits</span>
                                         </label>
                                         <label class="quiz-option-label">
-                                            <input type="radio" name="q1" value="Sales" onchange="updateQuizHighlight(this)">
+                                            <input type="radio" name="q1" value="Sales" onchange="selectQuizRadio(this, 1)">
                                             <span>Sales</span>
                                         </label>
                                     </div>
@@ -963,21 +1000,24 @@
                                     <p class="quiz-title">2. What is the name of the franchise owner? <span style="color: var(--brand-red);">*</span></p>
                                     <div class="quiz-options-list">
                                         <label class="quiz-option-label">
-                                            <input type="radio" name="q2" value="Brent Hamill" required onchange="updateQuizHighlight(this)">
+                                            <input type="radio" name="q2" value="Brent Hamill" required onchange="selectQuizRadio(this, 2)">
                                             <span>Brent Hamill</span>
                                         </label>
                                         <label class="quiz-option-label">
-                                            <input type="radio" name="q2" value="Tom Monaghan" onchange="updateQuizHighlight(this)">
+                                            <input type="radio" name="q2" value="Tom Monaghan" onchange="selectQuizRadio(this, 2)">
                                             <span>Tom Monaghan</span>
                                         </label>
                                         <label class="quiz-option-label">
-                                            <input type="radio" name="q2" value="David Brandon" onchange="updateQuizHighlight(this)">
+                                            <input type="radio" name="q2" value="David Brandon" onchange="selectQuizRadio(this, 2)">
                                             <span>David Brandon</span>
                                         </label>
                                         <label class="quiz-option-label">
-                                            <input type="radio" name="q2" value="Richard Allison" onchange="updateQuizHighlight(this)">
+                                            <input type="radio" name="q2" value="Richard Allison" onchange="selectQuizRadio(this, 2)">
                                             <span>Richard Allison</span>
                                         </label>
+                                    </div>
+                                    <div style="margin-top: 10px;">
+                                        <button type="button" class="quiz-nav-back" onclick="showQuizQuestion(1)">← Back to Question 1</button>
                                     </div>
                                 </div>
 
@@ -986,21 +1026,24 @@
                                     <p class="quiz-title">3. If the order is wrong, it is ______: <span style="color: var(--brand-red);">*</span></p>
                                     <div class="quiz-options-list">
                                         <label class="quiz-option-label">
-                                            <input type="radio" name="q3" value="Free" required onchange="updateQuizHighlight(this)">
+                                            <input type="radio" name="q3" value="Free" required onchange="selectQuizRadio(this, 3)">
                                             <span>Free</span>
                                         </label>
                                         <label class="quiz-option-label">
-                                            <input type="radio" name="q3" value="50% Off" onchange="updateQuizHighlight(this)">
+                                            <input type="radio" name="q3" value="50% Off" onchange="selectQuizRadio(this, 3)">
                                             <span>50% Off</span>
                                         </label>
                                         <label class="quiz-option-label">
-                                            <input type="radio" name="q3" value="Replaced Next Time" onchange="updateQuizHighlight(this)">
+                                            <input type="radio" name="q3" value="Replaced Next Time" onchange="selectQuizRadio(this, 3)">
                                             <span>Replaced Next Time</span>
                                         </label>
                                         <label class="quiz-option-label">
-                                            <input type="radio" name="q3" value="Ignored" onchange="updateQuizHighlight(this)">
+                                            <input type="radio" name="q3" value="Ignored" onchange="selectQuizRadio(this, 3)">
                                             <span>Ignored</span>
                                         </label>
+                                    </div>
+                                    <div style="margin-top: 10px;">
+                                        <button type="button" class="quiz-nav-back" onclick="showQuizQuestion(2)">← Back to Question 2</button>
                                     </div>
                                 </div>
 
@@ -1029,14 +1072,40 @@
                                             <span>Buy Alcohol or Smoke</span>
                                         </label>
                                     </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; gap: 8px; flex-wrap: wrap;">
+                                        <button type="button" class="quiz-nav-back" onclick="showQuizQuestion(3)">← Back to Question 3</button>
+                                        <button type="button" id="btnCheckResults" class="btn-brand-primary" style="padding: 10px 18px; font-size: 14.5px; width: auto;" onclick="calculateAndShowQuizResults()">
+                                            <span>Check Answers & View Score →</span>
+                                        </button>
+                                    </div>
                                 </div>
-
-                                <button type="button" id="btnGoToAck" class="btn-brand-primary quiz-step-hidden" style="margin-top: 10px; font-size: 15px; padding: 12px 20px;" onclick="goToAcknowledgmentStep()">
-                                    <span>Continue to Acknowledgments →</span>
-                                </button>
                             </div>
 
-                            <!-- STEP 2: Policy Acknowledgments & Submission (Transitions in-place) -->
+                            <!-- STEP 2: Score & Correct Answers Review (In-Place Screen) -->
+                            <div id="quizResultsView" class="quiz-step-hidden">
+                                <div class="card-header-band" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span class="band-icon">🎯</span>
+                                        <div>
+                                            <h3 class="band-title">Orientation Review</h3>
+                                            <p class="band-subtitle">Review standards before policy sign-off</p>
+                                        </div>
+                                    </div>
+                                    <span id="quizScoreBadge" style="font-family: 'Subhead1'; font-size: 12px; background: var(--brand-blue); color: #fff; padding: 4px 10px; border-radius: var(--radius-pill);">Score: 4/4</span>
+                                </div>
+
+                                <div id="quizScoreBanner"></div>
+                                <div id="quizAnswersBreakdown" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; max-height: 230px; overflow-y: auto; padding-right: 2px;"></div>
+
+                                <button type="button" class="btn-brand-primary" style="font-size: 15.5px; padding: 12px 20px;" onclick="goToAcknowledgmentStep()">
+                                    <span>Continue to Policy Acknowledgments →</span>
+                                </button>
+                                <div style="text-align: center; margin-top: 8px;">
+                                    <button type="button" class="quiz-nav-back" onclick="retakeQuiz()">↺ Review / Change Answers</button>
+                                </div>
+                            </div>
+
+                            <!-- STEP 3: Policy Acknowledgments & Submission (Transitions in-place) -->
                             <div id="quizAckView" class="quiz-step-hidden">
                                 <div class="card-header-band" style="display: flex; justify-content: space-between; align-items: center;">
                                     <div style="display: flex; align-items: center; gap: 10px;">
@@ -1046,15 +1115,15 @@
                                             <p class="band-subtitle">Confirm orientation &amp; policies</p>
                                         </div>
                                     </div>
-                                    <button type="button" class="btn-brand-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="goToQuizStep()">
-                                        ← Edit Quiz
+                                    <button type="button" class="btn-brand-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="goToResultsStep()">
+                                        ← View Score
                                     </button>
                                 </div>
 
                                 <!-- Review Passed Banner -->
                                 <div style="background: rgba(0, 144, 226, 0.08); border: 1.5px solid var(--brand-blue); border-radius: var(--radius-md); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                                     <div>
-                                        <strong style="color: var(--dark-blue); font-family: 'Subhead1'; font-size: 14.5px;">✓ Review Completed (4/4)</strong>
+                                        <strong id="ackReviewScoreText" style="color: var(--dark-blue); font-family: 'Subhead1'; font-size: 14.5px;">✓ Review Completed (4/4)</strong>
                                         <p style="margin: 2px 0 0 0; font-family: 'Compact'; font-size: 13px; color: var(--crust-deep);">Team Wow standards acknowledged.</p>
                                     </div>
                                     <span style="font-size: 20px;">🎓</span>
@@ -1278,6 +1347,7 @@
             // Transition UI
             document.getElementById('lookupState').classList.add('hidden');
             document.getElementById('formState').classList.remove('hidden');
+            showQuizQuestion(1);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -1296,69 +1366,217 @@
             });
         }
 
-        function updateQuizHighlight(radioInput) {
+        let quizAdvanceTimer = null;
+        let latestQuizScore = 4;
+
+        function escapeHtml(str) {
+            if (!str) return "";
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function showQuizQuestion(num) {
+            hideError();
+            if (quizAdvanceTimer) clearTimeout(quizAdvanceTimer);
+
+            for (let i = 1; i <= 4; i++) {
+                const box = document.getElementById('quizBox' + i);
+                if (box) {
+                    box.classList.add('quiz-step-hidden');
+                    box.classList.remove('quiz-step-visible');
+                }
+            }
+            const currentBox = document.getElementById('quizBox' + num);
+            if (currentBox) {
+                currentBox.classList.remove('quiz-step-hidden');
+                currentBox.classList.add('quiz-step-visible');
+            }
+            const badge = document.getElementById('quizProgressBadge');
+            if (badge) {
+                badge.textContent = `Question ${num} of 4`;
+                badge.style.background = 'var(--crust-med)';
+                badge.style.color = 'var(--crust-burnt)';
+            }
+        }
+
+        function selectQuizRadio(radioInput, currentQNum) {
+            hideError();
             const groupName = radioInput.name;
             document.querySelectorAll(`input[name="${groupName}"]`).forEach(inp => {
                 inp.closest('.quiz-option-label').classList.toggle('selected', inp.checked);
             });
 
-            const badge = document.getElementById('quizProgressBadge');
+            if (quizAdvanceTimer) clearTimeout(quizAdvanceTimer);
 
-            if (groupName === 'q1') {
-                const box2 = document.getElementById('quizBox2');
-                if (box2 && box2.classList.contains('quiz-step-hidden')) {
-                    box2.classList.remove('quiz-step-hidden');
-                    box2.classList.add('quiz-step-visible');
-                    if (badge) badge.textContent = 'Question 2 of 4';
-                    box2.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-            } else if (groupName === 'q2') {
-                const box3 = document.getElementById('quizBox3');
-                if (box3 && box3.classList.contains('quiz-step-hidden')) {
-                    box3.classList.remove('quiz-step-hidden');
-                    box3.classList.add('quiz-step-visible');
-                    if (badge) badge.textContent = 'Question 3 of 4';
-                    box3.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-            } else if (groupName === 'q3') {
-                const box4 = document.getElementById('quizBox4');
-                if (box4 && box4.classList.contains('quiz-step-hidden')) {
-                    box4.classList.remove('quiz-step-hidden');
-                    box4.classList.add('quiz-step-visible');
-                    if (badge) badge.textContent = 'Question 4 of 4';
-                    box4.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-            }
+            // Auto-advance to the next question after brief 420ms delay (LMS style)
+            quizAdvanceTimer = setTimeout(() => {
+                showQuizQuestion(currentQNum + 1);
+            }, 420);
         }
 
         function updateCheckboxHighlight(checkboxInput) {
+            hideError();
             checkboxInput.closest('.quiz-option-label').classList.toggle('selected', checkboxInput.checked);
-            const anyChecked = document.querySelectorAll('input[name="q4"]:checked').length > 0;
-            const badge = document.getElementById('quizProgressBadge');
-            const btnGoToAck = document.getElementById('btnGoToAck');
+        }
 
-            if (anyChecked) {
-                if (badge) {
-                    badge.textContent = '✓ Review Ready!';
-                    badge.style.background = 'var(--brand-blue)';
-                    badge.style.color = '#ffffff';
-                }
-                if (btnGoToAck) {
-                    btnGoToAck.classList.remove('quiz-step-hidden');
-                    btnGoToAck.classList.add('quiz-step-visible');
-                    btnGoToAck.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-            } else {
-                if (badge) {
-                    badge.textContent = 'Question 4 of 4';
-                    badge.style.background = 'var(--crust-med)';
-                    badge.style.color = 'var(--crust-burnt)';
-                }
-                if (btnGoToAck) {
-                    btnGoToAck.classList.add('quiz-step-hidden');
-                    btnGoToAck.classList.remove('quiz-step-visible');
+        function calculateAndShowQuizResults() {
+            hideError();
+            const q1Val = document.querySelector('input[name="q1"]:checked')?.value;
+            const q2Val = document.querySelector('input[name="q2"]:checked')?.value;
+            const q3Val = document.querySelector('input[name="q3"]:checked')?.value;
+            const q4Checked = Array.from(document.querySelectorAll('input[name="q4"]:checked')).map(el => el.value);
+
+            if (!q1Val) {
+                showError("Please answer Question #1 before viewing results.");
+                showQuizQuestion(1);
+                return;
+            }
+            if (!q2Val) {
+                showError("Please answer Question #2 before viewing results.");
+                showQuizQuestion(2);
+                return;
+            }
+            if (!q3Val) {
+                showError("Please answer Question #3 before viewing results.");
+                showQuizQuestion(3);
+                return;
+            }
+            if (q4Checked.length === 0) {
+                showError("Please select at least one option for Question #4.");
+                return;
+            }
+
+            let score = 0;
+            const isQ1Correct = (q1Val === "Safety");
+            if (isQ1Correct) score++;
+
+            const isQ2Correct = (q2Val === "Brent Hamill");
+            if (isQ2Correct) score++;
+
+            const isQ3Correct = (q3Val === "Free");
+            if (isQ3Correct) score++;
+
+            const requiredQ4 = ['Be in Perfect Image', 'Be Friendly', 'Drive Safe & Courteously'];
+            const forbiddenQ4 = ['Carry more than $20', 'Buy Alcohol or Smoke'];
+            const hasAllRequired = requiredQ4.every(item => q4Checked.includes(item));
+            const hasNoForbidden = forbiddenQ4.every(item => !q4Checked.includes(item));
+            const isQ4Correct = hasAllRequired && hasNoForbidden;
+            if (isQ4Correct) score++;
+
+            latestQuizScore = score;
+
+            // Render score badge
+            const badge = document.getElementById('quizScoreBadge');
+            if (badge) {
+                badge.textContent = `Score: ${score} / 4`;
+                badge.style.background = score === 4 ? 'var(--brand-blue)' : 'var(--crust-med)';
+                badge.style.color = score === 4 ? '#ffffff' : 'var(--crust-burnt)';
+            }
+
+            // Render score summary banner
+            const banner = document.getElementById('quizScoreBanner');
+            if (banner) {
+                if (score === 4) {
+                    banner.innerHTML = `
+                        <div style="background: rgba(0, 144, 226, 0.08); border: 1.5px solid var(--brand-blue); border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <strong style="color: var(--dark-blue); font-family: 'Subhead1'; font-size: 14.5px;">🎉 Perfect Score: 4 / 4 (100%)</strong>
+                                <p style="margin: 2px 0 0 0; font-family: 'Compact'; font-size: 13px; color: var(--crust-deep);">Outstanding! You understand Team Wow standards thoroughly.</p>
+                            </div>
+                            <span style="font-size: 22px;">🏆</span>
+                        </div>
+                    `;
+                } else {
+                    banner.innerHTML = `
+                        <div style="background: rgba(227, 24, 55, 0.06); border: 1.5px solid var(--crust-dark); border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <strong style="color: var(--dark-blue); font-family: 'Subhead1'; font-size: 14.5px;">Score: ${score} / 4 (${Math.round((score / 4) * 100)}%)</strong>
+                                <p style="margin: 2px 0 0 0; font-family: 'Compact'; font-size: 13px; color: var(--crust-deep);">Great job! Please review the standards below before continuing.</p>
+                            </div>
+                            <span style="font-size: 22px;">📋</span>
+                        </div>
+                    `;
                 }
             }
+
+            // Render breakdown items
+            const breakdown = document.getElementById('quizAnswersBreakdown');
+            if (breakdown) {
+                breakdown.innerHTML = `
+                    <div class="quiz-result-item ${isQ1Correct ? 'correct' : 'incorrect'}">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <strong style="color: var(--dark-blue); font-family: 'Subhead1'; font-size: 13.5px;">1. #1 Priority:</strong>
+                            <span style="font-family: 'Subhead1'; font-size: 12px; color: ${isQ1Correct ? 'var(--brand-blue)' : 'var(--brand-red)'}; font-weight: bold;">
+                                ${isQ1Correct ? '✓ Correct' : '✗ Review'}
+                            </span>
+                        </div>
+                        <div style="font-size: 13px; color: var(--crust-deep); margin-top: 3px;">
+                            ${isQ1Correct 
+                                ? '<strong style="color: var(--brand-blue);">Safety</strong> — Always #1 at Team Wow' 
+                                : `Your answer: <span style="text-decoration: line-through;">${escapeHtml(q1Val)}</span> • Correct: <strong style="color: var(--brand-blue);">Safety</strong>`}
+                        </div>
+                    </div>
+
+                    <div class="quiz-result-item ${isQ2Correct ? 'correct' : 'incorrect'}">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <strong style="color: var(--dark-blue); font-family: 'Subhead1'; font-size: 13.5px;">2. Franchise Owner:</strong>
+                            <span style="font-family: 'Subhead1'; font-size: 12px; color: ${isQ2Correct ? 'var(--brand-blue)' : 'var(--brand-red)'}; font-weight: bold;">
+                                ${isQ2Correct ? '✓ Correct' : '✗ Review'}
+                            </span>
+                        </div>
+                        <div style="font-size: 13px; color: var(--crust-deep); margin-top: 3px;">
+                            ${isQ2Correct 
+                                ? '<strong style="color: var(--brand-blue);">Brent Hamill</strong>' 
+                                : `Your answer: <span style="text-decoration: line-through;">${escapeHtml(q2Val)}</span> • Correct: <strong style="color: var(--brand-blue);">Brent Hamill</strong>`}
+                        </div>
+                    </div>
+
+                    <div class="quiz-result-item ${isQ3Correct ? 'correct' : 'incorrect'}">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <strong style="color: var(--dark-blue); font-family: 'Subhead1'; font-size: 13.5px;">3. If Order is Wrong:</strong>
+                            <span style="font-family: 'Subhead1'; font-size: 12px; color: ${isQ3Correct ? 'var(--brand-blue)' : 'var(--brand-red)'}; font-weight: bold;">
+                                ${isQ3Correct ? '✓ Correct' : '✗ Review'}
+                            </span>
+                        </div>
+                        <div style="font-size: 13px; color: var(--crust-deep); margin-top: 3px;">
+                            ${isQ3Correct 
+                                ? '<strong style="color: var(--brand-blue);">Free</strong> — Team Wow Service Guarantee' 
+                                : `Your answer: <span style="text-decoration: line-through;">${escapeHtml(q3Val)}</span> • Correct: <strong style="color: var(--brand-blue);">Free</strong>`}
+                        </div>
+                    </div>
+
+                    <div class="quiz-result-item ${isQ4Correct ? 'correct' : 'incorrect'}">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <strong style="color: var(--dark-blue); font-family: 'Subhead1'; font-size: 13.5px;">4. Uniform Standards:</strong>
+                            <span style="font-family: 'Subhead1'; font-size: 12px; color: ${isQ4Correct ? 'var(--brand-blue)' : 'var(--brand-red)'}; font-weight: bold;">
+                                ${isQ4Correct ? '✓ Correct' : '✗ Review'}
+                            </span>
+                        </div>
+                        <div style="font-size: 13px; color: var(--crust-deep); margin-top: 3px;">
+                            ${isQ4Correct 
+                                ? '<strong style="color: var(--brand-blue);">Perfect Image, Friendly, Drive Safe & Courteously</strong>' 
+                                : 'Correct: <strong style="color: var(--brand-blue);">Perfect Image, Friendly, Drive Safe & Courteously</strong><br><span style="font-size: 12px;">(Never carry >$20; never smoke or buy alcohol in uniform)</span>'}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Transition from Questions View to Results View
+            document.getElementById('quizQuestionsView').classList.add('quiz-step-hidden');
+            document.getElementById('quizResultsView').classList.remove('quiz-step-hidden');
+            document.getElementById('quizResultsView').classList.add('quiz-step-visible');
+        }
+
+        function retakeQuiz() {
+            hideError();
+            document.getElementById('quizResultsView').classList.add('quiz-step-hidden');
+            document.getElementById('quizResultsView').classList.remove('quiz-step-visible');
+            document.getElementById('quizQuestionsView').classList.remove('quiz-step-hidden');
+            showQuizQuestion(1);
         }
 
         function goToAcknowledgmentStep() {
@@ -1368,34 +1586,40 @@
             const q3Val = document.querySelector('input[name="q3"]:checked')?.value;
             const q4Checked = Array.from(document.querySelectorAll('input[name="q4"]:checked')).map(el => el.value);
 
-            if (!q1Val) {
-                showError("Please answer Question #1 before continuing.");
-                return false;
-            }
-            if (!q2Val) {
-                showError("Please answer Question #2 before continuing.");
-                return false;
-            }
-            if (!q3Val) {
-                showError("Please answer Question #3 before continuing.");
-                return false;
-            }
-            if (q4Checked.length === 0) {
-                showError("Please answer Question #4 before continuing.");
+            if (!q1Val || !q2Val || !q3Val || q4Checked.length === 0) {
+                calculateAndShowQuizResults();
                 return false;
             }
 
             document.getElementById('quizQuestionsView').classList.add('quiz-step-hidden');
+            document.getElementById('quizResultsView').classList.add('quiz-step-hidden');
+            document.getElementById('quizResultsView').classList.remove('quiz-step-visible');
+
+            const scoreText = document.getElementById('ackReviewScoreText');
+            if (scoreText) {
+                scoreText.textContent = `✓ Review Completed (${latestQuizScore}/4)`;
+            }
+
             document.getElementById('quizAckView').classList.remove('quiz-step-hidden');
             document.getElementById('quizAckView').classList.add('quiz-step-visible');
             return true;
+        }
+
+        function goToResultsStep() {
+            hideError();
+            document.getElementById('quizAckView').classList.add('quiz-step-hidden');
+            document.getElementById('quizAckView').classList.remove('quiz-step-visible');
+            document.getElementById('quizResultsView').classList.remove('quiz-step-hidden');
+            document.getElementById('quizResultsView').classList.add('quiz-step-visible');
         }
 
         function goToQuizStep() {
             hideError();
             document.getElementById('quizAckView').classList.add('quiz-step-hidden');
             document.getElementById('quizAckView').classList.remove('quiz-step-visible');
+            document.getElementById('quizResultsView').classList.add('quiz-step-hidden');
             document.getElementById('quizQuestionsView').classList.remove('quiz-step-hidden');
+            showQuizQuestion(1);
         }
 
         // 3. Form Submission
@@ -1448,6 +1672,7 @@
                 shirtSize: selectedShirtSize,
                 hatStyle: selectedHatStyle,
                 payCard: currentCandidate.payCard || "",
+                quizScore: latestQuizScore,
                 quizAnswers: {
                     q1: q1Val,
                     q2: q2Val,
