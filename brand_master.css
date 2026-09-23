@@ -526,6 +526,7 @@ body {
     padding: 10px 20px;
     padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
     margin-top: auto;
+    text-align: left;
 }
 
 .portal-footer-inner {
@@ -541,6 +542,7 @@ body {
 .footer-brand {
     display: flex;
     flex-direction: column;
+    text-align: left;
     gap: 2px;
 }
 
