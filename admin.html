@@ -893,22 +893,21 @@
                                 </div>
                             </div>
 
-                            <!-- Header + Halved Search + Show All Dates (Combined in 1 Row) -->
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 6px; flex-shrink: 0;">
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <label style="font-size: 15px; display: flex; align-items: center; gap: 6px; cursor: pointer; font-family: 'Subhead2', sans-serif; color: var(--dark-blue); margin: 0;" title="Select or deselect all trainees">
+                            <!-- Header + Both Checkboxes on Left + Search Aligned Under Column 3 (Per Mockup) -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 6px; flex-shrink: 0; gap: 10px;">
+                                <div style="display: flex; align-items: center; gap: 18px;">
+                                    <label style="font-size: 14.5px; display: flex; align-items: center; gap: 6px; cursor: pointer; font-family: 'Subhead1', sans-serif; color: var(--dark-blue); margin: 0; text-transform: uppercase; letter-spacing: 0.3px;" title="Select or deselect all trainees">
                                         <input type="checkbox" id="ntoSelectAllTrainees" onchange="toggleSelectAllNtoTrainees(this)" style="width: 17px; height: 17px; accent-color: var(--brand-blue); cursor: pointer;">
-                                        <span class="section-header" style="margin: 0; font-size: 15px; border-bottom: none; padding-bottom: 0;">Class Trainee Roster & Attendance</span>
+                                        <span>Class Trainee Roster & Attendance</span>
+                                    </label>
+                                    <label style="font-size: 14.5px; display: flex; align-items: center; gap: 6px; cursor: pointer; font-family: 'Subhead1', sans-serif; color: var(--dark-blue); margin: 0; text-transform: uppercase; letter-spacing: 0.3px;" title="Show trainees across all class dates">
+                                        <input type="checkbox" id="ntoShowAllDates" onchange="renderNtoClassView()" style="width: 17px; height: 17px; accent-color: var(--brand-blue); cursor: pointer;">
+                                        <span>Show All Dates</span>
                                     </label>
                                 </div>
-                                <div style="display: flex; gap: 10px; align-items: center;">
+                                <div style="width: calc((100% - 20px) / 3); box-sizing: border-box;">
                                     <input type="text" id="ntoRosterSearch" placeholder="🔍 Search trainee..."
-                                        oninput="renderNtoClassView()" style="width: 180px; padding: 5px 9px; font-size: 14px; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white;">
-                                    <label style="font-size: 14px; display: flex; align-items: center; gap: 5px; white-space: nowrap; cursor: pointer; font-family: 'Subhead2', sans-serif;">
-                                        <input type="checkbox" id="ntoShowAllDates" onchange="renderNtoClassView()"
-                                            style="width: 16px; height: 16px; cursor: pointer;">
-                                        Show All Dates
-                                    </label>
+                                        oninput="renderNtoClassView()" style="width: 100%; box-sizing: border-box; padding: 7px 10px; font-size: 16px; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white;">
                                 </div>
                             </div>
 
