@@ -171,14 +171,17 @@ export async function onRequestGet(context) {
             // 3. Update candidate profile if exists
             if (cls) {
                 const nowFormatted = getNowFormatted("America/Chicago");
+                const cleanRegPhone = (reg.phone || "").replace(/\D/g, "").slice(-10);
                 await db.prepare(`
                     UPDATE onboarding_candidates SET
                         nto_date = ?,
                         nto_scheduled = 1,
+                        missed_nto = 0,
+                        nto_attendance = '',
                         last_updated = ?,
                         updated_at = CURRENT_TIMESTAMP
-                    WHERE LOWER(email) = LOWER(?) OR (phone_number != '' AND phone_number = ?)
-                `).bind(cls.class_date, nowFormatted, reg.email, reg.phone).run();
+                    WHERE LOWER(email) = LOWER(?) OR (phone_number != '' AND REPLACE(REPLACE(REPLACE(REPLACE(phone_number, '-', ''), ' ', ''), '(', ''), ')', '') LIKE ?)
+                `).bind(cls.class_date, nowFormatted, reg.email, '%' + cleanRegPhone).run();
             }
 
             // 4. Send Confirmation & Google Meet link via Apps Script microservice
@@ -1007,6 +1010,8 @@ export async function onRequestPost(context) {
                     UPDATE onboarding_candidates SET
                         nto_date = ?,
                         nto_scheduled = 1,
+                        missed_nto = 0,
+                        nto_attendance = '',
                         phone_number = CASE WHEN (phone_number IS NULL OR phone_number = '') AND ? != '' THEN ? ELSE phone_number END,
                         email = CASE WHEN (email IS NULL OR email = '') AND ? != '' THEN ? ELSE email END,
                         store_num = CASE WHEN (store_num IS NULL OR store_num = '') AND ? != '' THEN ? ELSE store_num END,
