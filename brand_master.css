@@ -1,32 +1,58 @@
 /* ==========================================================================
    TEAM WOW / DOMINO'S MASTER BRAND DESIGN SYSTEM
-   Authoritative CSS tokens and component rules extracted from dominos.com
+   Authoritative Global CSS Tokens, Typography & Shell Components
+   CDN Location: https://teamwow-assets.pages.dev/brand_master.css
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   1. BRAND TYPOGRAPHY
+   1. MASTER DOMINO'S TYPOGRAPHY SYSTEM
+   All @font-face rules registered as font-weight: normal to prevent synthetic
+   bolding or browser fallback to Arial. Native font files supply their own weight.
    -------------------------------------------------------------------------- */
+
+/* Tier 1: Display / Hero (ExtraBlack) */
 @font-face {
     font-family: 'ExtraBlack';
     src: url('fonts/Dominos Sans Header 1.ttf') format('truetype');
-    font-weight: bold;
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Header1';
+    src: url('fonts/Dominos Sans Header 1.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'PizzaPress';
+    src: url('fonts/Dominos Sans Header 1.ttf') format('truetype');
+    font-weight: normal;
     font-style: normal;
 }
 
+/* Tier 2: Primary Headers (ExtraBold) */
 @font-face {
     font-family: 'ExtraBold';
     src: url('fonts/Dominos Sans Header 2.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
 }
-
 @font-face {
-    font-family: 'Subhead1';
-    src: url('fonts/Dominos Sans Subhead 1.ttf') format('truetype');
-    font-weight: bold;
+    font-family: 'Header2';
+    src: url('fonts/Dominos Sans Header 2.ttf') format('truetype');
+    font-weight: normal;
     font-style: normal;
 }
 
+/* Tier 3: Action & Banners (Subhead 1 - Inherently Bold) */
+@font-face {
+    font-family: 'Subhead1';
+    src: url('fonts/Dominos Sans Subhead 1.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Tier 4: Labels & Badges (Subhead 2 - SemiBold) */
 @font-face {
     font-family: 'Subhead2';
     src: url('fonts/Dominos Sans Subhead 2.ttf') format('truetype');
@@ -34,16 +60,24 @@
     font-style: normal;
 }
 
+/* Tier 5: Body & Reading (Body Compact Regular) */
 @font-face {
-    font-family: 'Condensed';
-    src: url('fonts/Dominos Sans Body Condensed.ttf') format('truetype');
+    font-family: 'Compact';
+    src: url('fonts/Dominos Sans Body Compact.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'OneDotCd';
+    src: url('fonts/Dominos Sans Body Compact.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
 }
 
+/* Tier 6: Data Tables, Form Numbers & Compact Values (Body Condensed Regular) */
 @font-face {
-    font-family: 'Compact';
-    src: url('fonts/Dominos Sans Body Compact.ttf') format('truetype');
+    font-family: 'Condensed';
+    src: url('fonts/Dominos Sans Body Condensed.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
 }
@@ -53,27 +87,28 @@
    -------------------------------------------------------------------------- */
 :root {
     /* --- Blue Hierarchy --- */
-    --brand-blue: #0090e2;          /* Primary Brand Blue: Top Nav Header, Tracker Bar Segments, Badges */
-    --med-blue: #0077bd;            /* Medium Blue: Major Page Section Headers ("WHAT'S NEW", "START YOUR ORDER") */
-    --dark-blue: #005c91;           /* Dark Blue: Card-Level Hero Depth ("TRY THE NEW DOMINO™"), Rare Depth Accents */
+    --brand-blue: #0090e2;          /* Primary Brand Blue: Top Nav Header, Segment Bars, Active Badges */
+    --med-blue: #0077bd;            /* Medium Blue: Major Section Headers ("WHAT'S NEW", "START YOUR ORDER") */
+    --dark-blue: #005c91;           /* Dark Blue: Card-Level Hero Depth, Branded Footer */
 
     /* --- Red Hierarchy --- */
-    --brand-red: #ff0000;           /* Domino's Red: Primary Action Buttons ("ADD DEAL", "TRACK ORDER"), "NEW!" Tags */
+    --brand-red: #ff0000;           /* Domino's Red: Primary Action Buttons, Accent Underlines, "NEW!" Tags */
     --dark-red: #910000;            /* Deep Red: Hover States, Urgency Alerts, Low-Spot Indicators */
     --red-soft-bg: #fff1f1;         /* Warm Red Tint: Alert Cards, Missed Attendance Badges */
 
-/* --- Authentic Crust Palette (Canvas, Cards & Content) --- */
+    /* --- Authentic Crust Palette (Canvas, Cards & Content) --- */
     --crust-base: #fefaf6;          /* Main Page Canvas Background */
-    --crust-light: #faf2e9;         /* Card Background: Session Cards, Menu Tiles, Dashboard Containers */
+    --crust-light: #faf2e9;         /* Card Background: Session Cards, Menu Tiles, Containers */
     --crust-med: #f0decc;           /* Accent: Warm Crust Borders, Card Dividers, Separator Hairlines */
-    --crust-dark: #c0a588;          /* Accent: Input Field Outlines, Outline Pill Borders ("RECENT ITEMS") */
-    --crust-deep: #603913;          /* Category Labels ("BUILD YOUR PIZZA", "BREADS"), Subhead Text */
-    --crust-burnt: #472b10;         /* Primary High-Contrast Text, Crust Button Fill ("MENU" pill) */
+    --crust-dark: #c0a588;          /* Accent: Input Field Outlines, Outline Pill Borders */
+    --crust-deep: #603913;          /* Category Labels, Subhead Text */
+    --crust-burnt: #472b10;         /* Primary High-Contrast Text, Crust Button Fill */
 
     /* --- Rare Inner Container & Neutrals --- */
-    --inner-white: #ffffff;         /* Inner Sub-Cards (e.g. Tracker Input Box, White Card Tiles) */
+    --inner-white: #ffffff;         /* Inner Sub-Cards, White Card Tiles */
     --brand-grey: #6c757d;          /* Muted Secondary Text, Disabled State Backgrounds */
     --disabled-bg: #bcc6cc;         /* Disabled Action Buttons */
+    --success-green: #117a30;       /* Positive Status Indicators, Verified Checkmarks */
 
     /* --- Radii & Elevation --- */
     --radius-sm: 6px;
@@ -94,55 +129,62 @@
 body {
     background-color: var(--crust-base);
     color: var(--crust-burnt);
-    font-family: 'Compact', 'Condensed', sans-serif;
+    font-family: 'Compact', 'Condensed', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     margin: 0;
     padding: 0;
 }
 
+.hidden {
+    display: none !important;
+}
+
 /* --------------------------------------------------------------------------
-   4. THE MASTER 6-TIER DOMINO'S TYPOGRAPHY SYSTEM
+   4. THE MASTER 6-TIER DOMINO'S TYPOGRAPHY CLASSES
    -------------------------------------------------------------------------- */
 /* Tier 1: Display & Page Heroes ("WHAT'S NEW", "START YOUR ORDER") */
 .font-hero, h1.brand-hero {
-    font-family: 'ExtraBlack', serif;
-    font-weight: bold;
+    font-family: 'ExtraBlack', 'Header1', serif;
+    font-weight: normal !important;
     letter-spacing: 0.5px;
 }
 
 /* Tier 2: Primary Headers (Major feature containers, dialog titles) */
 .font-primary-header, h2.brand-header {
-    font-family: 'ExtraBold', sans-serif;
-    font-weight: normal;
+    font-family: 'ExtraBold', 'Header2', sans-serif;
+    font-weight: normal !important;
     letter-spacing: 0.5px;
 }
 
 /* Tier 3: Action, Buttons & Banners ("ADD DEAL", "TRACK ORDER", "MENU") */
 .font-action, .btn-pill-red, .btn-pill-crust, .btn-pill-outline, .btn-pill-blue {
     font-family: 'Subhead1', sans-serif;
-    font-weight: bold;
+    font-weight: normal !important;
     letter-spacing: 0.5px;
 }
 
 /* Tier 4: Labels & Badges (Card tags, status badges, secondary labels) */
 .font-badge, .badge-spots-blue, .badge-spots-low, .badge-date-blue {
     font-family: 'Subhead2', sans-serif;
+    font-weight: normal !important;
     letter-spacing: 0.5px;
 }
 
 /* Tier 5: Body & Reading (Long-form descriptions, policies, articles) */
 .font-reading, p.brand-reading {
     font-family: 'Compact', sans-serif;
+    font-weight: normal !important;
     line-height: 1.55;
 }
 
 /* Tier 6: Data Tables, Form Numbers & Compact Values */
 .font-data, table.brand-data, input.input-dominos {
     font-family: 'Condensed', sans-serif;
+    font-weight: normal !important;
     letter-spacing: 0.3px;
 }
 
 /* --------------------------------------------------------------------------
-   4. BUTTON STYLES (MATCHING DOMINOS.COM)
+   5. BUTTON STYLES (MATCHING DOMINOS.COM)
    -------------------------------------------------------------------------- */
 /* Primary Red Pill Button ("TRACK ORDER", "ADD DEAL", "REGISTER") */
 .btn-pill-red {
@@ -153,7 +195,7 @@ body {
     padding: 12px 24px;
     font-family: 'Subhead1', sans-serif;
     font-size: 16px;
-    font-weight: bold;
+    font-weight: normal !important;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     cursor: pointer;
@@ -178,7 +220,7 @@ body {
     box-shadow: none;
 }
 
-/* Solid Crust Burnt Pill Button ("MENU" pill in Screenshot 2) */
+/* Solid Crust Burnt Pill Button ("MENU" pill) */
 .btn-pill-crust {
     background-color: var(--crust-burnt);
     color: #ffffff;
@@ -187,7 +229,7 @@ body {
     padding: 12px 24px;
     font-family: 'Subhead1', sans-serif;
     font-size: 16px;
-    font-weight: bold;
+    font-weight: normal !important;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     cursor: pointer;
@@ -205,7 +247,7 @@ body {
     transform: translateY(-1px);
 }
 
-/* Inactive / Outline Pill Button ("RECENT ITEMS" in Screenshot 2) */
+/* Inactive / Outline Pill Button ("RECENT ITEMS") */
 .btn-pill-outline {
     background-color: transparent;
     color: var(--crust-deep);
@@ -214,7 +256,7 @@ body {
     padding: 10px 22px;
     font-family: 'Subhead1', sans-serif;
     font-size: 16px;
-    font-weight: bold;
+    font-weight: normal !important;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     cursor: pointer;
@@ -232,7 +274,7 @@ body {
     color: var(--crust-burnt);
 }
 
-/* Vibrant Brand-Blue Button (Badges, Navigation Links, Secondary Triggers) */
+/* Vibrant Brand-Blue Button (Navigation Links, Secondary Triggers) */
 .btn-pill-blue {
     background-color: var(--brand-blue);
     color: #ffffff;
@@ -241,7 +283,7 @@ body {
     padding: 10px 20px;
     font-family: 'Subhead1', sans-serif;
     font-size: 15px;
-    font-weight: bold;
+    font-weight: normal !important;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     cursor: pointer;
@@ -260,9 +302,8 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   5. CARD & CONTAINER ARCHITECTURE
+   6. CARD & CONTAINER ARCHITECTURE
    -------------------------------------------------------------------------- */
-/* Standard Outer Card (Warm Crust Background #faf2e9) */
 .card-dominos {
     background-color: var(--crust-light);
     border: 1.5px solid var(--crust-med);
@@ -277,7 +318,6 @@ body {
     box-shadow: var(--shadow-md);
 }
 
-/* Rare Inner White Container (Screenshot 3: Tracker Input Container) */
 .card-inner-white {
     background-color: var(--inner-white);
     border: 1.5px solid var(--crust-med);
@@ -287,9 +327,8 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   6. BADGES & PILL TAGS
+   7. BADGES & PILL TAGS
    -------------------------------------------------------------------------- */
-/* "NEW!" Badge (Red Pill) */
 .badge-new {
     background-color: var(--brand-red);
     color: #ffffff;
@@ -297,14 +336,12 @@ body {
     border-radius: var(--radius-sm);
     font-family: 'Subhead1', sans-serif;
     font-size: 12px;
-    font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     display: inline-flex;
     align-items: center;
 }
 
-/* Date / Status Badge (Brand Blue) */
 .badge-date-blue {
     background-color: var(--brand-blue);
     color: #ffffff;
@@ -312,7 +349,6 @@ body {
     border-radius: var(--radius-sm);
     font-family: 'Subhead1', sans-serif;
     font-size: 14px;
-    font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     box-shadow: var(--shadow-blue-glow);
@@ -320,36 +356,34 @@ body {
     align-items: center;
 }
 
-/* Spots Available Badge (Domino's Blue Tint) */
 .badge-spots-blue {
     background-color: #eef7fd;
     color: var(--dark-blue);
     border: 1px solid #c9e6f8;
     padding: 4px 10px;
     border-radius: var(--radius-pill);
+    font-family: 'Subhead2', sans-serif;
     font-size: 13px;
-    font-weight: bold;
     display: inline-flex;
     align-items: center;
     gap: 4px;
 }
 
-/* Spots Low Badge (Domino's Red Tint) */
 .badge-spots-low {
     background-color: var(--red-soft-bg);
     color: var(--dark-red);
     border: 1px solid #f8c8c8;
     padding: 4px 10px;
     border-radius: var(--radius-pill);
+    font-family: 'Subhead2', sans-serif;
     font-size: 13px;
-    font-weight: bold;
     display: inline-flex;
     align-items: center;
     gap: 4px;
 }
 
 /* --------------------------------------------------------------------------
-   7. FORM INPUTS & TEXT CONTROLS
+   8. FORM INPUTS & TEXT CONTROLS
    -------------------------------------------------------------------------- */
 .input-dominos {
     width: 100%;
@@ -375,43 +409,18 @@ body {
     color: #998877;
 }
 
-/* --------------------------------------------------------------------------
-   8. TYPOGRAPHY UTILITIES
-   -------------------------------------------------------------------------- */
-/* Page Level Section Headers ("WHAT'S NEW", "AVAILABLE ORIENTATION SESSIONS") */
-.title-section-med-blue {
-    color: var(--med-blue);
-    font-family: 'ExtraBlack', serif;
-    font-size: 24px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin: 0;
-}
-
-/* Card-Level Hero Depth ("TRY THE NEW DOMINO™") */
-.title-card-dark-blue {
+.input-label {
+    display: block;
+    font-family: 'Subhead1', sans-serif;
+    font-size: 14px;
     color: var(--dark-blue);
-    font-family: 'Subhead1', sans-serif;
-    font-size: 20px;
-    font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin: 0;
-}
-
-/* Category Labels ("BUILD YOUR PIZZA", "BREADS", "CHICKEN") */
-.title-category-crust {
-    color: var(--crust-deep);
-    font-family: 'Subhead1', sans-serif;
-    font-size: 18px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin: 0;
+    margin-bottom: 6px;
 }
 
 /* --------------------------------------------------------------------------
-   9. STANDARDIZED PORTAL HEADER & FOOTER COMPONENTS
+   9. STANDARDIZED PORTAL HEADER & FOOTER SHELL
    -------------------------------------------------------------------------- */
 .portal-header {
     background-color: var(--brand-blue);
@@ -462,7 +471,54 @@ body {
     flex-shrink: 0;
 }
 
-/* Branded Footer */
+/* Header Trainee Badge Slot (Optional) */
+.header-trainee-badge {
+    background-color: var(--dark-blue);
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    border-radius: var(--radius-pill);
+    padding: 4px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+.trainee-badge-info {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.trainee-badge-label {
+    font-family: 'Subhead2', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.6px;
+    color: rgba(255, 255, 255, 0.85);
+    text-transform: uppercase;
+    line-height: 1.1;
+}
+
+.trainee-badge-name {
+    font-family: 'ExtraBold', sans-serif;
+    font-size: 17px;
+    color: #ffffff;
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+}
+
+.trainee-badge-store {
+    font-family: 'Subhead1', sans-serif;
+    font-size: 15px;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+    background: rgba(0, 144, 226, 0.35);
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Branded Portal Footer */
 .portal-footer {
     background-color: var(--dark-blue);
     border-top: 3px solid var(--brand-red);
@@ -526,7 +582,6 @@ body {
 .footer-crust-code {
     color: #81d4fa;
     font-family: 'Subhead2', sans-serif;
-    font-weight: 500;
 }
 
 @media (max-width: 760px) {
@@ -550,3 +605,122 @@ body {
     }
 }
 
+/* --------------------------------------------------------------------------
+   10. UNIVERSAL BRANDED MODALS
+   -------------------------------------------------------------------------- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(30, 20, 10, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-card {
+    background-color: var(--crust-light);
+    border-radius: var(--radius-lg);
+    max-width: 680px;
+    width: 100%;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 16px 40px rgba(71, 43, 16, 0.28);
+    border: 2px solid var(--crust-med);
+    animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(20px) scale(0.98);
+    }
+    to {
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    background-color: var(--brand-blue);
+    color: #ffffff;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--brand-red);
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-family: 'Subhead1', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #ffffff;
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 28px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    transition: transform 0.15s ease;
+}
+
+.modal-close-btn:hover {
+    transform: scale(1.15);
+}
+
+.modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+    line-height: 1.55;
+    font-size: 16px;
+    color: var(--crust-burnt);
+    font-family: 'Compact', sans-serif;
+}
+
+.modal-footer {
+    padding: 16px 24px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    background-color: var(--crust-light);
+    border-top: 1.5px solid var(--crust-med);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Branded Policy / Alert Blocks inside Modals or Pages */
+.policy-block {
+    background-color: var(--crust-base);
+    border: 1.5px solid var(--crust-med);
+    border-left: 6px solid var(--brand-blue);
+    border-radius: var(--radius-sm);
+    padding: 16px 18px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-sm);
+}
+
+.policy-block.alert-block {
+    border-left-color: var(--brand-red);
+    background-color: var(--red-soft-bg);
+}

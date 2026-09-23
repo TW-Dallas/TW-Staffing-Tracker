@@ -15,43 +15,9 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="brand_master.css">
 
     <style>
-        @font-face {
-            font-family: 'ExtraBlack';
-            src: url('fonts/Dominos Sans Header 1.ttf') format('truetype');
-            font-weight: bold;
-        }
-
-        @font-face {
-            font-family: 'ExtraBold';
-            src: url('fonts/Dominos Sans Header 2.ttf') format('truetype');
-            font-weight: normal;
-        }
-
-        @font-face {
-            font-family: 'Subhead1';
-            src: url('fonts/Dominos Sans Subhead 1.ttf') format('truetype');
-            font-weight: normal;
-        }
-
-        @font-face {
-            font-family: 'Subhead2';
-            src: url('fonts/Dominos Sans Subhead 2.ttf') format('truetype');
-            font-weight: normal;
-        }
-
-        @font-face {
-            font-family: 'Body';
-            src: url('fonts/Dominos Sans Body.ttf') format('truetype');
-            font-weight: normal;
-        }
-
-        @font-face {
-            font-family: 'Condensed';
-            src: url('fonts/Dominos Sans Body Condensed.ttf') format('truetype');
-            font-weight: normal;
-        }
 
         :root {
             --brand-red: #ff0000;
@@ -1071,9 +1037,17 @@
         <div id="classGrid" class="class-grid" style="display: none;"></div>
     </main>
 
-    <!-- FOOTER -->
-    <footer>
-        <p style="margin: 0;">&copy; 2026 Team Wow! All rights reserved.</p>
+    <!-- Branded Team Wow Domino's Footer -->
+    <footer class="portal-footer">
+        <div class="portal-footer-inner">
+            <div class="footer-brand">
+                <span class="footer-title">Team Wow • Domino's Pizza</span>
+                <span class="footer-subtitle">Virtual New Team Orientation &amp; Store Onboarding</span>
+            </div>
+            <div class="footer-meta">
+                <p class="footer-copy">&copy; 2026 Team Wow, Inc. All rights reserved. &bull; <span class="footer-crust-code">Powered by Crust &amp; Code</span></p>
+            </div>
+        </div>
     </footer>
 
     <!-- 1. ENTRY POLICY & REQUIREMENTS MODAL -->
