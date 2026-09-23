@@ -872,6 +872,7 @@
                                     <label>Class End Time</label>
                                     <input type="text" id="ntoEndTime" list="time15MinList" placeholder="e.g., 7:30 PM"
                                         onblur="autoFormatTimeInput(this)">
+                                    <small id="ntoEndTimeHint" style="display: none; font-size: 13.5px; color: var(--brand-blue); margin-top: 4px; font-family: 'Subhead2', sans-serif; font-weight: bold;"></small>
                                 </div>
                             </div>
 
@@ -6198,6 +6199,21 @@
                 if (detectedEnd && endInput && !endInput.value) {
                     endInput.placeholder = detectedEnd;
                 }
+
+                // 4. Auto-detect suggested end time based on completed forms in this class (rounded up to nearest 5 min)
+                const suggestedEnd = calculateSuggestedNtoEndTime(activeClassList);
+                const endHint = document.getElementById('ntoEndTimeHint');
+                if (suggestedEnd) {
+                    if (endInput && !endInput.value) {
+                        endInput.value = suggestedEnd.roundedTime;
+                    }
+                    if (endHint) {
+                        endHint.style.display = 'block';
+                        endHint.innerHTML = `💡 Auto-calculated: <strong>${suggestedEnd.roundedTime}</strong> (last form: ${suggestedEnd.rawTime})`;
+                    }
+                } else if (endHint) {
+                    endHint.style.display = 'none';
+                }
             }
 
             if (activeClassList.length === 0) {
@@ -6222,6 +6238,7 @@
                 const payCardVal = item.payCard || item.paycard || item.Paycard || '';
                 const ntoDateVal = item.ntoDate || item.date || item.Date || '';
                 const candId = item.id || item.classId || item['Class ID'] || '';
+                const lastUpdatedVal = item.lastUpdated || item.last_updated || '';
 
                 row.innerHTML = `
                 <div style="flex: 1.6;">
@@ -6229,7 +6246,7 @@
                     <div style="font-family: 'Condensed', sans-serif; font-size: 16px; color: var(--text-dark); margin-top: 2px;">Store #${item.store} • ${item.position || 'CSR'} • Date: ${ntoDateVal || 'N/A'}</div>
                 </div>
                 <div style="flex: 1.4; display: flex; gap: 8px; align-items: center; justify-content: flex-end;">
-                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" style="width: 205px; min-width: 195px; padding: 8px 10px; font-size: 18px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1.5px solid var(--crust-dark); cursor: pointer;">
+                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" data-lastupdated="${escapeText(lastUpdatedVal)}" style="width: 205px; min-width: 195px; padding: 8px 10px; font-size: 18px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1.5px solid var(--crust-dark); cursor: pointer;">
                         <option value="" ${!savedStatus ? 'selected' : ''}>Select Status...</option>
                         <option value="In Class" ${savedStatus === 'In Class' ? 'selected' : ''}>📖 In Class</option>                        
                         <option value="Not in NTO" ${savedStatus === 'Not in NTO' ? 'selected' : ''}>❌ Not in NTO (Absent)</option>
@@ -6440,20 +6457,11 @@
         async function concludeNtoClass() {
             const classDate = document.getElementById('ntoClassDate').value;
             let rawStartTime = document.getElementById('ntoStartTime') ? document.getElementById('ntoStartTime').value.trim() : '';
-            let rawEndTime = document.getElementById('ntoEndTime').value.trim();
+            let rawEndTime = document.getElementById('ntoEndTime') ? document.getElementById('ntoEndTime').value.trim() : '';
 
             if (!rawStartTime) rawStartTime = "6:00 PM";
             const startTime = formatTimeDisplayFrontEnd(rawStartTime) || rawStartTime;
             if (document.getElementById('ntoStartTime')) document.getElementById('ntoStartTime').value = startTime;
-
-            if (!rawEndTime) {
-                rawEndTime = await showBrandPrompt("Class End Time is required! Enter the class end time below (e.g. 7:30 PM):", "", "Class End Time Required");
-                if (!rawEndTime || !rawEndTime.trim()) return;
-                rawEndTime = rawEndTime.trim();
-            }
-
-            const endTime = formatTimeDisplayFrontEnd(rawEndTime) || rawEndTime;
-            document.getElementById('ntoEndTime').value = endTime;
 
             const selectedDateFormatted = formatDateForInput(classDate);
             const allRosterElements = Array.from(document.querySelectorAll('.nto-attendance-select'));
@@ -6504,9 +6512,8 @@
                     ntoStatus: attVal,
                     'NTO Status': attVal,
                     liveStatus: attVal,
-                    startTime: startTime,
-                    endTime: endTime,
-                    'End Time': endTime
+                    lastUpdated: el.getAttribute('data-lastupdated') || '',
+                    startTime: startTime
                 });
             });
 
@@ -6519,6 +6526,26 @@
                 showBrandAlert(`Cannot conclude class with trainees still marked "In Class".\n\nPlease assign a final status (NTO Complete, Not in NTO, or Left Early) for:\n• ${inClassSelection.join('\n• ')}`, "Final Status Required");
                 return;
             }
+
+            // Auto-calculate suggested end time based on the last form submission in class (rounded up to next 5 min)
+            const suggestedEnd = calculateSuggestedNtoEndTime(rosterData);
+            let defaultEndTime = rawEndTime || (suggestedEnd ? suggestedEnd.roundedTime : "7:30 PM");
+
+            let promptMsg = "Verify or enter Class End Time for Bonnie & Payroll:";
+            if (suggestedEnd) {
+                promptMsg = `Verify Class End Time for Bonnie & Payroll:\n\n• Auto-calculated: ${suggestedEnd.roundedTime}\n• Last form submission: ${suggestedEnd.rawTime} (${suggestedEnd.lastTrainee || 'Trainee'})\n• Rounded up to next 5 minutes\n\nConfirm or edit below:`;
+            }
+
+            const verifiedEndTime = await showBrandPrompt(promptMsg, defaultEndTime, "Verify Class End Time");
+            if (!verifiedEndTime || !verifiedEndTime.trim()) return;
+            const endTime = formatTimeDisplayFrontEnd(verifiedEndTime.trim()) || verifiedEndTime.trim();
+            if (document.getElementById('ntoEndTime')) document.getElementById('ntoEndTime').value = endTime;
+
+            // Apply verified end time to all roster records
+            rosterData.forEach(r => {
+                r.endTime = endTime;
+                r['End Time'] = endTime;
+            });
 
             const attendedCount = rosterData.filter(r =>
                 r.attendance === 'NTO Complete' || r.attendance === 'In Class' || r.attendance === 'Attended'
@@ -6552,6 +6579,90 @@
                 showLoader(false);
                 showBrandAlert("Error concluding class: " + err.message, "System Error");
             }
+        }
+
+        // Auto-calculates the class end time from completed candidates, rounding up to the next 5 minutes
+        function calculateSuggestedNtoEndTime(candidatesList) {
+            if (!candidatesList || candidatesList.length === 0) return null;
+
+            const timeEntries = [];
+
+            candidatesList.forEach(c => {
+                const status = (c.ntoAttendance || c.attendance || c.status || '').toLowerCase();
+                const isComplete = status.includes('complete') || status.includes('attended');
+                const rawTimestamp = c.lastUpdated || c.last_updated || '';
+
+                if (rawTimestamp && (isComplete || candidatesList.length <= 5)) {
+                    const parsed = parseTimestampToMinutes(rawTimestamp);
+                    if (parsed !== null) {
+                        timeEntries.push({
+                            minutes: parsed.totalMinutes,
+                            rawTime: parsed.timeStr,
+                            name: c.name || ''
+                        });
+                    }
+                }
+            });
+
+            if (timeEntries.length === 0) return null;
+
+            // Sort ascending by submission time
+            timeEntries.sort((a, b) => a.minutes - b.minutes);
+
+            // Filter out late outliers (> 8 min gap from the main completion cluster)
+            let cluster = [timeEntries[0]];
+            for (let i = 1; i < timeEntries.length; i++) {
+                const diff = timeEntries[i].minutes - cluster[cluster.length - 1].minutes;
+                if (diff <= 8) {
+                    cluster.push(timeEntries[i]);
+                } else {
+                    break;
+                }
+            }
+
+            const lastEntry = cluster[cluster.length - 1];
+
+            // Round UP to next multiple of 5 minutes (e.g. 7:12 -> 7:15, 7:19 -> 7:20)
+            let roundedMinutes = Math.ceil(lastEntry.minutes / 5) * 5;
+
+            // Format as standard 12-hour time string
+            let h = Math.floor(roundedMinutes / 60);
+            let m = roundedMinutes % 60;
+            const ampm = h >= 12 && h < 24 ? 'PM' : 'AM';
+            h = h % 12;
+            if (h === 0) h = 12;
+            const mStr = m < 10 ? '0' + m : String(m);
+            const roundedTime = `${h}:${mStr} ${ampm}`;
+
+            return {
+                roundedTime: roundedTime,
+                rawTime: lastEntry.rawTime,
+                lastTrainee: lastEntry.name
+            };
+        }
+
+        function parseTimestampToMinutes(tStr) {
+            if (!tStr) return null;
+            const s = String(tStr).trim();
+            const match = s.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?/i);
+            if (!match) return null;
+
+            let h = parseInt(match[1], 10);
+            const m = parseInt(match[2], 10);
+            const ampm = (match[3] || '').toUpperCase();
+
+            if (ampm === 'PM' && h < 12) h += 12;
+            if (ampm === 'AM' && h === 12) h = 0;
+
+            let dispH = h % 12;
+            if (dispH === 0) dispH = 12;
+            const dispM = m < 10 ? '0' + m : String(m);
+            const dispAmpm = h >= 12 ? 'PM' : 'AM';
+
+            return {
+                totalMinutes: h * 60 + m,
+                timeStr: `${dispH}:${dispM} ${dispAmpm}`
+            };
         }
         // Converts 18:30, 1830, or Sat Dec 30 1899 19:20:00 GMT... to "7:20 PM" for Frontend
         function formatTimeDisplayFrontEnd(tStr) {
