@@ -422,12 +422,22 @@ body {
 /* --------------------------------------------------------------------------
    9. STANDARDIZED PORTAL HEADER & FOOTER SHELL
    -------------------------------------------------------------------------- */
-.portal-header {
+header, .portal-header, header.gm-header {
     background-color: var(--brand-blue);
     border-bottom: 4px solid var(--brand-red);
-    padding: 5px 20px;
-    box-shadow: var(--shadow-md);
-    text-align: center;
+    color: var(--crust-base);
+    padding: 10px 20px;
+    padding-top: calc(10px + env(safe-area-inset-top, 0px));
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(71, 43, 16, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .portal-header-inner {
@@ -437,31 +447,61 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 16px;
+    width: 100%;
 }
 
-.portal-logo-wrap {
+.header-left, .portal-header-left, .portal-logo-wrap {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     text-decoration: none;
     flex-shrink: 0;
 }
 
-.portal-logo-img {
-    height: 44px;
+.header-logo, .logo, .portal-logo-img {
+    height: 38px;
     width: auto;
     display: block;
     object-fit: contain;
     transition: transform 0.2s ease;
 }
 
-.portal-logo-img:hover {
+.header-logo:hover, .portal-logo-img:hover {
     transform: scale(1.03);
+}
+
+.header-titles, .header-text, .portal-header-titles {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    gap: 2px;
+}
+
+.header-titles h1, header h1, .portal-header-title {
+    margin: 0;
+    font-family: 'ExtraBlack', 'Header1', serif;
+    font-size: 24px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    line-height: 1.1;
+    color: var(--crust-base) !important;
+    font-weight: normal !important;
+}
+
+.header-titles p, .subtitle, .portal-header-subtitle {
+    margin: 0;
+    font-family: 'Subhead2', sans-serif;
+    font-size: 13px;
+    color: var(--crust-base) !important;
+    opacity: 0.95;
+    letter-spacing: 0.8px;
+    line-height: 1.2;
+    text-transform: uppercase;
 }
 
 .portal-tagline {
     font-family: 'Subhead1', sans-serif;
-    color: #ffffff;
+    color: var(--crust-base);
     font-size: 14px;
     letter-spacing: 0.5px;
     text-transform: uppercase;
@@ -494,7 +534,7 @@ body {
     font-family: 'Subhead2', sans-serif;
     font-size: 11px;
     letter-spacing: 0.6px;
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(254, 250, 246, 0.85);
     text-transform: uppercase;
     line-height: 1.1;
 }
@@ -502,7 +542,7 @@ body {
 .trainee-badge-name {
     font-family: 'ExtraBold', sans-serif;
     font-size: 17px;
-    color: #ffffff;
+    color: var(--crust-base);
     letter-spacing: 0.3px;
     line-height: 1.2;
 }
@@ -510,7 +550,7 @@ body {
 .trainee-badge-store {
     font-family: 'Subhead1', sans-serif;
     font-size: 15px;
-    color: #ffffff;
+    color: var(--crust-base);
     letter-spacing: 0.5px;
     background: rgba(0, 144, 226, 0.35);
     padding: 2px 8px;
@@ -521,7 +561,7 @@ body {
 /* Branded Market Pill (e.g. "Dallas Market", "Denver Market") */
 .market-pill {
     background-color: var(--brand-red);
-    color: #ffffff;
+    color: var(--crust-base) !important;
     padding: 6px 14px;
     border-radius: var(--radius-pill);
     font-family: 'Subhead1', sans-serif;
@@ -534,6 +574,16 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+    .market-pill {
+        padding: 4px 10px;
+        font-size: 11px;
+        letter-spacing: 0.5px;
+    }
 }
 
 /* Branded Portal Footer */
@@ -569,13 +619,13 @@ body {
     font-size: 14px;
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    color: #ffffff;
+    color: var(--crust-base);
 }
 
 .footer-subtitle {
     font-family: 'Compact', sans-serif;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(254, 250, 246, 0.8);
 }
 
 .footer-meta {
@@ -589,7 +639,7 @@ body {
     margin: 0;
     font-family: 'Compact', sans-serif;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(254, 250, 246, 0.9);
 }
 
 .footer-security {

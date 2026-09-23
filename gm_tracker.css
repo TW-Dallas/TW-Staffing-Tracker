@@ -3,69 +3,7 @@
    Shared between Dallas (index.html) and Denver (denver_index.html)
    ========================================================================== */
 
-/* --- GM TRACKER HEADER --- */
-header.gm-header, header {
-    background-color: var(--brand-blue);
-    border-bottom: 3px solid var(--brand-red);
-    color: white;
-    padding: 10px 16px;
-    padding-top: calc(10px + env(safe-area-inset-top, 0px));
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 4px 12px rgba(71, 43, 16, 0.15);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.logo {
-    height: 34px;
-    width: auto;
-    object-fit: contain;
-}
-
-h1 {
-    margin: 0;
-    font-family: 'ExtraBlack', 'Header1', serif;
-    font-size: 22px;
-    text-transform: uppercase;
-    line-height: 1.1;
-    font-weight: normal !important;
-}
-
-.subtitle {
-    font-family: 'Subhead2', sans-serif;
-    font-size: 13px;
-    opacity: 0.9;
-    line-height: 1.2;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-
-.market-pill {
-    margin-left: auto;
-    background-color: var(--brand-red);
-    color: #ffffff;
-    padding: 6px 14px;
-    border-radius: var(--radius-pill, 20px);
-    font-family: 'Subhead1', sans-serif;
-    font-size: 13px;
-    font-weight: normal !important;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    box-shadow: 0 2px 6px rgba(255, 0, 0, 0.3);
-    white-space: nowrap;
-    flex-shrink: 0;
-}
-
-@media (max-width: 600px) {
-    .market-pill {
-        padding: 4px 10px;
-        font-size: 11px;
-        letter-spacing: 0.5px;
-    }
-}
+/* Header styles are canonically managed by brand_master.css */
 
 /* --- CONTROLS & FILTERS --- */
 .controls {

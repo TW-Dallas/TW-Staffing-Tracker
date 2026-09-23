@@ -4,7 +4,7 @@
 <head>
     <script>
         if (window.location.hostname.endsWith('github.io')) {
-            window.location.replace('https://tw-dallas-staffing.pages.dev/denver_orientation' + window.location.search);
+            window.location.replace('https://tw-staffing.pages.dev/denver-orientation' + window.location.search);
         }
     </script>
     <meta charset="UTF-8">
@@ -52,74 +52,7 @@
             min-height: 100vh;
         }
 
-        /* HEADER */
-        header {
-            background-color: var(--brand-blue);
-            color: white;
-            padding: 10px 20px;
-            padding-top: calc(10px + env(safe-area-inset-top, 0px));
-            padding-left: calc(20px + env(safe-area-inset-left, 0px));
-            padding-right: calc(20px + env(safe-area-inset-right, 0px));
-            flex: 0 0 auto;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 4px 12px rgba(71, 43, 16, 0.15);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .header-logo {
-            height: 38px;
-            width: auto;
-        }
-
-        .header-titles h1 {
-            margin: 0;
-            font-family: 'ExtraBlack', serif;
-            font-size: 24px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            line-height: 1.1;
-            color: white;
-        }
-
-        .header-titles p {
-            margin: 2px 0 0 0;
-            font-family: 'Subhead2', sans-serif;
-            font-size: 13px;
-            color: #d1ecf1;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-        }
-
-        .market-pill {
-            background-color: var(--brand-red);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-family: 'Subhead1', sans-serif;
-            font-size: 13px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            box-shadow: 0 2px 6px rgba(255, 0, 0, 0.3);
-        }
-
-        /* SIGNATURE RED ACCENT STRIPE */
-        .brand-stripe {
-            height: 4px;
-            background-color: var(--brand-red);
-            width: 100%;
-            flex: 0 0 auto;
-        }
+        /* Header & Brand Stripe styles canonically handled by brand_master.css */
 
         /* TRAINER INFO STRIP */
         .info-strip {

@@ -4,7 +4,7 @@
 <head>
     <script>
         if (window.location.hostname.endsWith('github.io')) {
-            window.location.replace('https://tw-dallas-staffing.pages.dev/admin' + window.location.search);
+            window.location.replace('https://tw-staffing.pages.dev/admin' + window.location.search);
         }
     </script>
     <meta charset="UTF-8">
@@ -1480,7 +1480,7 @@
         const API_URL = "https://script.google.com/macros/s/AKfycbxQVuU0uQ3TdkfsBwJpZ-K1iUDXTuLgvqEayPeqZgSRLDNxHOEUsOrjaSZAujI8p_874g/exec";
         const D1_API_URL = (window.location.origin.includes('pages.dev') || window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1'))
             ? '/api/staffing'
-            : 'https://tw-dallas-staffing.pages.dev/api/staffing';
+            : 'https://tw-staffing.pages.dev/api/staffing';
 
         // Add this helper near the top of your script tag:
         async function apiCall(actionOrMethod = 'getData', payload = {}) {

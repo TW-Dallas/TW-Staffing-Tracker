@@ -2,6 +2,7 @@
 # Note: Cloudflare Pages automatically serves *.html files at clean URLs (e.g. orientation.html -> /orientation, admin.html -> /admin)
 # Adding /orientation -> /orientation.html creates an infinite 308 redirect loop.
 
+/dallas                   /index                 200
 /tw-dallas-orientation    /orientation           200
 /dallas-orientation       /orientation           200
 /tw-denver-orientation    /denver_orientation    200

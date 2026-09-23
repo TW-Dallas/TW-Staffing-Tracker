@@ -3,7 +3,7 @@
 <head>
     <script>
         if (window.location.hostname.endsWith('github.io')) {
-            window.location.replace('https://tw-dallas-staffing.pages.dev/' + window.location.search);
+            window.location.replace('https://tw-staffing.pages.dev/' + window.location.search);
         }
     </script>
     <meta charset="UTF-8">
@@ -228,7 +228,7 @@
 
         const d1Url = (window.location.origin.includes('pages.dev') || window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1'))
             ? '/api/staffing?market=Dallas'
-            : 'https://tw-dallas-staffing.pages.dev/api/staffing?market=Dallas';
+            : 'https://tw-staffing.pages.dev/api/staffing?market=Dallas';
 
         fetch(d1Url)
             .then(res => {
