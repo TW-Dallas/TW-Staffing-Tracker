@@ -266,7 +266,7 @@
                                         <option value="Visor">Visor</option>
                                     </select>
                                 </div>
-                                <div class="form-group flex-two-weight">
+                                <div class="form-group flex-two-weight" id="payCardFormGroup">
                                     <label>Pay Card Status</label>
                                     <input type="text" id="fieldPayCard" placeholder="Yes or leave blank">
                                 </div>
@@ -2713,12 +2713,24 @@
             const toggleInt = document.getElementById('toggleInt');
             const toggleStf = document.getElementById('toggleStf');
             const togglePay = document.getElementById('togglePay');
+            const toggleMit = document.getElementById('toggleMit');
             const btnGmaps = document.getElementById('btnGmapsLink');
 
             // 🚫 Hide Interviews, Dallas Store Map, and Pay Cards for Denver
             if (toggleInt) toggleInt.style.display = isDenver ? 'none' : 'block';
             if (btnGmaps) btnGmaps.style.display = isDenver ? 'none' : 'inline-flex';
             if (togglePay) togglePay.style.display = isDenver ? 'none' : 'block'; // Hidden for Denver
+
+            // 🚫 Hide MIT Class toggle for Denver (Dallas-only program currently)
+            if (toggleMit) toggleMit.style.display = isDenver ? 'none' : 'block';
+
+            // 🚫 Hide Pay Card input field on candidate form for Denver
+            const payCardGroup = document.getElementById('payCardFormGroup');
+            if (payCardGroup) payCardGroup.style.display = isDenver ? 'none' : 'block';
+
+            // 🚫 Hide ATS Phone Invite header button for Denver
+            const btnSrTemplate = document.getElementById('btnSrTemplate');
+            if (btnSrTemplate) btnSrTemplate.style.display = isDenver ? 'none' : 'inline-flex';
 
             // ✅ Staffing is visible for BOTH Dallas and Denver
             if (toggleStf) toggleStf.style.display = 'block';
@@ -3701,10 +3713,10 @@
 
                     if (item.ineligible || item.inactive || item.withdrawn) {
                         card.classList.add('status-gray');
-                    } else if (isAllPayError || item.incorrectEmail || isBlockedByDocs || item.missedNto) {
-                        card.classList.add('status-red');
                     } else if (item.hired) {
                         card.classList.add('status-green');
+                    } else if (isAllPayError || item.incorrectEmail || isBlockedByDocs || item.missedNto) {
+                        card.classList.add('status-red');
                     } else if (item.ntoScheduled || item.ntoSignupLinkSent) {
                         card.classList.add('status-nto');
                     } else if (item.bgcComplete || item.allPayCompleted || item.pulseFormComplete) {
@@ -3725,15 +3737,17 @@
                     else if (item.ineligible || item.inactive || item.withdrawn) statusStyleColor = 'var(--brand-grey)';
 
                     let flags = '';
-                    if (isAllPayError) flags += '<span class="badge-incorrect">⚠️ AllPay Error</span> ';
-                    if (item.incorrectEmail) flags += '<span class="badge-incorrect">⚠️ Email Error</span> ';
-                    if (isBlockedByDocs) flags += '<span class="badge-incorrect">⚠️ Missing Docs</span> ';
-                    if (item.missedNto) flags += '<span class="badge-incorrect">⚠️ Missed NTO</span> ';
+                    if (!item.hired && !item.ineligible && !item.inactive && !item.withdrawn) {
+                        if (isAllPayError) flags += '<span class="badge-incorrect">⚠️ AllPay Error</span> ';
+                        if (item.incorrectEmail) flags += '<span class="badge-incorrect">⚠️ Email Error</span> ';
+                        if (isBlockedByDocs) flags += '<span class="badge-incorrect">⚠️ Missing Docs</span> ';
+                        if (item.missedNto) flags += '<span class="badge-incorrect">⚠️ Missed NTO</span> ';
+                    }
 
                     card.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div class="card-name">${item.name}</div>
-                        <div style="display: flex; gap: 4px;">${flags}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                        <div class="card-name" style="flex: 1; min-width: 0;">${item.name}</div>
+                        ${flags ? `<div style="display: flex; gap: 4px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end;">${flags}</div>` : ''}
                     </div>
                     <div class="card-sub">
                         <span>Store #${item.store} (${item.position})</span>
@@ -3775,22 +3789,74 @@
             if (!existing) return;
 
             if (currentView === 'onboarding') {
-                const notesEl = document.getElementById('fieldNotes');
-                const phoneEl = document.getElementById('fieldPhone');
-                const emailEl = document.getElementById('fieldEmail');
-
-                const notes = notesEl ? notesEl.value.trim() : '';
-                const phone = phoneEl ? phoneEl.value.trim() : '';
-                const email = emailEl ? emailEl.value.trim() : '';
+                const name = document.getElementById('fieldName')?.value.trim() || existing.name;
+                const position = document.getElementById('fieldPosition')?.value || existing.position;
+                const store = document.getElementById('fieldStore')?.value.trim() || existing.store;
+                const phone = document.getElementById('fieldPhone')?.value.trim() || '';
+                const email = document.getElementById('fieldEmail')?.value.trim() || '';
+                const ntoDate = document.getElementById('fieldNto')?.value.trim() || '';
+                const notes = document.getElementById('fieldNotes')?.value.trim() || '';
+                const shirtSize = document.getElementById('fieldShirt')?.value || '';
+                const hatStyle = document.getElementById('fieldHat')?.value || '';
+                const payCardEl = document.getElementById('fieldPayCard');
+                const payCard = payCardEl ? payCardEl.value.trim() : '';
+                const submissionReceived = document.getElementById('checkSubmission')?.checked ?? true;
+                const onboardingSent = document.getElementById('checkOnbSent')?.checked ?? false;
+                const bgcComplete = document.getElementById('checkBgc')?.checked ?? false;
+                const allPayCompleted = document.getElementById('checkAllPay')?.checked ?? false;
+                const ntoSignupLinkSent = document.getElementById('checkNtoLink')?.checked ?? false;
+                const ntoScheduled = document.getElementById('checkNto')?.checked ?? false;
+                const hired = document.getElementById('checkHired')?.checked ?? false;
+                const incorrectEmail = document.getElementById('checkIncorrect')?.checked ?? false;
+                const ineligible = document.getElementById('checkIneligible')?.checked ?? false;
+                const inactive = document.getElementById('checkInactive')?.checked ?? false;
+                const withdrawn = document.getElementById('checkWithdrawn')?.checked ?? false;
+                const pulseFormComplete = document.getElementById('checkPulseForm')?.checked ?? false;
 
                 let isChanged = (notes !== (existing.notes || '')) ||
                     (phone !== (existing.phoneNumber || '')) ||
-                    (email !== (existing.email || ''));
+                    (email !== (existing.email || '')) ||
+                    (store !== (existing.store || '')) ||
+                    (position !== (existing.position || '')) ||
+                    (ntoDate !== (existing.ntoDate || '')) ||
+                    (shirtSize !== (existing.shirtSize || '')) ||
+                    (hatStyle !== (existing.hatStyle || '')) ||
+                    (payCard !== (existing.payCard || '')) ||
+                    (hired !== Boolean(existing.hired)) ||
+                    (bgcComplete !== Boolean(existing.bgcComplete)) ||
+                    (allPayCompleted !== Boolean(existing.allPayCompleted)) ||
+                    (ntoSignupLinkSent !== Boolean(existing.ntoSignupLinkSent)) ||
+                    (ntoScheduled !== Boolean(existing.ntoScheduled)) ||
+                    (inactive !== Boolean(existing.inactive)) ||
+                    (ineligible !== Boolean(existing.ineligible)) ||
+                    (withdrawn !== Boolean(existing.withdrawn)) ||
+                    (pulseFormComplete !== Boolean(existing.pulseFormComplete)) ||
+                    (submissionReceived !== Boolean(existing.submissionReceived)) ||
+                    (onboardingSent !== Boolean(existing.onboardingSent));
+
                 if (isChanged) {
-                    payload.name = existing.name;
-                    payload.notes = notes;
+                    payload.name = name;
+                    payload.position = position;
+                    payload.store = store;
                     payload.phoneNumber = phone;
                     payload.email = email;
+                    payload.ntoDate = ntoDate;
+                    payload.notes = notes;
+                    payload.shirtSize = shirtSize;
+                    payload.hatStyle = hatStyle;
+                    payload.payCard = payCard;
+                    payload.submissionReceived = submissionReceived;
+                    payload.onboardingSent = onboardingSent;
+                    payload.bgcComplete = bgcComplete;
+                    payload.allPayCompleted = allPayCompleted;
+                    payload.ntoSignupLinkSent = ntoSignupLinkSent;
+                    payload.ntoScheduled = ntoScheduled;
+                    payload.hired = hired;
+                    payload.incorrectEmail = incorrectEmail;
+                    payload.ineligible = ineligible;
+                    payload.inactive = inactive;
+                    payload.withdrawn = withdrawn;
+                    payload.pulseFormComplete = pulseFormComplete;
                     unsavedDrafts[currentSelectedId] = payload;
                 }
             } else if (currentView === 'interviews') {
@@ -3851,7 +3917,7 @@
                 updateBatchDraftBanner();
 
                 showLoader(false);
-                showBrandAlert(result.message || `Successfully saved ${drafts.length} updates!`, "Batch Save Complete");
+                showBrandAlert(`✓ Successfully saved updates for ${drafts.length} candidate(s)!`, "Batch Save Complete");
 
                 // Refresh data
                 const refreshData = await apiCall('GET');
@@ -4212,8 +4278,9 @@
                 payload.email = document.getElementById('fieldEmail').value.trim();
                 payload.shirtSize = document.getElementById('fieldShirt').value;
                 payload.hatStyle = document.getElementById('fieldHat').value;
-                payload.payCard = document.getElementById('fieldPayCard').value.trim();
+                payload.payCard = document.getElementById('fieldPayCard') ? document.getElementById('fieldPayCard').value.trim() : '';
                 payload.notes = document.getElementById('fieldNotes').value.trim();
+                payload.ntoDate = document.getElementById('fieldNto') ? document.getElementById('fieldNto').value.trim() : '';
                 payload.submissionReceived = document.getElementById('checkSubmission').checked;
                 payload.onboardingSent = document.getElementById('checkOnbSent').checked;
                 payload.bgcComplete = document.getElementById('checkBgc').checked;
@@ -4361,6 +4428,7 @@
                 renderList();
                 updateAuditMetrics();
                 showLoader(false);
+                showBrandAlert(`✓ Successfully saved details for ${targetName || 'candidate'}!`, "Changes Saved");
 
             } catch (err) {
                 showLoader(false);
@@ -7702,7 +7770,9 @@
             if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 25px; color:#888; font-size: 16px;">Loading scheduled MIT classes from D1...</td></tr>`;
 
             try {
-                const res = await fetch('/api/staffing?action=getMitClasses&market=Dallas');
+                const u = localStorage.getItem('onb_user') || '';
+                const currentCity = getCityFromUser(u);
+                const res = await fetch(`${D1_API_URL}?action=getMitClasses&market=${encodeURIComponent(currentCity || 'Dallas')}`);
                 const data = await res.json();
                 if (!data.success || !data.classes || data.classes.length === 0) {
                     window.mitCalendarClassesCache = [];

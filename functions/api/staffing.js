@@ -1817,6 +1817,70 @@ export async function onRequestPost(context) {
             return new Response(JSON.stringify({ success: true, message: "Attendance saved." }), { status: 200, headers: corsHeaders() });
         }
 
+        // --- MIT ATTENDANCE GROUND TRUTH: OFFICIAL COMPLETION SUBMISSION ---
+        if (action === "submitMitCompletion") {
+            const classId = payload.classId || "";
+            const candidateName = (payload.candidateName || payload.name || "").trim();
+            const storeNum = (payload.storeNum || payload.store || "").toString().trim();
+            const position = payload.position || "MIT 1";
+            const phone = (payload.phone || "").trim();
+            const email = (payload.email || "").trim();
+            const takeaway = payload.takeaway || "";
+            const rating = payload.rating || "";
+
+            if (!candidateName || !storeNum) {
+                return new Response(JSON.stringify({ success: false, error: "Missing candidate name or store number" }), { status: 400, headers: corsHeaders() });
+            }
+
+            // Fetch class details if classId provided
+            let cls = null;
+            if (classId) {
+                cls = await db.prepare("SELECT * FROM training_classes WHERE id = ?").bind(classId).first();
+            }
+
+            const className = cls ? cls.name : (payload.className || "MIT Leadership");
+            const level = cls ? (cls.level || 1) : parseInt(payload.level || 1, 10);
+            const classDate = cls ? cls.class_date : (payload.classDate || getNowFormatted().split(' ')[0]);
+            const trainerName = cls ? (cls.trainer || "") : (payload.trainerName || "");
+            const deliveryMode = cls && cls.location === 'Virtual' ? 'Virtual' : 'In-Person';
+
+            // 1. Insert into mit_attendance_records (Ground truth)
+            await db.prepare(`
+                INSERT INTO mit_attendance_records (
+                    candidate_name, do_name, store_num, attendance_date, class_name, level, market, delivery_mode, trainer_name, source_tab, is_active_employee
+                ) VALUES (?, '', ?, ?, ?, ?, ?, ?, ?, 'D1_Live', 1)
+            `).bind(candidateName, storeNum, classDate, className, level, market, deliveryMode, trainerName).run();
+
+            // 2. Mark matching registration as Completed in class_registrations (if exists)
+            if (classId) {
+                const updated = await db.prepare(`
+                    UPDATE class_registrations 
+                    SET status = 'Completed', updated_at = CURRENT_TIMESTAMP 
+                    WHERE class_id = ? AND (LOWER(candidate_name) = LOWER(?) OR (phone != '' AND phone = ?))
+                `).bind(classId, candidateName, phone).run();
+
+                // If not pre-registered (walk-in), insert as Completed registration
+                if (!updated.meta?.changes || updated.meta.changes === 0) {
+                    const regId = `REG-WALKIN-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 1000)}`;
+                    await db.prepare(`
+                        INSERT INTO class_registrations (
+                            id, class_id, candidate_name, store_num, position, phone, email, status, created_at, updated_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'Completed', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                    `).bind(regId, classId, candidateName, storeNum, position, phone, email).run();
+                }
+            }
+
+            return new Response(JSON.stringify({ 
+                success: true, 
+                message: "MIT Class Completion recorded successfully!",
+                candidateName,
+                className,
+                level,
+                classDate,
+                storeNum
+            }), { status: 200, headers: corsHeaders() });
+        }
+
         // 4. Email & NTO Automation Actions: Proxy to Google Apps Script Gmail microservice
         if (action === "sendEmail" || action === "sendNtoMeetLinks" || action === "sendWelcomeLetter" || action === "concludeNtoClass" || action === "testNtoPayrollReport" || action === "sendNtoPayrollReport" || action === "setupNtoPayrollTrigger" || action === "disableNtoPayrollTrigger") {
             try {
@@ -2494,22 +2558,58 @@ export async function onRequestPost(context) {
                 if (!item.id) continue;
                 statements.push(db.prepare(`
                     UPDATE onboarding_candidates SET
-                        nto_attendance = COALESCE(?, nto_attendance),
-                        nto_date = COALESCE(?, nto_date),
+                        name = COALESCE(?, name),
+                        phone_number = COALESCE(?, phone_number),
+                        email = COALESCE(?, email),
+                        store_num = COALESCE(?, store_num),
+                        position = COALESCE(?, position),
+                        shirt_size = COALESCE(?, shirt_size),
+                        hat_style = COALESCE(?, hat_style),
+                        pay_card = COALESCE(?, pay_card),
+                        submission_received = COALESCE(?, submission_received),
+                        onboarding_sent = COALESCE(?, onboarding_sent),
+                        bgc_complete = COALESCE(?, bgc_complete),
+                        allpay_completed = COALESCE(?, allpay_completed),
+                        allpay_error = COALESCE(?, allpay_error),
+                        nto_signup_link_sent = COALESCE(?, nto_signup_link_sent),
+                        nto_scheduled = COALESCE(?, nto_scheduled),
                         hired = COALESCE(?, hired),
                         inactive = COALESCE(?, inactive),
+                        ineligible = COALESCE(?, ineligible),
                         withdrawn = COALESCE(?, withdrawn),
+                        missing_docs = COALESCE(?, missing_docs),
+                        pulse_form_complete = COALESCE(?, pulse_form_complete),
                         notes = COALESCE(?, notes),
+                        nto_date = COALESCE(?, nto_date),
+                        nto_attendance = COALESCE(?, nto_attendance),
                         last_updated = ?,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE id = ?
                 `).bind(
-                    item.ntoAttendance !== undefined ? item.ntoAttendance : null,
-                    item.ntoDate !== undefined ? item.ntoDate : null,
+                    item.name !== undefined ? item.name : null,
+                    item.phoneNumber !== undefined ? item.phoneNumber : (item.phone !== undefined ? item.phone : null),
+                    item.email !== undefined ? item.email : null,
+                    item.store !== undefined ? item.store : (item.store_num !== undefined ? item.store_num : null),
+                    item.position !== undefined ? item.position : null,
+                    item.shirtSize !== undefined ? item.shirtSize : null,
+                    item.hatStyle !== undefined ? item.hatStyle : null,
+                    item.payCard !== undefined ? item.payCard : null,
+                    item.submissionReceived !== undefined ? boolToInt(item.submissionReceived) : null,
+                    item.onboardingSent !== undefined ? boolToInt(item.onboardingSent) : null,
+                    item.bgcComplete !== undefined ? boolToInt(item.bgcComplete) : null,
+                    item.allPayCompleted !== undefined ? boolToInt(item.allPayCompleted) : null,
+                    item.allPayError !== undefined ? item.allPayError : null,
+                    item.ntoSignupLinkSent !== undefined ? boolToInt(item.ntoSignupLinkSent) : null,
+                    item.ntoScheduled !== undefined ? boolToInt(item.ntoScheduled) : null,
                     item.hired !== undefined ? boolToInt(item.hired) : null,
                     item.inactive !== undefined ? boolToInt(item.inactive) : null,
+                    item.ineligible !== undefined ? boolToInt(item.ineligible) : null,
                     item.withdrawn !== undefined ? boolToInt(item.withdrawn) : null,
+                    item.missingDocs !== undefined ? item.missingDocs : null,
+                    item.pulseFormComplete !== undefined ? boolToInt(item.pulseFormComplete) : null,
                     item.notes !== undefined ? item.notes : null,
+                    item.ntoDate !== undefined ? item.ntoDate : null,
+                    item.ntoAttendance !== undefined ? item.ntoAttendance : null,
                     item.lastUpdated || nowFormatted,
                     item.id
                 ));
