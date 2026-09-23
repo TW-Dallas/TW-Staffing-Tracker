@@ -1106,14 +1106,11 @@
                                 </div>
 
                                 <div id="quizScoreBanner"></div>
-                                <div id="quizAnswersBreakdown" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; max-height: 230px; overflow-y: auto; padding-right: 2px;"></div>
+                                <div id="quizAnswersBreakdown" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px;"></div>
 
                                 <button type="button" class="btn-brand-primary" style="font-size: 15.5px; padding: 12px 20px;" onclick="goToAcknowledgmentStep()">
                                     <span>Continue to Policy Acknowledgments →</span>
                                 </button>
-                                <div style="text-align: center; margin-top: 8px;">
-                                    <button type="button" class="quiz-nav-back" onclick="retakeQuiz()">↺ Review / Change Answers</button>
-                                </div>
                             </div>
 
                             <!-- STEP 3: Policy Acknowledgments & Submission (Transitions in-place) -->
@@ -1529,80 +1526,64 @@
                 }
             }
 
-            // Render breakdown items
+            // Render breakdown items (Single-Line Items to Prevent Scroll)
             const breakdown = document.getElementById('quizAnswersBreakdown');
             if (breakdown) {
                 breakdown.innerHTML = `
-                    <div class="quiz-result-item ${isQ1Correct ? 'correct' : 'incorrect'}">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <strong style="color: var(--dark-blue); font-family: 'Subhead1'; font-size: 13.5px;">1. #1 Priority:</strong>
-                            <span style="font-family: 'Subhead1'; font-size: 12px; color: ${isQ1Correct ? 'var(--brand-blue)' : 'var(--brand-red)'}; font-weight: bold;">
-                                ${isQ1Correct ? '✓ Correct' : '✗ Review'}
-                            </span>
-                        </div>
-                        <div style="font-size: 13px; color: var(--crust-deep); margin-top: 3px;">
+                    <div class="quiz-result-item ${isQ1Correct ? 'correct' : 'incorrect'}" style="display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 6px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 13.5px;">
+                            <strong style="color: var(--dark-blue); font-family: 'Subhead1';">1. #1 Priority:</strong>
                             ${isQ1Correct 
-                                ? '<strong style="color: var(--brand-blue);">Safety</strong> — Always #1 at Team Wow' 
-                                : `Your answer: <span style="text-decoration: line-through;">${escapeHtml(q1Val)}</span> • Correct: <strong style="color: var(--brand-blue);">Safety</strong>`}
+                                ? '<span style="color: var(--brand-blue); font-weight: bold;">Safety</span>' 
+                                : `<span style="text-decoration: line-through; color: var(--crust-deep);">${escapeHtml(q1Val)}</span> <span style="color: var(--brand-blue); font-weight: bold;">→ Safety</span>`}
                         </div>
+                        <span style="font-family: 'Subhead1'; font-size: 12px; color: ${isQ1Correct ? 'var(--brand-blue)' : 'var(--brand-red)'}; font-weight: bold; white-space: nowrap; flex-shrink: 0;">
+                            ${isQ1Correct ? '✓ Correct' : '✗ Review'}
+                        </span>
                     </div>
 
-                    <div class="quiz-result-item ${isQ2Correct ? 'correct' : 'incorrect'}">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <strong style="color: var(--dark-blue); font-family: 'Subhead1'; font-size: 13.5px;">2. Franchise Owner:</strong>
-                            <span style="font-family: 'Subhead1'; font-size: 12px; color: ${isQ2Correct ? 'var(--brand-blue)' : 'var(--brand-red)'}; font-weight: bold;">
-                                ${isQ2Correct ? '✓ Correct' : '✗ Review'}
-                            </span>
-                        </div>
-                        <div style="font-size: 13px; color: var(--crust-deep); margin-top: 3px;">
+                    <div class="quiz-result-item ${isQ2Correct ? 'correct' : 'incorrect'}" style="display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 6px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 13.5px;">
+                            <strong style="color: var(--dark-blue); font-family: 'Subhead1';">2. Franchise Owner:</strong>
                             ${isQ2Correct 
-                                ? '<strong style="color: var(--brand-blue);">Brent Hamill</strong>' 
-                                : `Your answer: <span style="text-decoration: line-through;">${escapeHtml(q2Val)}</span> • Correct: <strong style="color: var(--brand-blue);">Brent Hamill</strong>`}
+                                ? '<span style="color: var(--brand-blue); font-weight: bold;">Brent Hamill</span>' 
+                                : `<span style="text-decoration: line-through; color: var(--crust-deep);">${escapeHtml(q2Val)}</span> <span style="color: var(--brand-blue); font-weight: bold;">→ Brent Hamill</span>`}
                         </div>
+                        <span style="font-family: 'Subhead1'; font-size: 12px; color: ${isQ2Correct ? 'var(--brand-blue)' : 'var(--brand-red)'}; font-weight: bold; white-space: nowrap; flex-shrink: 0;">
+                            ${isQ2Correct ? '✓ Correct' : '✗ Review'}
+                        </span>
                     </div>
 
-                    <div class="quiz-result-item ${isQ3Correct ? 'correct' : 'incorrect'}">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <strong style="color: var(--dark-blue); font-family: 'Subhead1'; font-size: 13.5px;">3. If Order is Wrong:</strong>
-                            <span style="font-family: 'Subhead1'; font-size: 12px; color: ${isQ3Correct ? 'var(--brand-blue)' : 'var(--brand-red)'}; font-weight: bold;">
-                                ${isQ3Correct ? '✓ Correct' : '✗ Review'}
-                            </span>
-                        </div>
-                        <div style="font-size: 13px; color: var(--crust-deep); margin-top: 3px;">
+                    <div class="quiz-result-item ${isQ3Correct ? 'correct' : 'incorrect'}" style="display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 6px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 13.5px;">
+                            <strong style="color: var(--dark-blue); font-family: 'Subhead1';">3. Order Wrong:</strong>
                             ${isQ3Correct 
-                                ? '<strong style="color: var(--brand-blue);">Free</strong> — Team Wow Service Guarantee' 
-                                : `Your answer: <span style="text-decoration: line-through;">${escapeHtml(q3Val)}</span> • Correct: <strong style="color: var(--brand-blue);">Free</strong>`}
+                                ? '<span style="color: var(--brand-blue); font-weight: bold;">Free</span>' 
+                                : `<span style="text-decoration: line-through; color: var(--crust-deep);">${escapeHtml(q3Val)}</span> <span style="color: var(--brand-blue); font-weight: bold;">→ Free</span>`}
                         </div>
+                        <span style="font-family: 'Subhead1'; font-size: 12px; color: ${isQ3Correct ? 'var(--brand-blue)' : 'var(--brand-red)'}; font-weight: bold; white-space: nowrap; flex-shrink: 0;">
+                            ${isQ3Correct ? '✓ Correct' : '✗ Review'}
+                        </span>
                     </div>
 
-                    <div class="quiz-result-item ${isQ4Correct ? 'correct' : 'incorrect'}">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <strong style="color: var(--dark-blue); font-family: 'Subhead1'; font-size: 13.5px;">4. Uniform Standards:</strong>
-                            <span style="font-family: 'Subhead1'; font-size: 12px; color: ${isQ4Correct ? 'var(--brand-blue)' : 'var(--brand-red)'}; font-weight: bold;">
-                                ${isQ4Correct ? '✓ Correct' : '✗ Review'}
-                            </span>
-                        </div>
-                        <div style="font-size: 13px; color: var(--crust-deep); margin-top: 3px;">
+                    <div class="quiz-result-item ${isQ4Correct ? 'correct' : 'incorrect'}" style="display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 6px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 13.5px;">
+                            <strong style="color: var(--dark-blue); font-family: 'Subhead1';">4. Uniform:</strong>
                             ${isQ4Correct 
-                                ? '<strong style="color: var(--brand-blue);">Perfect Image, Friendly, Drive Safe & Courteously</strong>' 
-                                : 'Correct: <strong style="color: var(--brand-blue);">Perfect Image, Friendly, Drive Safe & Courteously</strong><br><span style="font-size: 12px;">(Never carry >$20; never smoke or buy alcohol in uniform)</span>'}
+                                ? '<span style="color: var(--brand-blue); font-weight: bold;">Image, Friendly, Safe Driving</span>' 
+                                : '<span style="color: var(--brand-blue); font-weight: bold;">Image, Friendly, Safe Driving</span>'}
                         </div>
+                        <span style="font-family: 'Subhead1'; font-size: 12px; color: ${isQ4Correct ? 'var(--brand-blue)' : 'var(--brand-red)'}; font-weight: bold; white-space: nowrap; flex-shrink: 0;">
+                            ${isQ4Correct ? '✓ Correct' : '✗ Review'}
+                        </span>
                     </div>
                 `;
             }
 
-            // Transition from Questions View to Results View
+            // Transition from Questions View to Results View (Scores are locked)
             document.getElementById('quizQuestionsView').classList.add('quiz-step-hidden');
             document.getElementById('quizResultsView').classList.remove('quiz-step-hidden');
             document.getElementById('quizResultsView').classList.add('quiz-step-visible');
-        }
-
-        function retakeQuiz() {
-            hideError();
-            document.getElementById('quizResultsView').classList.add('quiz-step-hidden');
-            document.getElementById('quizResultsView').classList.remove('quiz-step-visible');
-            document.getElementById('quizQuestionsView').classList.remove('quiz-step-hidden');
-            showQuizQuestion(1);
         }
 
         function goToAcknowledgmentStep() {
