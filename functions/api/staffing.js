@@ -165,8 +165,29 @@ export async function onRequestGet(context) {
             // 1. Mark registration as Confirmed
             await db.prepare("UPDATE class_registrations SET status = 'Confirmed', updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(regId).run();
 
-            // 2. Increment spots_taken
+            // 2. Increment spots_taken on new class
             await db.prepare("UPDATE training_classes SET spots_taken = spots_taken + 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(reg.class_id).run();
+
+            // 2b. Clean up prior class registrations in older classes for this candidate & free their spots
+            const cleanRegPhone = (reg.phone || "").replace(/\D/g, "").slice(-10);
+            try {
+                const priorRegs = await db.prepare(`
+                    SELECT * FROM class_registrations 
+                    WHERE id != ? AND class_id != ? AND (
+                        (LOWER(email) = LOWER(?) AND email != '') OR 
+                        (phone != '' AND ? != '' AND REPLACE(REPLACE(REPLACE(REPLACE(phone, '-', ''), ' ', ''), '(', ''), ')', '') LIKE ?)
+                    )
+                `).bind(regId, reg.class_id, reg.email, cleanRegPhone, '%' + cleanRegPhone).all();
+
+                if (priorRegs && priorRegs.results && priorRegs.results.length > 0) {
+                    for (const pr of priorRegs.results) {
+                        await db.prepare("UPDATE training_classes SET spots_taken = MAX(0, spots_taken - 1), updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(pr.class_id).run();
+                        await db.prepare("DELETE FROM class_registrations WHERE id = ?").bind(pr.id).run();
+                    }
+                }
+            } catch (cleanupErr) {
+                console.warn("Prior registration cleanup error:", cleanupErr);
+            }
 
             // 3. Update candidate profile if exists
             if (cls) {
