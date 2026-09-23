@@ -560,29 +560,67 @@ header, .portal-header, header.gm-header {
 
 /* Branded Market Pill (e.g. "Dallas Market", "Denver Market") */
 .market-pill {
-    background-color: var(--brand-red);
+    background-color: var(--brand-red) !important;
     color: var(--crust-base) !important;
-    padding: 6px 14px;
-    border-radius: var(--radius-pill);
-    font-family: 'Subhead1', sans-serif;
-    font-size: 13px;
+    padding: 5px 12px !important;
+    min-height: 32px !important;
+    box-sizing: border-box !important;
+    border-radius: var(--radius-pill, 20px) !important;
+    font-family: 'Subhead1', 'OneDotCd-Bold', sans-serif !important;
+    font-size: 0.82rem !important;
     font-weight: normal !important;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    box-shadow: 0 2px 6px rgba(255, 0, 0, 0.3);
-    white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
     margin-left: auto;
     flex-shrink: 0;
 }
 
+/* Branded Header Action Button */
+.header-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background: rgba(254, 250, 246, 0.12);
+    color: var(--crust-base) !important;
+    border: 1.5px solid rgba(254, 250, 246, 0.85);
+    padding: 5px 12px;
+    min-height: 32px;
+    box-sizing: border-box;
+    border-radius: var(--radius-pill, 20px);
+    font-family: 'Subhead1', 'OneDotCd-Bold', sans-serif !important;
+    font-size: 0.82rem !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    white-space: nowrap;
+    touch-action: manipulation;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-weight: normal !important;
+    line-height: 1;
+}
+
+.header-action-btn:hover {
+    background: var(--brand-red) !important;
+    border-color: var(--brand-red) !important;
+    color: var(--crust-base) !important;
+    transform: translateY(-1px);
+}
+
 @media (max-width: 600px) {
-    .market-pill {
-        padding: 4px 10px;
-        font-size: 11px;
-        letter-spacing: 0.5px;
+    .market-pill, .header-action-btn {
+        padding: 4px 10px !important;
+        min-height: 28px !important;
+        font-size: 0.74rem !important;
+        letter-spacing: 0.3px !important;
     }
 }
 

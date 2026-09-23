@@ -461,6 +461,90 @@ export async function onRequestGet(context) {
         });
     }
 
+    // Fast endpoint for MIT classes: queries active MIT classes and their live registrations
+    if (reqAction === "getMitClasses") {
+        const [classesRes, regsRes] = await Promise.all([
+            db.prepare("SELECT * FROM training_classes WHERE program = 'MIT' AND (market = ? OR market = 'Virtual') AND is_active = 1").bind(market).all(),
+            db.prepare("SELECT class_id, candidate_name, store_num, position, phone, email, status FROM class_registrations WHERE class_id IN (SELECT id FROM training_classes WHERE program = 'MIT' AND (market = ? OR market = 'Virtual') AND is_active = 1)").bind(market).all()
+        ]);
+
+        const regMap = {};
+        (regsRes.results || []).forEach(r => {
+            if (!regMap[r.class_id]) regMap[r.class_id] = [];
+            regMap[r.class_id].push(r);
+        });
+
+        const mitClasses = (classesRes.results || []).map(cl => {
+            const registrations = regMap[cl.id] || [];
+            const confirmedRegs = registrations.filter(r => r.status === 'Confirmed' || !r.status);
+            let isoDate = null;
+            try {
+                const parts = (cl.class_date || '').split('/');
+                if (parts.length === 3) {
+                    const m = parts[0].padStart(2, '0');
+                    const d = parts[1].padStart(2, '0');
+                    const y = parts[2];
+                    const hour = cl.start_time && cl.start_time.includes('6:00') ? '18' : (cl.start_time && cl.start_time.includes('2:00') ? '14' : '11');
+                    isoDate = `${y}-${m}-${d}T${hour}:00:00`;
+                }
+            } catch (e) {}
+
+            const spotsTaken = confirmedRegs.length > 0 ? confirmedRegs.length : (cl.spots_taken || 0);
+            const spotsTotal = cl.spots_total || 15;
+
+            return {
+                id: cl.id,
+                classId: cl.id,
+                market: cl.market,
+                name: cl.name,
+                level: cl.level || 1,
+                classDate: cl.class_date,
+                startTime: cl.start_time,
+                endTime: cl.end_time,
+                trainer: cl.trainer,
+                trainerName: cl.trainer,
+                location: cl.location,
+                meetLink: cl.meet_link,
+                spotsTotal: spotsTotal,
+                capacity: spotsTotal,
+                spotsTaken: spotsTaken,
+                spotsLeft: Math.max(0, spotsTotal - spotsTaken),
+                openDate: cl.open_date,
+                closeDate: cl.close_date,
+                attendees: confirmedRegs.map(r => r.candidate_name),
+                roster: registrations,
+                isoDate: isoDate
+            };
+        });
+
+        mitClasses.sort((a, b) => parseDateForSort(a.classDate) - parseDateForSort(b.classDate));
+
+        return new Response(JSON.stringify({
+            success: true,
+            market,
+            classes: mitClasses
+        }), {
+            status: 200,
+            headers: corsHeaders(60)
+        });
+    }
+
+    if (reqAction === "getMitRoster") {
+        const classId = url.searchParams.get("classId");
+        if (!classId) {
+            return new Response(JSON.stringify({ success: false, error: "Missing classId" }), { status: 400, headers: corsHeaders() });
+        }
+        const [cls, regs] = await Promise.all([
+            db.prepare("SELECT * FROM training_classes WHERE id = ?").bind(classId).first(),
+            db.prepare("SELECT * FROM class_registrations WHERE class_id = ? ORDER BY created_at ASC").bind(classId).all()
+        ]);
+        return new Response(JSON.stringify({
+            success: true,
+            class: cls,
+            roster: regs.results || []
+        }), { status: 200, headers: corsHeaders() });
+    }
+
     const storeNum = url.searchParams.get("storeNum") || url.searchParams.get("store");
 
     try {
@@ -1313,6 +1397,424 @@ export async function onRequestPost(context) {
                 market,
                 classes: classes
             }), { status: 200, headers: corsHeaders() });
+        }
+
+        // 3c. MIT Class Operations (D1 Native)
+        if (action === "getMitClasses") {
+            const [classesRes, regsRes] = await Promise.all([
+                db.prepare("SELECT * FROM training_classes WHERE program = 'MIT' AND (market = ? OR market = 'Virtual') AND is_active = 1").bind(market).all(),
+                db.prepare("SELECT class_id, candidate_name, store_num, position, phone, email, status FROM class_registrations WHERE class_id IN (SELECT id FROM training_classes WHERE program = 'MIT' AND (market = ? OR market = 'Virtual') AND is_active = 1)").bind(market).all()
+            ]);
+
+            const regMap = {};
+            (regsRes.results || []).forEach(r => {
+                if (!regMap[r.class_id]) regMap[r.class_id] = [];
+                regMap[r.class_id].push(r);
+            });
+
+            const mitClasses = (classesRes.results || []).map(cl => {
+                const registrations = regMap[cl.id] || [];
+                const confirmedRegs = registrations.filter(r => r.status === 'Confirmed' || !r.status);
+                let isoDate = null;
+                try {
+                    const parts = (cl.class_date || '').split('/');
+                    if (parts.length === 3) {
+                        const m = parts[0].padStart(2, '0');
+                        const d = parts[1].padStart(2, '0');
+                        const y = parts[2];
+                        const hour = cl.start_time && cl.start_time.includes('6:00') ? '18' : (cl.start_time && cl.start_time.includes('2:00') ? '14' : '11');
+                        isoDate = `${y}-${m}-${d}T${hour}:00:00`;
+                    }
+                } catch (e) {}
+
+                const spotsTaken = confirmedRegs.length > 0 ? confirmedRegs.length : (cl.spots_taken || 0);
+                const spotsTotal = cl.spots_total || 15;
+
+                return {
+                    id: cl.id,
+                    classId: cl.id,
+                    market: cl.market,
+                    name: cl.name,
+                    level: cl.level || 1,
+                    classDate: cl.class_date,
+                    startTime: cl.start_time,
+                    endTime: cl.end_time,
+                    trainer: cl.trainer,
+                    trainerName: cl.trainer,
+                    location: cl.location,
+                    meetLink: cl.meet_link,
+                    spotsTotal: spotsTotal,
+                    capacity: spotsTotal,
+                    spotsTaken: spotsTaken,
+                    spotsLeft: Math.max(0, spotsTotal - spotsTaken),
+                    openDate: cl.open_date,
+                    closeDate: cl.close_date,
+                    attendees: confirmedRegs.map(r => r.candidate_name),
+                    roster: registrations,
+                    isoDate: isoDate
+                };
+            });
+
+            mitClasses.sort((a, b) => parseDateForSort(a.classDate) - parseDateForSort(b.classDate));
+
+            return new Response(JSON.stringify({
+                success: true,
+                market,
+                classes: mitClasses
+            }), { status: 200, headers: corsHeaders() });
+        }
+
+        if (action === "getMitRoster") {
+            const classId = payload.classId;
+            if (!classId) {
+                return new Response(JSON.stringify({ success: false, error: "Missing classId" }), { status: 400, headers: corsHeaders() });
+            }
+            const [cls, regs] = await Promise.all([
+                db.prepare("SELECT * FROM training_classes WHERE id = ?").bind(classId).first(),
+                db.prepare("SELECT * FROM class_registrations WHERE class_id = ? ORDER BY created_at ASC").bind(classId).all()
+            ]);
+            return new Response(JSON.stringify({
+                success: true,
+                class: cls,
+                roster: regs.results || []
+            }), { status: 200, headers: corsHeaders() });
+        }
+
+        if (action === "addMitClass") {
+            const classDate = payload.classDate || "";
+            const startTime = payload.startTime || "11:00 AM";
+            const endTime = payload.endTime || "1:00 PM";
+            const name = payload.name || payload.className || "Operations Assessment";
+            const level = parseInt(payload.level || 1, 10);
+            const location = payload.location || "McKinney";
+            const trainer = payload.trainer || payload.trainerName || "";
+            const capacity = parseInt(payload.capacity || payload.spotsTotal || 15, 10);
+            const meetLink = payload.meetLink || "";
+            const openDate = payload.openDate || "";
+            const closeDate = payload.closeDate || "";
+
+            let idDatePart = "";
+            const parts = classDate.split('/');
+            if (parts.length === 3) {
+                idDatePart = parts[2] + parts[0].padStart(2, '0') + parts[1].padStart(2, '0');
+            } else {
+                idDatePart = classDate.replace(/[^0-9]/g, '');
+            }
+            const nameAbbr = (name || "Cls").substring(0, 3);
+            const hourNum = startTime.includes("11") ? "11" : (startTime.includes("2:") || startTime.includes("14") ? "14" : (startTime.includes("6:") || startTime.includes("18") ? "18" : "00"));
+            const classId = payload.classId || `${idDatePart}-${hourNum}-${nameAbbr}`;
+
+            await db.prepare(`
+                INSERT INTO training_classes (
+                    id, market, program, name, level, class_date, start_time, end_time, trainer, location, meet_link, spots_total, spots_taken, open_date, close_date, is_active
+                ) VALUES (?, ?, 'MIT', ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, 1)
+            `).bind(classId, market, name, level, classDate, startTime, endTime, trainer, location, meetLink, capacity, openDate, closeDate).run();
+
+            return new Response(JSON.stringify({ success: true, message: "MIT class added!", id: classId }), { status: 200, headers: corsHeaders() });
+        }
+
+        if (action === "deleteMitClass") {
+            const classId = payload.classId;
+            if (classId) {
+                await db.prepare("UPDATE training_classes SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(classId).run();
+            }
+            return new Response(JSON.stringify({ success: true, message: "MIT class deactivated." }), { status: 200, headers: corsHeaders() });
+        }
+
+        if (action === "updateMitClass") {
+            const classId = payload.classId;
+            if (!classId) {
+                return new Response(JSON.stringify({ success: false, error: "Missing classId" }), { status: 400, headers: corsHeaders() });
+            }
+            const trainer = payload.trainer || payload.trainerName;
+            const location = payload.location;
+            const startTime = payload.startTime;
+            const endTime = payload.endTime;
+            const capacity = payload.capacity || payload.spotsTotal;
+            const meetLink = payload.meetLink;
+
+            await db.prepare(`
+                UPDATE training_classes 
+                SET trainer = COALESCE(?, trainer),
+                    location = COALESCE(?, location),
+                    start_time = COALESCE(?, start_time),
+                    end_time = COALESCE(?, end_time),
+                    spots_total = COALESCE(?, spots_total),
+                    meet_link = COALESCE(?, meet_link),
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            `).bind(trainer, location, startTime, endTime, capacity, meetLink, classId).run();
+
+            return new Response(JSON.stringify({ success: true, message: "MIT class updated." }), { status: 200, headers: corsHeaders() });
+        }
+
+        if (action === "registerMitClass" || action === "registerMitCandidate") {
+            const classId = payload.classId;
+            const name = (payload.name || payload.candidateName || "").trim();
+            const phone = (payload.phone || "").trim();
+            const email = (payload.email || "").trim();
+            const storeNum = (payload.storeNum || payload.store || "").toString().trim();
+            const position = payload.position || "MIT 1";
+            const candidateId = payload.candidateId || payload.employeeId || "";
+
+            if (!classId || !name) {
+                return new Response(JSON.stringify({ success: false, error: "Missing required registration details (class or name)" }), { status: 400, headers: corsHeaders() });
+            }
+
+            const cls = await db.prepare("SELECT * FROM training_classes WHERE id = ?").bind(classId).first();
+            if (!cls) {
+                return new Response(JSON.stringify({ success: false, error: "MIT class session not found." }), { status: 404, headers: corsHeaders() });
+            }
+
+            if (cls.spots_taken >= cls.spots_total) {
+                return new Response(JSON.stringify({ success: false, error: "This class is currently full. Please select another date." }), { status: 400, headers: corsHeaders() });
+            }
+
+            // Check for duplicate in this exact class
+            const existingReg = await db.prepare("SELECT * FROM class_registrations WHERE class_id = ? AND (LOWER(candidate_name) = LOWER(?) OR (phone != '' AND phone = ?))").bind(classId, name, phone).first();
+            if (existingReg) {
+                return new Response(JSON.stringify({
+                    success: true,
+                    message: "You are already registered for this session!",
+                    classDate: cls.class_date,
+                    startTime: cls.start_time,
+                    alreadyRegistered: true
+                }), { status: 200, headers: corsHeaders() });
+            }
+
+            const regId = `REG-MIT-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 1000)}`;
+
+            await db.prepare(`
+                INSERT INTO class_registrations (
+                    id, class_id, candidate_id, candidate_name, store_num, position, phone, email, status, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Confirmed', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            `).bind(regId, classId, candidateId, name, storeNum, position, phone, email).run();
+
+            // Increment spots_taken
+            await db.prepare("UPDATE training_classes SET spots_taken = spots_taken + 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(classId).run();
+
+            // Trainer Contacts Map
+            const TRAINER_PHONES = {
+                "bobby": "(214) 609-4715",
+                "chris": "(469) 674-8855",
+                "paul": "(469) 450-9169",
+                "phu": "(214) 404-6535",
+                "rebecca": "(469) 390-8012",
+                "amanda": "(972) 802-4392",
+                "beans": "(214) 244-2599",
+                "kevin": "(469) 515-5957",
+                "melissa": "(972) 246-7668",
+                "stephanie": "(817) 521-1016"
+            };
+            const trainerKey = (cls.trainer || "").toString().toLowerCase().trim().split(/\s+/)[0];
+            const resolvedTrainerPhone = TRAINER_PHONES[trainerKey] || "(214) 609-4715";
+
+            // Fire automated confirmation email via Google Apps Script microservice
+            if (email && email.includes("@")) {
+                try {
+                    await fetch(APPS_SCRIPT_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify({
+                            username: "dallas_admin",
+                            password: "dallas_password_123",
+                            action: "sendMitConfirmationEmail",
+                            candidateName: name,
+                            candidateEmail: email,
+                            storeNum: storeNum,
+                            position: position,
+                            className: cls.name,
+                            level: cls.level,
+                            classDate: cls.class_date,
+                            startTime: cls.start_time,
+                            endTime: cls.end_time,
+                            location: cls.location,
+                            trainerName: cls.trainer,
+                            trainerPhone: resolvedTrainerPhone,
+                            bobbyPhone: "(214) 609-4715"
+                        })
+                    });
+                } catch (emailErr) {
+                    console.warn("MIT confirmation email dispatch failed:", emailErr);
+                }
+            }
+
+            return new Response(JSON.stringify({
+                success: true,
+                message: "Successfully registered for MIT class!",
+                registrationId: regId,
+                classId: classId,
+                className: cls.name,
+                classDate: cls.class_date,
+                startTime: cls.start_time,
+                location: cls.location,
+                spotsTaken: cls.spots_taken + 1,
+                spotsTotal: cls.spots_total
+            }), { status: 200, headers: corsHeaders() });
+        }
+
+        // --- MIT AUTOMATION: SEND MORNING-OF REMINDERS ---
+        if (action === "sendMitMorningReminders") {
+            const todayMdy = payload.date || getNowFormatted().split(' ')[0]; // e.g. "9/23/2026"
+            const TRAINER_PHONES = {
+                "bobby": "(214) 609-4715",
+                "chris": "(469) 674-8855",
+                "paul": "(469) 450-9169",
+                "phu": "(214) 404-6535",
+                "rebecca": "(469) 390-8012",
+                "amanda": "(972) 802-4392",
+                "beans": "(214) 244-2599",
+                "kevin": "(469) 515-5957",
+                "melissa": "(972) 246-7668",
+                "stephanie": "(817) 521-1016"
+            };
+
+            const classesToday = await db.prepare("SELECT * FROM training_classes WHERE program = 'MIT' AND (class_date = ? OR REPLACE(class_date, ' ', '') = ?) AND is_active = 1").bind(todayMdy, todayMdy).all();
+            const classesList = classesToday.results || [];
+            let totalRemindersSent = 0;
+
+            for (const c of classesList) {
+                const regs = await db.prepare("SELECT * FROM class_registrations WHERE class_id = ? AND (status = 'Confirmed' OR status IS NULL OR status = '')").bind(c.id).all();
+                const trainerKey = (c.trainer || "").toString().toLowerCase().trim().split(/\s+/)[0];
+                const resolvedTrainerPhone = TRAINER_PHONES[trainerKey] || "(214) 609-4715";
+
+                for (const reg of (regs.results || [])) {
+                    if (reg.email && reg.email.includes("@")) {
+                        try {
+                            await fetch(APPS_SCRIPT_URL, {
+                                method: "POST",
+                                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                                body: JSON.stringify({
+                                    username: "dallas_admin",
+                                    password: "dallas_password_123",
+                                    action: "sendMitMorningReminder",
+                                    candidateName: reg.candidate_name,
+                                    candidateEmail: reg.email,
+                                    className: c.name,
+                                    level: c.level,
+                                    classDate: c.class_date,
+                                    startTime: c.start_time,
+                                    endTime: c.end_time,
+                                    location: c.location,
+                                    trainerName: c.trainer,
+                                    trainerPhone: resolvedTrainerPhone,
+                                    bobbyPhone: "(214) 609-4715"
+                                })
+                            });
+                            totalRemindersSent++;
+                        } catch (err) {
+                            console.warn("Failed sending MIT morning reminder to:", reg.email, err);
+                        }
+                    }
+                }
+            }
+
+            return new Response(JSON.stringify({ success: true, count: totalRemindersSent, classesCount: classesList.length }), { status: 200, headers: corsHeaders() });
+        }
+
+        // --- MIT AUTOMATION: SEND FINAL ROSTER TO TRAINER AFTER CUTOFF ---
+        if (action === "sendMitTrainerRosters") {
+            const classId = payload.classId;
+            const TRAINER_EMAILS = {
+                "bobby": "Bobby@team-wow.com",
+                "chris": "chris@team-wow.com",
+                "paul": "paul@team-wow.com",
+                "phu": "phu@team-wow.com",
+                "rebecca": "rebecca@team-wow.com",
+                "amanda": "amanda@team-wow.com",
+                "beans": "beans@team-wow.com",
+                "kevin": "kevin@team-wow.com",
+                "melissa": "melissa@team-wow.com",
+                "stephanie": "stephanie@team-wow.com"
+            };
+
+            let classesToProcess = [];
+            if (classId) {
+                const c = await db.prepare("SELECT * FROM training_classes WHERE id = ?").bind(classId).first();
+                if (c) classesToProcess.push(c);
+            } else {
+                const todayMdy = payload.date || getNowFormatted().split(' ')[0];
+                const closing = await db.prepare("SELECT * FROM training_classes WHERE program = 'MIT' AND (close_date = ? OR class_date = ?) AND is_active = 1").bind(todayMdy, todayMdy).all();
+                classesToProcess = closing.results || [];
+            }
+
+            let rostersSent = 0;
+            for (const c of classesToProcess) {
+                const regs = await db.prepare("SELECT * FROM class_registrations WHERE class_id = ? AND (status = 'Confirmed' OR status IS NULL OR status = '')").bind(c.id).all();
+                const attendees = regs.results || [];
+                const trainerKey = (c.trainer || "").toString().toLowerCase().trim().split(/\s+/)[0];
+                const trainerEmail = TRAINER_EMAILS[trainerKey] || "Bobby@team-wow.com";
+
+                try {
+                    await fetch(APPS_SCRIPT_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify({
+                            username: "dallas_admin",
+                            password: "dallas_password_123",
+                            action: "sendMitTrainerRoster",
+                            trainerEmail: trainerEmail,
+                            trainerName: c.trainer || "Trainer",
+                            className: c.name,
+                            level: c.level,
+                            classDate: c.class_date,
+                            startTime: c.start_time,
+                            endTime: c.end_time,
+                            location: c.location,
+                            attendees: attendees
+                        })
+                    });
+                    rostersSent++;
+                } catch (err) {
+                    console.warn("Failed sending trainer roster for:", c.id, err);
+                }
+            }
+
+            return new Response(JSON.stringify({ success: true, count: rostersSent }), { status: 200, headers: corsHeaders() });
+        }
+
+        if (action === "saveMitAttendance" || action === "updateMitAttendance") {
+            const registrations = payload.registrations || (payload.registrationId ? [payload] : []);
+            const trainerName = payload.trainerName || payload.trainer || "";
+
+            for (const r of registrations) {
+                const regId = r.id || r.registrationId;
+                const status = r.status || "Attended"; // 'Attended', 'Absent', 'Completed'
+                const notes = r.notes || r.attendanceNotes || "";
+
+                if (regId) {
+                    await db.prepare(`
+                        UPDATE class_registrations 
+                        SET status = ?, updated_at = CURRENT_TIMESTAMP 
+                        WHERE id = ?
+                    `).bind(status, regId).run();
+
+                    // If Completed, log to mit_attendance_records for permanent promotion ledger
+                    if (status === "Completed") {
+                        const reg = await db.prepare("SELECT cr.*, tc.name as class_name, tc.level, tc.class_date, tc.market, tc.location FROM class_registrations cr JOIN training_classes tc ON cr.class_id = tc.id WHERE cr.id = ?").bind(regId).first();
+                        if (reg) {
+                            await db.prepare(`
+                                INSERT INTO mit_attendance_records (
+                                    candidate_name, candidate_id, do_name, store_num, attendance_date, class_name, level, market, delivery_mode, trainer_name, source_tab, is_active_employee
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'D1_Live', 1)
+                            `).bind(
+                                reg.candidate_name,
+                                reg.candidate_id || '',
+                                reg.do_name || '',
+                                reg.store_num,
+                                reg.class_date,
+                                reg.class_name,
+                                reg.level || 1,
+                                reg.market || 'Dallas',
+                                reg.location === 'Virtual' ? 'Virtual' : 'In-Person',
+                                trainerName || ''
+                            ).run();
+                        }
+                    }
+                }
+            }
+
+            return new Response(JSON.stringify({ success: true, message: "Attendance saved." }), { status: 200, headers: corsHeaders() });
         }
 
         // 4. Email & NTO Automation Actions: Proxy to Google Apps Script Gmail microservice
