@@ -43,6 +43,30 @@ h1 {
     text-transform: uppercase;
 }
 
+.market-pill {
+    margin-left: auto;
+    background-color: var(--brand-red);
+    color: #ffffff;
+    padding: 6px 14px;
+    border-radius: var(--radius-pill, 20px);
+    font-family: 'Subhead1', sans-serif;
+    font-size: 13px;
+    font-weight: normal !important;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    box-shadow: 0 2px 6px rgba(255, 0, 0, 0.3);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+    .market-pill {
+        padding: 4px 10px;
+        font-size: 11px;
+        letter-spacing: 0.5px;
+    }
+}
+
 /* --- CONTROLS & FILTERS --- */
 .controls {
     padding: 12px 16px;
