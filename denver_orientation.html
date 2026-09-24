@@ -174,11 +174,13 @@
             font-size: 14.5px;
             color: var(--crust-deep);
             font-family: 'Subhead2', sans-serif;
-        }        /* CLASS GRID - 4 per row on desktop, 1 on mobile */
+        }
+
+        /* CLASS GRID - 4 per row on desktop, 1 on mobile */
         .class-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 14px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 330px));
+            gap: 16px;
             align-items: stretch;
         }
 
@@ -192,6 +194,9 @@
             flex-direction: column;
             overflow: hidden;
             transition: transform 0.2s, box-shadow 0.2s;
+            max-width: 360px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .class-card:hover {
@@ -316,7 +321,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 5px;
-            min-height: 60px;
+            min-height: 44px;
             max-height: 110px;
             overflow-y: auto;
             padding-right: 4px;
@@ -409,6 +414,9 @@
             .class-grid {
                 grid-template-columns: 1fr;
                 gap: 12px;
+            }
+            .class-card {
+                max-width: 100%;
             }
             .info-strip {
                 flex-direction: column;
