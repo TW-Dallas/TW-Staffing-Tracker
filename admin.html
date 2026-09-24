@@ -6496,6 +6496,7 @@
                 const ntoDateVal = item.ntoDate || item.date || item.Date || '';
                 const candId = item.id || item.classId || item['Class ID'] || '';
                 const lastUpdatedVal = item.lastUpdated || item.last_updated || '';
+                const ntoCompletedAtVal = item.ntoCompletedAt || item.nto_completed_at || '';
 
                 const changeDateBtn = isDenver ? `
                     <button type="button" onclick="openRescheduleNtoModal('${escapeText(candId)}', '${escapeText(item.name || '')}', '${escapeText(item.email || '')}', '${escapeText(ntoDateVal || '')}')" style="background: var(--dark-blue); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 15px; font-family: 'Subhead2', sans-serif; cursor: pointer; white-space: nowrap;" title="Change orientation class date for this trainee">
@@ -6521,7 +6522,7 @@
                     </div>
                 </label>
                 <div style="flex: 1.4; display: flex; gap: 8px; align-items: center; justify-content: flex-end;">
-                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" data-lastupdated="${escapeText(lastUpdatedVal)}" style="width: 215px; min-width: 195px; padding: 8px 10px; font-size: 18px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1.5px solid var(--crust-dark); cursor: pointer;">
+                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" data-lastupdated="${escapeText(lastUpdatedVal)}" data-ntocompletedat="${escapeText(ntoCompletedAtVal)}" style="width: 215px; min-width: 195px; padding: 8px 10px; font-size: 18px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1.5px solid var(--crust-dark); cursor: pointer;">
                         <option value="" ${!savedStatus ? 'selected' : ''}>Select Status...</option>
                         <option value="In Class" ${savedStatus === 'In Class' ? 'selected' : ''}>📖 In Class</option>                        
                         <option value="Not in NTO" ${savedStatus === 'Not in NTO' ? 'selected' : ''}>❌ Not in NTO (Absent)</option>
@@ -6753,6 +6754,11 @@
             rosterElements.forEach(el => {
                 const attVal = (el.value || '').trim();
                 const candName = el.getAttribute('data-name') || 'Trainee';
+                const candId = el.getAttribute('data-id') || '';
+                const candObj = (typeof candidates !== 'undefined' && Array.isArray(candidates))
+                    ? candidates.find(c => String(c.id || c.classId) === String(candId))
+                    : null;
+                const ntoCompVal = el.getAttribute('data-ntocompletedat') || (candObj ? (candObj.ntoCompletedAt || candObj.nto_completed_at) : '') || '';
 
                 if (!attVal) {
                     missingSelection.push(candName);
@@ -6761,8 +6767,8 @@
                 }
 
                 rosterData.push({
-                    id: el.getAttribute('data-id') || '',
-                    classId: el.getAttribute('data-id') || '',
+                    id: candId,
+                    classId: candId,
                     name: el.getAttribute('data-name') || '',
                     email: el.getAttribute('data-email') || '',
                     store: el.getAttribute('data-store') || '',
@@ -6784,6 +6790,8 @@
                     ntoStatus: attVal,
                     'NTO Status': attVal,
                     liveStatus: attVal,
+                    ntoCompletedAt: ntoCompVal,
+                    nto_completed_at: ntoCompVal,
                     lastUpdated: el.getAttribute('data-lastupdated') || '',
                     startTime: startTime
                 });
@@ -6862,12 +6870,19 @@
             const startParsed = parseTimestampToMinutes(startStr);
             const classStartMin = startParsed ? startParsed.totalMinutes : null;
 
+            // Check if ANY candidate has a dedicated quiz/form completion time
+            const hasDedicatedCompletionTimes = candidatesList.some(c => Boolean(c.ntoCompletedAt || c.nto_completed_at));
+
             const timeEntries = [];
 
             candidatesList.forEach(c => {
                 const status = (c.ntoAttendance || c.attendance || c.status || '').toLowerCase();
                 const isComplete = status.includes('complete') || status.includes('attended');
-                const rawTimestamp = c.ntoCompletedAt || c.nto_completed_at || c.lastUpdated || c.last_updated || '';
+                
+                // If we have actual quiz completion times, NEVER use lastUpdated (which gets overwritten whenever admin clicks "Save Attendance")
+                const rawTimestamp = hasDedicatedCompletionTimes
+                    ? (c.ntoCompletedAt || c.nto_completed_at || '')
+                    : (c.lastUpdated || c.last_updated || '');
 
                 if (rawTimestamp && (isComplete || candidatesList.length <= 5)) {
                     const parsed = parseTimestampToMinutes(rawTimestamp, classStartMin);
