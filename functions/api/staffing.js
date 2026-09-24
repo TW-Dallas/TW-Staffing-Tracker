@@ -631,6 +631,7 @@ export async function onRequestGet(context) {
             ddEntered: Boolean(c.dd_entered),
             noticeSentDate: c.notice_sent_date || '',
             withdrawn: Boolean(c.withdrawn),
+            quizScore: c.quiz_score || '',
             lastUpdated: c.last_updated || ''
         }));
 
@@ -914,10 +915,19 @@ export async function onRequestPost(context) {
 
             // 3. Update onboarding_candidates record in D1
             const now = new Date();
-            const timestampStr = `${now.getMonth() + 1}/${now.getDate()}/${now.getFullYear()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            const tz = (candidate.market || market || "Dallas").toLowerCase() === "denver" ? "America/Denver" : "America/Chicago";
+            const dateStr = now.toLocaleDateString("en-US", { timeZone: tz });
+            const timeStr = now.toLocaleTimeString("en-US", { timeZone: tz, hour: 'numeric', minute: '2-digit', hour12: true });
+            const timestampStr = `${dateStr} ${timeStr}`;
             const shirtSize = payload.shirtSize || candidate.shirt_size || "";
             const hatStyle = payload.hatStyle || candidate.hat_style || "Standard Cap";
             const payCard = payload.payCard || candidate.pay_card || "";
+
+            const rawScore = payload.quizScore !== undefined && payload.quizScore !== null ? String(payload.quizScore) : '';
+            let formattedScore = rawScore;
+            if (/^[0-4]$/.test(rawScore)) {
+                formattedScore = `${rawScore}/4 (${Math.round((parseInt(rawScore, 10) / 4) * 100)}%)`;
+            }
 
             await db.prepare(`
                 UPDATE onboarding_candidates
@@ -927,9 +937,10 @@ export async function onRequestPost(context) {
                     shirt_size = ?,
                     hat_style = ?,
                     pay_card = ?,
+                    quiz_score = ?,
                     last_updated = ?
                 WHERE id = ?
-            `).bind(shirtSize, hatStyle, payCard, timestampStr, candidateId).run();
+            `).bind(shirtSize, hatStyle, payCard, formattedScore, timestampStr, candidateId).run();
 
             // 4. Fetch store & GM details
             const store = await db.prepare("SELECT * FROM stores WHERE store_number = ? LIMIT 1")

@@ -2702,8 +2702,55 @@
                 paycards = processPayCards(data);
                 renderList();
                 updateAuditMetrics();
+                if (currentView === 'nto') {
+                    renderNtoClassView();
+                }
             } catch (err) {
                 console.warn("Silent sync skipped:", err.message);
+            }
+        }
+
+        let _ntoLivePollTimer = null;
+        function startNtoLivePoll() {
+            stopNtoLivePoll();
+            _ntoLivePollTimer = setInterval(async () => {
+                if (currentView !== 'nto' || document.visibilityState !== 'visible') return;
+                const loader = document.getElementById('loadingOverlay');
+                if (loader && !loader.classList.contains('hidden')) return;
+
+                const u = localStorage.getItem('onb_user');
+                const p = localStorage.getItem('onb_pass');
+                if (!u || !p) return;
+
+                try {
+                    const data = await apiCall('GET');
+                    if (data && Array.isArray(data.onboarding)) {
+                        // Check if any candidate's ntoAttendance, lastUpdated, or quizScore changed
+                        let hasChanges = false;
+                        data.onboarding.forEach(newCand => {
+                            const existing = candidates.find(c => String(c.id) === String(newCand.id));
+                            if (!existing || existing.ntoAttendance !== newCand.ntoAttendance || existing.lastUpdated !== newCand.lastUpdated || existing.quizScore !== newCand.quizScore) {
+                                hasChanges = true;
+                            }
+                        });
+
+                        if (hasChanges) {
+                            candidates = data.onboarding;
+                            renderNtoClassView();
+                            renderList();
+                            updateAuditMetrics();
+                        }
+                    }
+                } catch (e) {
+                    console.warn("NTO live sync skipped:", e.message);
+                }
+            }, 6000);
+        }
+
+        function stopNtoLivePoll() {
+            if (_ntoLivePollTimer) {
+                clearInterval(_ntoLivePollTimer);
+                _ntoLivePollTimer = null;
             }
         }
         // Helper function for safe workspace feature toggling
@@ -2789,6 +2836,11 @@
             const auditTitle = document.getElementById('auditTitleHeader');
 
             currentView = view;
+            if (view === 'nto') {
+                startNtoLivePoll();
+            } else {
+                stopNtoLivePoll();
+            }
             document.getElementById('searchControl').value = '';
 
             // Reset toggle styles
@@ -6451,11 +6503,20 @@
                     </button>
                 ` : '';
 
+                const scoreBadge = item.quizScore ? `
+                    <span style="display: inline-flex; align-items: center; gap: 4px; font-family: 'Subhead1', sans-serif; font-size: 13.5px; background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; padding: 2px 8px; border-radius: 12px; font-weight: bold; margin-left: 8px; vertical-align: middle;" title="Orientation Quiz Score">
+                        🎯 ${escapeText(item.quizScore)}
+                    </span>
+                ` : '';
+
                 row.innerHTML = `
                 <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; flex: 1.6; margin: 0;" title="Check to send Google Meet link">
                     <input type="checkbox" class="nto-trainee-check" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" onchange="updateNtoSendMeetLinksButtonText()" style="width: 19px; height: 19px; accent-color: var(--brand-blue); cursor: pointer; flex-shrink: 0;">
                     <div>
-                        <div style="font-family: 'Subhead2', sans-serif; font-size: 19px; color: var(--dark-blue);">${item.name}</div>
+                        <div style="font-family: 'Subhead2', sans-serif; font-size: 19px; color: var(--dark-blue); display: flex; align-items: center; flex-wrap: wrap;">
+                            <span>${item.name}</span>
+                            ${scoreBadge}
+                        </div>
                         <div style="font-family: 'Condensed', sans-serif; font-size: 16px; color: var(--text-dark); margin-top: 2px;">Store #${item.store} • ${item.position || 'CSR'} • Date: ${ntoDateVal || 'N/A'}</div>
                     </div>
                 </label>
@@ -6796,6 +6857,11 @@
         function calculateSuggestedNtoEndTime(candidatesList) {
             if (!candidatesList || candidatesList.length === 0) return null;
 
+            // Get class start time in minutes to detect UTC offset if any
+            const startStr = document.getElementById('ntoStartTime')?.value || '';
+            const startParsed = parseTimestampToMinutes(startStr);
+            const classStartMin = startParsed ? startParsed.totalMinutes : null;
+
             const timeEntries = [];
 
             candidatesList.forEach(c => {
@@ -6804,7 +6870,7 @@
                 const rawTimestamp = c.lastUpdated || c.last_updated || '';
 
                 if (rawTimestamp && (isComplete || candidatesList.length <= 5)) {
-                    const parsed = parseTimestampToMinutes(rawTimestamp);
+                    const parsed = parseTimestampToMinutes(rawTimestamp, classStartMin);
                     if (parsed !== null) {
                         timeEntries.push({
                             minutes: parsed.totalMinutes,
@@ -6833,7 +6899,7 @@
 
             const lastEntry = cluster[cluster.length - 1];
 
-            // Round UP to next multiple of 5 minutes (e.g. 7:12 -> 7:15, 7:19 -> 7:20)
+            // Round UP to next multiple of 5 minutes (e.g. 5:16 -> 5:20)
             let roundedMinutes = Math.ceil(lastEntry.minutes / 5) * 5;
 
             // Format as standard 12-hour time string
@@ -6852,7 +6918,7 @@
             };
         }
 
-        function parseTimestampToMinutes(tStr) {
+        function parseTimestampToMinutes(tStr, classStartMinutes = null) {
             if (!tStr) return null;
             const s = String(tStr).trim();
             const match = s.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?/i);
@@ -6865,13 +6931,29 @@
             if (ampm === 'PM' && h < 12) h += 12;
             if (ampm === 'AM' && h === 12) h = 0;
 
+            let totalMinutes = h * 60 + m;
+
+            // Failsafe: Detect UTC timestamps saved on Cloudflare server without local timezone offset
+            // E.g. Class started at 4:00 PM (960 min) and submission timestamp was recorded in UTC as 10:16 PM (1336 min).
+            // A class only runs ~1 to 2 hours. If submission is > 3.5 hours after start, check if subtracting
+            // Central Time offset (5h = 300 min) or Mountain Time offset (6h = 360 min) places it 0-180 min from start.
+            if (classStartMinutes !== null && (totalMinutes - classStartMinutes > 210)) {
+                if (totalMinutes - 300 >= classStartMinutes && (totalMinutes - 300 - classStartMinutes <= 180)) {
+                    totalMinutes -= 300;
+                    h = Math.floor(totalMinutes / 60);
+                } else if (totalMinutes - 360 >= classStartMinutes && (totalMinutes - 360 - classStartMinutes <= 180)) {
+                    totalMinutes -= 360;
+                    h = Math.floor(totalMinutes / 60);
+                }
+            }
+
             let dispH = h % 12;
             if (dispH === 0) dispH = 12;
             const dispM = m < 10 ? '0' + m : String(m);
-            const dispAmpm = h >= 12 ? 'PM' : 'AM';
+            const dispAmpm = h >= 12 && h < 24 ? 'PM' : 'AM';
 
             return {
-                totalMinutes: h * 60 + m,
+                totalMinutes: totalMinutes,
                 timeStr: `${dispH}:${dispM} ${dispAmpm}`
             };
         }
