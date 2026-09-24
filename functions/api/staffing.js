@@ -632,6 +632,7 @@ export async function onRequestGet(context) {
             noticeSentDate: c.notice_sent_date || '',
             withdrawn: Boolean(c.withdrawn),
             quizScore: c.quiz_score || '',
+            ntoCompletedAt: c.nto_completed_at || '',
             lastUpdated: c.last_updated || ''
         }));
 
@@ -938,9 +939,10 @@ export async function onRequestPost(context) {
                     hat_style = ?,
                     pay_card = ?,
                     quiz_score = ?,
+                    nto_completed_at = ?,
                     last_updated = ?
                 WHERE id = ?
-            `).bind(shirtSize, hatStyle, payCard, formattedScore, timestampStr, candidateId).run();
+            `).bind(shirtSize, hatStyle, payCard, formattedScore, timestampStr, timestampStr, candidateId).run();
 
             // 4. Fetch store & GM details
             const store = await db.prepare("SELECT * FROM stores WHERE store_number = ? LIMIT 1")

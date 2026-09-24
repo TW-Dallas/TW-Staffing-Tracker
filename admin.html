@@ -6504,7 +6504,7 @@
                 ` : '';
 
                 const scoreBadge = item.quizScore ? `
-                    <span style="display: inline-flex; align-items: center; gap: 4px; font-family: 'Subhead1', sans-serif; font-size: 13.5px; background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; padding: 2px 8px; border-radius: 12px; font-weight: bold; margin-left: 8px; vertical-align: middle;" title="Orientation Quiz Score">
+                    <span style="display: inline-flex; align-items: center; gap: 4px; font-family: 'Subhead1', sans-serif; font-size: 13px; background: #e3f2fd; color: var(--dark-blue); border: 1px solid #bbdefb; padding: 2px 9px; border-radius: 12px; font-weight: bold; margin-left: 8px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0, 92, 145, 0.08);" title="Orientation Quiz Score">
                         🎯 ${escapeText(item.quizScore)}
                     </span>
                 ` : '';
@@ -6867,7 +6867,7 @@
             candidatesList.forEach(c => {
                 const status = (c.ntoAttendance || c.attendance || c.status || '').toLowerCase();
                 const isComplete = status.includes('complete') || status.includes('attended');
-                const rawTimestamp = c.lastUpdated || c.last_updated || '';
+                const rawTimestamp = c.ntoCompletedAt || c.nto_completed_at || c.lastUpdated || c.last_updated || '';
 
                 if (rawTimestamp && (isComplete || candidatesList.length <= 5)) {
                     const parsed = parseTimestampToMinutes(rawTimestamp, classStartMin);
