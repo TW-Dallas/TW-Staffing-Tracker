@@ -4764,7 +4764,7 @@
 
         function cleanEmailInput(val) {
             if (!val) return '';
-            return String(val).trim().replace(/^mailto:/i, '').replace(/^[<"'(]+|[>"')]+$/g, '').replace(/\s+/g, '').replace(/[,;.]+$/, '').toLowerCase();
+            return String(val).trim().replace(/^mailto:/i, '').replace(/[`'"]/g, '').replace(/^[<(\[]+|[>)\]]+$/g, '').replace(/\s+/g, '').replace(/[,;.]+$/, '').toLowerCase();
         }
 
         /* --- DYNAMIC SMS / TEXT MESSAGE TEMPLATE GENERATOR --- */
