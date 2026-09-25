@@ -633,6 +633,7 @@ export async function onRequestGet(context) {
             withdrawn: Boolean(c.withdrawn),
             quizScore: c.quiz_score || '',
             ntoCompletedAt: c.nto_completed_at || '',
+            ssnLast4: c.ssn_last_4 || '',
             lastUpdated: c.last_updated || ''
         }));
 
@@ -940,9 +941,10 @@ export async function onRequestPost(context) {
                     pay_card = ?,
                     quiz_score = ?,
                     nto_completed_at = ?,
+                    ssn_last_4 = ?,
                     last_updated = ?
                 WHERE id = ?
-            `).bind(shirtSize, hatStyle, payCard, formattedScore, timestampStr, timestampStr, candidateId).run();
+            `).bind(shirtSize, hatStyle, payCard, formattedScore, timestampStr, ssnLast4, timestampStr, candidateId).run();
 
             // 4. Fetch store & GM details
             const store = await db.prepare("SELECT * FROM stores WHERE store_number = ? LIMIT 1")
@@ -952,7 +954,7 @@ export async function onRequestPost(context) {
             // 5. Dual-write to Apps Script (Dallas Credentials tab & Welcome Email)
             const gasUrl = "https://script.google.com/macros/s/AKfycbxQVuU0uQ3TdkfsBwJpZ-K1iUDXTuLgvqEayPeqZgSRLDNxHOEUsOrjaSZAujI8p_874g/exec";
             try {
-                fetch(gasUrl, {
+                const gasPromise = fetch(gasUrl, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -964,9 +966,15 @@ export async function onRequestPost(context) {
                         storeNum: candidate.store_num,
                         role: candidate.position || "CSR",
                         email: candidate.email || "",
-                        phone: candidate.phone_number || ""
+                        phone: candidate.phone_number || "",
+                        ssnLast4: ssnLast4
                     })
-                }).catch(err => console.error("Dual-write fetch error:", err));
+                });
+                if (context && typeof context.waitUntil === "function") {
+                    context.waitUntil(gasPromise);
+                } else {
+                    await gasPromise;
+                }
             } catch (gasErr) {
                 console.error("Failed to dispatch dual-write to Apps Script:", gasErr);
             }

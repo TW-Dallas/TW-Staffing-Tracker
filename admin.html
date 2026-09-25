@@ -6497,6 +6497,7 @@
                 const candId = item.id || item.classId || item['Class ID'] || '';
                 const lastUpdatedVal = item.lastUpdated || item.last_updated || '';
                 const ntoCompletedAtVal = item.ntoCompletedAt || item.nto_completed_at || '';
+                const ssnLast4Val = item.ssnLast4 || item.ssn_last_4 || item['SSN (Last 4)'] || '';
 
                 const changeDateBtn = isDenver ? `
                     <button type="button" onclick="openRescheduleNtoModal('${escapeText(candId)}', '${escapeText(item.name || '')}', '${escapeText(item.email || '')}', '${escapeText(ntoDateVal || '')}')" style="background: var(--dark-blue); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 15px; font-family: 'Subhead2', sans-serif; cursor: pointer; white-space: nowrap;" title="Change orientation class date for this trainee">
@@ -6522,7 +6523,7 @@
                     </div>
                 </label>
                 <div style="flex: 1.4; display: flex; gap: 8px; align-items: center; justify-content: flex-end;">
-                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" data-lastupdated="${escapeText(lastUpdatedVal)}" data-ntocompletedat="${escapeText(ntoCompletedAtVal)}" style="width: 215px; min-width: 195px; padding: 8px 10px; font-size: 18px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1.5px solid var(--crust-dark); cursor: pointer;">
+                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" data-lastupdated="${escapeText(lastUpdatedVal)}" data-ntocompletedat="${escapeText(ntoCompletedAtVal)}" data-ssnlast4="${escapeText(ssnLast4Val)}" style="width: 215px; min-width: 195px; padding: 8px 10px; font-size: 18px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1.5px solid var(--crust-dark); cursor: pointer;">
                         <option value="" ${!savedStatus ? 'selected' : ''}>Select Status...</option>
                         <option value="In Class" ${savedStatus === 'In Class' ? 'selected' : ''}>📖 In Class</option>                        
                         <option value="Not in NTO" ${savedStatus === 'Not in NTO' ? 'selected' : ''}>❌ Not in NTO (Absent)</option>
@@ -6759,6 +6760,7 @@
                     ? candidates.find(c => String(c.id || c.classId) === String(candId))
                     : null;
                 const ntoCompVal = el.getAttribute('data-ntocompletedat') || (candObj ? (candObj.ntoCompletedAt || candObj.nto_completed_at) : '') || '';
+                const ssnVal = el.getAttribute('data-ssnlast4') || (candObj ? (candObj.ssnLast4 || candObj.ssn_last_4) : '') || '';
 
                 if (!attVal) {
                     missingSelection.push(candName);
@@ -6792,6 +6794,8 @@
                     liveStatus: attVal,
                     ntoCompletedAt: ntoCompVal,
                     nto_completed_at: ntoCompVal,
+                    ssnLast4: ssnVal,
+                    ssn: ssnVal,
                     lastUpdated: el.getAttribute('data-lastupdated') || '',
                     startTime: startTime
                 });
