@@ -2565,6 +2565,29 @@
             return 'System';
         }
 
+        function enrichWithStoreDos(targetData) {
+            if (!targetData) return;
+            const sMap = {};
+            (targetData.contacts || []).forEach(c => {
+                if (c.store && c.doName) sMap[String(c.store).trim()] = c.doName.trim();
+            });
+            (targetData.onboarding || []).forEach(cand => {
+                if (!cand.doName && cand.store && sMap[String(cand.store).trim()]) {
+                    cand.doName = sMap[String(cand.store).trim()];
+                }
+            });
+            (targetData.interviews || []).forEach(intv => {
+                if (!intv.doName && intv.store && sMap[String(intv.store).trim()]) {
+                    intv.doName = sMap[String(intv.store).trim()];
+                }
+            });
+            (targetData.staffing || []).forEach(stf => {
+                if (!stf.doName && stf.store && sMap[String(stf.store).trim()]) {
+                    stf.doName = sMap[String(stf.store).trim()];
+                }
+            });
+        }
+
         async function handleLogin(savedUser, savedPass) {
             const u = savedUser || document.getElementById('loginUser').value.trim();
             const p = savedPass || document.getElementById('loginPass').value.trim();
@@ -2579,6 +2602,7 @@
             if (cachedRaw) {
                 try {
                     const cachedData = JSON.parse(cachedRaw);
+                    enrichWithStoreDos(cachedData);
                     candidates = cachedData.onboarding || [];
                     interviews = cachedData.interviews || [];
                     staffing = cachedData.staffing || [];
@@ -2608,6 +2632,7 @@
                 localStorage.setItem('onb_pass', p);
 
                 const data = await apiCall('GET');
+                enrichWithStoreDos(data);
 
                 localStorage.setItem(`cached_workspace_data_${u}`, JSON.stringify(data));
 
@@ -2695,6 +2720,7 @@
 
             try {
                 const data = await apiCall('GET');
+                enrichWithStoreDos(data);
                 candidates = data.onboarding || [];
                 interviews = data.interviews || [];
                 staffing = data.staffing || [];
@@ -4305,7 +4331,8 @@
                 payload.position = document.getElementById('intPosition').value;
                 payload.store = document.getElementById('intStore').value.trim();
                 const intDoElem = document.getElementById('intDo');
-                payload.doName = intDoElem ? intDoElem.value.trim() : (existingCand ? existingCand.doName || '' : '');
+                const intStoreContact = (contacts || []).find(c => String(c.store).trim() === String(payload.store).trim());
+                payload.doName = (intDoElem ? intDoElem.value.trim() : '') || intStoreContact?.doName || (existingCand ? existingCand.doName || '' : '');
                 payload.phoneNumber = document.getElementById('intPhone').value.trim();
                 payload.email = document.getElementById('intEmail').value.trim();
                 payload.date = document.getElementById('intDate').value.trim();
@@ -4324,6 +4351,8 @@
                 payload.name = document.getElementById('fieldName').value.trim();
                 payload.position = document.getElementById('fieldPosition').value;
                 payload.store = document.getElementById('fieldStore').value.trim();
+                const onbStoreContact = (contacts || []).find(c => String(c.store).trim() === String(payload.store).trim());
+                payload.doName = onbStoreContact?.doName || (existingCand ? existingCand.doName || '' : '');
                 payload.phoneNumber = document.getElementById('fieldPhone').value.trim();
                 payload.email = document.getElementById('fieldEmail').value.trim();
                 payload.shirtSize = document.getElementById('fieldShirt').value;

@@ -250,6 +250,23 @@
                         </div>`;
                     return;
                 }
+                // Self-healing fallback: ensure doName is populated from store contacts if missing
+                const storeDoMap = {};
+                (data.contacts || []).forEach(c => {
+                    if (c.store && c.doName) {
+                        storeDoMap[String(c.store).trim()] = c.doName.trim();
+                    }
+                });
+                (data.onboarding || []).forEach(item => {
+                    if (!item.doName && item.store && storeDoMap[String(item.store).trim()]) {
+                        item.doName = storeDoMap[String(item.store).trim()];
+                    }
+                });
+                (data.interviews || []).forEach(item => {
+                    if (!item.doName && item.store && storeDoMap[String(item.store).trim()]) {
+                        item.doName = storeDoMap[String(item.store).trim()];
+                    }
+                });
                 rawData = data;
                 populateFilters();
                 renderNtoSchedule(data.ntoClasses || []);
@@ -449,9 +466,17 @@
         const activeDo = document.getElementById('doFilter').value;
         const activeStore = document.getElementById('storeFilter').value;
 
-        const allDos = [...rawData.onboarding.map(i => i.doName), ...rawData.interviews.map(i => i.doName)];
+        const allDos = [
+            ...(rawData.contacts || []).map(c => c.doName),
+            ...(rawData.onboarding || []).map(i => i.doName),
+            ...(rawData.interviews || []).map(i => i.doName)
+        ];
         const dos = [...new Set(allDos.filter(d => d && d !== 'DO').map(d => d.toString().trim()))].sort();
-        const allStores = [...rawData.onboarding.map(i => i.store), ...rawData.interviews.map(i => i.store)];
+        const allStores = [
+            ...(rawData.contacts || []).map(c => c.store),
+            ...(rawData.onboarding || []).map(i => i.store),
+            ...(rawData.interviews || []).map(i => i.store)
+        ];
         const stores = [...new Set(allStores.filter(s => s && s !== 'Store #').map(s => s.toString().trim()))].sort();
 
         const doSelect = document.getElementById('doFilter');

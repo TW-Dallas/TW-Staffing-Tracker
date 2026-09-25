@@ -592,50 +592,63 @@ export async function onRequestGet(context) {
             db.prepare("SELECT class_id, candidate_name FROM class_registrations WHERE class_id IN (SELECT id FROM training_classes WHERE program = 'NTO' AND (market = ? OR market = 'Virtual') AND is_active = 1)").bind(market).all()
         ]);
 
+        // Build store DO lookup map from stores query
+        const storeDoMap = new Map();
+        (storesRes.results || []).forEach(s => {
+            if (s.store_number && s.do_name) {
+                storeDoMap.set(String(s.store_number).trim(), s.do_name.trim());
+            }
+        });
+
         // Map candidates to frontend camelCase
-        const onboarding = (candidatesRes.results || []).map(c => ({
-            id: c.id,
-            name: c.name,
-            position: c.position || '',
-            store: c.store_num,
-            doName: c.do_name || '',
-            ntoDate: c.nto_date || '',
-            ntoAttendance: c.nto_attendance || '',
-            notes: c.notes || '',
-            shirtSize: c.shirt_size || '',
-            hatStyle: c.hat_style || '',
-            payCard: c.pay_card || '',
-            phoneNumber: c.phone_number || '',
-            email: c.email || '',
-            submissionReceived: Boolean(c.submission_received),
-            onboardingSent: Boolean(c.onboarding_sent),
-            bgcComplete: Boolean(c.bgc_complete),
-            allPayCompleted: Boolean(c.allpay_completed),
-            allPayError: c.allpay_error || '',
-            allPayErrorText: c.allpay_error || '',
-            hasAllPayError: Boolean(c.allpay_error && c.allpay_error !== 'FALSE'),
-            ntoSignupLinkSent: Boolean(c.nto_signup_link_sent),
-            ntoScheduled: Boolean(c.nto_scheduled),
-            hired: Boolean(c.hired),
-            incorrectEmail: Boolean(c.incorrect_email),
-            ineligible: Boolean(c.ineligible),
-            inactive: Boolean(c.inactive),
-            missingDocs: c.missing_docs || '',
-            missingDocsText: c.missing_docs || '',
-            hasMissingDocs: Boolean(c.missing_docs && c.missing_docs !== 'FALSE'),
-            pulseFormComplete: Boolean(c.pulse_form_complete),
-            missedNto: Boolean(c.missed_nto),
-            cardReceived: Boolean(c.card_received),
-            registered: Boolean(c.registered),
-            ddReceived: Boolean(c.dd_received),
-            ddEntered: Boolean(c.dd_entered),
-            noticeSentDate: c.notice_sent_date || '',
-            withdrawn: Boolean(c.withdrawn),
-            quizScore: c.quiz_score || '',
-            ntoCompletedAt: c.nto_completed_at || '',
-            ssnLast4: c.ssn_last_4 || '',
-            lastUpdated: c.last_updated || ''
-        }));
+        const onboarding = (candidatesRes.results || []).map(c => {
+            const rawDo = (c.do_name || '').trim();
+            const sNum = String(c.store_num || '').trim();
+            const resolvedDo = rawDo || storeDoMap.get(sNum) || '';
+            return {
+                id: c.id,
+                name: c.name,
+                position: c.position || '',
+                store: c.store_num,
+                doName: resolvedDo,
+                ntoDate: c.nto_date || '',
+                ntoAttendance: c.nto_attendance || '',
+                notes: c.notes || '',
+                shirtSize: c.shirt_size || '',
+                hatStyle: c.hat_style || '',
+                payCard: c.pay_card || '',
+                phoneNumber: c.phone_number || '',
+                email: c.email || '',
+                submissionReceived: Boolean(c.submission_received),
+                onboardingSent: Boolean(c.onboarding_sent),
+                bgcComplete: Boolean(c.bgc_complete),
+                allPayCompleted: Boolean(c.allpay_completed),
+                allPayError: c.allpay_error || '',
+                allPayErrorText: c.allpay_error || '',
+                hasAllPayError: Boolean(c.allpay_error && c.allpay_error !== 'FALSE'),
+                ntoSignupLinkSent: Boolean(c.nto_signup_link_sent),
+                ntoScheduled: Boolean(c.nto_scheduled),
+                hired: Boolean(c.hired),
+                incorrectEmail: Boolean(c.incorrect_email),
+                ineligible: Boolean(c.ineligible),
+                inactive: Boolean(c.inactive),
+                missingDocs: c.missing_docs || '',
+                missingDocsText: c.missing_docs || '',
+                hasMissingDocs: Boolean(c.missing_docs && c.missing_docs !== 'FALSE'),
+                pulseFormComplete: Boolean(c.pulse_form_complete),
+                missedNto: Boolean(c.missed_nto),
+                cardReceived: Boolean(c.card_received),
+                registered: Boolean(c.registered),
+                ddReceived: Boolean(c.dd_received),
+                ddEntered: Boolean(c.dd_entered),
+                noticeSentDate: c.notice_sent_date || '',
+                withdrawn: Boolean(c.withdrawn),
+                quizScore: c.quiz_score || '',
+                ntoCompletedAt: c.nto_completed_at || '',
+                ssnLast4: c.ssn_last_4 || '',
+                lastUpdated: c.last_updated || ''
+            };
+        });
 
         // Map stores/contacts
         const contacts = (storesRes.results || []).map(s => ({
@@ -667,43 +680,53 @@ export async function onRequestGet(context) {
         }));
 
         // Map interviews
-        const interviews = (interviewsRes.results || []).map(i => ({
-            id: i.id,
-            store: i.store_num,
-            doName: i.do_name || '',
-            name: i.name,
-            position: i.position || '',
-            phoneNumber: i.phone_number || '',
-            email: i.email || '',
-            date: i.interview_date || '',
-            day: i.interview_day || '',
-            time: i.interview_time || '',
-            status: i.status || 'Scheduled',
-            gmDate: i.gm_date || '',
-            gmTime: i.gm_time || '',
-            statusUpdates: i.status_updates || '',
-            availability: i.availability || '',
-            notes: i.notes || ''
-        }));
+        const interviews = (interviewsRes.results || []).map(i => {
+            const rawDo = (i.do_name || '').trim();
+            const sNum = String(i.store_num || '').trim();
+            const resolvedDo = rawDo || storeDoMap.get(sNum) || '';
+            return {
+                id: i.id,
+                store: i.store_num,
+                doName: resolvedDo,
+                name: i.name,
+                position: i.position || '',
+                phoneNumber: i.phone_number || '',
+                email: i.email || '',
+                date: i.interview_date || '',
+                day: i.interview_day || '',
+                time: i.interview_time || '',
+                status: i.status || 'Scheduled',
+                gmDate: i.gm_date || '',
+                gmTime: i.gm_time || '',
+                statusUpdates: i.status_updates || '',
+                availability: i.availability || '',
+                notes: i.notes || ''
+            };
+        });
 
         // Map staffing
-        const staffing = (staffingRes.results || []).map(st => ({
-            id: st.id,
-            period: st.period || '',
-            doName: st.do_name || '',
-            store: st.store_num,
-            name: st.name,
-            position: st.position || '',
-            hireDate: st.hire_date || '',
-            termDate: st.term_date || '',
-            rehireEligible: st.rehire_eligible || 'Yes',
-            causeOfAction: st.cause_of_action || '',
-            reasonOfAction: st.reason_of_action || '',
-            notes: st.notes || '',
-            receivedDate: st.received_date || '',
-            gmName: st.gm_name || '',
-            sourceSheet: st.source_sheet || ''
-        }));
+        const staffing = (staffingRes.results || []).map(st => {
+            const rawDo = (st.do_name || '').trim();
+            const sNum = String(st.store_num || '').trim();
+            const resolvedDo = rawDo || storeDoMap.get(sNum) || '';
+            return {
+                id: st.id,
+                period: st.period || '',
+                doName: resolvedDo,
+                store: st.store_num,
+                name: st.name,
+                position: st.position || '',
+                hireDate: st.hire_date || '',
+                termDate: st.term_date || '',
+                rehireEligible: st.rehire_eligible || 'Yes',
+                causeOfAction: st.cause_of_action || '',
+                reasonOfAction: st.reason_of_action || '',
+                notes: st.notes || '',
+                receivedDate: st.received_date || '',
+                gmName: st.gm_name || '',
+                sourceSheet: st.source_sheet || ''
+            };
+        });
 
         // Scratchpad
         let scratchpadText = "";
@@ -757,6 +780,49 @@ export async function onRequestGet(context) {
                 isoDate: isoDate
             };
         });
+
+        // Auto-heal empty do_name in D1 database in the background if any missing
+        if (context && typeof context.waitUntil === 'function') {
+            context.waitUntil((async () => {
+                try {
+                    await db.prepare(`
+                        UPDATE onboarding_candidates
+                        SET do_name = (
+                            SELECT s.do_name FROM stores s
+                            WHERE s.market = onboarding_candidates.market
+                              AND s.store_number = onboarding_candidates.store_num
+                            LIMIT 1
+                        )
+                        WHERE (do_name IS NULL OR do_name = '')
+                          AND store_num IN (SELECT store_number FROM stores WHERE market = onboarding_candidates.market AND do_name IS NOT NULL AND do_name != '')
+                    `).run();
+                    await db.prepare(`
+                        UPDATE interviews
+                        SET do_name = (
+                            SELECT s.do_name FROM stores s
+                            WHERE s.market = interviews.market
+                              AND s.store_number = interviews.store_num
+                            LIMIT 1
+                        )
+                        WHERE (do_name IS NULL OR do_name = '')
+                          AND store_num IN (SELECT store_number FROM stores WHERE market = interviews.market AND do_name IS NOT NULL AND do_name != '')
+                    `).run();
+                    await db.prepare(`
+                        UPDATE staffing_records
+                        SET do_name = (
+                            SELECT s.do_name FROM stores s
+                            WHERE s.market = staffing_records.market
+                              AND s.store_number = staffing_records.store_num
+                            LIMIT 1
+                        )
+                        WHERE (do_name IS NULL OR do_name = '')
+                          AND store_num IN (SELECT store_number FROM stores WHERE market = staffing_records.market AND do_name IS NOT NULL AND do_name != '')
+                    `).run();
+                } catch (healErr) {
+                    console.warn("Background auto-heal DO names warning:", healErr);
+                }
+            })());
+        }
 
         return new Response(JSON.stringify({
             success: true,
@@ -2077,6 +2143,13 @@ export async function onRequestPost(context) {
 
             if (target === "interviews") {
                 const newId = payload.id || `INT-ID-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+                let resolvedDoName = (payload.doName || '').trim();
+                const targetStore = String(payload.store || payload.store_num || '').trim();
+                if (!resolvedDoName && targetStore) {
+                    const stRow = await db.prepare("SELECT do_name FROM stores WHERE market = ? AND store_number = ? LIMIT 1").bind(market, targetStore).first();
+                    if (stRow && stRow.do_name) resolvedDoName = stRow.do_name.trim();
+                }
+
                 await db.prepare(`
                     INSERT INTO interviews (
                         id, market, store_num, do_name, name, position, phone_number, email,
@@ -2087,7 +2160,7 @@ export async function onRequestPost(context) {
                     newId,
                     market,
                     payload.store || payload.store_num || '',
-                    payload.doName || '',
+                    resolvedDoName,
                     payload.name || '',
                     payload.position || '',
                     payload.phoneNumber || '',
@@ -2108,6 +2181,13 @@ export async function onRequestPost(context) {
 
             if (target === "staffing") {
                 const newId = payload.id || `STF-ID-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+                let resolvedDoName = (payload.doName || '').trim();
+                const targetStore = String(payload.store || payload.store_num || '').trim();
+                if (!resolvedDoName && targetStore) {
+                    const stRow = await db.prepare("SELECT do_name FROM stores WHERE market = ? AND store_number = ? LIMIT 1").bind(market, targetStore).first();
+                    if (stRow && stRow.do_name) resolvedDoName = stRow.do_name.trim();
+                }
+
                 await db.prepare(`
                     INSERT INTO staffing_records (
                         id, market, fiscal_year, period, store_num, do_name, gm_name, name, position,
@@ -2120,7 +2200,7 @@ export async function onRequestPost(context) {
                     2026,
                     payload.period || '',
                     payload.store || payload.store_num || '',
-                    payload.doName || '',
+                    resolvedDoName,
                     payload.gmName || '',
                     payload.name || '',
                     payload.position || '',
@@ -2239,6 +2319,13 @@ export async function onRequestPost(context) {
             const tz = market.toLowerCase() === "denver" ? "America/Denver" : "America/Chicago";
             const nowFormatted = cand.lastUpdated || getNowFormatted(tz);
 
+            let resolvedDoName = (cand.doName || '').trim();
+            const targetStore = String(cand.store || cand.store_num || '').trim();
+            if (!resolvedDoName && targetStore) {
+                const stRow = await db.prepare("SELECT do_name FROM stores WHERE market = ? AND store_number = ? LIMIT 1").bind(market, targetStore).first();
+                if (stRow && stRow.do_name) resolvedDoName = stRow.do_name.trim();
+            }
+
             await db.prepare(`
                 INSERT INTO onboarding_candidates (
                     id, market, name, position, store_num, do_name, nto_date, nto_attendance, notes,
@@ -2254,7 +2341,7 @@ export async function onRequestPost(context) {
                 cand.name || '',
                 cand.position || '',
                 cand.store || cand.store_num || '',
-                cand.doName || '',
+                resolvedDoName,
                 cand.ntoDate || '',
                 cand.ntoAttendance || '',
                 cand.notes || '',
@@ -2298,6 +2385,13 @@ export async function onRequestPost(context) {
                     return new Response(JSON.stringify({ error: "Missing interview ID" }), { status: 400, headers: corsHeaders() });
                 }
 
+                let updateDoName = payload.doName !== undefined && payload.doName !== '' ? String(payload.doName).trim() : null;
+                const updateStore = payload.store !== undefined ? payload.store : (payload.store_num !== undefined ? payload.store_num : null);
+                if (!updateDoName && updateStore) {
+                    const stRow = await db.prepare("SELECT do_name FROM stores WHERE market = ? AND store_number = ? LIMIT 1").bind(market, String(updateStore).trim()).first();
+                    if (stRow && stRow.do_name) updateDoName = stRow.do_name.trim();
+                }
+
                 await db.prepare(`
                     UPDATE interviews SET
                         store_num = COALESCE(?, store_num),
@@ -2319,7 +2413,7 @@ export async function onRequestPost(context) {
                     WHERE id = ?
                 `).bind(
                     payload.store !== undefined ? payload.store : (payload.store_num !== undefined ? payload.store_num : null),
-                    payload.doName !== undefined ? payload.doName : null,
+                    updateDoName,
                     payload.name !== undefined ? payload.name : null,
                     payload.position !== undefined ? payload.position : null,
                     payload.phoneNumber !== undefined ? payload.phoneNumber : null,
@@ -2344,6 +2438,13 @@ export async function onRequestPost(context) {
                     return new Response(JSON.stringify({ error: "Missing staffing record ID" }), { status: 400, headers: corsHeaders() });
                 }
 
+                let updateDoName = payload.doName !== undefined && payload.doName !== '' ? String(payload.doName).trim() : null;
+                const updateStore = payload.store !== undefined ? payload.store : (payload.store_num !== undefined ? payload.store_num : null);
+                if (!updateDoName && updateStore) {
+                    const stRow = await db.prepare("SELECT do_name FROM stores WHERE market = ? AND store_number = ? LIMIT 1").bind(market, String(updateStore).trim()).first();
+                    if (stRow && stRow.do_name) updateDoName = stRow.do_name.trim();
+                }
+
                 await db.prepare(`
                     UPDATE staffing_records SET
                         store_num = COALESCE(?, store_num),
@@ -2363,7 +2464,7 @@ export async function onRequestPost(context) {
                     WHERE id = ?
                 `).bind(
                     payload.store !== undefined ? payload.store : (payload.store_num !== undefined ? payload.store_num : null),
-                    payload.doName !== undefined ? payload.doName : null,
+                    updateDoName,
                     payload.gmName !== undefined ? payload.gmName : null,
                     payload.name !== undefined ? payload.name : null,
                     payload.position !== undefined ? payload.position : null,
@@ -2486,6 +2587,13 @@ export async function onRequestPost(context) {
             const tz = market.toLowerCase() === "denver" ? "America/Denver" : "America/Chicago";
             const nowFormatted = cand.lastUpdated || getNowFormatted(tz);
 
+            let updateDoName = cand.doName !== undefined && cand.doName !== '' ? String(cand.doName).trim() : null;
+            const updateStore = cand.store !== undefined ? cand.store : (cand.store_num !== undefined ? cand.store_num : null);
+            if (!updateDoName && updateStore) {
+                const stRow = await db.prepare("SELECT do_name FROM stores WHERE market = ? AND store_number = ? LIMIT 1").bind(market, String(updateStore).trim()).first();
+                if (stRow && stRow.do_name) updateDoName = stRow.do_name.trim();
+            }
+
             await db.prepare(`
                 UPDATE onboarding_candidates SET
                     name = COALESCE(?, name),
@@ -2527,7 +2635,7 @@ export async function onRequestPost(context) {
                 cand.name !== undefined ? cand.name : null,
                 cand.position !== undefined ? cand.position : null,
                 cand.store !== undefined ? cand.store : (cand.store_num !== undefined ? cand.store_num : null),
-                cand.doName !== undefined ? cand.doName : null,
+                updateDoName,
                 cand.ntoDate !== undefined ? cand.ntoDate : null,
                 cand.ntoAttendance !== undefined ? cand.ntoAttendance : null,
                 cand.notes !== undefined ? cand.notes : null,
