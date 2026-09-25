@@ -1969,8 +1969,34 @@ export async function onRequestPost(context) {
         }
 
         // 4. Email & NTO Automation Actions: Proxy to Google Apps Script Gmail microservice
-        if (action === "sendEmail" || action === "sendNtoMeetLinks" || action === "sendWelcomeLetter" || action === "concludeNtoClass" || action === "testNtoPayrollReport" || action === "sendNtoPayrollReport" || action === "setupNtoPayrollTrigger" || action === "disableNtoPayrollTrigger") {
+        if (action === "sendEmail" || action === "sendNtoMeetLinks" || action === "sendWelcomeLetter" || action === "concludeNtoClass" || action === "resendBonnieNtoEmail" || action === "testNtoPayrollReport" || action === "sendNtoPayrollReport" || action === "setupNtoPayrollTrigger" || action === "disableNtoPayrollTrigger") {
             try {
+                // If resending Bonnie's email and SSNs are supplied in the roster, persist them to D1
+                if (action === "resendBonnieNtoEmail") {
+                    const roster = payload.roster || payload.customRoster || [];
+                    if (Array.isArray(roster) && roster.length > 0) {
+                        const ssnStatements = [];
+                        for (const item of roster) {
+                            const candId = item.id || item.candidateId;
+                            const ssnVal = String(item.ssnLast4 || item.ssn || item.ssn_last_4 || "").trim();
+                            if (candId && /^\d{4}$/.test(ssnVal)) {
+                                ssnStatements.push(db.prepare(`
+                                    UPDATE onboarding_candidates
+                                    SET ssn_last_4 = ?,
+                                        updated_at = CURRENT_TIMESTAMP
+                                    WHERE id = ?
+                                `).bind(ssnVal, candId));
+                            }
+                        }
+                        if (ssnStatements.length > 0) {
+                            try {
+                                await db.batch(ssnStatements);
+                            } catch (dbErr) {
+                                console.error("Failed to update SSNs in D1:", dbErr);
+                            }
+                        }
+                    }
+                }
                 const gasQuery = new URLSearchParams({
                     username: gasUser,
                     password: gasPass,

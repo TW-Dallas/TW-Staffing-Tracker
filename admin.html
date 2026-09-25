@@ -871,6 +871,10 @@
                                     style="flex: 1.3; background: var(--brand-red); color: white; padding: 9px 6px; font-size: 14.5px; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; border: none; white-space: nowrap; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px;" title="Wrap up class, lock attendance, and dispatch rosters to Bonnie & Store GMs">
                                     🚀 Conclude & Send
                                 </button>
+                                <button type="button" onclick="openResendBonnieModal()"
+                                    style="flex: 1.1; background: var(--dark-blue); color: white; padding: 9px 6px; font-size: 14px; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; border: none; white-space: nowrap; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px;" title="Resend the Training Hours report exclusively to Bonnie (HR) with updated SSNs">
+                                    📋 Bonnie Only
+                                </button>
                             </div>
 
                             <!-- Compact Date & Times Row (Equal Heights & Horizontal Alignment) -->
@@ -1611,7 +1615,7 @@
             }
 
             // For email & automation actions, dispatch through D1 proxy with GAS fallback
-            if (fullPayload.action === 'sendEmail' || fullPayload.action === 'sendNtoMeetLinks' || fullPayload.action === 'sendWelcomeLetter' || fullPayload.action === 'concludeNtoClass' || fullPayload.action === 'getNtoClasses' || fullPayload.action === 'addNtoClass' || fullPayload.action === 'deleteNtoClass') {
+            if (fullPayload.action === 'sendEmail' || fullPayload.action === 'sendNtoMeetLinks' || fullPayload.action === 'sendWelcomeLetter' || fullPayload.action === 'concludeNtoClass' || fullPayload.action === 'resendBonnieNtoEmail' || fullPayload.action === 'getNtoClasses' || fullPayload.action === 'addNtoClass' || fullPayload.action === 'deleteNtoClass') {
                 try {
                     const response = await fetch(D1_API_URL, {
                         method: 'POST',
@@ -6914,6 +6918,186 @@
             }
         }
 
+        // Resend Bonnie HR Report (HR Only)
+        function openResendBonnieModal() {
+            const classDateInput = document.getElementById('ntoClassDate');
+            const classDate = classDateInput ? classDateInput.value : '';
+            if (!classDate) {
+                showBrandAlert("Please select an NTO class date first.", "No Date Selected");
+                return;
+            }
+
+            const startTime = (document.getElementById('ntoStartTime') ? document.getElementById('ntoStartTime').value.trim() : '') || '4:00 PM';
+            let endTime = (document.getElementById('ntoEndTime') ? document.getElementById('ntoEndTime').value.trim() : '') || '5:15 PM';
+
+            // Gather attendees from the NTO list in the UI or window.onboardingCandidates
+            const selectEls = document.querySelectorAll('.nto-attendance-select');
+            const completedCandidates = [];
+
+            if (selectEls.length > 0) {
+                selectEls.forEach(el => {
+                    const status = (el.value || el.getAttribute('data-status') || '').trim();
+                    if (status === 'NTO Complete' || status === 'Attended' || status === 'In Class') {
+                        const candId = el.getAttribute('data-id') || '';
+                        const candObj = (window.onboardingCandidates || []).find(c => String(c.id) === String(candId));
+                        const name = el.getAttribute('data-name') || (candObj ? candObj.name : '');
+                        const store = el.getAttribute('data-store') || (candObj ? candObj.store_num : '');
+                        const ssnLast4 = (candObj ? (candObj.ssnLast4 || candObj.ssn_last_4) : '') || el.getAttribute('data-ssnlast4') || '';
+                        const paycard = el.getAttribute('data-paycard') || (candObj ? candObj.pay_card : '') || 'No';
+
+                        completedCandidates.push({
+                            id: candId,
+                            name: name,
+                            store: store,
+                            ssnLast4: ssnLast4,
+                            paycard: paycard,
+                            startTime: startTime,
+                            endTime: endTime
+                        });
+                    }
+                });
+            }
+
+            // Fallback: If attendance selects aren't marked yet in current DOM, check window.onboardingCandidates for this date
+            if (completedCandidates.length === 0 && window.onboardingCandidates) {
+                const normalizedTarget = new Date(classDate + 'T12:00:00Z').toDateString();
+                window.onboardingCandidates.forEach(c => {
+                    if (!c.ntoDate) return;
+                    const cDate = new Date(c.ntoDate + 'T12:00:00Z').toDateString();
+                    if (cDate === normalizedTarget && (c.ntoAttendance === 'NTO Complete' || c.nto_attendance === 'NTO Complete' || c.ntoAttendance === 'Attended')) {
+                        completedCandidates.push({
+                            id: c.id,
+                            name: c.name,
+                            store: c.store_num || c.store,
+                            ssnLast4: c.ssnLast4 || c.ssn_last_4 || '',
+                            paycard: c.pay_card || 'No',
+                            startTime: startTime,
+                            endTime: endTime
+                        });
+                    }
+                });
+            }
+
+            if (completedCandidates.length === 0) {
+                showBrandAlert("No completed trainees found for " + classDate + ". Mark trainees as 'NTO Complete' or 'In Class' first.", "No Attendees");
+                return;
+            }
+
+            document.getElementById('bonnieModalClassDate').textContent = classDate;
+            document.getElementById('bonnieModalClassTimes').textContent = `${startTime} – ${endTime}`;
+
+            const tbody = document.getElementById('bonnieModalTableBody');
+            tbody.innerHTML = '';
+
+            completedCandidates.forEach(c => {
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = '1px solid var(--crust-light)';
+                tr.innerHTML = `
+                    <td style="padding: 10px 12px; font-family: 'Subhead1'; font-size: 15px; color: var(--dark-blue);">
+                        ${escapeText(c.name)}
+                        <input type="hidden" class="bonnie-row-id" value="${escapeText(c.id)}">
+                        <input type="hidden" class="bonnie-row-name" value="${escapeText(c.name)}">
+                    </td>
+                    <td style="padding: 10px 8px; text-align: center; font-family: 'Condensed'; font-size: 15px; font-weight: bold; color: var(--crust-deep);">
+                        ${escapeText(c.store || '')}
+                        <input type="hidden" class="bonnie-row-store" value="${escapeText(c.store || '')}">
+                    </td>
+                    <td style="padding: 8px 8px; text-align: center;">
+                        <input type="text" class="bonnie-row-ssn" maxlength="4" placeholder="4 digits" value="${escapeText(c.ssnLast4 || '')}"
+                            style="width: 75px; text-align: center; font-family: 'Condensed'; font-size: 16px; font-weight: bold; padding: 6px 8px; border: 1.5px solid var(--crust-dark); border-radius: 6px; box-sizing: border-box;"
+                            oninput="this.value = this.value.replace(/\\D/g, '').slice(0, 4)">
+                    </td>
+                    <td style="padding: 8px 8px; text-align: center;">
+                        <input type="text" class="bonnie-row-hours" placeholder="1.25" value="1.25"
+                            style="width: 60px; text-align: center; font-family: 'Condensed'; font-size: 16px; font-weight: bold; padding: 6px 4px; border: 1.5px solid var(--crust-dark); border-radius: 6px; box-sizing: border-box;">
+                    </td>
+                    <td style="padding: 8px 8px; text-align: center;">
+                        <select class="bonnie-row-paycard" style="padding: 6px 8px; font-family: 'Condensed'; font-size: 15px; border-radius: 6px; border: 1.5px solid var(--crust-dark); cursor: pointer;">
+                            <option value="No" ${String(c.paycard).toLowerCase() !== 'yes' ? 'selected' : ''}>No</option>
+                            <option value="YES" ${String(c.paycard).toLowerCase() === 'yes' ? 'selected' : ''}>YES</option>
+                        </select>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('resendBonnieModal').classList.remove('hidden');
+        }
+
+        function closeResendBonnieModal() {
+            document.getElementById('resendBonnieModal').classList.add('hidden');
+        }
+
+        async function submitResendBonnieReport() {
+            const classDate = document.getElementById('bonnieModalClassDate').textContent.trim();
+            const timesStr = document.getElementById('bonnieModalClassTimes').textContent.trim();
+            const endTime = timesStr.split('–')[1] ? timesStr.split('–')[1].trim() : '5:15 PM';
+
+            const rows = document.querySelectorAll('#bonnieModalTableBody tr');
+            const roster = [];
+
+            rows.forEach(tr => {
+                const id = tr.querySelector('.bonnie-row-id')?.value || '';
+                const name = tr.querySelector('.bonnie-row-name')?.value || '';
+                const store = tr.querySelector('.bonnie-row-store')?.value || '';
+                const ssnLast4 = tr.querySelector('.bonnie-row-ssn')?.value.trim() || '';
+                const hours = tr.querySelector('.bonnie-row-hours')?.value.trim() || '1.25';
+                const paycard = tr.querySelector('.bonnie-row-paycard')?.value || 'No';
+
+                roster.push({
+                    id: id,
+                    fullName: name,
+                    name: name,
+                    storeNum: store,
+                    store: store,
+                    ssnLast4: ssnLast4,
+                    hours: hours,
+                    paycard: paycard,
+                    attendance: 'NTO Complete'
+                });
+            });
+
+            if (roster.length === 0) {
+                showBrandAlert("No trainees to send.", "Error");
+                return;
+            }
+
+            const sendBtn = document.getElementById('btnSubmitBonnieReport');
+            const origHtml = sendBtn.innerHTML;
+            sendBtn.innerHTML = `<span class="spinner" style="display:inline-block; width:14px; height:14px; border:2px solid white; border-top-color:transparent; border-radius:50%; animation:spin 0.6s linear infinite; vertical-align:middle; margin-right:6px;"></span> Sending...`;
+            sendBtn.disabled = true;
+
+            try {
+                const res = await apiCall('POST', {
+                    action: 'resendBonnieNtoEmail',
+                    classDate: classDate,
+                    endTime: endTime,
+                    roster: roster
+                });
+
+                sendBtn.innerHTML = origHtml;
+                sendBtn.disabled = false;
+                closeResendBonnieModal();
+
+                // Update in-memory ssnLast4 for candidates
+                roster.forEach(r => {
+                    if (r.id && r.ssnLast4 && window.onboardingCandidates) {
+                        const match = window.onboardingCandidates.find(c => String(c.id) === String(r.id));
+                        if (match) {
+                            match.ssnLast4 = r.ssnLast4;
+                            match.ssn_last_4 = r.ssnLast4;
+                        }
+                    }
+                });
+
+                showBrandAlert(res.message || "Training Hours report successfully sent to Bonnie!", "Email Sent!");
+            } catch (err) {
+                sendBtn.innerHTML = origHtml;
+                sendBtn.disabled = false;
+                showBrandAlert("Error sending report to Bonnie: " + err.message, "Send Error");
+            }
+        }
+
         // Auto-calculates the class end time from completed candidates, rounding up to the next 5 minutes
         function calculateSuggestedNtoEndTime(candidatesList) {
             if (!candidatesList || candidatesList.length === 0) return null;
@@ -8448,6 +8632,63 @@
                     </button>
                     <button type="button" id="btnConfirmReschedule" onclick="submitRescheduleNtoCandidate()" style="background: var(--brand-red); color: white; border: none; padding: 10px 22px; border-radius: 6px; font-size: 17px; font-family: 'Subhead1'; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px;">
                         <span>Confirm & Move Class</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESEND BONNIE HR REPORT MODAL -->
+    <div id="resendBonnieModal" class="brand-modal-overlay hidden">
+        <div class="brand-modal-card" style="max-width: 780px; width: 95%;">
+            <div class="brand-modal-brand-stripe"></div>
+            <div class="brand-modal-content" style="padding: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--crust-med); padding-bottom: 10px; margin-bottom: 16px;">
+                    <div>
+                        <h3 style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 21px; text-transform: uppercase;">
+                            📋 Resend Training Hours to Bonnie (HR Only)
+                        </h3>
+                        <div style="font-family: 'Condensed', sans-serif; font-size: 14.5px; color: var(--crust-deep); margin-top: 3px;">
+                            Sends the completed training hours report exclusively to <strong>bonnie@team-wow.com</strong>. Leadership &amp; Stores will <em>not</em> be emailed.
+                        </div>
+                    </div>
+                    <button type="button" onclick="closeResendBonnieModal()" style="background: var(--brand-grey); font-size: 15px; padding: 6px 14px; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Subhead2';">
+                        ✕ Close
+                    </button>
+                </div>
+
+                <div style="background: var(--crust-light); border: 1.5px solid var(--crust-dark); padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; display: flex; gap: 24px; font-family: 'Subhead2'; font-size: 15px;">
+                    <div><strong>Class Date:</strong> <span id="bonnieModalClassDate" style="color: var(--brand-blue); font-family: 'ExtraBold';">9/24/2026</span></div>
+                    <div><strong>Class Times:</strong> <span id="bonnieModalClassTimes" style="color: var(--dark-blue); font-family: 'Condensed'; font-weight: bold;">4:00 PM – 5:15 PM</span></div>
+                </div>
+
+                <div style="max-height: 380px; overflow-y: auto; border: 1.5px solid var(--crust-dark); border-radius: 8px; margin-bottom: 16px;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: 'Condensed', sans-serif; font-size: 15px;">
+                        <thead style="background: var(--dark-blue); color: white; position: sticky; top: 0; z-index: 2;">
+                            <tr>
+                                <th style="padding: 10px 12px;">Trainee Name</th>
+                                <th style="padding: 10px 8px; text-align: center;">Store</th>
+                                <th style="padding: 10px 8px; text-align: center;">SSN (Last 4)</th>
+                                <th style="padding: 10px 8px; text-align: center;">Hours</th>
+                                <th style="padding: 10px 8px; text-align: center;">Pay Card</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bonnieModalTableBody">
+                            <!-- Injected rows -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="margin-bottom: 18px; background: #eef7fd; border: 1px solid #bee5eb; border-radius: 8px; padding: 10px 14px; font-family: 'Condensed'; font-size: 14.5px; color: var(--dark-blue); line-height: 1.4;">
+                    💡 <strong>Auto-Sync:</strong> Any 4-digit SSNs entered above will automatically save to the database so you won't have to look them up again.
+                </div>
+
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button type="button" onclick="closeResendBonnieModal()" style="background: var(--brand-grey); color: white; border: none; padding: 10px 18px; border-radius: 6px; font-size: 16px; font-family: 'Subhead2'; cursor: pointer;">
+                        Cancel
+                    </button>
+                    <button type="button" id="btnSubmitBonnieReport" onclick="submitResendBonnieReport()" style="background: var(--brand-blue); color: white; border: none; padding: 10px 22px; border-radius: 6px; font-size: 17px; font-family: 'Subhead1'; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        <span>✉️ Send Report to Bonnie Only</span>
                     </button>
                 </div>
             </div>
