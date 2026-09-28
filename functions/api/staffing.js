@@ -2630,15 +2630,6 @@ export async function onRequestPost(context) {
                 await syncHiredCandidatesToStaffing(db, market);
             }
 
-            // Sync with Google Apps Script in background so Google Sheets stays in sync
-            try {
-                fetch(APPS_SCRIPT_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify(gasPayload)
-                }).catch(e => console.warn("GAS background candidate add sync warning:", e));
-            } catch (e) {}
-
             return new Response(JSON.stringify({ success: true, id: newId }), { status: 200, headers: corsHeaders() });
         }
 
