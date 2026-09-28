@@ -334,6 +334,22 @@
                                             <label class="checkbox-item"><input type="checkbox" id="checkHired"
                                                     onchange="updateStageBadges()"> Hired</label>
                                         </div>
+                                        <div class="form-row" style="margin-top: 10px; display: flex; gap: 10px;">
+                                            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                                <label>Orientation (NTO) Date</label>
+                                                <input type="text" id="fieldNtoDateText" placeholder="MM/DD/YYYY" oninput="document.getElementById('fieldNto').value = this.value">
+                                            </div>
+                                            <div class="form-group" style="flex: 1.2; margin-bottom: 0;">
+                                                <label>NTO Attendance Status</label>
+                                                <select id="fieldNtoAttendance" onchange="if(this.value === 'NTO Complete'){ document.getElementById('checkHired').checked = true; document.getElementById('checkNto').checked = true; updateStageBadges(); }">
+                                                    <option value="">Select Status...</option>
+                                                    <option value="In Class">📖 In Class</option>
+                                                    <option value="Not in NTO">❌ Not in NTO (Absent)</option>
+                                                    <option value="Left Early">⚠️ Left Early</option>
+                                                    <option value="NTO Complete">🎓 NTO Complete</option>
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -3716,7 +3732,11 @@
                     let ntoStatusColor = 'var(--brand-blue)';
                     let ntoLabel = '';
 
-                    const isCompleted = item.ntoStatus === 'NTO Complete' || item.ntoAttendance === 'NTO Complete';
+                    const isCompleted = item.ntoStatus === 'NTO Complete' || 
+                                        item.ntoAttendance === 'NTO Complete' || 
+                                        item.ntoAttendance === 'Hired' || 
+                                        item.ntoAttendance === 'Complete' || 
+                                        (item.hired && item.ntoAttendance && item.ntoAttendance !== 'Not in NTO' && item.ntoAttendance !== 'Left Early');
                     const isInClass = item.ntoStatus === 'In Class' || item.ntoAttendance === 'In Class';
                     const isMissed = item.missedNto || item.ntoStatus === 'Not in NTO' || item.ntoStatus === 'Left Early' || item.ntoAttendance === 'Not in NTO' || item.ntoAttendance === 'Left Early';
 
@@ -3725,9 +3745,9 @@
                         ntoStatusColor = 'var(--brand-red)';
                         ntoLabel = '⚠️ Missed NTO';
                     } else if (isCompleted) {
-                        card.classList.add('status-green');
-                        ntoStatusColor = 'var(--success-green)';
-                        ntoLabel = item.ntoDate ? `🎓 NTO: ${item.ntoDate} (Done)` : '🎓 NTO Complete';
+                        card.classList.add('status-blue');
+                        ntoStatusColor = 'var(--dark-blue)';
+                        ntoLabel = item.ntoDate ? `🎓 NTO: ${item.ntoDate}` : '🎓 NTO Complete';
                     } else if (isInClass) {
                         card.classList.add('status-blue');
                         ntoStatusColor = '#d97706';
@@ -4033,6 +4053,33 @@
             currentSelectedId = item.id;
             renderList();
 
+            if (currentView === 'nto') {
+                if (item.ntoDate) {
+                    const parsedDate = formatDateForInput(item.ntoDate);
+                    const classDateInput = document.getElementById('ntoClassDate');
+                    if (classDateInput && parsedDate) {
+                        classDateInput.value = parsedDate;
+                    }
+                }
+                renderNtoClassView();
+                setTimeout(() => {
+                    const rowSelect = document.querySelector(`.nto-attendance-select[data-id="${item.id}"]`) || 
+                                      Array.from(document.querySelectorAll('.nto-attendance-select')).find(el => (el.getAttribute('data-name') || '').toLowerCase().trim() === (item.name || '').toLowerCase().trim());
+                    if (rowSelect) {
+                        const row = rowSelect.closest('.nto-roster-row');
+                        if (row) {
+                            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            row.style.transition = 'background-color 0.4s ease';
+                            row.style.backgroundColor = '#e8f0fe';
+                            setTimeout(() => {
+                                row.style.backgroundColor = '';
+                            }, 1500);
+                        }
+                    }
+                }, 80);
+                return;
+            }
+
             const draftPayload = unsavedDrafts[item.id];
             const displayNotes = (draftPayload && draftPayload.notes !== undefined) ? draftPayload.notes : (item.notes || '');
 
@@ -4110,6 +4157,17 @@
                 document.getElementById('fieldPhone').value = (draftPayload && draftPayload.phoneNumber !== undefined) ? draftPayload.phoneNumber : (item.phoneNumber || '');
                 document.getElementById('fieldEmail').value = (draftPayload && draftPayload.email !== undefined) ? draftPayload.email : (item.email || '');
                 document.getElementById('fieldNto').value = item.ntoDate || '';
+                const fieldNtoDateTextEl = document.getElementById('fieldNtoDateText');
+                if (fieldNtoDateTextEl) fieldNtoDateTextEl.value = item.ntoDate || '';
+                const fieldNtoAttEl = document.getElementById('fieldNtoAttendance');
+                if (fieldNtoAttEl) {
+                    const rawAtt = item.ntoAttendance || item.ntoStatus || '';
+                    if (rawAtt === 'Hired' || rawAtt === 'Complete' || rawAtt === 'NTO Complete' || (item.hired && item.ntoDate)) {
+                        fieldNtoAttEl.value = 'NTO Complete';
+                    } else {
+                        fieldNtoAttEl.value = rawAtt;
+                    }
+                }
                 document.getElementById('fieldPayCard').value = item.payCard || '';
                 document.getElementById('fieldNotes').value = displayNotes;
 
@@ -4230,6 +4288,8 @@
             document.getElementById('candidateForm').reset();
             document.getElementById('fieldId').value = '';
             document.getElementById('fieldNto').value = '';
+            if (document.getElementById('fieldNtoDateText')) document.getElementById('fieldNtoDateText').value = '';
+            if (document.getElementById('fieldNtoAttendance')) document.getElementById('fieldNtoAttendance').value = '';
             document.getElementById('checkSubmission').checked = true;
             updateStageBadges();
 
@@ -4363,7 +4423,12 @@
                 payload.hatStyle = document.getElementById('fieldHat').value;
                 payload.payCard = document.getElementById('fieldPayCard') ? document.getElementById('fieldPayCard').value.trim() : '';
                 payload.notes = document.getElementById('fieldNotes').value.trim();
-                payload.ntoDate = document.getElementById('fieldNto') ? document.getElementById('fieldNto').value.trim() : '';
+                payload.ntoDate = (document.getElementById('fieldNtoDateText') && document.getElementById('fieldNtoDateText').value.trim()) 
+                    ? document.getElementById('fieldNtoDateText').value.trim() 
+                    : (document.getElementById('fieldNto') ? document.getElementById('fieldNto').value.trim() : '');
+                const ntoAttSelect = document.getElementById('fieldNtoAttendance');
+                payload.ntoAttendance = ntoAttSelect ? ntoAttSelect.value : (existingCand ? (existingCand.ntoAttendance || '') : '');
+                payload.ntoStatus = payload.ntoAttendance;
                 payload.submissionReceived = document.getElementById('checkSubmission').checked;
                 payload.onboardingSent = document.getElementById('checkOnbSent').checked;
                 payload.bgcComplete = document.getElementById('checkBgc').checked;
@@ -4371,6 +4436,10 @@
                 payload.ntoSignupLinkSent = document.getElementById('checkNtoLink').checked;
                 payload.ntoScheduled = document.getElementById('checkNto').checked;
                 payload.hired = document.getElementById('checkHired').checked;
+                if (payload.ntoAttendance === 'NTO Complete') {
+                    payload.hired = true;
+                    payload.ntoScheduled = true;
+                }
                 payload.incorrectEmail = document.getElementById('checkIncorrect').checked;
                 payload.ineligible = document.getElementById('checkIneligible').checked;
                 payload.inactive = document.getElementById('checkInactive').checked;
@@ -6566,7 +6635,9 @@
                 row.className = 'nto-roster-row';
                 row.style.cssText = "display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--crust-med); gap: 12px;";
 
-                const savedStatus = (item.ntoAttendance || '').trim();
+                const rawSaved = (item.ntoAttendance || item.ntoStatus || '').trim();
+                const isCompleteStatus = rawSaved === 'NTO Complete' || rawSaved === 'Hired' || rawSaved === 'Complete' || (item.hired && rawSaved !== 'Not in NTO' && rawSaved !== 'Left Early');
+                const savedStatus = isCompleteStatus ? 'NTO Complete' : rawSaved;
                 const shirtVal = (item.shirtSize || item.shirt || item.Shirt || '').replace(/\\'/g, "'");
                 const hatVal = item.hatStyle || item.capVisor || item['Cap/Visor'] || item.hat || item.Hat || '';
                 const payCardVal = item.payCard || item.paycard || item.Paycard || '';
@@ -6600,7 +6671,7 @@
                     </div>
                 </label>
                 <div style="flex: 1.4; display: flex; gap: 8px; align-items: center; justify-content: flex-end;">
-                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" data-lastupdated="${escapeText(lastUpdatedVal)}" data-ntocompletedat="${escapeText(ntoCompletedAtVal)}" data-ssnlast4="${escapeText(ssnLast4Val)}" style="width: 215px; min-width: 195px; padding: 8px 10px; font-size: 18px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1.5px solid var(--crust-dark); cursor: pointer;">
+                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" data-lastupdated="${escapeText(lastUpdatedVal)}" data-ntocompletedat="${escapeText(ntoCompletedAtVal)}" data-ssnlast4="${escapeText(ssnLast4Val)}" onchange="handleNtoAttendanceChange(this)" style="width: 215px; min-width: 195px; padding: 8px 10px; font-size: 18px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1.5px solid var(--crust-dark); background: white; cursor: pointer;">
                         <option value="" ${!savedStatus ? 'selected' : ''}>Select Status...</option>
                         <option value="In Class" ${savedStatus === 'In Class' ? 'selected' : ''}>📖 In Class</option>                        
                         <option value="Not in NTO" ${savedStatus === 'Not in NTO' ? 'selected' : ''}>❌ Not in NTO (Absent)</option>
@@ -6614,6 +6685,71 @@
             });
 
             updateNtoSendMeetLinksButtonText();
+        }
+
+        async function handleNtoAttendanceChange(selectEl) {
+            if (!selectEl) return;
+            const newStatus = selectEl.value;
+            const candId = selectEl.getAttribute('data-id') || '';
+            const candName = selectEl.getAttribute('data-name') || '';
+            const candEmail = selectEl.getAttribute('data-email') || '';
+            const candStore = selectEl.getAttribute('data-store') || '';
+            const candPosition = selectEl.getAttribute('data-position') || 'CSR';
+            const candNtoDate = selectEl.getAttribute('data-ntodate') || '';
+            const shirtVal = selectEl.getAttribute('data-shirt') || '';
+            const hatVal = selectEl.getAttribute('data-hat') || '';
+            const payCardVal = selectEl.getAttribute('data-paycard') || '';
+            const attNowTime = formatDisplayDateTime(new Date());
+
+            // Update in-memory candidate cache immediately
+            const cand = candidates.find(c => (candId && String(c.id) === String(candId)) || (candName && (c.name || '').toLowerCase().trim() === candName.toLowerCase().trim()));
+            if (cand) {
+                cand.ntoAttendance = newStatus;
+                cand.ntoStatus = newStatus;
+                cand.lastUpdated = attNowTime;
+                if (newStatus === 'NTO Complete') {
+                    cand.hired = true;
+                    cand.ntoScheduled = true;
+                    cand.missedNto = false;
+                } else if (newStatus === 'Not in NTO' || newStatus === 'Left Early') {
+                    cand.missedNto = true;
+                } else {
+                    cand.missedNto = false;
+                }
+            }
+
+            // Re-render the candidate list so card badges update immediately
+            renderList();
+
+            // Persist to Cloudflare D1
+            try {
+                const rosterItem = {
+                    id: candId,
+                    name: candName,
+                    email: candEmail,
+                    store: candStore,
+                    position: candPosition,
+                    shirtSize: shirtVal,
+                    hatStyle: hatVal,
+                    payCard: payCardVal,
+                    ntoDate: candNtoDate,
+                    attendance: newStatus,
+                    ntoAttendance: newStatus,
+                    ntoStatus: newStatus,
+                    liveStatus: newStatus,
+                    lastUpdated: attNowTime
+                };
+
+                const classDateVal = candNtoDate || document.getElementById('ntoClassDate')?.value || '';
+                await apiCall('POST', {
+                    action: "saveNtoAttendance",
+                    classDate: classDateVal,
+                    roster: [rosterItem]
+                });
+            } catch (err) {
+                console.error("Error auto-saving NTO attendance:", err);
+                showBrandAlert("Error saving attendance to server: " + (err.message || err), "Save Error");
+            }
         }
 
         async function sendSingleNtoMeetLink(name, email) {
@@ -6815,11 +6951,15 @@
             if (document.getElementById('ntoStartTime')) document.getElementById('ntoStartTime').value = startTime;
 
             const selectedDateFormatted = formatDateForInput(classDate);
+            const showAllDates = document.getElementById('ntoShowAllDates')?.checked;
             const allRosterElements = Array.from(document.querySelectorAll('.nto-attendance-select'));
-            const rosterElements = allRosterElements.filter(el => {
-                const elDate = formatDateForInput(el.getAttribute('data-ntodate') || '');
-                return !selectedDateFormatted || !elDate || elDate === selectedDateFormatted;
-            });
+            const targetElements = (showAllDates || !selectedDateFormatted) 
+                ? allRosterElements 
+                : allRosterElements.filter(el => {
+                    const elDate = formatDateForInput(el.getAttribute('data-ntodate') || '');
+                    return !elDate || elDate === selectedDateFormatted || el.value;
+                });
+            const rosterElements = targetElements.length > 0 ? targetElements : allRosterElements;
             if (rosterElements.length === 0) {
                 showBrandAlert(`No trainees found on the roster for class date ${classDate} to process.`, "Class Empty");
                 return;
@@ -7317,11 +7457,15 @@
         async function saveNtoAttendanceOnly() {
             const classDate = document.getElementById('ntoClassDate').value;
             const selectedDateFormatted = formatDateForInput(classDate);
+            const showAllDates = document.getElementById('ntoShowAllDates')?.checked;
             const allRosterElements = Array.from(document.querySelectorAll('.nto-attendance-select'));
-            const rosterElements = allRosterElements.filter(el => {
-                const elDate = formatDateForInput(el.getAttribute('data-ntodate') || '');
-                return !selectedDateFormatted || !elDate || elDate === selectedDateFormatted;
-            });
+            const targetElements = (showAllDates || !selectedDateFormatted) 
+                ? allRosterElements 
+                : allRosterElements.filter(el => {
+                    const elDate = formatDateForInput(el.getAttribute('data-ntodate') || '');
+                    return !elDate || elDate === selectedDateFormatted || el.value;
+                });
+            const rosterElements = targetElements.length > 0 ? targetElements : allRosterElements;
 
             if (rosterElements.length === 0) {
                 showBrandAlert(`No trainees found on the roster for class date ${classDate} to save.`, "Roster Empty");
@@ -7366,7 +7510,7 @@
                         cand.ntoAttendance = r.attendance;
                         cand.ntoStatus = r.attendance;
                         cand.liveStatus = r.attendance;
-                        if (r.attendance === "NTO Complete" || r.attendance === "Attended") {
+                        if (r.attendance === "NTO Complete" || r.attendance === "Attended" || r.attendance === "Hired") {
                             cand.hired = true;
                             cand.missedNto = false;
                         } else if (r.attendance === "Not in NTO") {

@@ -10,4 +10,9 @@
 /denver-orientation       /denver_orientation    200
 /denver                   /denver_index          200
 /nto-completion          /completion            200
+/denver-completion       /denver_completion     200
+/tw-denver-completion    /denver_completion     200
+/twdenver-completion     /denver_completion     200
+/denver/completion       /denver_completion     200
+/denver-nto-completion   /denver_completion     200
 

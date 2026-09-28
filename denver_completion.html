@@ -2,9 +2,14 @@
 <html lang="en">
 
 <head>
+    <script>
+        if (window.location.hostname.endsWith('github.io')) {
+            window.location.replace('https://tw-staffing.pages.dev/denver-completion' + window.location.search);
+        }
+    </script>
     <meta charset="UTF-8">
     <link class="favicon" rel="icon" type="image/png" href="images/tile_blue.png">
-    <title>Team Wow • NTO Completion & Review</title>
+    <title>Team Wow • Denver NTO Completion</title>
     <meta name="theme-color" content="#005c91">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
@@ -22,8 +27,6 @@
             display: flex;
             flex-direction: column;
         }
-
-        /* Header styles canonically managed by brand_master.css */
 
         /* Header Center Trainee Badge */
         .header-trainee-badge {
@@ -830,7 +833,7 @@
             <span id="activeStoreBadge" class="trainee-badge-store">Store #0000</span>
         </div>
 
-        <div id="completionMarketPill" class="market-pill">Dallas Market</div>
+        <div id="completionMarketPill" class="market-pill">Denver Market</div>
     </header>
 
     <main class="portal-main">
@@ -850,7 +853,7 @@
 
             <div class="input-group" style="text-align: left;">
                 <label for="lookupInput" class="input-label">10-Digit Phone Number or Email</label>
-                <input type="tel" id="lookupInput" class="text-input" placeholder="(214) 555-0199" autocomplete="tel">
+                <input type="tel" id="lookupInput" class="text-input" placeholder="(303) 555-0199" autocomplete="tel">
             </div>
 
             <button type="button" id="lookupBtn" class="btn-brand-blue" onclick="handleLookupTrainee()">
@@ -861,7 +864,7 @@
             <div id="identityConfirmCard" class="identity-badge-card hidden">
                 <div class="identity-badge-details">
                     <h3 id="confirmName">Trainee Name</h3>
-                    <p id="confirmStoreRole">Store #6916 • Customer Service Rep</p>
+                    <p id="confirmStoreRole">Store #6200 • Customer Service Rep</p>
                 </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     <button type="button" class="btn-brand-primary" style="padding: 10px 20px; font-size: 14px;" onclick="confirmIdentityAndProceed()">
@@ -1158,25 +1161,25 @@
                 <!-- Column 1: Text GM for Training Schedule -->
                 <div class="gm-action-card" style="margin-bottom: 0;">
                     <div style="font-size: 32px; margin-bottom: 6px;">💬</div>
-                    <h2 class="gm-title">Next Step: Text Your General Manager</h2>
+                    <h2 class="gm-title">Next Step: Reach Out for Your Training Schedule</h2>
                     <p class="gm-desc">
-                        Your store manager is waiting for your text to get you on the schedule for your first in-store shift!
+                        Your store management team is waiting for your message to get you on the schedule for your first in-store shift!
                     </p>
 
                     <div class="gm-contact-row">
-                        <div>Store <strong id="successStoreNum">#6916</strong></div>
+                        <div>Store <strong id="successStoreNum">#6200</strong></div>
                         <div>•</div>
-                        <div>GM: <strong id="successGmName">Manager Name</strong></div>
+                        <div>Leader: <strong id="successGmName">Management</strong></div>
                         <div>•</div>
-                        <div>Cell: <strong id="successGmPhone">(214) 555-0100</strong></div>
+                        <div>Cell: <strong id="successGmPhone">Provided in Welcome Letter</strong></div>
                     </div>
 
                     <div class="gm-button-group">
                         <a id="textGmBtn" href="#" class="btn-brand-primary" style="font-size: 16px;">
-                            💬 Text GM for Training Schedule
+                            💬 Text for Training Schedule
                         </a>
                         <a id="callGmBtn" href="#" class="btn-brand-secondary" style="font-size: 15px;">
-                            📞 Call GM
+                            📞 Call Leader
                         </a>
                     </div>
                 </div>
@@ -1207,7 +1210,7 @@
         <div class="portal-footer-inner">
             <div class="footer-brand">
                 <span class="footer-title">Team Wow • Domino's Pizza</span>
-                <span class="footer-subtitle">Virtual New Team Orientation &amp; Store Onboarding</span>
+                <span class="footer-subtitle">Denver Virtual New Team Orientation &amp; Store Onboarding</span>
             </div>
             <div class="footer-meta">
                 <p class="footer-copy">&copy; 2026 Team Wow, Inc. All rights reserved. &bull; <span class="footer-crust-code">Powered by Crust &amp; Code</span></p>
@@ -1221,22 +1224,11 @@
         let currentCandidate = null;
         let selectedShirtSize = "";
         let selectedHatStyle = "Standard Cap";
-        let selectedPayCard = "";
-        let activeMarket = "";
 
         // Auto-check URL parameters on page load
         window.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
             const lookupVal = params.get('phone') || params.get('email') || params.get('id') || params.get('lookup');
-            const marketParam = params.get('market');
-            if (marketParam) {
-                activeMarket = marketParam;
-                const pill = document.getElementById('completionMarketPill');
-                if (pill) {
-                    const mName = marketParam.charAt(0).toUpperCase() + marketParam.slice(1).toLowerCase();
-                    pill.textContent = `${mName} Market`;
-                }
-            }
             
             // Format phone input as user types
             const phoneInput = document.getElementById('lookupInput');
@@ -1278,8 +1270,7 @@
             btn.disabled = true;
 
             try {
-                const marketQuery = activeMarket ? `&market=${encodeURIComponent(activeMarket)}` : '';
-                const res = await fetch(`/api/staffing?action=getNtoCompletionProfile&lookup=${encodeURIComponent(inputVal)}${marketQuery}`);
+                const res = await fetch(`/api/staffing?action=getNtoCompletionProfile&market=Denver&lookup=${encodeURIComponent(inputVal)}`);
                 const data = await res.json();
 
                 if (!data.success || !data.candidate) {
@@ -1301,7 +1292,7 @@
 
         function displayIdentityConfirm(cand) {
             document.getElementById('confirmName').textContent = cand.name || `${cand.firstName} ${cand.lastName}`;
-            document.getElementById('confirmStoreRole').textContent = `Store #${cand.storeNum} • ${cand.position || 'Team Member'}`;
+            document.getElementById('confirmStoreRole').textContent = `Store #${cand.storeNum || 'Denver'} • ${cand.position || 'Team Member'}`;
             document.getElementById('identityConfirmCard').classList.remove('hidden');
         }
 
@@ -1319,16 +1310,25 @@
 
             // Populate Header Center Trainee Badge
             document.getElementById('activeTraineeTitle').textContent = currentCandidate.name;
-            document.getElementById('activeStoreBadge').textContent = `Store #${currentCandidate.storeNum}`;
+            document.getElementById('activeStoreBadge').textContent = `Store #${currentCandidate.storeNum || 'Denver'}`;
             document.getElementById('headerTraineeBadge').classList.remove('hidden');
-            if (currentCandidate.market) {
-                const pill = document.getElementById('completionMarketPill');
-                if (pill) pill.textContent = `${currentCandidate.market} Market`;
-            }
 
             // Pre-select uniform details
             if (currentCandidate.shirtSize) {
-                selectShirt(currentCandidate.shirtSize);
+                const sizeUpper = currentCandidate.shirtSize.toUpperCase();
+                if (['S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'].includes(sizeUpper)) {
+                    selectShirt(sizeUpper);
+                } else if (sizeUpper.includes('SMALL')) {
+                    selectShirt('S');
+                } else if (sizeUpper.includes('MEDIUM')) {
+                    selectShirt('M');
+                } else if (sizeUpper.includes('LARGE') && !sizeUpper.includes('X')) {
+                    selectShirt('L');
+                } else if (sizeUpper.includes('XL') || sizeUpper.includes('EXTRA LARGE')) {
+                    selectShirt('XL');
+                } else {
+                    selectShirt('L');
+                }
             } else {
                 selectShirt('L'); // default fallback
             }
@@ -1568,7 +1568,7 @@
                 `;
             }
 
-            // Transition from Questions View to Results View (Scores are locked)
+            // Transition from Questions View to Results View
             document.getElementById('quizQuestionsView').classList.add('quiz-step-hidden');
             document.getElementById('quizResultsView').classList.remove('quiz-step-hidden');
             document.getElementById('quizResultsView').classList.add('quiz-step-visible');
@@ -1608,15 +1608,6 @@
             document.getElementById('quizResultsView').classList.add('quiz-step-visible');
         }
 
-        function goToQuizStep() {
-            hideError();
-            document.getElementById('quizAckView').classList.add('quiz-step-hidden');
-            document.getElementById('quizAckView').classList.remove('quiz-step-visible');
-            document.getElementById('quizResultsView').classList.add('quiz-step-hidden');
-            document.getElementById('quizQuestionsView').classList.remove('quiz-step-hidden');
-            showQuizQuestion(1);
-        }
-
         // 3. Form Submission
         async function handleFormSubmit(e) {
             e.preventDefault();
@@ -1645,7 +1636,6 @@
                 return;
             }
 
-            // Validate Quiz Q4: Check all that apply
             const q4Checked = Array.from(document.querySelectorAll('input[name="q4"]:checked')).map(el => el.value);
             if (q4Checked.length === 0) {
                 showError("Please answer Question #4 on the orientation review.");
@@ -1661,10 +1651,9 @@
             submitBtn.innerHTML = `<span class="spinner"></span> <span>Saving & Finalizing...</span>`;
             submitBtn.disabled = true;
 
-            const candMarket = currentCandidate.market || activeMarket || "Dallas";
             const payload = {
                 candidateId: currentCandidate.id,
-                market: candMarket,
+                market: "Denver",
                 ssnLast4: ssnVal,
                 shirtSize: selectedShirtSize,
                 hatStyle: selectedHatStyle,
@@ -1679,7 +1668,7 @@
             };
 
             try {
-                const res = await fetch(`/api/staffing?action=submitNtoCompletion&market=${encodeURIComponent(candMarket)}`, {
+                const res = await fetch('/api/staffing?action=submitNtoCompletion&market=Denver', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -1709,17 +1698,17 @@
 
             const candidateName = currentCandidate.name || currentCandidate.firstName;
             document.getElementById('successTraineeGreeting').textContent = `Congratulations, ${currentCandidate.firstName || candidateName}! Your orientation record is complete.`;
-            document.getElementById('successStoreNum').textContent = `#${data.storeNum || currentCandidate.storeNum}`;
+            document.getElementById('successStoreNum').textContent = `#${data.storeNum || currentCandidate.storeNum || 'Denver'}`;
             
-            const gmName = data.gmName || currentCandidate.gmName || "Your General Manager";
+            const gmName = data.gmName || currentCandidate.gmName || "Store Management";
             const gmPhone = data.gmPhone || currentCandidate.gmPhone || "";
             
             document.getElementById('successGmName').textContent = gmName;
             document.getElementById('successGmPhone').textContent = gmPhone || "Provided in Welcome Letter";
 
-            // Configure 1-Tap Text GM SMS button
+            // Configure 1-Tap Text GM / Leader SMS button
             const cleanPhone = gmPhone.replace(/\D/g, '');
-            const smsBody = encodeURIComponent(`Hi ${gmName}, this is ${currentCandidate.name}. I just completed NTO for Store #${data.storeNum || currentCandidate.storeNum} and am reaching out for my training schedule!`);
+            const smsBody = encodeURIComponent(`Hi ${gmName}, this is ${currentCandidate.name}. I just completed Denver NTO for Store #${data.storeNum || currentCandidate.storeNum} and am reaching out for my training schedule!`);
 
             const textBtn = document.getElementById('textGmBtn');
             const callBtn = document.getElementById('callGmBtn');

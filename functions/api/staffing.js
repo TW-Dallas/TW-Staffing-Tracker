@@ -488,6 +488,7 @@ export async function onRequestGet(context) {
         const rawLookup = (url.searchParams.get("phone") || url.searchParams.get("email") || url.searchParams.get("lookup") || url.searchParams.get("id") || "").trim();
         const cleanPhoneDigits = rawLookup.replace(/\D/g, "");
         const isEmail = rawLookup.includes("@");
+        const reqMarket = (url.searchParams.get("market") || "").trim();
 
         let candidate = null;
 
@@ -499,27 +500,53 @@ export async function onRequestGet(context) {
 
         if (!candidate && cleanPhoneDigits.length >= 7) {
             const last10Digits = cleanPhoneDigits.slice(-10);
-            const { results } = await db.prepare(`
-                SELECT * FROM onboarding_candidates 
-                WHERE REPLACE(REPLACE(REPLACE(REPLACE(phone_number, ' ', ''), '-', ''), '(', ''), ')', '') LIKE ?
-                ORDER BY created_at DESC LIMIT 5
-            `).bind(`%${last10Digits}%`).all();
-            if (results && results.length > 0) {
-                candidate = results[0];
+            if (reqMarket) {
+                const { results } = await db.prepare(`
+                    SELECT * FROM onboarding_candidates 
+                    WHERE REPLACE(REPLACE(REPLACE(REPLACE(phone_number, ' ', ''), '-', ''), '(', ''), ')', '') LIKE ?
+                      AND LOWER(market) = LOWER(?)
+                    ORDER BY created_at DESC LIMIT 5
+                `).bind(`%${last10Digits}%`, reqMarket).all();
+                if (results && results.length > 0) {
+                    candidate = results[0];
+                }
+            }
+            if (!candidate) {
+                const { results } = await db.prepare(`
+                    SELECT * FROM onboarding_candidates 
+                    WHERE REPLACE(REPLACE(REPLACE(REPLACE(phone_number, ' ', ''), '-', ''), '(', ''), ')', '') LIKE ?
+                    ORDER BY created_at DESC LIMIT 5
+                `).bind(`%${last10Digits}%`).all();
+                if (results && results.length > 0) {
+                    candidate = results[0];
+                }
             }
         }
 
         if (!candidate && isEmail) {
-            candidate = await db.prepare("SELECT * FROM onboarding_candidates WHERE LOWER(email) = LOWER(?) ORDER BY created_at DESC LIMIT 1")
-                .bind(rawLookup)
-                .first();
+            if (reqMarket) {
+                candidate = await db.prepare("SELECT * FROM onboarding_candidates WHERE LOWER(email) = LOWER(?) AND LOWER(market) = LOWER(?) ORDER BY created_at DESC LIMIT 1")
+                    .bind(rawLookup, reqMarket)
+                    .first();
+            }
+            if (!candidate) {
+                candidate = await db.prepare("SELECT * FROM onboarding_candidates WHERE LOWER(email) = LOWER(?) ORDER BY created_at DESC LIMIT 1")
+                    .bind(rawLookup)
+                    .first();
+            }
         }
 
         if (!candidate && rawLookup) {
-            // Partial name or generic search fallback
-            candidate = await db.prepare("SELECT * FROM onboarding_candidates WHERE id = ? OR LOWER(email) = LOWER(?) LIMIT 1")
-                .bind(rawLookup, rawLookup)
-                .first();
+            if (reqMarket) {
+                candidate = await db.prepare("SELECT * FROM onboarding_candidates WHERE (id = ? OR LOWER(email) = LOWER(?)) AND LOWER(market) = LOWER(?) LIMIT 1")
+                    .bind(rawLookup, rawLookup, reqMarket)
+                    .first();
+            }
+            if (!candidate) {
+                candidate = await db.prepare("SELECT * FROM onboarding_candidates WHERE id = ? OR LOWER(email) = LOWER(?) LIMIT 1")
+                    .bind(rawLookup, rawLookup)
+                    .first();
+            }
         }
 
         if (!candidate) {
@@ -538,6 +565,9 @@ export async function onRequestGet(context) {
         const firstName = nameParts[0] || "";
         const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
 
+        const gmName = (store && store.manager_name) ? store.manager_name : ((store && store.do_name) ? `DO ${store.do_name}` : (candidate.do_name ? `DO ${candidate.do_name}` : ""));
+        const gmPhone = (store && store.gm_phone) ? store.gm_phone : ((store && store.do_cell) ? store.do_cell : "");
+
         return new Response(JSON.stringify({
             success: true,
             candidate: {
@@ -549,14 +579,16 @@ export async function onRequestGet(context) {
                 phone: candidate.phone_number || "",
                 storeNum: candidate.store_num,
                 position: candidate.position || "Team Member",
-                market: candidate.market || "Dallas",
+                market: candidate.market || reqMarket || "Dallas",
                 shirtSize: candidate.shirt_size || "",
                 hatStyle: candidate.hat_style || "Standard Cap",
                 payCard: candidate.pay_card || "",
                 pulseFormComplete: Boolean(candidate.pulse_form_complete),
                 ntoAttendance: candidate.nto_attendance || "",
-                gmName: store ? (store.manager_name || "") : "",
-                gmPhone: store ? (store.gm_phone || "") : "",
+                gmName: gmName,
+                gmPhone: gmPhone,
+                doName: store ? (store.do_name || "") : (candidate.do_name || ""),
+                doPhone: store ? (store.do_cell || "") : "",
                 storeAddress: store ? (store.address || "") : "",
                 storePhone: store ? (store.store_phone || "") : ""
             }
@@ -1188,6 +1220,9 @@ export async function onRequestPost(context) {
                 .bind(candidate.store_num)
                 .first();
 
+            const finalGmName = (store && store.manager_name) ? store.manager_name : ((store && store.do_name) ? `DO ${store.do_name}` : (candidate.do_name ? `DO ${candidate.do_name}` : ""));
+            const finalGmPhone = (store && store.gm_phone) ? store.gm_phone : ((store && store.do_cell) ? store.do_cell : "");
+
             // 5. Dual-write to Apps Script (Dallas Credentials tab & Welcome Email)
             const gasUrl = "https://script.google.com/macros/s/AKfycbxQVuU0uQ3TdkfsBwJpZ-K1iUDXTuLgvqEayPeqZgSRLDNxHOEUsOrjaSZAujI8p_874g/exec";
             try {
@@ -1221,8 +1256,8 @@ export async function onRequestPost(context) {
                 success: true,
                 candidateName: candidate.name,
                 storeNum: candidate.store_num,
-                gmName: store ? (store.manager_name || "") : "",
-                gmPhone: store ? (store.gm_phone || "") : "",
+                gmName: finalGmName,
+                gmPhone: finalGmPhone,
                 storeAddress: store ? (store.address || "") : "",
                 storePhone: store ? (store.store_phone || "") : ""
             }), {
@@ -2305,6 +2340,7 @@ export async function onRequestPost(context) {
                 const payCardVal = item.payCard || item.paycard || '';
                 const itemTime = item.lastUpdated || nowFormatted;
 
+                const candName = (item.name || '').trim();
                 if (item.id) {
                     statements.push(db.prepare(`
                         UPDATE onboarding_candidates SET
@@ -2316,7 +2352,7 @@ export async function onRequestPost(context) {
                             pay_card = CASE WHEN ? != '' THEN ? ELSE pay_card END,
                             last_updated = ?,
                             updated_at = CURRENT_TIMESTAMP
-                        WHERE id = ?
+                        WHERE id = ? OR (LOWER(TRIM(name)) = LOWER(?) AND ? != '' AND market = ?)
                     `).bind(
                         attVal,
                         hiredVal,
@@ -2325,7 +2361,8 @@ export async function onRequestPost(context) {
                         hatVal, hatVal,
                         payCardVal, payCardVal,
                         itemTime,
-                        item.id
+                        item.id,
+                        candName, candName, market
                     ));
                 } else if (item.email) {
                     statements.push(db.prepare(`
