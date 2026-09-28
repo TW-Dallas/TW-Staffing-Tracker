@@ -4,7 +4,7 @@
 <head>
     <script>
         if (window.location.hostname.endsWith('github.io')) {
-            window.location.replace('https://tw-staffing.pages.dev/denver-orientation' + window.location.search);
+            window.location.replace('https://tw-dallas-staffing.pages.dev/denver-orientation' + window.location.search);
         }
     </script>
     <meta charset="UTF-8">
@@ -1036,6 +1036,37 @@
         </div>
     </div>
 
+    <!-- 4. PENDING APPROVAL MODAL -->
+    <div id="pendingModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header" style="background-color: var(--brand-blue);">
+                <h3>Request Pending Review</h3>
+                <button type="button" class="modal-close-btn" onclick="closePendingModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: center; padding: 28px 20px;">
+                <div style="font-size: 44px; margin-bottom: 12px; line-height: 1;">⏳</div>
+                <h4 style="margin: 0 0 10px 0; font-family: 'Subhead1', sans-serif; font-size: 20px; color: var(--dark-blue);">
+                    Request Received, <span id="pendingName">Team Member</span>
+                </h4>
+                <p style="font-size: 15.5px; margin: 0 0 16px 0; color: var(--crust-burnt); line-height: 1.5;">
+                    Our records indicate you have previously registered for an orientation session. This signup is currently <strong>PENDING trainer review</strong> and will not appear on the class roster until reviewed.
+                </p>
+
+                <div style="background-color: #faf2e9; border: 1.5px solid var(--crust-med); border-radius: 8px; padding: 16px; text-align: left; margin-bottom: 20px; font-size: 14px; color: var(--crust-burnt);">
+                    <strong style="display: block; margin-bottom: 6px; font-size: 15px; color: var(--dark-red);">&#9888;&#65039; Important Notice:</strong>
+                    <ul style="margin: 0; padding-left: 18px; line-height: 1.5;">
+                        <li><strong>Do not submit multiple requests.</strong> Repeated submissions will not speed up the review.</li>
+                        <li><strong>Rescheduling is a store-level decision.</strong> If you need to reschedule or have questions about your status, please contact the <strong>General Manager</strong> of the store you applied to.</li>
+                    </ul>
+                </div>
+
+                <button type="button" class="confirm-reqs-btn" onclick="closePendingModal()" style="width: 100%; background-color: var(--dark-blue);">
+                    Understood
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- JAVASCRIPT LOGIC -->
     <script>
         const API_URL = "/api/staffing";
@@ -1173,6 +1204,24 @@
             return isNaN(t) ? 0 : t;
         }
 
+        // Formats ISO/GMT times (e.g. 1899-12-31T00:15:00.000Z) into friendly 12h time (5:15 PM)
+        function formatTimeDisplayFrontEnd(tStr) {
+            if (!tStr && tStr !== 0) return '';
+            let rawStr = tStr.toString().trim();
+            if (rawStr.includes("1899") || rawStr.includes("GMT") || rawStr.includes("T")) {
+                const tMatch = rawStr.match(/(?:T|\s)(\d{1,2}):(\d{2})/);
+                if (tMatch) {
+                    let h = parseInt(tMatch[1], 10);
+                    let m = parseInt(tMatch[2], 10);
+                    let period = h >= 12 ? "PM" : "AM";
+                    let displayH = h % 12 || 12;
+                    let displayM = m < 10 ? "0" + m : m;
+                    return `${displayH}:${displayM} ${period}`;
+                }
+            }
+            return rawStr;
+        }
+
         async function fetchClasses() {
             const loading = document.getElementById('loadingSchedule');
             const grid = document.getElementById('classGrid');
@@ -1245,7 +1294,9 @@
                 }
 
                 const dateDisplay = cls.classDate || "Scheduled Date";
-                const timeRange = (cls.startTime || "1:00 PM") + (cls.endTime ? ` – ${cls.endTime}` : "");
+                const startFormatted = formatTimeDisplayFrontEnd(cls.startTime) || cls.startTime || "5:00 PM";
+                const endFormatted = formatTimeDisplayFrontEnd(cls.endTime) || cls.endTime || "";
+                const timeRange = startFormatted + (endFormatted ? ` – ${endFormatted}` : "");
 
                 const attendees = cls.attendees || [];
                 let rosterHTML = '';
@@ -1310,9 +1361,12 @@
             selectedClass = classesData.find(c => c.id === classId);
             if (!selectedClass) return;
 
+            const startDisp = formatTimeDisplayFrontEnd(selectedClass.startTime) || selectedClass.startTime || "5:00 PM";
+            const endDisp = formatTimeDisplayFrontEnd(selectedClass.endTime) || selectedClass.endTime || "";
+
             document.getElementById('formClassId').value = classId;
             document.getElementById('summaryClassDate').textContent = `Date: ${selectedClass.classDate}`;
-            document.getElementById('summaryClassTime').textContent = `Time: ${selectedClass.startTime} – ${selectedClass.endTime || ''}`;
+            document.getElementById('summaryClassTime').textContent = `Time: ${startDisp}${endDisp ? ' – ' + endDisp : ''}`;
 
             if (candidateProfile) {
                 document.getElementById('formCandidateId').value = candidateProfile.id || '';
@@ -1371,7 +1425,14 @@
                 }
 
                 closeSignupModal();
-                showSuccessModal(name, email, data.classDate || (selectedClass ? selectedClass.classDate : ''), data.startTime || (selectedClass ? selectedClass.startTime : ''));
+
+                if (data.pending) {
+                    showPendingModal(name);
+                    return;
+                }
+
+                const confirmStart = formatTimeDisplayFrontEnd(data.startTime) || data.startTime || (selectedClass ? (formatTimeDisplayFrontEnd(selectedClass.startTime) || selectedClass.startTime) : '');
+                showSuccessModal(name, email, data.classDate || (selectedClass ? selectedClass.classDate : ''), confirmStart);
 
                 await fetchClasses();
             } catch (err) {
@@ -1381,6 +1442,15 @@
                 btn.disabled = false;
                 btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg> Confirm Registration`;
             }
+        }
+
+        function showPendingModal(name) {
+            document.getElementById('pendingName').textContent = (name ? name.split(' ')[0] : '') || name || 'Team Member';
+            document.getElementById('pendingModal').classList.add('active');
+        }
+
+        function closePendingModal() {
+            document.getElementById('pendingModal').classList.remove('active');
         }
 
         function showSuccessModal(name, email, classDate, classTime) {

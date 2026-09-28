@@ -162,6 +162,23 @@ function calculateDominosPeriod(dateInput) {
     return "P10";
 }
 
+function formatTimeDisplay(tStr) {
+    if (!tStr && tStr !== 0) return '';
+    let rawStr = tStr.toString().trim();
+    if (rawStr.includes("1899") || rawStr.includes("GMT") || rawStr.includes("T")) {
+        const tMatch = rawStr.match(/(?:T|\s)(\d{1,2}):(\d{2})/);
+        if (tMatch) {
+            let h = parseInt(tMatch[1], 10);
+            let m = parseInt(tMatch[2], 10);
+            let period = h >= 12 ? "PM" : "AM";
+            let displayH = h % 12 || 12;
+            let displayM = m < 10 ? "0" + m : m;
+            return `${displayH}:${displayM} ${period}`;
+        }
+    }
+    return rawStr;
+}
+
 // Automatically syncs any candidates with hired = 1 in onboarding_candidates into staffing_records
 async function syncHiredCandidatesToStaffing(db, market) {
     try {
@@ -583,8 +600,8 @@ export async function onRequestGet(context) {
                 market: cl.market,
                 name: cl.name,
                 classDate: cl.class_date,
-                startTime: cl.start_time,
-                endTime: cl.end_time,
+                startTime: formatTimeDisplay(cl.start_time),
+                endTime: formatTimeDisplay(cl.end_time),
                 trainer: cl.trainer,
                 trainerName: cl.trainer,
                 location: cl.location,
@@ -1361,33 +1378,54 @@ export async function onRequestPost(context) {
                         phone_number = CASE WHEN (phone_number IS NULL OR phone_number = '') AND ? != '' THEN ? ELSE phone_number END,
                         email = CASE WHEN (email IS NULL OR email = '') AND ? != '' THEN ? ELSE email END,
                         store_num = CASE WHEN (store_num IS NULL OR store_num = '') AND ? != '' THEN ? ELSE store_num END,
+                        market = CASE WHEN (market IS NULL OR market = '') THEN ? ELSE market END,
                         last_updated = ?,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE id = ?
-                `).bind(cls.class_date, phone, phone, email, email, storeNum, storeNum, nowFormatted, matchedCand.id).run();
+                `).bind(cls.class_date, phone, phone, email, email, storeNum, storeNum, regMarket, nowFormatted, matchedCand.id).run();
+            } else {
+                // If candidate did not exist in onboarding_candidates yet, insert them!
+                const newCandId = candidateId || `cand-${regMarket}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+                let doName = '';
+                if (storeNum) {
+                    try {
+                        const st = await db.prepare("SELECT do_name FROM stores WHERE store_number = ? AND market = ?").bind(storeNum, regMarket).first();
+                        if (st && st.do_name) doName = st.do_name;
+                    } catch (storeErr) {}
+                }
+                await db.prepare(`
+                    INSERT INTO onboarding_candidates (
+                        id, market, name, position, store_num, do_name, nto_date, nto_attendance,
+                        nto_scheduled, phone_number, email, submission_received, onboarding_sent,
+                        created_at, last_updated, updated_at
+                    ) VALUES (
+                        ?, ?, ?, ?, ?, ?, ?, '', 1, ?, ?, 1, 1, CURRENT_TIMESTAMP, ?, CURRENT_TIMESTAMP
+                    )
+                `).bind(newCandId, regMarket, name, position || 'CSR', storeNum, doName, cls.class_date, phone, email, nowFormatted).run();
             }
 
-            // 1f. Trigger confirmation email via Google Apps Script microservice
+            // 1f. Trigger confirmation email & admin alert via Google Apps Script microservice
             try {
-                if (regMarket.toLowerCase() === "dallas") {
-                    await fetch(APPS_SCRIPT_URL, {
-                        method: "POST",
-                        headers: { "Content-Type": "text/plain;charset=utf-8" },
-                        body: JSON.stringify({
-                            username: "dallas_admin",
-                            password: "dallas_password_123",
-                            action: "sendNtoMeetLinks",
-                            classDate: cls.class_date,
-                            classTime: cls.start_time,
-                            meetLink: cls.meet_link || "https://meet.google.com/zwc-afuu-hgh",
-                            trainerName: "Mike Jacobs",
-                            notifyAdmin: true,
-                            studentPhone: phone,
-                            storeNum: storeNum,
-                            trainees: [{ name: name, email: email }]
-                        })
-                    });
-                }
+                const isDen = regMarket.toLowerCase() === "denver";
+                await fetch(APPS_SCRIPT_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({
+                        username: isDen ? "denver_admin" : "dallas_admin",
+                        password: isDen ? "denver_password_123" : "dallas_password_123",
+                        action: "sendNtoMeetLinks",
+                        classDate: cls.class_date,
+                        classTime: formatTimeDisplay(cls.start_time),
+                        meetLink: cls.meet_link || (isDen ? "" : "https://meet.google.com/zwc-afuu-hgh"),
+                        trainerName: cls.trainer || (isDen ? "Richard Keske" : "Mike Jacobs"),
+                        notifyAdmin: true,
+                        studentPhone: phone,
+                        storeNum: storeNum,
+                        market: regMarket,
+                        city: regMarket,
+                        trainees: [{ name: name, email: email }]
+                    })
+                });
             } catch (mailErr) {
                 console.warn("Confirmation email proxy failed:", mailErr);
             }
@@ -1396,8 +1434,8 @@ export async function onRequestPost(context) {
                 success: true,
                 message: "Registration confirmed!",
                 classDate: cls.class_date,
-                startTime: cls.start_time,
-                endTime: cls.end_time,
+                startTime: formatTimeDisplay(cls.start_time),
+                endTime: formatTimeDisplay(cls.end_time),
                 meetLink: cls.meet_link,
                 trainer: cls.trainer
             }), { status: 200, headers: corsHeaders() });
