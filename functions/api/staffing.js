@@ -82,6 +82,154 @@ function renderActionHtml(title, message, headerColor) {
 </html>`;
 }
 
+// Domino's Fiscal Period Calendar Definitions (2025-2027)
+const DOMINOS_FISCAL_CALENDARS = [
+    // 2025
+    { period: "P01", start: "2024-12-30", end: "2025-01-26" },
+    { period: "P02", start: "2025-01-27", end: "2025-02-23" },
+    { period: "P03", start: "2025-02-24", end: "2025-03-23" },
+    { period: "P04", start: "2025-03-24", end: "2025-04-20" },
+    { period: "P05", start: "2025-04-21", end: "2025-05-18" },
+    { period: "P06", start: "2025-05-19", end: "2025-06-15" },
+    { period: "P07", start: "2025-06-16", end: "2025-07-13" },
+    { period: "P08", start: "2025-07-14", end: "2025-08-10" },
+    { period: "P09", start: "2025-08-11", end: "2025-09-07" },
+    { period: "P10", start: "2025-09-08", end: "2025-10-05" },
+    { period: "P11", start: "2025-10-06", end: "2025-11-02" },
+    { period: "P12", start: "2025-11-03", end: "2025-11-30" },
+    { period: "P13", start: "2025-12-01", end: "2025-12-28" },
+    // 2026
+    { period: "P01", start: "2025-12-29", end: "2026-01-25" },
+    { period: "P02", start: "2026-01-26", end: "2026-02-22" },
+    { period: "P03", start: "2026-02-23", end: "2026-03-22" },
+    { period: "P04", start: "2026-03-23", end: "2026-04-19" },
+    { period: "P05", start: "2026-04-20", end: "2026-05-17" },
+    { period: "P06", start: "2026-05-18", end: "2026-06-14" },
+    { period: "P07", start: "2026-06-15", end: "2026-07-12" },
+    { period: "P08", start: "2026-07-13", end: "2026-08-09" },
+    { period: "P09", start: "2026-08-10", end: "2026-09-06" },
+    { period: "P10", start: "2026-09-07", end: "2026-10-04" },
+    { period: "P11", start: "2026-10-05", end: "2026-11-01" },
+    { period: "P12", start: "2026-11-02", end: "2026-11-29" },
+    { period: "P13", start: "2026-11-30", end: "2026-12-27" },
+    // 2027
+    { period: "P01", start: "2026-12-28", end: "2027-01-24" },
+    { period: "P02", start: "2027-01-25", end: "2027-02-21" },
+    { period: "P03", start: "2027-02-22", end: "2027-03-21" },
+    { period: "P04", start: "2027-03-22", end: "2027-04-18" },
+    { period: "P05", start: "2027-04-19", end: "2027-05-16" },
+    { period: "P06", start: "2027-05-17", end: "2027-06-13" },
+    { period: "P07", start: "2027-06-14", end: "2027-07-11" },
+    { period: "P08", start: "2027-07-12", end: "2027-08-08" },
+    { period: "P09", start: "2027-08-09", end: "2027-09-05" },
+    { period: "P10", start: "2027-09-06", end: "2027-10-03" },
+    { period: "P11", start: "2027-10-04", end: "2027-10-31" },
+    { period: "P12", start: "2027-11-01", end: "2027-11-28" },
+    { period: "P13", start: "2027-11-29", end: "2027-12-26" }
+];
+
+function calculateDominosPeriod(dateInput) {
+    if (!dateInput) return "P10";
+    let d = (dateInput instanceof Date) ? dateInput : new Date(dateInput);
+    if (isNaN(d.getTime())) {
+        const parts = String(dateInput).split(/[-/]/);
+        if (parts.length === 3) {
+            let m, day, y;
+            if (parts[0].length === 4) {
+                y = parseInt(parts[0], 10);
+                m = parseInt(parts[1], 10);
+                day = parseInt(parts[2], 10);
+            } else {
+                m = parseInt(parts[0], 10);
+                day = parseInt(parts[1], 10);
+                y = parseInt(parts[2], 10);
+            }
+            d = new Date(y, m - 1, day);
+        }
+    }
+    if (isNaN(d.getTime())) return "P10";
+
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const formatted = `${yyyy}-${mm}-${dd}`;
+
+    for (let i = 0; i < DOMINOS_FISCAL_CALENDARS.length; i++) {
+        if (formatted >= DOMINOS_FISCAL_CALENDARS[i].start && formatted <= DOMINOS_FISCAL_CALENDARS[i].end) {
+            return DOMINOS_FISCAL_CALENDARS[i].period;
+        }
+    }
+    return "P10";
+}
+
+// Automatically syncs any candidates with hired = 1 in onboarding_candidates into staffing_records
+async function syncHiredCandidatesToStaffing(db, market) {
+    try {
+        const missingHires = await db.prepare(`
+            SELECT c.id, c.market, c.name, c.position, c.store_num, c.do_name, c.nto_date, c.created_at
+            FROM onboarding_candidates c
+            WHERE c.market = ? AND c.hired = 1 AND TRIM(c.name) != ''
+              AND NOT EXISTS (
+                SELECT 1 FROM staffing_records s
+                WHERE s.market = c.market AND (
+                  (s.id IS NOT NULL AND s.id != '' AND s.id = c.id)
+                  OR (LOWER(TRIM(s.name)) = LOWER(TRIM(c.name)) AND s.store_num = c.store_num)
+                )
+              )
+        `).bind(market).all();
+
+        if (!missingHires || !missingHires.results || missingHires.results.length === 0) {
+            return 0;
+        }
+
+        const stores = await db.prepare("SELECT store_number, do_name FROM stores WHERE market = ?").bind(market).all();
+        const storeDoMap = new Map();
+        (stores.results || []).forEach(s => {
+            if (s.store_number && s.do_name) {
+                storeDoMap.set(String(s.store_number).trim(), s.do_name.trim());
+            }
+        });
+
+        const now = new Date();
+        const tz = market.toLowerCase() === "denver" ? "America/Denver" : "America/Chicago";
+        const dateStr = now.toLocaleDateString("en-US", { timeZone: tz });
+
+        const statements = [];
+        for (const cand of missingHires.results) {
+            const rawHireDate = cand.nto_date || dateStr;
+            const period = calculateDominosPeriod(rawHireDate);
+            const resolvedDo = (cand.do_name || '').trim() || storeDoMap.get(String(cand.store_num || '').trim()) || '';
+            const newId = cand.id || `STF-ID-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+            statements.push(db.prepare(`
+                INSERT INTO staffing_records (
+                    id, market, fiscal_year, period, store_num, do_name, gm_name, name, position,
+                    hire_date, term_date, rehire_eligible, cause_of_action, reason_of_action, notes,
+                    received_date, source_sheet, updated_at
+                ) VALUES (?, ?, 2026, ?, ?, ?, '', ?, ?, ?, '', 'Yes', '', '', '', '', 'Auto-Hired from NTO', CURRENT_TIMESTAMP)
+            `).bind(
+                newId,
+                cand.market || market,
+                period,
+                cand.store_num || '',
+                resolvedDo,
+                cand.name || '',
+                cand.position || 'CSR',
+                rawHireDate
+            ));
+        }
+
+        if (statements.length > 0) {
+            await db.batch(statements);
+            console.log(`Auto-synced ${statements.length} hired candidates to staffing_records for ${market}`);
+        }
+        return statements.length;
+    } catch (err) {
+        console.error("Error in syncHiredCandidatesToStaffing:", err);
+        return 0;
+    }
+}
+
 export async function onRequestOptions() {
     return new Response(null, { headers: corsHeaders(), status: 204 });
 }
@@ -548,6 +696,9 @@ export async function onRequestGet(context) {
     const storeNum = url.searchParams.get("storeNum") || url.searchParams.get("store");
 
     try {
+        // Auto-heal: Ensure any candidate marked hired in onboarding is present in staffing_records
+        await syncHiredCandidatesToStaffing(db, market);
+
         // Parallel queries to D1
         const [
             candidatesRes,
@@ -1011,6 +1162,9 @@ export async function onRequestPost(context) {
                     last_updated = ?
                 WHERE id = ?
             `).bind(shirtSize, hatStyle, payCard, formattedScore, timestampStr, ssnLast4, timestampStr, candidateId).run();
+
+            // Auto-sync new hire into staffing_records
+            await syncHiredCandidatesToStaffing(db, candidate.market || market || "Dallas");
 
             // 4. Fetch store & GM details
             const store = await db.prepare("SELECT * FROM stores WHERE store_number = ? LIMIT 1")
@@ -1971,6 +2125,70 @@ export async function onRequestPost(context) {
         // 4. Email & NTO Automation Actions: Proxy to Google Apps Script Gmail microservice
         if (action === "sendEmail" || action === "sendNtoMeetLinks" || action === "sendWelcomeLetter" || action === "concludeNtoClass" || action === "resendBonnieNtoEmail" || action === "testNtoPayrollReport" || action === "sendNtoPayrollReport" || action === "setupNtoPayrollTrigger" || action === "disableNtoPayrollTrigger") {
             try {
+                // If concluding NTO class, update trainee records and sync them into staffing_records in D1
+                if (action === "concludeNtoClass") {
+                    const roster = payload.roster || [];
+                    if (Array.isArray(roster) && roster.length > 0) {
+                        const concludeStatements = [];
+                        const tz = market.toLowerCase() === "denver" ? "America/Denver" : "America/Chicago";
+                        const nowFormatted = getNowFormatted(tz);
+
+                        for (const item of roster) {
+                            const attVal = (item.attendance || item.ntoAttendance || item.finalAttendance || '').trim();
+                            let hiredVal = null;
+                            let missedNtoVal = null;
+                            if (attVal === "NTO Complete" || attVal === "Attended") {
+                                hiredVal = 1;
+                                missedNtoVal = 0;
+                            } else if (attVal === "Not in NTO") {
+                                hiredVal = 0;
+                                missedNtoVal = 1;
+                            }
+                            const shirtVal = item.shirtSize || item.shirt || '';
+                            const hatVal = item.hatStyle || item.hat || '';
+                            const payCardVal = item.payCard || item.paycard || '';
+                            const ssnVal = String(item.ssnLast4 || item.ssn || item.ssn_last_4 || '').trim();
+                            const ntoCompVal = item.ntoCompletedAt || item.nto_completed_at || (attVal === "NTO Complete" ? nowFormatted : '');
+
+                            if (item.id) {
+                                concludeStatements.push(db.prepare(`
+                                    UPDATE onboarding_candidates SET
+                                        nto_attendance = COALESCE(NULLIF(?, ''), nto_attendance),
+                                        hired = COALESCE(?, hired),
+                                        missed_nto = COALESCE(?, missed_nto),
+                                        shirt_size = CASE WHEN ? != '' THEN ? ELSE shirt_size END,
+                                        hat_style = CASE WHEN ? != '' THEN ? ELSE hat_style END,
+                                        pay_card = CASE WHEN ? != '' THEN ? ELSE pay_card END,
+                                        ssn_last_4 = CASE WHEN ? != '' THEN ? ELSE ssn_last_4 END,
+                                        nto_completed_at = CASE WHEN ? != '' THEN ? ELSE nto_completed_at END,
+                                        last_updated = ?,
+                                        updated_at = CURRENT_TIMESTAMP
+                                    WHERE id = ?
+                                `).bind(
+                                    attVal,
+                                    hiredVal,
+                                    missedNtoVal,
+                                    shirtVal, shirtVal,
+                                    hatVal, hatVal,
+                                    payCardVal, payCardVal,
+                                    ssnVal, ssnVal,
+                                    ntoCompVal, ntoCompVal,
+                                    nowFormatted,
+                                    item.id
+                                ));
+                            }
+                        }
+                        if (concludeStatements.length > 0) {
+                            try {
+                                await db.batch(concludeStatements);
+                            } catch (dbErr) {
+                                console.error("Failed to update roster on concludeNtoClass in D1:", dbErr);
+                            }
+                        }
+                        await syncHiredCandidatesToStaffing(db, market);
+                    }
+                }
+
                 // If resending Bonnie's email and SSNs are supplied in the roster, persist them to D1
                 if (action === "resendBonnieNtoEmail") {
                     const roster = payload.roster || payload.customRoster || [];
@@ -2101,6 +2319,9 @@ export async function onRequestPost(context) {
                 await db.batch(statements);
             }
 
+            // Ensure any trainees marked NTO Complete / Attended are synced to staffing_records
+            await syncHiredCandidatesToStaffing(db, market);
+
             // Sync with Google Apps Script in the background so Google Sheets stays in sync
             try {
                 fetch(APPS_SCRIPT_URL, {
@@ -2161,6 +2382,12 @@ export async function onRequestPost(context) {
                 `).bind(market, checklistJson).run();
             }
             return new Response(JSON.stringify({ success: true }), { status: 200, headers: corsHeaders() });
+        }
+
+        // 3b. Sync Hired Candidates from Onboarding to Staffing Records
+        if (action === "syncHiredToStaffing") {
+            const count = await syncHiredCandidatesToStaffing(db, market);
+            return new Response(JSON.stringify({ success: true, syncedCount: count }), { status: 200, headers: corsHeaders() });
         }
 
         // 4. Handle ADD Operations (Interviews, Staffing, Onboarding)
@@ -2398,6 +2625,19 @@ export async function onRequestPost(context) {
                 boolToInt(cand.withdrawn),
                 nowFormatted
             ).run();
+
+            if (cand.hired || (cand.ntoAttendance && (cand.ntoAttendance === "NTO Complete" || cand.ntoAttendance === "Attended"))) {
+                await syncHiredCandidatesToStaffing(db, market);
+            }
+
+            // Sync with Google Apps Script in background so Google Sheets stays in sync
+            try {
+                fetch(APPS_SCRIPT_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify(gasPayload)
+                }).catch(e => console.warn("GAS background candidate add sync warning:", e));
+            } catch (e) {}
 
             return new Response(JSON.stringify({ success: true, id: newId }), { status: 200, headers: corsHeaders() });
         }
@@ -2694,6 +2934,10 @@ export async function onRequestPost(context) {
                 cand.id
             ).run();
 
+            if (cand.hired || (cand.ntoAttendance && (cand.ntoAttendance === "NTO Complete" || cand.ntoAttendance === "Attended"))) {
+                await syncHiredCandidatesToStaffing(db, market);
+            }
+
             return new Response(JSON.stringify({ success: true, id: cand.id }), { status: 200, headers: corsHeaders() });
         }
 
@@ -2772,6 +3016,7 @@ export async function onRequestPost(context) {
 
             if (statements.length > 0) {
                 await db.batch(statements);
+                await syncHiredCandidatesToStaffing(db, market);
             }
 
             return new Response(JSON.stringify({ success: true, count: statements.length }), { status: 200, headers: corsHeaders() });
