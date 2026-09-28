@@ -5749,8 +5749,25 @@
         function processPayCards(data) {
             const onboardingList = data.onboarding || [];
             const serverPaycards = data.paycards || [];
+            const staffingList = data.staffing || [];
 
-            // Find all onboarding candidates with payCard = "Yes" (excluding inactive/ineligible)
+            // Identify terminated employees from Staffing records
+            const terminatedSet = new Set();
+            (staffingList || []).forEach(stf => {
+                const sName = (stf.name || '').trim().toLowerCase();
+                const sTerm = (stf.termDate || '').trim();
+                const sHire = (stf.hireDate || '').trim();
+                if (sName && sTerm) {
+                    const termTime = parseCandidateDate(sTerm)?.getTime() || 0;
+                    const hireTime = parseCandidateDate(sHire)?.getTime() || 0;
+                    if (termTime >= hireTime) {
+                        terminatedSet.add(sName);
+                        if (stf.id) terminatedSet.add(String(stf.id).trim().toLowerCase());
+                    }
+                }
+            });
+
+            // Find all onboarding candidates with payCard = "Yes" (excluding inactive/ineligible/withdrawn/terminated)
             const matchedFromOnboarding = onboardingList.filter(item => {
                 const val = (item.payCard || item.paycard || item.Paycard || "").toString().trim().toLowerCase();
                 const hasPayCard = val === "yes" || val === "true" || val === "1" || val.includes("yes");
@@ -5758,6 +5775,13 @@
 
                 // Exclude candidates explicitly marked inactive, ineligible, or withdrawn
                 if (item.ineligible || item.inactive || item.withdrawn) return false;
+
+                // Exclude candidates who have been terminated in staffing
+                const cName = (item.name || '').trim().toLowerCase();
+                const cId = (item.id || '').trim().toLowerCase();
+                if (terminatedSet.has(cName) || (cId && terminatedSet.has(cId))) {
+                    return false;
+                }
 
                 return true;
             }).map(item => {
@@ -7828,18 +7852,36 @@
         }
 
         async function deleteCurrentCandidate() {
-            const id = document.getElementById('fieldId').value;
-            const name = document.getElementById('fieldName').value || document.getElementById('intName').value || document.getElementById('stfName').value || "this record";
+            const id = (document.getElementById('fieldId')?.value || '').trim();
+            const name = (document.getElementById('fieldName')?.value || document.getElementById('intName')?.value || document.getElementById('stfName')?.value || document.getElementById('payName')?.value || "this record").trim();
             if (!id) return;
 
-            const confirmed = await showBrandConfirm(`Are you sure you want to permanently delete ${name}?`, "Confirm Permanent Deletion");
+            const isPayCardView = currentView === 'paycards';
+            const promptTitle = isPayCardView ? "Confirm Pay Card Removal" : "Confirm Permanent Deletion";
+            const promptMsg = isPayCardView ? `Are you sure you want to remove the pay card record for ${name}?` : `Are you sure you want to permanently delete ${name}?`;
+
+            const confirmed = await showBrandConfirm(promptMsg, promptTitle);
             if (!confirmed) return;
 
-            showLoader(true, "Deleting record from sheet...");
+            showLoader(true, isPayCardView ? "Removing pay card..." : "Deleting record...");
 
             try {
-                await apiCall('POST', { action: "delete", target: currentView, id: id });
-                showBrandAlert(`${name} was permanently deleted.`, "Record Deleted");
+                await apiCall('POST', { action: "delete", target: currentView, id: id, name: name });
+                showBrandAlert(isPayCardView ? `Pay card record for ${name} was removed.` : `${name} was permanently deleted.`, isPayCardView ? "Pay Card Removed" : "Record Deleted");
+
+                // Immediately purge from local paycards list
+                if (isPayCardView) {
+                    paycards = paycards.filter(c => String(c.id) !== String(id));
+                    const onbMatch = candidates.find(c => String(c.id) === String(id));
+                    if (onbMatch) {
+                        onbMatch.payCard = '';
+                        onbMatch.paycard = '';
+                        onbMatch.cardReceived = false;
+                        onbMatch.registered = false;
+                        onbMatch.ddReceived = false;
+                        onbMatch.ddEntered = false;
+                    }
+                }
 
                 // Refresh data
                 const data = await apiCall('GET');
@@ -7848,6 +7890,22 @@
                 staffing = data.staffing || [];
                 contacts = data.contacts || [];
                 paycards = processPayCards(data);
+
+                // Update local storage cache
+                const u = localStorage.getItem('onb_user');
+                if (u) {
+                    try {
+                        const raw = localStorage.getItem(`cached_workspace_data_${u}`);
+                        if (raw) {
+                            const cached = JSON.parse(raw);
+                            cached.onboarding = candidates;
+                            cached.interviews = interviews;
+                            cached.staffing = staffing;
+                            cached.paycards = paycards;
+                            localStorage.setItem(`cached_workspace_data_${u}`, JSON.stringify(cached));
+                        }
+                    } catch (e) { }
+                }
 
                 clearForm();
                 renderList();

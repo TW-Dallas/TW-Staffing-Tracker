@@ -3036,6 +3036,37 @@ export async function onRequestPost(context) {
                 await db.prepare("DELETE FROM staffing_records WHERE id = ?").bind(id).run();
             } else if (target === "interviews") {
                 await db.prepare("DELETE FROM interviews WHERE id = ?").bind(id).run();
+            } else if (target === "paycards") {
+                const tz = market.toLowerCase() === "denver" ? "America/Denver" : "America/Chicago";
+                const nowFormatted = getNowFormatted(tz);
+                const candName = (payload.name || '').trim();
+                if (candName) {
+                    await db.prepare(`
+                        UPDATE onboarding_candidates SET
+                            pay_card = '',
+                            card_received = 0,
+                            registered = 0,
+                            dd_received = 0,
+                            dd_entered = 0,
+                            notice_sent_date = '',
+                            last_updated = ?,
+                            updated_at = CURRENT_TIMESTAMP
+                        WHERE id = ? OR LOWER(TRIM(name)) = LOWER(?)
+                    `).bind(nowFormatted, id, candName).run();
+                } else {
+                    await db.prepare(`
+                        UPDATE onboarding_candidates SET
+                            pay_card = '',
+                            card_received = 0,
+                            registered = 0,
+                            dd_received = 0,
+                            dd_entered = 0,
+                            notice_sent_date = '',
+                            last_updated = ?,
+                            updated_at = CURRENT_TIMESTAMP
+                        WHERE id = ?
+                    `).bind(nowFormatted, id).run();
+                }
             }
 
             return new Response(JSON.stringify({ success: true, deletedId: id }), { status: 200, headers: corsHeaders() });
