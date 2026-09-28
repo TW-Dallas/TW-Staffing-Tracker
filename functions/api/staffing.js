@@ -2322,17 +2322,6 @@ export async function onRequestPost(context) {
             // Ensure any trainees marked NTO Complete / Attended are synced to staffing_records
             await syncHiredCandidatesToStaffing(db, market);
 
-            // Sync with Google Apps Script in the background so Google Sheets stays in sync
-            try {
-                fetch(APPS_SCRIPT_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify(gasPayload)
-                }).catch(e => console.warn("GAS background attendance sync warning:", e));
-            } catch (e) {
-                console.warn("GAS fetch trigger failed:", e);
-            }
-
             return new Response(JSON.stringify({ success: true, message: `Live attendance updated for ${roster.length} trainees!` }), {
                 status: 200,
                 headers: corsHeaders()
@@ -2552,15 +2541,6 @@ export async function onRequestPost(context) {
                         }
                     }
                 }
-
-                // Background sync to GAS
-                try {
-                    fetch(APPS_SCRIPT_URL, {
-                        method: "POST",
-                        headers: { "Content-Type": "text/plain;charset=utf-8" },
-                        body: JSON.stringify(gasPayload)
-                    }).catch(e => console.warn("GAS background staffing sync warning:", e));
-                } catch (e) {}
 
                 return new Response(JSON.stringify({ success: true, id: newId, savedStints: savedStints }), { status: 200, headers: corsHeaders() });
             }
@@ -2821,15 +2801,6 @@ export async function onRequestPost(context) {
                         }
                     }
                 }
-
-                // Background sync to GAS
-                try {
-                    fetch(APPS_SCRIPT_URL, {
-                        method: "POST",
-                        headers: { "Content-Type": "text/plain;charset=utf-8" },
-                        body: JSON.stringify(gasPayload)
-                    }).catch(e => console.warn("GAS background staffing sync warning:", e));
-                } catch (e) {}
 
                 return new Response(JSON.stringify({ success: true, id: payload.id, savedStints: savedStints }), { status: 200, headers: corsHeaders() });
             }
