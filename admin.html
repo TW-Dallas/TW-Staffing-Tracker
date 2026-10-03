@@ -1020,7 +1020,7 @@
                             <!-- Sessions Count / Summary Badge Bar -->
                             <div style="display: flex; justify-content: space-between; align-items: center; background: var(--crust-light); border: 1px solid var(--crust-med); border-radius: 6px; padding: 6px 12px; margin-bottom: 8px; flex-shrink: 0; font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-burnt);">
                                 <div>Showing: <strong id="mitSessionCountDisp">0</strong> Upcoming Sessions</div>
-                                <div style="display: flex; gap: 12px; font-size: 12px;">
+                                <div id="mitLevelLegendBar" style="display: flex; gap: 12px; font-size: 12px;">
                                     <span style="color: var(--dark-blue);">● Level 1: Every 4 Wks</span>
                                     <span style="color: var(--crust-deep);">● Level 2: Every 8 Wks</span>
                                     <span style="color: var(--brand-red);">● Level 3: Every 12 Wks</span>
@@ -1033,7 +1033,7 @@
                                     <thead>
                                         <tr style="background: var(--dark-blue); color: white; position: sticky; top: 0; font-family: 'Subhead2'; font-size: 13.5px; text-transform: uppercase; z-index: 10;">
                                             <th style="padding: 9px 12px;">Date & ID</th>
-                                            <th style="padding: 9px 12px;">Course & Level</th>
+                                            <th id="mitThCourse" style="padding: 9px 12px;">Course & Level</th>
                                             <th style="padding: 9px 12px; text-align: center;">Center / Time</th>
                                             <th style="padding: 9px 12px; text-align: center;">Trainer</th>
                                             <th style="padding: 9px 12px; text-align: center;">Seats</th>
@@ -2806,6 +2806,7 @@
         }
         // Helper function for safe workspace feature toggling
         function updateWorkspaceVisibility(city) {
+            window.currentCity = city;
             const isDenver = (city || '').toLowerCase() === 'denver';
 
             const toggleInt = document.getElementById('toggleInt');
@@ -2893,6 +2894,19 @@
                     `;
                 }
             }
+
+            // Toggle MIT Level controls (Dallas uses Levels 1-3, Denver does not use Levels)
+            const mitFilterLvl = document.getElementById('mitFilterLevel');
+            const mitLegend = document.getElementById('mitLevelLegendBar');
+            const mitThCourse = document.getElementById('mitThCourse');
+            const mitModalLevelGroup = document.getElementById('mitModalLevelGroup');
+            const mitModalCourseGroup = document.getElementById('mitModalCourseGroup');
+
+            if (mitFilterLvl) mitFilterLvl.style.display = isDenver ? 'none' : 'inline-block';
+            if (mitLegend) mitLegend.style.display = isDenver ? 'none' : 'flex';
+            if (mitThCourse) mitThCourse.innerText = isDenver ? 'Course Name' : 'Course & Level';
+            if (mitModalLevelGroup) mitModalLevelGroup.style.display = isDenver ? 'none' : 'block';
+            if (mitModalCourseGroup) mitModalCourseGroup.style.gridColumn = isDenver ? 'span 2' : 'auto';
 
             // 🚫 Hide Pay Card input field on candidate form for Denver
             const payCardGroup = document.getElementById('payCardFormGroup');
@@ -8770,7 +8784,12 @@
 
             try {
                 const u = localStorage.getItem('onb_user') || '';
-                const currentCity = getCityFromUser(u);
+                const headerCityText = document.getElementById('headerCity') ? document.getElementById('headerCity').innerText : '';
+                let currentCity = window.currentCity || getCityFromUser(u);
+                if (!currentCity || currentCity === 'System') {
+                    if (headerCityText.toLowerCase().includes('denver')) currentCity = 'Denver';
+                    else currentCity = 'Dallas';
+                }
                 const res = await fetch(`${D1_API_URL}?action=getMitClasses&market=${encodeURIComponent(currentCity || 'Dallas')}`);
                 const data = await res.json();
                 if (!data.success || !data.classes || data.classes.length === 0) {
@@ -8830,6 +8849,12 @@
                 return;
             }
 
+            const u = localStorage.getItem('onb_user') || '';
+            const headerCityText = document.getElementById('headerCity') ? document.getElementById('headerCity').innerText : '';
+            const isCurrentDenver = (window.currentCity || '').toLowerCase() === 'denver' ||
+                                    getCityFromUser(u).toLowerCase() === 'denver' ||
+                                    headerCityText.toLowerCase().includes('denver');
+
             tbody.innerHTML = '';
             filtered.forEach(c => {
                 const row = document.createElement('tr');
@@ -8850,16 +8875,21 @@
                 const spotsBadgeColor = spotsLeft === 0 ? '#ffffff' : 'var(--dark-blue)';
                 const spotsBadgeBorder = spotsLeft === 0 ? 'none' : '1px solid var(--dark-blue)';
 
+                const isClassDenver = isCurrentDenver || (c.market || '').toLowerCase() === 'denver';
+                const levelBadgeHTML = isClassDenver ? '' : `
+                    <br>
+                    <span style="display: inline-block; background: ${levelBadgeBg}; color: ${levelBadgeColor}; font-size: 11px; padding: 2px 7px; border-radius: 4px; font-family: 'Subhead2'; text-transform: uppercase; margin-top: 2px;">
+                        Level ${c.level}
+                    </span>
+                `;
+
                 row.innerHTML = `
                     <td style="padding: 10px 12px; font-weight: bold; color: var(--dark-blue); font-size: 16px;">
                         ${c.classDate} <br>
                         <span style="font-size: 12px; color: var(--crust-deep); font-weight: normal; font-family: monospace;">${c.id}</span>
                     </td>
                     <td style="padding: 10px 12px; font-size: 16px;">
-                        <strong>${c.name}</strong><br>
-                        <span style="display: inline-block; background: ${levelBadgeBg}; color: ${levelBadgeColor}; font-size: 11px; padding: 2px 7px; border-radius: 4px; font-family: 'Subhead2'; text-transform: uppercase; margin-top: 2px;">
-                            Level ${c.level}
-                        </span>
+                        <strong>${c.name}</strong>${levelBadgeHTML}
                     </td>
                     <td style="padding: 10px 12px; text-align: center; font-size: 15px;">
                         <strong>📍 ${c.location}</strong><br>
@@ -8923,11 +8953,17 @@
             } else {
                 const tomorrow = new Date();
                 tomorrow.setDate(tomorrow.getDate() + 1);
+                const u = localStorage.getItem('onb_user') || '';
+                const headerCityText = document.getElementById('headerCity') ? document.getElementById('headerCity').innerText : '';
+                const isDenverModal = (window.currentCity || '').toLowerCase() === 'denver' ||
+                                      getCityFromUser(u).toLowerCase() === 'denver' ||
+                                      headerCityText.toLowerCase().includes('denver');
+
                 document.getElementById('mitModalDate').value = tomorrow.toISOString().split('T')[0];
-                document.getElementById('mitModalCourse').value = "Operations Assessment";
+                document.getElementById('mitModalCourse').value = isDenverModal ? "Creating a Schedule/Labor Class" : "Operations Assessment";
                 document.getElementById('mitModalLevel').value = "1";
-                document.getElementById('mitModalLocation').value = "McKinney";
-                document.getElementById('mitModalTrainer').value = "Rebecca";
+                document.getElementById('mitModalLocation').value = isDenverModal ? "Academy" : "McKinney";
+                document.getElementById('mitModalTrainer').value = isDenverModal ? "Nick" : "Rebecca";
                 document.getElementById('mitModalStart').value = "11:00 AM";
                 document.getElementById('mitModalEnd').value = "1:00 PM";
                 document.getElementById('mitModalCapacity').value = 15;
@@ -9678,7 +9714,7 @@
                 <input type="hidden" id="mitEditClassId">
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-                    <div>
+                    <div id="mitModalCourseGroup">
                         <label style="font-family: 'Subhead2'; font-size: 13px; color: var(--dark-blue); display: block; margin-bottom: 3px; text-transform: uppercase;">
                             Course Name:
                         </label>
@@ -9700,7 +9736,7 @@
                         </select>
                     </div>
 
-                    <div>
+                    <div id="mitModalLevelGroup">
                         <label style="font-family: 'Subhead2'; font-size: 13px; color: var(--dark-blue); display: block; margin-bottom: 3px; text-transform: uppercase;">
                             Level:
                         </label>
