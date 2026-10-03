@@ -4,7 +4,7 @@
 <head>
     <script>
         if (window.location.hostname.endsWith('github.io')) {
-            window.location.replace('https://tw-dallas-staffing.pages.dev/denver-orientation' + window.location.search);
+            window.location.replace('https://tw-staffing.pages.dev/denver-orientation' + window.location.search);
         }
     </script>
     <meta charset="UTF-8">
@@ -176,12 +176,18 @@
             font-family: 'Subhead2', sans-serif;
         }
 
-        /* CLASS GRID - 4 per row on desktop, 1 on mobile */
+        /* CLASS GRID - 4 per row on desktop, 2 on tablet, 1 on mobile */
         .class-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 330px));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 16px;
             align-items: stretch;
+        }
+
+        @media (max-width: 1024px) {
+            .class-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
         }
 
         /* CLASS CARD */
@@ -194,7 +200,6 @@
             flex-direction: column;
             overflow: hidden;
             transition: transform 0.2s, box-shadow 0.2s;
-            max-width: 360px;
             width: 100%;
             box-sizing: border-box;
         }
@@ -211,6 +216,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
         }
 
         .date-badge {
@@ -1248,11 +1255,11 @@
             const now = new Date();
             const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
 
-            // Filter out past classes: only show classes scheduled for today or in the future
+            // Filter out past classes: only show classes scheduled for today or in the future (max 2 rows of 4 = 8 classes)
             const upcomingClasses = (classes || []).filter(cls => {
                 const classDay = parseClassDate(cls.classDate);
                 return classDay >= todayStart;
-            });
+            }).slice(0, 8);
 
             if (!upcomingClasses || upcomingClasses.length === 0) {
                 grid.innerHTML = `

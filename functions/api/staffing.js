@@ -373,17 +373,18 @@ export async function onRequestGet(context) {
             // 4. Send Confirmation & Google Meet link via Apps Script microservice
             try {
                 if (cls && reg.email) {
+                    const isDen = (reg.market || "").toLowerCase() === "denver" || (cls && (cls.market || "").toLowerCase() === "denver");
                     await fetch(APPS_SCRIPT_URL, {
                         method: "POST",
                         headers: { "Content-Type": "text/plain;charset=utf-8" },
                         body: JSON.stringify({
-                            username: "dallas_admin",
-                            password: "dallas_password_123",
+                            username: isDen ? "denver_admin" : "dallas_admin",
+                            password: isDen ? "denver_password_123" : "dallas_password_123",
                             action: "sendNtoMeetLinks",
                             classDate: cls.class_date,
                             classTime: cls.start_time,
-                            meetLink: cls.meet_link || "https://meet.google.com/zwc-afuu-hgh",
-                            trainerName: cls.trainer || "Mike Jacobs",
+                            meetLink: cls.meet_link || (isDen ? "https://meet.google.com/haf-izyt-gws" : "https://meet.google.com/zwc-afuu-hgh"),
+                            trainerName: cls.trainer || (isDen ? "Richard Keske" : "Mike Jacobs"),
                             notifyAdmin: false,
                             studentPhone: reg.phone,
                             storeNum: reg.store_num,
@@ -1451,7 +1452,7 @@ export async function onRequestPost(context) {
                         action: "sendNtoMeetLinks",
                         classDate: cls.class_date,
                         classTime: formatTimeDisplay(cls.start_time),
-                        meetLink: cls.meet_link || (isDen ? "" : "https://meet.google.com/zwc-afuu-hgh"),
+                        meetLink: cls.meet_link || (isDen ? "https://meet.google.com/haf-izyt-gws" : "https://meet.google.com/zwc-afuu-hgh"),
                         trainerName: cls.trainer || (isDen ? "Richard Keske" : "Mike Jacobs"),
                         notifyAdmin: true,
                         studentPhone: phone,
@@ -1568,17 +1569,18 @@ export async function onRequestPost(context) {
 
             if (sendEmailNotification && recipientEmail && recipientEmail.includes("@")) {
                 try {
+                    const isDen = (targetClass.market || "").toLowerCase() === "denver";
                     await fetch(APPS_SCRIPT_URL, {
                         method: "POST",
                         headers: { "Content-Type": "text/plain;charset=utf-8" },
                         body: JSON.stringify({
-                            username: "dallas_admin",
-                            password: "dallas_password_123",
+                            username: isDen ? "denver_admin" : "dallas_admin",
+                            password: isDen ? "denver_password_123" : "dallas_password_123",
                             action: "sendNtoMeetLinks",
                             classDate: targetClass.class_date,
                             classTime: targetClass.start_time,
-                            meetLink: targetClass.meet_link || "https://meet.google.com/zwc-afuu-hgh",
-                            trainerName: targetClass.trainer || "Mike Jacobs",
+                            meetLink: targetClass.meet_link || (isDen ? "https://meet.google.com/haf-izyt-gws" : "https://meet.google.com/zwc-afuu-hgh"),
+                            trainerName: targetClass.trainer || (isDen ? "Richard Keske" : "Mike Jacobs"),
                             trainees: [{ name: recipientName, email: recipientEmail }]
                         })
                     });
@@ -1606,7 +1608,7 @@ export async function onRequestPost(context) {
             const endTime = payload.endTime || "7:15 PM";
             const trainer = payload.trainerName || payload.trainer || (market === "Denver" ? "Richard" : "Mike");
             const capacity = parseInt(payload.capacity || 15, 10);
-            const meetLink = payload.meetLink || (market === "Denver" ? "" : "https://meet.google.com/zwc-afuu-hgh");
+            const meetLink = payload.meetLink || (market === "Denver" ? "https://meet.google.com/haf-izyt-gws" : "https://meet.google.com/zwc-afuu-hgh");
 
             // Duplicate guard: prevent multiple sessions on the same date for this market
             const existing = await db.prepare("SELECT id FROM training_classes WHERE class_date = ? AND market = ? AND is_active = 1").bind(classDate, market).first();
@@ -1642,6 +1644,109 @@ export async function onRequestPost(context) {
             } catch(e) {}
 
             return new Response(JSON.stringify({ success: true, message: "New orientation session added!", id: classId }), {
+                status: 200,
+                headers: corsHeaders()
+            });
+        }
+
+        // 2b. Reschedule NTO Class in D1 (with automatic candidate roster migration & notifications)
+        if (action === "rescheduleNtoClass") {
+            const classId = payload.classId;
+            const newClassDate = payload.newClassDate;
+            const newStartTime = payload.newStartTime || payload.startTime || "6:00 PM";
+            const newEndTime = payload.newEndTime || payload.endTime || "7:15 PM";
+            const trainer = payload.trainerName || payload.trainer;
+            const notifyAttendees = payload.notifyAttendees !== false;
+
+            if (!classId || !newClassDate) {
+                return new Response(JSON.stringify({ error: "Missing required classId or newClassDate." }), {
+                    status: 400,
+                    headers: corsHeaders()
+                });
+            }
+
+            const currentClass = await db.prepare("SELECT * FROM training_classes WHERE id = ?").bind(classId).first();
+            if (!currentClass) {
+                return new Response(JSON.stringify({ error: "Original class session not found." }), {
+                    status: 404,
+                    headers: corsHeaders()
+                });
+            }
+
+            const oldClassDate = currentClass.class_date;
+
+            // Generate new class ID based on new date
+            let idDatePart = "";
+            const parts = newClassDate.split('/');
+            if (parts.length === 3) {
+                idDatePart = parts[2] + parts[0].padStart(2, '0') + parts[1].padStart(2, '0');
+            } else {
+                idDatePart = newClassDate.replace(/[^0-9]/g, '');
+            }
+            const trainerCode = (currentClass.market || market) === "Denver" ? "Ric" : "Mik";
+            const newClassId = `${idDatePart}-00-${trainerCode}`;
+
+            // Check if a class already exists on the new date
+            const existingOnNewDate = await db.prepare("SELECT id FROM training_classes WHERE class_date = ? AND market = ? AND is_active = 1 AND id != ?").bind(newClassDate, currentClass.market, classId).first();
+            if (existingOnNewDate) {
+                return new Response(JSON.stringify({ error: `A session is already scheduled on ${newClassDate}. Please select another date.` }), {
+                    status: 400,
+                    headers: corsHeaders()
+                });
+            }
+
+            // Update training_classes record
+            await db.prepare(`
+                UPDATE training_classes 
+                SET id = ?,
+                    class_date = ?,
+                    start_time = COALESCE(?, start_time),
+                    end_time = COALESCE(?, end_time),
+                    trainer = COALESCE(?, trainer),
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            `).bind(newClassId, newClassDate, newStartTime, newEndTime, trainer, classId).run();
+
+            // Migrate all registered candidates from old classId to newClassId
+            await db.prepare("UPDATE class_registrations SET class_id = ?, updated_at = CURRENT_TIMESTAMP WHERE class_id = ?").bind(newClassId, classId).run();
+
+            // Also update onboarding_candidates whose nto_date was the old date
+            await db.prepare("UPDATE onboarding_candidates SET nto_date = ?, updated_at = CURRENT_TIMESTAMP WHERE nto_date = ? AND market = ?").bind(newClassDate, oldClassDate, currentClass.market).run();
+
+            // Fetch all confirmed attendees to notify them
+            const attendeesRes = await db.prepare("SELECT * FROM class_registrations WHERE class_id = ? AND (status = 'Confirmed' OR status IS NULL OR status = '')").bind(newClassId).all();
+            const attendees = attendeesRes.results || [];
+
+            if (notifyAttendees && attendees.length > 0) {
+                try {
+                    const isDen = (currentClass.market || market).toLowerCase() === "denver";
+                    fetch(APPS_SCRIPT_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify({
+                            username: isDen ? "denver_admin" : "dallas_admin",
+                            password: isDen ? "denver_password_123" : "dallas_password_123",
+                            action: "sendClassRescheduledNotice",
+                            program: "NTO",
+                            market: currentClass.market,
+                            oldClassDate: oldClassDate,
+                            newClassDate: newClassDate,
+                            newStartTime: newStartTime,
+                            newEndTime: newEndTime,
+                            meetLink: currentClass.meet_link || (isDen ? "https://meet.google.com/haf-izyt-gws" : "https://meet.google.com/zwc-afuu-hgh"),
+                            trainerName: trainer || currentClass.trainer || (isDen ? "Richard Keske" : "Mike Jacobs"),
+                            trainees: attendees.map(a => ({ name: a.candidate_name, email: a.email, storeNum: a.store_num, phone: a.phone }))
+                        })
+                    }).catch(() => {});
+                } catch(e) {}
+            }
+
+            return new Response(JSON.stringify({
+                success: true,
+                message: `Class successfully rescheduled to ${newClassDate}. Migrated ${attendees.length} registered candidate(s).`,
+                newClassId: newClassId,
+                attendeesNotified: attendees.length
+            }), {
                 status: 200,
                 headers: corsHeaders()
             });
@@ -1840,16 +1945,45 @@ export async function onRequestPost(context) {
             if (!classId) {
                 return new Response(JSON.stringify({ success: false, error: "Missing classId" }), { status: 400, headers: corsHeaders() });
             }
-            const trainer = payload.trainer || payload.trainerName;
-            const location = payload.location;
-            const startTime = payload.startTime;
-            const endTime = payload.endTime;
-            const capacity = payload.capacity || payload.spotsTotal;
-            const meetLink = payload.meetLink;
+
+            const currentClass = await db.prepare("SELECT * FROM training_classes WHERE id = ?").bind(classId).first();
+            if (!currentClass) {
+                return new Response(JSON.stringify({ success: false, error: "MIT class session not found." }), { status: 404, headers: corsHeaders() });
+            }
+
+            const oldClassDate = currentClass.class_date;
+            const newClassDate = payload.classDate || oldClassDate;
+            const dateChanged = Boolean(newClassDate && newClassDate !== oldClassDate);
+
+            // Automatically recalculate close_date when classDate changes (default 4:00 PM UTC / 10:00 AM MT on session day)
+            let newCloseDate = payload.closeDate || null;
+            if (!newCloseDate && dateChanged && newClassDate) {
+                const parts = newClassDate.split('/');
+                if (parts.length === 3) {
+                    const m = parts[0].padStart(2, '0');
+                    const d = parts[1].padStart(2, '0');
+                    const y = parts[2];
+                    newCloseDate = `${y}-${m}-${d}T16:00:00.000Z`;
+                }
+            }
+
+            const name = payload.name || currentClass.name;
+            const level = payload.level || currentClass.level;
+            const trainer = payload.trainer || payload.trainerName || currentClass.trainer;
+            const location = payload.location || currentClass.location;
+            const startTime = payload.startTime || currentClass.start_time;
+            const endTime = payload.endTime || currentClass.end_time;
+            const capacity = payload.capacity || payload.spotsTotal || currentClass.spots_total;
+            const meetLink = payload.meetLink !== undefined ? payload.meetLink : currentClass.meet_link;
+            const notifyAttendees = payload.notifyAttendees !== false;
 
             await db.prepare(`
                 UPDATE training_classes 
-                SET trainer = COALESCE(?, trainer),
+                SET class_date = COALESCE(?, class_date),
+                    close_date = COALESCE(?, close_date),
+                    name = COALESCE(?, name),
+                    level = COALESCE(?, level),
+                    trainer = COALESCE(?, trainer),
                     location = COALESCE(?, location),
                     start_time = COALESCE(?, start_time),
                     end_time = COALESCE(?, end_time),
@@ -1857,9 +1991,61 @@ export async function onRequestPost(context) {
                     meet_link = COALESCE(?, meet_link),
                     updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
-            `).bind(trainer, location, startTime, endTime, capacity, meetLink, classId).run();
+            `).bind(newClassDate, newCloseDate, name, level, trainer, location, startTime, endTime, capacity, meetLink, classId).run();
 
-            return new Response(JSON.stringify({ success: true, message: "MIT class updated." }), { status: 200, headers: corsHeaders() });
+            // Safety cascade: If the class ID is being re-keyed to a new ID, cascade update to all enrollees
+            const newClassId = payload.newClassId;
+            if (newClassId && newClassId !== classId) {
+                await db.prepare("UPDATE training_classes SET id = ? WHERE id = ?").bind(newClassId, classId).run();
+                await db.prepare("UPDATE class_registrations SET class_id = ? WHERE class_id = ?").bind(newClassId, classId).run();
+            }
+
+            // If date changed, notify all confirmed registered attendees!
+            let attendeesNotified = 0;
+            if (dateChanged && notifyAttendees) {
+                const attendeesRes = await db.prepare("SELECT * FROM class_registrations WHERE class_id = ? AND (status = 'Confirmed' OR status IS NULL OR status = '')").bind(classId).all();
+                const attendees = attendeesRes.results || [];
+                attendeesNotified = attendees.length;
+
+                if (attendees.length > 0) {
+                    try {
+                        const isDen = (currentClass.market || market).toLowerCase() === "denver";
+                        fetch(APPS_SCRIPT_URL, {
+                            method: "POST",
+                            headers: { "Content-Type": "text/plain;charset=utf-8" },
+                            body: JSON.stringify({
+                                username: isDen ? "denver_admin" : "dallas_admin",
+                                password: isDen ? "denver_password_123" : "dallas_password_123",
+                                action: "sendClassRescheduledNotice",
+                                program: "MIT",
+                                className: name,
+                                level: level,
+                                market: currentClass.market,
+                                oldClassDate: oldClassDate,
+                                newClassDate: newClassDate,
+                                newStartTime: startTime,
+                                newEndTime: endTime,
+                                location: location,
+                                trainerName: trainer,
+                                trainees: attendees.map(a => ({ 
+                                    name: a.candidate_name, 
+                                    email: a.email, 
+                                    storeNum: a.store_num, 
+                                    phone: a.phone, 
+                                    position: a.position 
+                                }))
+                            })
+                        }).catch(() => {});
+                    } catch(e) {}
+                }
+            }
+
+            return new Response(JSON.stringify({ 
+                success: true, 
+                message: dateChanged ? `MIT class rescheduled to ${newClassDate}. Notified ${attendeesNotified} attendee(s).` : "MIT class updated.", 
+                dateChanged: dateChanged,
+                attendeesNotified: attendeesNotified
+            }), { status: 200, headers: corsHeaders() });
         }
 
         if (action === "registerMitClass" || action === "registerMitCandidate") {
@@ -2288,6 +2474,16 @@ export async function onRequestPost(context) {
                         }
                     }
                 }
+                const isDenverMarket = (market || "").toLowerCase() === "denver";
+                const gasUser = isDenverMarket ? "denver_admin" : "dallas_admin";
+                const gasPass = isDenverMarket ? "denver_password_123" : "dallas_password_123";
+                const gasPayload = {
+                    ...payload,
+                    username: gasUser,
+                    password: gasPass,
+                    market: market,
+                    city: market
+                };
                 const gasQuery = new URLSearchParams({
                     username: gasUser,
                     password: gasPass,

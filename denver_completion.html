@@ -1706,9 +1706,31 @@
             document.getElementById('successGmName').textContent = gmName;
             document.getElementById('successGmPhone').textContent = gmPhone || "Provided in Welcome Letter";
 
+            // Format GM First Name (fallback to "Hello" if generic/missing)
+            let gmGreeting = "Hello";
+            if (gmName && !/^(your\s+)?(general\s+manager|store\s+management|store\s+manager|gm)$/i.test(gmName.trim())) {
+                const gmFirst = gmName.trim().split(/\s+/)[0];
+                if (gmFirst) gmGreeting = `Hi ${gmFirst}`;
+            }
+
+            // Format candidate full name
+            const candidateFullName = (currentCandidate.name || `${currentCandidate.firstName || ''} ${currentCandidate.lastName || ''}`).trim() || "a new team member";
+
+            // Format position & article (e.g. "a new Delivery Driver", "a new CSR", "an Assistant Manager")
+            const rawPos = (currentCandidate.position || '').trim().toUpperCase();
+            let positionLabel = currentCandidate.position || 'team member';
+            if (rawPos === 'DE' || rawPos.includes('DRIVER')) positionLabel = 'Delivery Driver';
+            else if (rawPos === 'CSR' || rawPos.includes('INSIDE') || rawPos.includes('CUSTOMER')) positionLabel = 'CSR';
+            else if (rawPos === 'BIKE') positionLabel = 'Bike Driver';
+            else if (rawPos === 'AM' || rawPos.includes('ASSISTANT')) positionLabel = 'Assistant Manager';
+            else if (rawPos === 'MIT' || rawPos.includes('MANAGER IN TRAINING')) positionLabel = 'Manager in Training';
+
+            const article = /^[aeiou]/i.test(positionLabel) ? 'an' : 'a';
+
             // Configure 1-Tap Text GM / Leader SMS button
             const cleanPhone = gmPhone.replace(/\D/g, '');
-            const smsBody = encodeURIComponent(`Hi ${gmName}, this is ${currentCandidate.name}. I just completed Denver NTO for Store #${data.storeNum || currentCandidate.storeNum} and am reaching out for my training schedule!`);
+            const smsText = `${gmGreeting}, this is ${candidateFullName}, ${article} new ${positionLabel}. I just completed the virtual orientation class and am ready for my training schedule.`;
+            const smsBody = encodeURIComponent(smsText);
 
             const textBtn = document.getElementById('textGmBtn');
             const callBtn = document.getElementById('callGmBtn');

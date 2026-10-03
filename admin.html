@@ -146,10 +146,10 @@
                         <button type="button" id="toggleOnb" onclick="switchView('onboarding')">Onboarding</button>
                         <button type="button" id="toggleInt" onclick="switchView('interviews')">Interviews</button>
                         <button type="button" id="toggleStf" onclick="switchView('staffing')">Hires/Terms</button>
+                        <button type="button" id="toggleCnt" onclick="switchView('contacts')">Contacts</button>
                         <button type="button" id="togglePay" onclick="switchView('paycards')">Pay Cards</button>
                         <button type="button" id="toggleNto" onclick="switchView('nto')">NTO Class</button>
                         <button type="button" id="toggleMit" onclick="switchView('mit')">MIT Class</button>
-                        <button type="button" id="toggleCnt" onclick="switchView('contacts')">Contacts</button>
                     </div>
                 </div>
 
@@ -554,6 +554,7 @@
                                         <option value="Position Offered">🤝 Position Offered</option>
                                         <option value="Hired">🎉 Hired</option>
                                         <option value="No Show">❌ No Show</option>
+                                        <option value="Candidate Cancelled">🙅 Candidate Cancelled</option>
                                         <option value="Declined">🚫 Declined</option>
                                         <option value="Hold">⏸ Hold</option>
                                     </select>
@@ -604,7 +605,10 @@
                                         style="height: 80px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4;"></textarea>
                                 </div>
                                 <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                                    <label>Feedback & Notes</label>
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                                        <label style="margin-bottom: 0;">Feedback & Notes</label>
+                                        <span id="intAutoSaveStatus" style="font-size: 11.5px; font-family: 'Subhead2', sans-serif; font-weight: normal; color: var(--success-green); display: none; transition: opacity 0.3s ease;"></span>
+                                    </div>
                                     <textarea id="intNotes" placeholder="Write any specific interview notes here..."
                                         style="height: 80px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4;"></textarea>
                                 </div>
@@ -1863,6 +1867,7 @@
             // Generate 15-minute time options on page startup
             generateTimeOptions();
             initSmsTemplateListeners();
+            initInterviewAutoSaveListeners();
 
             const savedUser = localStorage.getItem('onb_user');
             const savedPass = localStorage.getItem('onb_pass');
@@ -2814,8 +2819,80 @@
             if (btnGmaps) btnGmaps.style.display = isDenver ? 'none' : 'inline-flex';
             if (togglePay) togglePay.style.display = isDenver ? 'none' : 'block'; // Hidden for Denver
 
-            // 🚫 Hide MIT Class toggle for Denver (Dallas-only program currently)
-            if (toggleMit) toggleMit.style.display = isDenver ? 'none' : 'block';
+            // ✅ MIT Class is enabled for BOTH Dallas and Denver
+            if (toggleMit) toggleMit.style.display = 'block';
+
+            // Configure MIT location filter & courses for market
+            const mitFilterLoc = document.getElementById('mitFilterLocation');
+            const mitModalLoc = document.getElementById('mitModalLocation');
+            const mitModalCourse = document.getElementById('mitModalCourse');
+
+            if (mitFilterLoc) {
+                if (isDenver) {
+                    mitFilterLoc.innerHTML = `
+                        <option value="ALL">All Centers</option>
+                        <option value="Academy">Academy Center</option>
+                        <option value="Parker">Parker Center</option>
+                        <option value="Boulder">Boulder Center</option>
+                        <option value="Virtual">Virtual</option>
+                    `;
+                } else {
+                    mitFilterLoc.innerHTML = `
+                        <option value="ALL">All Centers</option>
+                        <option value="McKinney">McKinney Center</option>
+                        <option value="Mesquite">Mesquite Center</option>
+                        <option value="Virtual">Virtual</option>
+                    `;
+                }
+            }
+
+            if (mitModalLoc) {
+                if (isDenver) {
+                    mitModalLoc.innerHTML = `
+                        <option value="Academy">Academy</option>
+                        <option value="Parker">Parker</option>
+                        <option value="Boulder">Boulder</option>
+                        <option value="Virtual">Virtual</option>
+                    `;
+                } else {
+                    mitModalLoc.innerHTML = `
+                        <option value="McKinney">McKinney (4550 Eldorado Pkwy)</option>
+                        <option value="Mesquite">Mesquite (519 N Galloway Ave)</option>
+                        <option value="Virtual">Virtual (Google Meet)</option>
+                    `;
+                }
+            }
+
+            if (mitModalCourse) {
+                if (isDenver) {
+                    mitModalCourse.innerHTML = `
+                        <option value="Creating a Schedule/Labor Class">Creating a Schedule/Labor Class</option>
+                        <option value="Food Class">Food Class</option>
+                        <option value="Hard Conversations/Write Ups/Terms">Hard Conversations/Write Ups/Terms</option>
+                        <option value="State Food Safety Exam">State Food Safety Exam</option>
+                        <option value="Conquer the Rush">Conquer the Rush</option>
+                        <option value="PWR & PULSE Reports">PWR & PULSE Reports</option>
+                        <option value="Recruiting, Hiring & Training">Recruiting, Hiring & Training</option>
+                        <option value="FSE Class">FSE Class</option>
+                    `;
+                } else {
+                    mitModalCourse.innerHTML = `
+                        <optgroup label="Level 1: Foundation">
+                            <option value="Customer Experience">Customer Experience (L1)</option>
+                            <option value="Operations Assessment">Operations Assessment (L1)</option>
+                            <option value="Product Quality">Product Quality (L1)</option>
+                        </optgroup>
+                        <optgroup label="Level 2: Advanced Store Operations">
+                            <option value="Smooth Operator">Smooth Operator (L2)</option>
+                            <option value="Train the Trainer">Train the Trainer (L2)</option>
+                        </optgroup>
+                        <optgroup label="Level 3: Multi-Unit / Financial Leadership">
+                            <option value="Cost Management">Cost Management (L3)</option>
+                            <option value="P&L">P&L (L3)</option>
+                        </optgroup>
+                    `;
+                }
+            }
 
             // 🚫 Hide Pay Card input field on candidate form for Denver
             const payCardGroup = document.getElementById('payCardFormGroup');
@@ -2880,6 +2957,15 @@
             const auditWeekly = document.getElementById('auditWeeklyContent');
             const auditPeriod = document.getElementById('auditPeriodContent');
             const auditTitle = document.getElementById('auditTitleHeader');
+            // If switching away from interviews, flush any pending auto-save immediately
+            if (currentView === 'interviews' && typeof performInterviewAutoSave === 'function') {
+                performInterviewAutoSave();
+            }
+
+            // Remember selected candidate for previous view
+            if (currentSelectedId) {
+                lastSelectedCandidateByView[currentView] = currentSelectedId;
+            }
 
             currentView = view;
             if (view === 'nto') {
@@ -2938,9 +3024,9 @@
                 if (payFormFields) payFormFields.classList.remove('hidden');
                 document.getElementById('formTitle').innerText = "Pay Card & Payroll Details";
 
-                auditWeekly.classList.add('hidden');
-                auditPeriod.classList.remove('hidden');
-                auditTitle.innerText = "Period Staffing Audit";
+                if (auditWeekly) auditWeekly.classList.add('hidden');
+                if (auditPeriod) auditPeriod.classList.remove('hidden');
+                if (auditTitle) auditTitle.innerText = "Period Staffing Audit";
 
             } else if (view === 'staffing') {
                 btnStf.style.background = 'var(--dark-blue)';
@@ -2949,9 +3035,9 @@
                 if (stfFormFields) stfFormFields.classList.remove('hidden');
                 document.getElementById('formTitle').innerText = "Hires & Terminations Details";
 
-                auditWeekly.classList.add('hidden');
-                auditPeriod.classList.remove('hidden');
-                auditTitle.innerText = "Period Staffing Audit";
+                if (auditWeekly) auditWeekly.classList.add('hidden');
+                if (auditPeriod) auditPeriod.classList.remove('hidden');
+                if (auditTitle) auditTitle.innerText = "Period Staffing Audit";
                 autoCalculatePeriodFromDates();
 
             } else if (view === 'interviews') {
@@ -2961,9 +3047,9 @@
                 if (intFormFields) intFormFields.classList.remove('hidden');
                 document.getElementById('formTitle').innerText = "Interview details";
 
-                auditWeekly.classList.remove('hidden');
-                auditPeriod.classList.add('hidden');
-                auditTitle.innerText = "Weekly Activity Audit";
+                if (auditWeekly) auditWeekly.classList.remove('hidden');
+                if (auditPeriod) auditPeriod.classList.add('hidden');
+                if (auditTitle) auditTitle.innerText = "Weekly Activity Audit";
 
             } else if (view === 'nto') {
                 if (btnNto) {
@@ -3013,12 +3099,25 @@
                 if (onbFormFields) onbFormFields.classList.remove('hidden');
                 document.getElementById('formTitle').innerText = "Candidate details";
 
-                auditWeekly.classList.remove('hidden');
-                auditPeriod.classList.add('hidden');
-                auditTitle.innerText = "Weekly Activity Audit";
+                if (auditWeekly) auditWeekly.classList.remove('hidden');
+                if (auditPeriod) auditPeriod.classList.add('hidden');
+                if (auditTitle) auditTitle.innerText = "Weekly Activity Audit";
             }
 
-            clearForm();
+            const rememberedId = lastSelectedCandidateByView[view];
+            let restoredCandidate = null;
+            if (rememberedId) {
+                if (view === 'interviews') restoredCandidate = (interviews || []).find(c => c.id === rememberedId);
+                else if (view === 'staffing') restoredCandidate = (staffing || []).find(c => c.id === rememberedId);
+                else if (view === 'paycards') restoredCandidate = (paycards || []).find(c => c.id === rememberedId);
+                else if (view === 'onboarding') restoredCandidate = (candidates || []).find(c => c.id === rememberedId);
+            }
+
+            if (restoredCandidate) {
+                selectCandidate(restoredCandidate);
+            } else {
+                clearForm();
+            }
             renderList();
             updateAuditMetrics();
         }
@@ -3624,7 +3723,7 @@
                     if (item.id === currentSelectedId) card.classList.add('selected');
 
                     let intStatusColor = 'var(--brand-blue)';
-                    if (item.status === 'No Show' || item.status === 'Declined') {
+                    if (item.status === 'No Show' || item.status === 'Declined' || item.status === 'Candidate Cancelled') {
                         card.classList.add('status-red');
                         intStatusColor = 'var(--brand-red)';
                     } else if (item.status === 'Hired' || item.status === 'Completed') {
@@ -3865,6 +3964,145 @@
         }
 
         let unsavedDrafts = {};
+        let interviewAutoSaveTimer = null;
+        let isInterviewAutoSaving = false;
+        let lastSelectedCandidateByView = {};
+
+        function triggerInterviewAutoSave(immediate = false) {
+            if (interviewAutoSaveTimer) {
+                clearTimeout(interviewAutoSaveTimer);
+                interviewAutoSaveTimer = null;
+            }
+
+            if (immediate) {
+                performInterviewAutoSave();
+            } else {
+                interviewAutoSaveTimer = setTimeout(performInterviewAutoSave, 1500);
+            }
+        }
+
+        async function performInterviewAutoSave() {
+            if (interviewAutoSaveTimer) {
+                clearTimeout(interviewAutoSaveTimer);
+                interviewAutoSaveTimer = null;
+            }
+
+            if (currentView !== 'interviews') return;
+
+            const id = (document.getElementById('fieldId')?.value || currentSelectedId || '').trim();
+            if (!id) return;
+
+            const candidate = (interviews || []).find(c => String(c.id) === String(id));
+            if (!candidate) return;
+
+            const notes = document.getElementById('intNotes')?.value || '';
+            const availability = document.getElementById('intAvailability')?.value || '';
+            const statusUpdates = document.getElementById('intStatusUpdates')?.value || '';
+            const status = document.getElementById('intStatus')?.value || candidate.status || '';
+
+            const notesChanged = notes !== (candidate.notes || '');
+            const availChanged = availability !== (candidate.availability || '');
+            const updatesChanged = statusUpdates !== (candidate.statusUpdates || '');
+            const statusChanged = status !== (candidate.status || '');
+
+            if (!notesChanged && !availChanged && !updatesChanged && !statusChanged) {
+                return;
+            }
+
+            const indicator = document.getElementById('intAutoSaveStatus');
+            if (indicator) {
+                indicator.innerText = '💾 Saving...';
+                indicator.style.color = 'var(--crust-burnt)';
+                indicator.style.display = 'inline';
+                indicator.style.opacity = '1';
+            }
+
+            const nowDisplay = formatDisplayDateTime(new Date());
+            const payload = {
+                action: 'update',
+                target: 'interviews',
+                id: id,
+                availability: availability,
+                notes: notes,
+                statusUpdates: statusUpdates,
+                status: status,
+                lastUpdated: nowDisplay
+            };
+
+            try {
+                isInterviewAutoSaving = true;
+                await apiCall('POST', payload);
+
+                candidate.availability = availability;
+                candidate.notes = notes;
+                candidate.statusUpdates = statusUpdates;
+                candidate.status = status;
+                candidate.lastUpdated = new Date().toISOString();
+
+                if (unsavedDrafts && unsavedDrafts[id]) {
+                    delete unsavedDrafts[id];
+                    updateBatchDraftBanner();
+                }
+
+                if (indicator) {
+                    const timeStr = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                    indicator.innerText = `✅ Auto-saved ${timeStr}`;
+                    indicator.style.color = 'var(--success-green)';
+                    setTimeout(() => {
+                        if (indicator && indicator.innerText.includes('Auto-saved')) {
+                            indicator.style.opacity = '0';
+                            setTimeout(() => { if (indicator.style.opacity === '0') indicator.style.display = 'none'; }, 400);
+                        }
+                    }, 3000);
+                }
+
+                if (statusChanged) {
+                    renderList();
+                } else {
+                    const selectedCard = document.querySelector(`.candidate-card.selected .card-sub:last-child`);
+                    if (selectedCard && selectedCard.innerText.includes('Updated:')) {
+                        selectedCard.innerHTML = `<span>🕒 Updated: ${nowDisplay}</span>`;
+                    }
+                }
+            } catch (err) {
+                console.warn("Interview auto-save error:", err);
+                if (indicator) {
+                    indicator.innerText = '⚠️ Auto-save failed';
+                    indicator.style.color = 'var(--brand-red)';
+                }
+            } finally {
+                isInterviewAutoSaving = false;
+            }
+        }
+
+        function initInterviewAutoSaveListeners() {
+            const autoFields = [
+                { id: 'intAvailability', event: 'input', immediate: false },
+                { id: 'intAvailability', event: 'blur', immediate: true },
+                { id: 'intNotes', event: 'input', immediate: false },
+                { id: 'intNotes', event: 'blur', immediate: true },
+                { id: 'intStatusUpdates', event: 'input', immediate: false },
+                { id: 'intStatusUpdates', event: 'blur', immediate: true },
+                { id: 'intStatus', event: 'change', immediate: true }
+            ];
+
+            autoFields.forEach(({ id, event, immediate }) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener(event, () => {
+                        if (currentView === 'interviews' && currentSelectedId) {
+                            triggerInterviewAutoSave(immediate);
+                        }
+                    });
+                }
+            });
+
+            window.addEventListener('beforeunload', () => {
+                if (currentView === 'interviews' && interviewAutoSaveTimer) {
+                    performInterviewAutoSave();
+                }
+            });
+        }
 
         function updateBatchDraftBanner() {
             const banner = document.getElementById('batchDraftBanner');
@@ -3964,15 +4202,18 @@
             } else if (currentView === 'interviews') {
                 const notesEl = document.getElementById('intNotes');
                 const updatesEl = document.getElementById('intStatusUpdates');
+                const availEl = document.getElementById('intAvailability');
                 const notes = notesEl ? notesEl.value.trim() : '';
                 const statusUpdates = updatesEl ? updatesEl.value.trim() : '';
+                const availability = availEl ? availEl.value.trim() : '';
 
-                let isChanged = (notes !== (existing.notes || '')) || (statusUpdates !== (existing.statusUpdates || ''));
+                let isChanged = (notes !== (existing.notes || '')) || (statusUpdates !== (existing.statusUpdates || '')) || (availability !== (existing.availability || ''));
                 if (isChanged) {
                     payload.name = existing.name;
                     payload.store = existing.store;
                     payload.notes = notes;
                     payload.statusUpdates = statusUpdates;
+                    payload.availability = availability;
                     unsavedDrafts[currentSelectedId] = payload;
                 }
             } else if (currentView === 'staffing') {
@@ -4046,6 +4287,11 @@
 
         function selectCandidate(item) {
             if (!item || !item.id) return;
+            if (currentView === 'interviews' && currentSelectedId && String(currentSelectedId) !== String(item.id)) {
+                if (typeof performInterviewAutoSave === 'function') {
+                    performInterviewAutoSave();
+                }
+            }
             try {
                 captureCurrentFormDraft();
             } catch (e) { }
@@ -4144,7 +4390,7 @@
                 if (gmDayElem) gmDayElem.value = item.gmDay || getDayOfWeekFromDateString(item.gmDate) || '';
                 document.getElementById('intGmTime').value = formatTimeDisplayFrontEnd(item.gmTime) || item.gmTime || '';
                 document.getElementById('intStatusUpdates').value = (draftPayload && draftPayload.statusUpdates !== undefined) ? draftPayload.statusUpdates : (item.statusUpdates || '');
-                document.getElementById('intAvailability').value = item.availability || '';
+                document.getElementById('intAvailability').value = (draftPayload && draftPayload.availability !== undefined) ? draftPayload.availability : (item.availability || '');
                 document.getElementById('intNotes').value = displayNotes;
                 document.getElementById('emailQuickActions').classList.add('hidden');
                 updateSmsPreview();
@@ -4284,6 +4530,18 @@
         }
 
         function clearForm() {
+            if (interviewAutoSaveTimer) {
+                clearTimeout(interviewAutoSaveTimer);
+                interviewAutoSaveTimer = null;
+            }
+            const autoInd = document.getElementById('intAutoSaveStatus');
+            if (autoInd) {
+                autoInd.style.display = 'none';
+                autoInd.style.opacity = '0';
+            }
+            if (lastSelectedCandidateByView) {
+                lastSelectedCandidateByView[currentView] = null;
+            }
             document.getElementById('btnDelete').classList.add('hidden');
             document.getElementById('candidateForm').reset();
             document.getElementById('fieldId').value = '';
@@ -4331,6 +4589,14 @@
 
         async function saveCandidate(event) {
             event.preventDefault();
+            if (interviewAutoSaveTimer) {
+                clearTimeout(interviewAutoSaveTimer);
+                interviewAutoSaveTimer = null;
+            }
+            const autoInd = document.getElementById('intAutoSaveStatus');
+            if (autoInd) {
+                autoInd.style.display = 'none';
+            }
 
             const id = (document.getElementById('fieldId').value || '').trim();
 
@@ -6647,11 +6913,11 @@
                 const ntoCompletedAtVal = item.ntoCompletedAt || item.nto_completed_at || '';
                 const ssnLast4Val = item.ssnLast4 || item.ssn_last_4 || item['SSN (Last 4)'] || '';
 
-                const changeDateBtn = isDenver ? `
+                const changeDateBtn = `
                     <button type="button" onclick="openRescheduleNtoModal('${escapeText(candId)}', '${escapeText(item.name || '')}', '${escapeText(item.email || '')}', '${escapeText(ntoDateVal || '')}')" style="background: var(--dark-blue); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 15px; font-family: 'Subhead2', sans-serif; cursor: pointer; white-space: nowrap;" title="Change orientation class date for this trainee">
                         📅 Change Date
                     </button>
-                ` : '';
+                `;
 
                 const scoreBadge = item.quizScore ? `
                     <span style="display: inline-flex; align-items: center; gap: 4px; font-family: 'Subhead1', sans-serif; font-size: 13px; background: #e3f2fd; color: var(--dark-blue); border: 1px solid #bbdefb; padding: 2px 9px; border-radius: 12px; font-weight: bold; margin-left: 8px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0, 92, 145, 0.08);" title="Orientation Quiz Score">
@@ -6769,7 +7035,7 @@
             const u = localStorage.getItem('onb_user') || '';
             const isDenver = u.toLowerCase().startsWith('denver');
             const defaultMeetLink = isDenver
-                ? "https://meet.google.com/denver-nto-class"
+                ? "https://meet.google.com/haf-izyt-gws"
                 : "https://meet.google.com/zwc-afuu-hgh";
 
             const meetUrl = await showBrandPrompt(
@@ -7030,7 +7296,23 @@
 
             // Auto-calculate suggested end time based on the last form submission in class (rounded up to next 5 min)
             const suggestedEnd = calculateSuggestedNtoEndTime(rosterData);
-            let defaultEndTime = rawEndTime || (suggestedEnd ? suggestedEnd.roundedTime : "7:30 PM");
+            let defaultEndTime = rawEndTime || (suggestedEnd ? suggestedEnd.roundedTime : "5:30 PM");
+
+            // Sanity check: Ensure Start Time is valid and earlier than End Time
+            let startMins = parseTimeToMinutes(startTime);
+            let endMins = parseTimeToMinutes(defaultEndTime);
+            if (startMins >= endMins || !rawStartTime) {
+                const promptStart = await showBrandPrompt(
+                    `Class Start Time appears incorrect:\n\n• Current Start Time: ${startTime}\n• End Time: ${defaultEndTime}\n\nPlease enter the correct Class Start Time (e.g., 4:00 PM):`,
+                    startTime === "6:00 PM" ? "4:00 PM" : startTime,
+                    "Verify Class Start Time"
+                );
+                if (promptStart && promptStart.trim()) {
+                    startTime = formatTimeDisplayFrontEnd(promptStart.trim()) || promptStart.trim();
+                    if (document.getElementById('ntoStartTime')) document.getElementById('ntoStartTime').value = startTime;
+                    startMins = parseTimeToMinutes(startTime);
+                }
+            }
 
             let promptMsg = "Verify or enter Class End Time for Bonnie & Payroll:";
             if (suggestedEnd) {
@@ -7041,9 +7323,28 @@
             if (!verifiedEndTime || !verifiedEndTime.trim()) return;
             const endTime = formatTimeDisplayFrontEnd(verifiedEndTime.trim()) || verifiedEndTime.trim();
             if (document.getElementById('ntoEndTime')) document.getElementById('ntoEndTime').value = endTime;
+            endMins = parseTimeToMinutes(endTime);
 
-            // Apply verified end time to all roster records
+            if (startMins >= endMins) {
+                const correctedStart = await showBrandPrompt(
+                    `⚠️ Notice: Class End Time (${endTime}) is earlier than or equal to Start Time (${startTime}).\n\nPlease confirm or correct the Class Start Time (e.g., 4:00 PM):`,
+                    startTime === "6:00 PM" ? "4:00 PM" : startTime,
+                    "Correct Class Start Time"
+                );
+                if (correctedStart && correctedStart.trim()) {
+                    startTime = formatTimeDisplayFrontEnd(correctedStart.trim()) || correctedStart.trim();
+                    if (document.getElementById('ntoStartTime')) document.getElementById('ntoStartTime').value = startTime;
+                    startMins = parseTimeToMinutes(startTime);
+                }
+            }
+
+            let diffMinutes = endMins - startMins;
+            if (diffMinutes < 0) diffMinutes += 24 * 60;
+            const calculatedHours = (diffMinutes / 60).toFixed(2);
+
+            // Apply verified times to all roster records
             rosterData.forEach(r => {
+                r.startTime = startTime;
                 r.endTime = endTime;
                 r['End Time'] = endTime;
             });
@@ -7056,6 +7357,7 @@
                 `• Class Date: ${classDate}\n` +
                 `• Start Time: ${startTime}\n` +
                 `• End Time: ${endTime}\n` +
+                `• Total Duration: ${calculatedHours} Hours\n` +
                 `• Total Attendees: ${attendedCount} / ${rosterData.length}\n\n` +
                 `This will send 3 automated email reports (HR, Leadership, and Store/DOs).`;
 
@@ -7065,11 +7367,16 @@
             showLoader(true, "Processing NTO hours & sending emails...");
 
             try {
+                const u = localStorage.getItem('onb_user') || '';
+                const isDenver = u.toLowerCase().startsWith('denver');
+                const mkt = isDenver ? 'Denver' : 'Dallas';
                 const result = await apiCall('POST', {
                     action: "concludeNtoClass",
                     classDate: classDate,
                     startTime: startTime,
                     endTime: endTime,
+                    market: mkt,
+                    city: mkt,
                     roster: rosterData
                 });
 
@@ -7150,6 +7457,17 @@
             document.getElementById('bonnieModalClassDate').textContent = classDate;
             document.getElementById('bonnieModalClassTimes').textContent = `${startTime} – ${endTime}`;
 
+            let defaultClassHours = "1.25";
+            const sM = parseTimeToMinutes(startTime);
+            const eM = parseTimeToMinutes(endTime);
+            if (sM && eM) {
+                let diffM = eM - sM;
+                if (diffM < 0) diffM += 24 * 60;
+                if (diffM > 0 && diffM <= 8 * 60) {
+                    defaultClassHours = (diffM / 60).toFixed(2);
+                }
+            }
+
             const tbody = document.getElementById('bonnieModalTableBody');
             tbody.innerHTML = '';
 
@@ -7172,7 +7490,7 @@
                             oninput="this.value = this.value.replace(/\\D/g, '').slice(0, 4)">
                     </td>
                     <td style="padding: 8px 8px; text-align: center;">
-                        <input type="text" class="bonnie-row-hours" placeholder="1.25" value="1.25"
+                        <input type="text" class="bonnie-row-hours" placeholder="${defaultClassHours}" value="${defaultClassHours}"
                             style="width: 60px; text-align: center; font-family: 'Condensed'; font-size: 16px; font-weight: bold; padding: 6px 4px; border: 1.5px solid var(--crust-dark); border-radius: 6px; box-sizing: border-box;">
                     </td>
                     <td style="padding: 8px 8px; text-align: center;">
@@ -7232,10 +7550,15 @@
             sendBtn.disabled = true;
 
             try {
+                const u = localStorage.getItem('onb_user') || '';
+                const isDenver = u.toLowerCase().startsWith('denver');
+                const mkt = isDenver ? 'Denver' : 'Dallas';
                 const res = await apiCall('POST', {
                     action: 'resendBonnieNtoEmail',
                     classDate: classDate,
                     endTime: endTime,
+                    market: mkt,
+                    city: mkt,
                     roster: roster
                 });
 
@@ -8108,7 +8431,7 @@
             const u = localStorage.getItem('onb_user') || '';
             const isDenver = u.toLowerCase().startsWith('denver');
             const defaultMeetLink = isDenver
-                ? "https://meet.google.com/denver-nto-class"
+                ? "https://meet.google.com/haf-izyt-gws"
                 : "https://meet.google.com/zwc-afuu-hgh";
 
             const meetUrl = await showBrandPrompt(
@@ -8210,8 +8533,11 @@
                         <td style="padding: 10px 12px; text-align: center; font-size: 17px;">${startDisp} - ${endDisp}</td>
                         <td style="padding: 10px 12px; text-align: center; font-size: 17px;">${c.trainerName}</td>
                         <td style="padding: 10px 12px; text-align: center; font-weight: bold; font-size: 17px;">${c.capacity}</td>
-                        <td style="padding: 10px 12px; text-align: center;">
-                            <button type="button" onclick="deleteNtoClassSession('${c.classId}', '${c.classDate}', ${c.rowNum})" style="background: var(--brand-red); color: white; border: none; padding: 6px 12px; font-size: 14px; border-radius: 4px; cursor: pointer; font-family: 'Subhead2';">
+                        <td style="padding: 10px 12px; text-align: center; white-space: nowrap;">
+                            <button type="button" onclick="startNtoReschedule('${c.classId}', '${c.classDate}', '${c.startTime}', '${c.endTime}', '${c.trainerName}', '${c.capacity}')" style="background: var(--brand-blue); color: white; border: none; padding: 6px 12px; font-size: 14px; border-radius: 4px; cursor: pointer; font-family: 'Subhead2'; margin-right: 6px;" title="Reschedule Session">
+                                ✏️ Reschedule
+                            </button>
+                            <button type="button" onclick="deleteNtoClassSession('${c.classId}', '${c.classDate}', ${c.rowNum})" style="background: var(--brand-red); color: white; border: none; padding: 6px 12px; font-size: 14px; border-radius: 4px; cursor: pointer; font-family: 'Subhead2';" title="Cancel Session">
                                 🗑️ Cancel
                             </button>
                         </td>
@@ -8224,6 +8550,122 @@
                 renderNtoClassView();
             } catch (err) {
                 if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color: var(--brand-red); font-size: 17px;">Error loading calendar.</td></tr>`;
+            }
+        }
+
+        function startNtoReschedule(classId, classDate, startTime, endTime, trainerName, capacity) {
+            const editIdEl = document.getElementById('ntoEditClassId');
+            const editOldEl = document.getElementById('ntoEditOldDate');
+            const titleEl = document.getElementById('ntoClassFormTitle');
+            const cancelBtn = document.getElementById('btnCancelNtoReschedule');
+            const submitBtn = document.getElementById('btnNtoClassSubmit');
+
+            if (editIdEl) editIdEl.value = classId;
+            if (editOldEl) editOldEl.value = classDate;
+            if (titleEl) titleEl.innerText = `✏️ Reschedule NTO Session (${classDate})`;
+            if (cancelBtn) cancelBtn.style.display = "inline-block";
+            if (submitBtn) {
+                submitBtn.innerText = "💾 Save Reschedule & Notify";
+                submitBtn.style.background = "var(--success-green)";
+            }
+
+            const parts = (classDate || '').split('/');
+            if (parts.length === 3) {
+                const y = parts[2];
+                const m = parts[0].padStart(2, '0');
+                const d = parts[1].padStart(2, '0');
+                document.getElementById('newClassDate').value = `${y}-${m}-${d}`;
+            }
+            document.getElementById('newClassStart').value = startTime || '';
+            document.getElementById('newClassEnd').value = endTime || '';
+            document.getElementById('newClassTrainer').value = trainerName || '';
+            document.getElementById('newClassCapacity').value = capacity || 15;
+
+            // Scroll modal to top of form
+            const modalContent = document.querySelector('#classCalendarModal .brand-modal-content');
+            if (modalContent) modalContent.scrollTop = 0;
+        }
+
+        function cancelNtoReschedule() {
+            const editIdEl = document.getElementById('ntoEditClassId');
+            const editOldEl = document.getElementById('ntoEditOldDate');
+            const titleEl = document.getElementById('ntoClassFormTitle');
+            const cancelBtn = document.getElementById('btnCancelNtoReschedule');
+            const submitBtn = document.getElementById('btnNtoClassSubmit');
+
+            if (editIdEl) editIdEl.value = '';
+            if (editOldEl) editOldEl.value = '';
+            if (titleEl) titleEl.innerText = "➕ Schedule New NTO Class Session";
+            if (cancelBtn) cancelBtn.style.display = "none";
+            if (submitBtn) {
+                submitBtn.innerText = "➕ Add Session";
+                submitBtn.style.background = "var(--brand-blue)";
+            }
+
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('newClassDate').value = tomorrow.toISOString().split('T')[0];
+            document.getElementById('newClassStart').value = '';
+            document.getElementById('newClassEnd').value = '';
+
+            const u = localStorage.getItem('onb_user') || (document.getElementById('loginUser') ? document.getElementById('loginUser').value.trim() : '');
+            const isDenver = u.toLowerCase().startsWith('denver');
+            document.getElementById('newClassTrainer').value = isDenver ? 'Richard' : 'Mike';
+            document.getElementById('newClassCapacity').value = isDenver ? 10 : 15;
+        }
+
+        async function saveNtoClassSession() {
+            const editClassId = document.getElementById('ntoEditClassId') ? document.getElementById('ntoEditClassId').value : '';
+            if (!editClassId) {
+                return addNtoClassSession();
+            }
+
+            const oldDate = document.getElementById('ntoEditOldDate').value;
+            const rawDate = document.getElementById('newClassDate').value;
+            const startTime = document.getElementById('newClassStart').value.trim();
+            const endTime = document.getElementById('newClassEnd').value.trim();
+            const trainerName = document.getElementById('newClassTrainer').value.trim();
+
+            if (!rawDate) {
+                showBrandAlert("Please select a new class date.", "Missing Date");
+                return;
+            }
+
+            const [year, month, day] = rawDate.split('-');
+            const formattedDateStr = `${parseInt(month, 10)}/${parseInt(day, 10)}/${year}`;
+
+            // Check how many attendees are scheduled
+            const matchedClass = window.ntoCalendarClassesCache ? window.ntoCalendarClassesCache.find(c => c.classId === editClassId) : null;
+            const attendeeCount = matchedClass && matchedClass.attendees ? matchedClass.attendees.length : (matchedClass && matchedClass.spotsTaken ? matchedClass.spotsTaken : 0);
+
+            let confirmMsg = `Are you sure you want to reschedule this class session from ${oldDate} to ${formattedDateStr}?`;
+            if (attendeeCount > 0) {
+                confirmMsg = `This session has ${attendeeCount} registered candidate(s).\n\nMoving this class will update their roster records to ${formattedDateStr} and automatically email each trainee an updated Google Meet invitation. Proceed?`;
+            }
+
+            const confirmed = await showBrandConfirm(confirmMsg, "Reschedule NTO Session");
+            if (!confirmed) return;
+
+            showLoader(true, "Rescheduling NTO session & notifying attendees...");
+
+            try {
+                const res = await apiCall('POST', {
+                    action: 'rescheduleNtoClass',
+                    classId: editClassId,
+                    newClassDate: formattedDateStr,
+                    newStartTime: startTime,
+                    newEndTime: endTime,
+                    trainerName: trainerName,
+                    notifyAttendees: true
+                });
+
+                showLoader(false);
+                cancelNtoReschedule();
+                showBrandAlert(res.message || "Class successfully rescheduled!", "Session Updated");
+                fetchNtoCalendarClasses();
+            } catch (err) {
+                showLoader(false);
+                showBrandAlert("Error rescheduling class: " + err.message, "System Error");
             }
         }
 
@@ -8532,6 +8974,19 @@
             const [year, month, day] = rawDate.split('-');
             const formattedDateStr = `${parseInt(month, 10)}/${parseInt(day, 10)}/${year}`;
 
+            if (classId && window.mitCalendarClassesCache) {
+                const cls = window.mitCalendarClassesCache.find(c => c.id === classId);
+                if (cls && cls.classDate && cls.classDate !== formattedDateStr) {
+                    const attendeesCount = (cls.attendees || []).length;
+                    let confirmMsg = `You are rescheduling this ${name} session from ${cls.classDate} to ${formattedDateStr}.`;
+                    if (attendeesCount > 0) {
+                        confirmMsg = `This session has ${attendeesCount} enrolled attendee(s).\n\nMoving this class to ${formattedDateStr} will update their records and automatically email each trainee an updated Change of Date notice with course and location details. Proceed?`;
+                    }
+                    const confirmed = await showBrandConfirm(confirmMsg, "Reschedule MIT Session");
+                    if (!confirmed) return;
+                }
+            }
+
             showLoader(true, classId ? "Updating MIT session..." : "Adding MIT session...");
 
             try {
@@ -8547,7 +9002,8 @@
                     startTime: startTime,
                     endTime: endTime,
                     capacity: parseInt(capacity, 10),
-                    meetLink: meetLink
+                    meetLink: meetLink,
+                    notifyAttendees: true
                 };
 
                 const res = await fetch('/api/staffing', {
@@ -8913,12 +9369,19 @@
                         Close</button>
                 </div>
 
-                <!-- Form: Add New Class Session -->
+                <!-- Form: Add New or Reschedule Class Session -->
                 <div
                     style="background: var(--crust-light); border: 1.5px solid var(--crust-dark); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-                    <div
-                        style="font-family: 'ExtraBold'; font-size: 18px; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 12px;">
-                        ➕ Schedule New NTO Class Session</div>
+                    <input type="hidden" id="ntoEditClassId" value="">
+                    <input type="hidden" id="ntoEditOldDate" value="">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div id="ntoClassFormTitle"
+                            style="font-family: 'ExtraBold'; font-size: 18px; color: var(--dark-blue); text-transform: uppercase;">
+                            ➕ Schedule New NTO Class Session</div>
+                        <button type="button" id="btnCancelNtoReschedule" onclick="cancelNtoReschedule()" style="display: none; background: var(--brand-grey); color: white; border: none; padding: 4px 10px; font-size: 13px; border-radius: 4px; cursor: pointer; font-family: 'Subhead2';">
+                            ✕ Cancel Reschedule
+                        </button>
+                    </div>
 
                     <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                         <div>
@@ -8960,7 +9423,7 @@
                             <input type="number" id="newClassCapacity" value="15"
                                 style="width: 100%; padding: 8px 10px; font-size: 16px; font-family: 'Condensed', sans-serif; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box; margin-top: 4px;">
                         </div>
-                        <button type="button" onclick="addNtoClassSession()"
+                        <button type="button" id="btnNtoClassSubmit" onclick="saveNtoClassSession()"
                             style="background: var(--brand-blue); color: white; padding: 10px 20px; font-family: 'Subhead1'; font-size: 16px; border: none; border-radius: 6px; cursor: pointer; white-space: nowrap; height: 42px;">
                             ➕ Add Session
                         </button>
