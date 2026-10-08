@@ -8294,7 +8294,35 @@
                     adminCategoryGroups[catKey].push(ac);
                 });
 
-                Object.keys(adminCategoryGroups).forEach(catName => {
+                // Prioritize Leadership & Operations (Benjy and Steve) at the top
+                const getCategoryRank = (name) => {
+                    const l = (name || '').toLowerCase();
+                    if (l.includes('leader') || l.includes('exec') || l.includes('vp')) return 1;
+                    if (l.includes('admin') || l.includes('local')) return 2;
+                    if (l.includes('hr') || l.includes('train')) return 3;
+                    if (l.includes('it')) return 4;
+                    if (l.includes('distrib')) return 5;
+                    return 10;
+                };
+
+                const sortedCatNames = Object.keys(adminCategoryGroups).sort((a, b) => {
+                    const rankA = getCategoryRank(a);
+                    const rankB = getCategoryRank(b);
+                    if (rankA !== rankB) return rankA - rankB;
+                    return a.localeCompare(b);
+                });
+
+                sortedCatNames.forEach(catName => {
+                    const contactsInGroup = adminCategoryGroups[catName];
+                    // Pin Benjy and Steve to the top of their respective group
+                    contactsInGroup.sort((a, b) => {
+                        const nameA = (a.name || '').toLowerCase();
+                        const nameB = (b.name || '').toLowerCase();
+                        if (nameA.includes('benjy') || nameA.includes('steve')) return -1;
+                        if (nameB.includes('benjy') || nameB.includes('steve')) return 1;
+                        return 0;
+                    });
+
                     const catCard = document.createElement('div');
                     catCard.style.cssText = `
                     background: var(--crust-base);
