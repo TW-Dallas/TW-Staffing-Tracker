@@ -915,12 +915,20 @@ export async function onRequestGet(context) {
         }));
 
         // Map admin contacts
-        const adminContacts = (adminContactsRes.results || []).map(a => ({
-            role: a.role,
-            name: a.name,
-            email: a.email || '',
-            phone: a.phone || ''
-        }));
+        const adminContacts = (adminContactsRes.results || []).map(a => {
+            const roleStr = a.role || '';
+            const isExec = roleStr.toLowerCase().includes('vp') || roleStr.toLowerCase().includes('operations');
+            return {
+                id: a.id,
+                role: roleStr,
+                category: a.category || (isExec ? 'Leadership & Operations' : 'Training & HR Support'),
+                title: a.title || roleStr,
+                name: a.name,
+                email: a.email || '',
+                phone: a.phone || '',
+                notes: a.notes || ''
+            };
+        });
 
         // Map interviews
         const interviews = (interviewsRes.results || []).map(i => {
@@ -3552,6 +3560,45 @@ export async function onRequestPost(context) {
             ).run();
 
             return new Response(JSON.stringify({ success: true, store: storeNum }), { status: 200, headers: corsHeaders() });
+        }
+
+        // 8. Save / Sync Admin Contacts
+        if (action === "saveAdminContacts" || action === "syncAdminContacts") {
+            const list = payload.contacts || payload.adminContacts || [];
+            if (Array.isArray(list)) {
+                try {
+                    await db.prepare("ALTER TABLE admin_contacts ADD COLUMN category TEXT DEFAULT ''").run();
+                } catch (e) {}
+                try {
+                    await db.prepare("ALTER TABLE admin_contacts ADD COLUMN title TEXT DEFAULT ''").run();
+                } catch (e) {}
+                try {
+                    await db.prepare("ALTER TABLE admin_contacts ADD COLUMN notes TEXT DEFAULT ''").run();
+                } catch (e) {}
+
+                if (payload.replace !== false) {
+                    await db.prepare("DELETE FROM admin_contacts WHERE market = ?").bind(market).run();
+                }
+
+                for (const ac of list) {
+                    await db.prepare(`
+                        INSERT INTO admin_contacts (market, role, name, email, phone, category, title, notes)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    `).bind(
+                        market,
+                        ac.role || ac.title || 'Admin',
+                        ac.name || '',
+                        ac.email || '',
+                        ac.phone || '',
+                        ac.category || '',
+                        ac.title || ac.role || '',
+                        ac.notes || ''
+                    ).run();
+                }
+
+                return new Response(JSON.stringify({ success: true, count: list.length }), { status: 200, headers: corsHeaders() });
+            }
+            return new Response(JSON.stringify({ error: "Invalid contacts list" }), { status: 400, headers: corsHeaders() });
         }
 
         // Fallback: action not recognized
