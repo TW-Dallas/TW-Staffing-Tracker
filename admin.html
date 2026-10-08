@@ -8202,7 +8202,7 @@
                     doCard.style.cssText = `
                         background: var(--crust-base);
                         border: 1.5px solid var(--crust-dark);
-                        border-left: 6px solid var(--crust-dark);
+                        border-left: 6px solid var(--crust-deep);
                         border-radius: 8px;
                         padding: 12px 14px;
                         display: flex;
@@ -8299,12 +8299,14 @@
                     catCard.style.cssText = `
                     background: var(--crust-base);
                     border: 1.5px solid var(--crust-dark);
-                    border-left: 6px solid var(--brand-burnt);
+                    border-left: 6px solid var(--brand-blue);
                     border-radius: 8px;
                     padding: 12px 14px;
                     display: flex;
                     flex-direction: column;
                     gap: 8px;
+                    box-shadow: 0 2px 5px rgba(71,43,16,0.06);
+                    margin-bottom: 12px;
                 `;
 
                     let itemsHtml = `<div style="font-family: 'Subhead2', sans-serif; font-size: 18px; color: var(--crust-burnt); border-bottom: 1px solid var(--crust-med); padding-bottom: 4px;">${catName}</div>`;
