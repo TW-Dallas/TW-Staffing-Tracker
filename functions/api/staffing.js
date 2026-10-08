@@ -19,6 +19,61 @@ function corsHeaders(cacheSecs = 0) {
     return h;
 }
 
+// Robust Google Apps Script Proxy Dispatcher
+// Automatically attaches query authentication for redirect stability and ensures response consumption & worker lifecycle management
+async function callAppsScriptProxy(payload, context = null) {
+    const isDenver = (payload.market || payload.city || "").toLowerCase() === "denver";
+    // Internal server-to-server microservice credentials (bypasses any invalid client localStorage credentials)
+    const username = isDenver ? "denver_admin" : "dallas_admin";
+    const password = isDenver ? "denver_password_123" : "dallas_password_123";
+    const market = payload.market || payload.city || (isDenver ? "Denver" : "Dallas");
+    const action = payload.action || "";
+
+    const gasPayload = {
+        ...payload,
+        username,
+        password,
+        market,
+        city: market
+    };
+
+    const gasQuery = new URLSearchParams({
+        username,
+        password,
+        city: market,
+        market: market,
+        action: action
+    }).toString();
+
+    const gasUrl = `${APPS_SCRIPT_URL}${APPS_SCRIPT_URL.includes('?') ? '&' : '?'}${gasQuery}`;
+
+    const fetchPromise = (async () => {
+        try {
+            const res = await fetch(gasUrl, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(gasPayload),
+                redirect: "follow"
+            });
+            const text = await res.text();
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                return { success: res.ok, raw: text };
+            }
+        } catch (err) {
+            console.error(`Apps Script proxy error (${action}):`, err);
+            return { success: false, error: err.message };
+        }
+    })();
+
+    if (context && typeof context.waitUntil === "function") {
+        context.waitUntil(fetchPromise);
+    }
+
+    return fetchPromise;
+}
+
 // Current timestamp formatted for Team Wow (e.g. "9/17/2026 10:20 AM")
 function getNowFormatted(timeZone = "America/Chicago") {
     const d = new Date();
@@ -358,6 +413,7 @@ export async function onRequestGet(context) {
             if (cls) {
                 const nowFormatted = getNowFormatted("America/Chicago");
                 const cleanRegPhone = (reg.phone || "").replace(/\D/g, "").slice(-10);
+                const candId = reg.candidate_id || "";
                 await db.prepare(`
                     UPDATE onboarding_candidates SET
                         nto_date = ?,
@@ -366,34 +422,28 @@ export async function onRequestGet(context) {
                         nto_attendance = '',
                         last_updated = ?,
                         updated_at = CURRENT_TIMESTAMP
-                    WHERE LOWER(email) = LOWER(?) OR (phone_number != '' AND REPLACE(REPLACE(REPLACE(REPLACE(phone_number, '-', ''), ' ', ''), '(', ''), ')', '') LIKE ?)
-                `).bind(cls.class_date, nowFormatted, reg.email, '%' + cleanRegPhone).run();
+                    WHERE (id = ? AND ? != '') OR LOWER(email) = LOWER(?) OR (phone_number != '' AND REPLACE(REPLACE(REPLACE(REPLACE(phone_number, '-', ''), ' ', ''), '(', ''), ')', '') LIKE ?)
+                `).bind(cls.class_date, nowFormatted, candId, candId, reg.email, '%' + cleanRegPhone).run();
             }
 
             // 4. Send Confirmation & Google Meet link via Apps Script microservice
-            try {
-                if (cls && reg.email) {
-                    const isDen = (reg.market || "").toLowerCase() === "denver" || (cls && (cls.market || "").toLowerCase() === "denver");
-                    await fetch(APPS_SCRIPT_URL, {
-                        method: "POST",
-                        headers: { "Content-Type": "text/plain;charset=utf-8" },
-                        body: JSON.stringify({
-                            username: isDen ? "denver_admin" : "dallas_admin",
-                            password: isDen ? "denver_password_123" : "dallas_password_123",
-                            action: "sendNtoMeetLinks",
-                            classDate: cls.class_date,
-                            classTime: cls.start_time,
-                            meetLink: cls.meet_link || (isDen ? "https://meet.google.com/haf-izyt-gws" : "https://meet.google.com/zwc-afuu-hgh"),
-                            trainerName: cls.trainer || (isDen ? "Richard Keske" : "Mike Jacobs"),
-                            notifyAdmin: false,
-                            studentPhone: reg.phone,
-                            storeNum: reg.store_num,
-                            trainees: [{ name: reg.candidate_name, email: reg.email }]
-                        })
-                    });
-                }
-            } catch (mailErr) {
-                console.warn("Apps Script confirmation email proxy failed:", mailErr);
+            if (cls && reg.email) {
+                const isDen = (reg.market || "").toLowerCase() === "denver" || (cls && (cls.market || "").toLowerCase() === "denver");
+                await callAppsScriptProxy({
+                    username: isDen ? "denver_admin" : "dallas_admin",
+                    password: isDen ? "denver_password_123" : "dallas_password_123",
+                    action: "sendNtoMeetLinks",
+                    classDate: cls.class_date,
+                    classTime: cls.start_time,
+                    meetLink: cls.meet_link || (isDen ? "https://meet.google.com/haf-izyt-gws" : "https://meet.google.com/zwc-afuu-hgh"),
+                    trainerName: cls.trainer || (isDen ? "Richard Keske" : "Mike Jacobs"),
+                    notifyAdmin: false,
+                    studentPhone: reg.phone,
+                    storeNum: reg.store_num,
+                    market: reg.market || (cls ? cls.market : "Dallas"),
+                    city: reg.market || (cls ? cls.market : "Dallas"),
+                    trainees: [{ name: reg.candidate_name, email: reg.email }]
+                }, context);
             }
 
             const classInfo = cls ? `${cls.class_date} at ${cls.start_time}` : "the scheduled session";
@@ -412,23 +462,15 @@ export async function onRequestGet(context) {
             await db.prepare("UPDATE class_registrations SET status = 'Denied', updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(regId).run();
 
             // 2. Send gentle GM reschedule notification to student via Apps Script
-            try {
-                if (reg.email) {
-                    await fetch(APPS_SCRIPT_URL, {
-                        method: "POST",
-                        headers: { "Content-Type": "text/plain;charset=utf-8" },
-                        body: JSON.stringify({
-                            username: "dallas_admin",
-                            password: "dallas_password_123",
-                            action: "sendNtoStudentDenial",
-                            name: reg.candidate_name,
-                            email: reg.email,
-                            classDate: cls ? cls.class_date : ""
-                        })
-                    });
-                }
-            } catch (mailErr) {
-                console.warn("Apps Script denial email proxy failed:", mailErr);
+            if (reg.email) {
+                await callAppsScriptProxy({
+                    username: "dallas_admin",
+                    password: "dallas_password_123",
+                    action: "sendNtoStudentDenial",
+                    name: reg.candidate_name,
+                    email: reg.email,
+                    classDate: cls ? cls.class_date : ""
+                }, context);
             }
 
             return new Response(renderActionHtml(
@@ -1293,95 +1335,115 @@ export async function onRequestPost(context) {
             }
 
             // 1b. Check for duplicate registration in this exact class
+            const isDenReg = regMarket.toLowerCase() === "denver";
             const existingReg = await db.prepare("SELECT * FROM class_registrations WHERE class_id = ? AND (LOWER(email) = LOWER(?) OR (phone != '' AND phone = ?))").bind(classId, email, phone).first();
             if (existingReg) {
-                return new Response(JSON.stringify({
-                    success: true,
-                    message: "You are already registered for this session!",
-                    classDate: cls.class_date,
-                    startTime: cls.start_time,
-                    meetLink: cls.meet_link,
-                    alreadyRegistered: true
-                }), { status: 200, headers: corsHeaders() });
+                if (isDenReg) {
+                    // Update any details that may have changed for Denver and resend confirmation
+                    await db.prepare("UPDATE class_registrations SET candidate_name = ?, phone = ?, store_num = ?, position = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?")
+                        .bind(name, phone, storeNum, position, existingReg.id).run();
+                } else {
+                    return new Response(JSON.stringify({
+                        success: true,
+                        message: "You are already registered for this session!",
+                        classDate: cls.class_date,
+                        startTime: cls.start_time,
+                        meetLink: cls.meet_link,
+                        alreadyRegistered: true
+                    }), { status: 200, headers: corsHeaders() });
+                }
             }
 
-            // 1b-ii. Global Duplicate / Prior Registration Check across all historical sessions
-            const cleanDigits = phone.replace(/\D/g, '').slice(-10);
-            let priorReg = null;
-            if (email && cleanDigits.length === 10) {
-                priorReg = await db.prepare(`
-                    SELECT cr.*, tc.class_date, tc.start_time 
-                    FROM class_registrations cr
-                    LEFT JOIN training_classes tc ON cr.class_id = tc.id
-                    WHERE LOWER(cr.email) = LOWER(?) OR (cr.phone != '' AND REPLACE(REPLACE(REPLACE(REPLACE(cr.phone, '-', ''), ' ', ''), '(', ''), ')', '') LIKE ?)
-                `).bind(email, '%' + cleanDigits).first();
-            } else if (email) {
-                priorReg = await db.prepare(`
-                    SELECT cr.*, tc.class_date, tc.start_time 
-                    FROM class_registrations cr
-                    LEFT JOIN training_classes tc ON cr.class_id = tc.id
-                    WHERE LOWER(cr.email) = LOWER(?)
-                `).bind(email).first();
-            } else if (cleanDigits.length === 10) {
-                priorReg = await db.prepare(`
-                    SELECT cr.*, tc.class_date, tc.start_time 
-                    FROM class_registrations cr
-                    LEFT JOIN training_classes tc ON cr.class_id = tc.id
-                    WHERE cr.phone != '' AND REPLACE(REPLACE(REPLACE(REPLACE(cr.phone, '-', ''), ' ', ''), '(', ''), ')', '') LIKE ?
-                `).bind('%' + cleanDigits).first();
-            }
-
-            // 1b-iii. Check onboarding_candidates for prior scheduled NTO
-            let candMatch = null;
-            if (email && cleanDigits.length === 10) {
-                candMatch = await db.prepare("SELECT * FROM onboarding_candidates WHERE (nto_scheduled = 1 OR (nto_date IS NOT NULL AND nto_date != '')) AND (LOWER(email) = LOWER(?) OR (phone_number != '' AND REPLACE(REPLACE(REPLACE(REPLACE(phone_number, '-', ''), ' ', ''), '(', ''), ')', '') LIKE ?))").bind(email, '%' + cleanDigits).first();
-            } else if (email) {
-                candMatch = await db.prepare("SELECT * FROM onboarding_candidates WHERE (nto_scheduled = 1 OR (nto_date IS NOT NULL AND nto_date != '')) AND LOWER(email) = LOWER(?)").bind(email).first();
-            }
-
-            if (priorReg || candMatch) {
-                const regId = "REG-PEND-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
-                await db.prepare("INSERT INTO class_registrations (id, class_id, candidate_id, candidate_name, store_num, position, phone, email, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending')").bind(regId, classId, candidateId, name, storeNum, position, phone, email).run();
-
-                try {
-                    await fetch(APPS_SCRIPT_URL, {
-                        method: "POST",
-                        headers: { "Content-Type": "text/plain;charset=utf-8" },
-                        body: JSON.stringify({
-                            username: "dallas_admin",
-                            password: "dallas_password_123",
-                            action: "sendNtoDuplicateAlert",
-                            name: name,
-                            email: email,
-                            phone: phone,
-                            storeNum: storeNum,
-                            classId: classId,
-                            classDate: cls.class_date,
-                            classTime: cls.start_time,
-                            requestId: regId
-                        })
-                    });
-                } catch (dupMailErr) {
-                    console.warn("Duplicate alert proxy failed:", dupMailErr);
+            // 1b-ii. Global Duplicate / Prior Registration Check across all historical sessions (Dallas only; Denver does not use duplicate blocker)
+            if (!isDenReg) {
+                const cleanDigits = phone.replace(/\D/g, '').slice(-10);
+                let priorReg = null;
+                if (candidateId) {
+                    priorReg = await db.prepare(`
+                        SELECT cr.*, tc.class_date, tc.start_time 
+                        FROM class_registrations cr
+                        LEFT JOIN training_classes tc ON cr.class_id = tc.id
+                        WHERE cr.status = 'Confirmed' AND (cr.candidate_id = ? OR (LOWER(cr.candidate_name) = LOWER(?) AND LOWER(cr.email) = LOWER(?)))
+                    `).bind(candidateId, name, email).first();
+                } else if (email && cleanDigits.length === 10) {
+                    priorReg = await db.prepare(`
+                        SELECT cr.*, tc.class_date, tc.start_time 
+                        FROM class_registrations cr
+                        LEFT JOIN training_classes tc ON cr.class_id = tc.id
+                        WHERE cr.status = 'Confirmed' AND LOWER(cr.candidate_name) = LOWER(?) AND (LOWER(cr.email) = LOWER(?) OR (cr.phone != '' AND REPLACE(REPLACE(REPLACE(REPLACE(cr.phone, '-', ''), ' ', ''), '(', ''), ')', '') LIKE ?))
+                    `).bind(name, email, '%' + cleanDigits).first();
+                } else if (email) {
+                    priorReg = await db.prepare(`
+                        SELECT cr.*, tc.class_date, tc.start_time 
+                        FROM class_registrations cr
+                        LEFT JOIN training_classes tc ON cr.class_id = tc.id
+                        WHERE cr.status = 'Confirmed' AND LOWER(cr.candidate_name) = LOWER(?) AND LOWER(cr.email) = LOWER(?)
+                    `).bind(name, email).first();
                 }
 
-                return new Response(JSON.stringify({
-                    success: true,
-                    pending: true,
-                    message: "Request received and pending review.",
-                    name: name,
-                    email: email,
-                    classDate: cls.class_date,
-                    classTime: cls.start_time
-                }), { status: 200, headers: corsHeaders() });
+                // 1b-iii. Check onboarding_candidates for prior scheduled NTO
+                let candMatch = null;
+                if (candidateId) {
+                    const targetCand = await db.prepare("SELECT * FROM onboarding_candidates WHERE id = ?").bind(candidateId).first();
+                    if (targetCand && (targetCand.nto_scheduled === 1 || targetCand.nto_scheduled === "1" || (targetCand.nto_date && targetCand.nto_date.trim() !== ''))) {
+                        candMatch = targetCand;
+                    }
+                } else {
+                    if (email && cleanDigits.length === 10) {
+                        candMatch = await db.prepare(`
+                            SELECT * FROM onboarding_candidates 
+                            WHERE (nto_scheduled = 1 OR (nto_date IS NOT NULL AND nto_date != '')) 
+                              AND LOWER(name) = LOWER(?)
+                              AND (LOWER(email) = LOWER(?) OR (phone_number != '' AND REPLACE(REPLACE(REPLACE(REPLACE(phone_number, '-', ''), ' ', ''), '(', ''), ')', '') LIKE ?))
+                        `).bind(name, email, '%' + cleanDigits).first();
+                    } else if (email) {
+                        candMatch = await db.prepare(`
+                            SELECT * FROM onboarding_candidates 
+                            WHERE (nto_scheduled = 1 OR (nto_date IS NOT NULL AND nto_date != '')) 
+                              AND LOWER(name) = LOWER(?)
+                              AND LOWER(email) = LOWER(?)
+                        `).bind(name, email).first();
+                    }
+                }
+
+                if (priorReg || candMatch) {
+                    const regId = "REG-PEND-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
+                    await db.prepare("INSERT INTO class_registrations (id, class_id, candidate_id, candidate_name, store_num, position, phone, email, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending')").bind(regId, classId, candidateId, name, storeNum, position, phone, email).run();
+
+                    await callAppsScriptProxy({
+                        username: "dallas_admin",
+                        password: "dallas_password_123",
+                        action: "sendNtoDuplicateAlert",
+                        name: name,
+                        email: email,
+                        phone: phone,
+                        storeNum: storeNum,
+                        classId: classId,
+                        classDate: cls.class_date,
+                        classTime: cls.start_time,
+                        requestId: regId
+                    }, context);
+
+                    return new Response(JSON.stringify({
+                        success: true,
+                        pending: true,
+                        message: "Request received and pending review.",
+                        name: name,
+                        email: email,
+                        classDate: cls.class_date,
+                        classTime: cls.start_time
+                    }), { status: 200, headers: corsHeaders() });
+                }
             }
 
             // 1c. Insert class registration
-            const regId = "REG-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
-            await db.prepare("INSERT INTO class_registrations (id, class_id, candidate_id, candidate_name, store_num, position, phone, email, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Confirmed')").bind(regId, classId, candidateId, name, storeNum, position, phone, email).run();
+            if (!existingReg) {
+                const regId = "REG-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
+                await db.prepare("INSERT INTO class_registrations (id, class_id, candidate_id, candidate_name, store_num, position, phone, email, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Confirmed')").bind(regId, classId, candidateId, name, storeNum, position, phone, email).run();
 
-            // 1d. Update spots_taken in training_classes
-            await db.prepare("UPDATE training_classes SET spots_taken = spots_taken + 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(classId).run();
+                // 1d. Update spots_taken in training_classes
+                await db.prepare("UPDATE training_classes SET spots_taken = spots_taken + 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(classId).run();
+            }
 
             // 1e. Update onboarding_candidates in D1
             const tz = regMarket.toLowerCase() === "denver" ? "America/Denver" : "America/Chicago";
@@ -1441,30 +1503,22 @@ export async function onRequestPost(context) {
             }
 
             // 1f. Trigger confirmation email & admin alert via Google Apps Script microservice
-            try {
-                const isDen = regMarket.toLowerCase() === "denver";
-                await fetch(APPS_SCRIPT_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({
-                        username: isDen ? "denver_admin" : "dallas_admin",
-                        password: isDen ? "denver_password_123" : "dallas_password_123",
-                        action: "sendNtoMeetLinks",
-                        classDate: cls.class_date,
-                        classTime: formatTimeDisplay(cls.start_time),
-                        meetLink: cls.meet_link || (isDen ? "https://meet.google.com/haf-izyt-gws" : "https://meet.google.com/zwc-afuu-hgh"),
-                        trainerName: cls.trainer || (isDen ? "Richard Keske" : "Mike Jacobs"),
-                        notifyAdmin: true,
-                        studentPhone: phone,
-                        storeNum: storeNum,
-                        market: regMarket,
-                        city: regMarket,
-                        trainees: [{ name: name, email: email }]
-                    })
-                });
-            } catch (mailErr) {
-                console.warn("Confirmation email proxy failed:", mailErr);
-            }
+            const isDen = regMarket.toLowerCase() === "denver";
+            await callAppsScriptProxy({
+                username: isDen ? "denver_admin" : "dallas_admin",
+                password: isDen ? "denver_password_123" : "dallas_password_123",
+                action: "sendNtoMeetLinks",
+                classDate: cls.class_date,
+                classTime: formatTimeDisplay(cls.start_time),
+                meetLink: cls.meet_link || (isDen ? "https://meet.google.com/haf-izyt-gws" : "https://meet.google.com/zwc-afuu-hgh"),
+                trainerName: cls.trainer || (isDen ? "Richard Keske" : "Mike Jacobs"),
+                notifyAdmin: true,
+                studentPhone: phone,
+                storeNum: storeNum,
+                market: regMarket,
+                city: regMarket,
+                trainees: [{ name: name, email: email }]
+            }, context);
 
             return new Response(JSON.stringify({
                 success: true,
@@ -1568,26 +1622,20 @@ export async function onRequestPost(context) {
             const recipientName = candidateName || (matchedCand ? matchedCand.name : (currentReg ? currentReg.candidate_name : ""));
 
             if (sendEmailNotification && recipientEmail && recipientEmail.includes("@")) {
-                try {
-                    const isDen = (targetClass.market || "").toLowerCase() === "denver";
-                    await fetch(APPS_SCRIPT_URL, {
-                        method: "POST",
-                        headers: { "Content-Type": "text/plain;charset=utf-8" },
-                        body: JSON.stringify({
-                            username: isDen ? "denver_admin" : "dallas_admin",
-                            password: isDen ? "denver_password_123" : "dallas_password_123",
-                            action: "sendNtoMeetLinks",
-                            classDate: targetClass.class_date,
-                            classTime: targetClass.start_time,
-                            meetLink: targetClass.meet_link || (isDen ? "https://meet.google.com/haf-izyt-gws" : "https://meet.google.com/zwc-afuu-hgh"),
-                            trainerName: targetClass.trainer || (isDen ? "Richard Keske" : "Mike Jacobs"),
-                            trainees: [{ name: recipientName, email: recipientEmail }]
-                        })
-                    });
-                    emailSent = true;
-                } catch (mailErr) {
-                    console.warn("Reschedule Meet link email failed:", mailErr);
-                }
+                const isDen = (targetClass.market || "").toLowerCase() === "denver";
+                await callAppsScriptProxy({
+                    username: isDen ? "denver_admin" : "dallas_admin",
+                    password: isDen ? "denver_password_123" : "dallas_password_123",
+                    action: "sendNtoMeetLinks",
+                    classDate: targetClass.class_date,
+                    classTime: targetClass.start_time,
+                    meetLink: targetClass.meet_link || (isDen ? "https://meet.google.com/haf-izyt-gws" : "https://meet.google.com/zwc-afuu-hgh"),
+                    trainerName: targetClass.trainer || (isDen ? "Richard Keske" : "Mike Jacobs"),
+                    market: targetClass.market || "Dallas",
+                    city: targetClass.market || "Dallas",
+                    trainees: [{ name: recipientName, email: recipientEmail }]
+                }, context);
+                emailSent = true;
             }
 
             return new Response(JSON.stringify({
@@ -2381,6 +2429,134 @@ export async function onRequestPost(context) {
             }), { status: 200, headers: corsHeaders() });
         }
 
+        // 3d. Direct D1 NTO Payroll Data Provider (Bypasses Google Sheets completely)
+        if (action === "getNtoPayrollReportData" || action === "getNtoPayrollData") {
+            const startDateStr = payload.startDate || url.searchParams.get("startDate") || "";
+            const endDateStr = payload.endDate || url.searchParams.get("endDate") || "";
+            const targetMarket = payload.market || url.searchParams.get("market") || market || "Dallas";
+
+            const parseDateLocal = (dStr) => {
+                if (!dStr) return null;
+                const str = String(dStr).trim();
+                const parts = str.includes("-") ? str.split("-") : str.split("/");
+                if (parts.length === 3) {
+                    if (parts[0].length === 4) { // YYYY-MM-DD
+                        return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+                    } else { // M/D/YYYY
+                        return new Date(parseInt(parts[2], 10), parseInt(parts[0], 10) - 1, parseInt(parts[1], 10));
+                    }
+                }
+                const d = new Date(str);
+                return isNaN(d.getTime()) ? null : d;
+            };
+
+            const startObj = parseDateLocal(startDateStr);
+            const endObj = parseDateLocal(endDateStr);
+            if (startObj) startObj.setHours(0, 0, 0, 0);
+            if (endObj) endObj.setHours(23, 59, 59, 999);
+
+            const { results: candidates } = await db.prepare(`
+                SELECT id, name, store_num, position, nto_date, nto_attendance, ssn_last_4, phone_number, email
+                FROM onboarding_candidates
+                WHERE LOWER(market) = LOWER(?)
+                  AND nto_attendance IN ('NTO Complete', 'Attended')
+                  AND (ineligible = 0 OR ineligible IS NULL)
+                  AND (inactive = 0 OR inactive IS NULL)
+                  AND (withdrawn = 0 OR withdrawn IS NULL)
+            `).bind(targetMarket).all();
+
+            const { results: classes } = await db.prepare(`
+                SELECT class_date, start_time, end_time
+                FROM training_classes
+                WHERE LOWER(market) = LOWER(?)
+            `).bind(targetMarket).all();
+
+            const classHoursByDate = {};
+            (classes || []).forEach(cls => {
+                if (cls.class_date) {
+                    const parsedClsDate = parseDateLocal(cls.class_date);
+                    if (parsedClsDate && cls.start_time && cls.end_time) {
+                        const dateKey = `${parsedClsDate.getMonth() + 1}/${parsedClsDate.getDate()}/${parsedClsDate.getFullYear()}`;
+                        try {
+                            const parseMins = (tStr) => {
+                                const m = (tStr || "").trim().match(/(\d+):(\d+)\s*(AM|PM)?/i);
+                                if (!m) return 0;
+                                let h = parseInt(m[1], 10);
+                                const mn = parseInt(m[2], 10);
+                                const meridiem = (m[3] || "").toUpperCase();
+                                if (meridiem === "PM" && h < 12) h += 12;
+                                if (meridiem === "AM" && h === 12) h = 0;
+                                return h * 60 + mn;
+                            };
+                            let sM = parseMins(cls.start_time);
+                            let eM = parseMins(cls.end_time);
+                            if (sM === 0 && eM > 720) sM = 18 * 60;
+                            if (sM < 720 && eM >= 720 && (sM + 720) <= eM) sM += 720;
+                            let diff = eM - sM;
+                            if (diff < 0 && (diff + 12 * 60) > 0) diff += 12 * 60;
+                            else if (diff < 0) diff += 24 * 60;
+                            while (diff > 5 * 60) diff -= 12 * 60;
+                            if (diff > 0) {
+                                classHoursByDate[dateKey] = (diff / 60).toFixed(2);
+                            }
+                        } catch (e) {}
+                    }
+                }
+            });
+
+            const matchedRows = [];
+            const seenKeys = new Set();
+
+            (candidates || []).forEach(c => {
+                if (!c.nto_date) return;
+                const candDate = parseDateLocal(c.nto_date);
+                if (!candDate) return;
+
+                if (startObj && candDate < startObj) return;
+                if (endObj && candDate > endObj) return;
+
+                const formattedDate = `${candDate.getMonth() + 1}/${candDate.getDate()}/${candDate.getFullYear()}`;
+                const nameClean = (c.name || '').trim();
+                const nameKey = nameClean.toLowerCase().replace(/[^a-z]/g, '');
+                const dedupKey = `${nameKey}@${formattedDate}`;
+                if (seenKeys.has(dedupKey)) return;
+                seenKeys.add(dedupKey);
+
+                const rawSsn = String(c.ssn_last_4 || '').replace(/\D/g, '');
+                const ssnVal = rawSsn.length >= 4 ? rawSsn.slice(-4) : (rawSsn ? rawSsn.padStart(4, '0') : '');
+                const pos = (c.position || 'CSR').trim();
+                const totalHours = classHoursByDate[formattedDate] || "1.33";
+
+                matchedRows.push({
+                    location: (c.store_num || '').replace(/\D/g, ''),
+                    last4Ssn: ssnVal,
+                    position: pos,
+                    totalHours: totalHours,
+                    systemDate: formattedDate,
+                    name: nameClean,
+                    job: pos,
+                    trainingType: "NTO Training"
+                });
+            });
+
+            matchedRows.sort((a, b) => {
+                const timeA = new Date(a.systemDate).getTime();
+                const timeB = new Date(b.systemDate).getTime();
+                if (timeA !== timeB) return timeA - timeB;
+                const storeA = parseInt(a.location, 10) || 0;
+                const storeB = parseInt(b.location, 10) || 0;
+                if (storeA !== storeB) return storeA - storeB;
+                return a.name.localeCompare(b.name);
+            });
+
+            return new Response(JSON.stringify({
+                success: true,
+                market: targetMarket,
+                count: matchedRows.length,
+                rows: matchedRows
+            }), { status: 200, headers: corsHeaders() });
+        }
+
         // 4. Email & NTO Automation Actions: Proxy to Google Apps Script Gmail microservice
         if (action === "sendEmail" || action === "sendNtoMeetLinks" || action === "sendWelcomeLetter" || action === "concludeNtoClass" || action === "resendBonnieNtoEmail" || action === "testNtoPayrollReport" || action === "sendNtoPayrollReport" || action === "setupNtoPayrollTrigger" || action === "disableNtoPayrollTrigger") {
             try {
@@ -2474,32 +2650,54 @@ export async function onRequestPost(context) {
                         }
                     }
                 }
-                const isDenverMarket = (market || "").toLowerCase() === "denver";
-                const gasUser = isDenverMarket ? "denver_admin" : "dallas_admin";
-                const gasPass = isDenverMarket ? "denver_password_123" : "dallas_password_123";
-                const gasPayload = {
-                    ...payload,
-                    username: gasUser,
-                    password: gasPass,
-                    market: market,
-                    city: market
-                };
-                const gasQuery = new URLSearchParams({
-                    username: gasUser,
-                    password: gasPass,
-                    city: market,
-                    market: market,
-                    action: action
-                }).toString();
-                const gasUrl = `${APPS_SCRIPT_URL}${APPS_SCRIPT_URL.includes('?') ? '&' : '?'}${gasQuery}`;
+                let enrichedPayload = { ...payload };
+                const storeNumTarget = String(payload.store || payload.storeNum || '').trim();
+                if ((action === "sendEmail" || action === "sendWelcomeLetter") && storeNumTarget) {
+                    try {
+                        const cleanStore = storeNumTarget.replace(/\D/g, '');
+                        const storeRecord = await db.prepare("SELECT * FROM stores WHERE store_number = ? OR store_number = ? LIMIT 1")
+                            .bind(storeNumTarget, cleanStore)
+                            .first();
+                        if (storeRecord) {
+                            if (!enrichedPayload.gmName && storeRecord.manager_name) enrichedPayload.gmName = storeRecord.manager_name;
+                            if (!enrichedPayload.gmPhone && (storeRecord.gm_phone || storeRecord.do_cell)) enrichedPayload.gmPhone = storeRecord.gm_phone || storeRecord.do_cell;
+                            if (!enrichedPayload.storePhone && storeRecord.store_phone) enrichedPayload.storePhone = storeRecord.store_phone;
+                            if (!enrichedPayload.storeAddress && storeRecord.address) enrichedPayload.storeAddress = storeRecord.address;
+                            if (!enrichedPayload.storeEmail && storeRecord.store_email) enrichedPayload.storeEmail = storeRecord.store_email;
+                            if (!enrichedPayload.doEmail && storeRecord.do_email) enrichedPayload.doEmail = storeRecord.do_email;
+                            if (!enrichedPayload.doName && storeRecord.do_name) enrichedPayload.doName = storeRecord.do_name;
+                        }
+                    } catch (storeLookupErr) {
+                        console.warn("Failed to lookup store in D1 for sendEmail:", storeLookupErr);
+                    }
+                }
 
-                const gasRes = await fetch(gasUrl, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify(gasPayload),
-                    redirect: "follow"
-                });
-                const gasJson = await gasRes.json();
+                if (action === "sendNtoMeetLinks") {
+                    const isDen = (market || payload.market || '').toLowerCase() === "denver";
+                    if (isDen) {
+                        if (!enrichedPayload.meetLink) enrichedPayload.meetLink = "https://meet.google.com/haf-izyt-gws";
+                        if (!enrichedPayload.trainerName) enrichedPayload.trainerName = "Richard Keske";
+                    }
+                    if (!enrichedPayload.classTime && enrichedPayload.classDate) {
+                        try {
+                            const cl = await db.prepare("SELECT start_time, trainer, meet_link FROM training_classes WHERE (class_date = ? OR REPLACE(class_date, ' ', '') = ?) AND (market = ? OR market = 'Virtual') AND is_active = 1 LIMIT 1")
+                                .bind(enrichedPayload.classDate, enrichedPayload.classDate, market)
+                                .first();
+                            if (cl) {
+                                if (!enrichedPayload.classTime && cl.start_time) enrichedPayload.classTime = formatTimeDisplay(cl.start_time);
+                                if (!enrichedPayload.trainerName && cl.trainer) enrichedPayload.trainerName = cl.trainer;
+                                if (!enrichedPayload.meetLink && cl.meet_link) enrichedPayload.meetLink = cl.meet_link;
+                            }
+                        } catch (clErr) {}
+                    }
+                }
+
+                const gasJson = await callAppsScriptProxy({
+                    ...enrichedPayload,
+                    market: market,
+                    city: market,
+                    action: action
+                }, context);
                 return new Response(JSON.stringify(gasJson), { status: 200, headers: corsHeaders() });
             } catch (err) {
                 return new Response(JSON.stringify({ error: `GAS proxy failed: ${err.message}` }), {
@@ -3099,8 +3297,8 @@ export async function onRequestPost(context) {
                     position = COALESCE(?, position),
                     store_num = COALESCE(?, store_num),
                     do_name = COALESCE(?, do_name),
-                    nto_date = COALESCE(?, nto_date),
-                    nto_attendance = COALESCE(?, nto_attendance),
+                    nto_date = COALESCE(NULLIF(?, ''), nto_date),
+                    nto_attendance = COALESCE(NULLIF(?, ''), nto_attendance),
                     notes = COALESCE(?, notes),
                     shirt_size = COALESCE(?, shirt_size),
                     hat_style = COALESCE(?, hat_style),

@@ -334,22 +334,6 @@
                                             <label class="checkbox-item"><input type="checkbox" id="checkHired"
                                                     onchange="updateStageBadges()"> Hired</label>
                                         </div>
-                                        <div class="form-row" style="margin-top: 10px; display: flex; gap: 10px;">
-                                            <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                                                <label>Orientation (NTO) Date</label>
-                                                <input type="text" id="fieldNtoDateText" placeholder="MM/DD/YYYY" oninput="document.getElementById('fieldNto').value = this.value">
-                                            </div>
-                                            <div class="form-group" style="flex: 1.2; margin-bottom: 0;">
-                                                <label>NTO Attendance Status</label>
-                                                <select id="fieldNtoAttendance" onchange="if(this.value === 'NTO Complete'){ document.getElementById('checkHired').checked = true; document.getElementById('checkNto').checked = true; updateStageBadges(); }">
-                                                    <option value="">Select Status...</option>
-                                                    <option value="In Class">📖 In Class</option>
-                                                    <option value="Not in NTO">❌ Not in NTO (Absent)</option>
-                                                    <option value="Left Early">⚠️ Left Early</option>
-                                                    <option value="NTO Complete">🎓 NTO Complete</option>
-                                                </select>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
 
@@ -945,10 +929,10 @@
                         </div>
 
                         <!-- 6. CONTACTS DIRECTORY TEMPLATE -->
-                        <div id="contactsFormFields" class="hidden">
+                        <div id="contactsFormFields" class="hidden" style="display: flex; flex-direction: column; height: 100%; box-sizing: border-box; overflow: hidden;">
                             <!-- Controls Row: Filter by DO & Quick Search -->
                             <div
-                                style="display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: flex-end;">
+                                style="display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: flex-end; flex-shrink: 0;">
                                 <div style="flex: 2; min-width: 200px;">
                                     <label
                                         style="font-family: 'Subhead2'; font-size: 14px; color: var(--text-dark);">Search
@@ -981,7 +965,7 @@
 
                             <!-- Contact List Grid Container -->
                             <div id="contactsGridContainer"
-                                style="display: flex; flex-direction: column; gap: 10px; max-height: calc(100vh - 220px); overflow-y: auto; padding-right: 4px;">
+                                style="display: flex; flex-direction: column; gap: 10px; flex: 1 1 0; min-height: 0; overflow-y: auto; padding-right: 4px;">
                                 <!-- Rows dynamically injected here -->
                             </div>
                         </div>
@@ -1577,12 +1561,8 @@
             // Ensure valid system credentials for GAS fallback
             const defaultUser = city === 'Denver' ? 'denver_admin' : 'dallas_admin';
             const defaultPass = city === 'Denver' ? 'denver_password_123' : 'dallas_password_123';
-            if (!u || (!u.startsWith('dallas') && !u.startsWith('denver'))) {
-                u = defaultUser;
-                p = defaultPass;
-            } else if (!p) {
-                p = defaultPass;
-            }
+            u = defaultUser;
+            p = defaultPass;
 
             let requestPayload = {};
             if (typeof actionOrMethod === 'object') {
@@ -3027,6 +3007,14 @@
                 if (btnAddMain) btnAddMain.classList.add('hidden');
                 if (formActions) formActions.classList.add('hidden');
                 if (cntFormFields) cntFormFields.classList.remove('hidden');
+                if (scrollArea) {
+                    scrollArea.style.overflowY = 'hidden';
+                    scrollArea.style.display = 'flex';
+                    scrollArea.style.flexDirection = 'column';
+                    scrollArea.style.height = '100%';
+                    scrollArea.style.paddingRight = '0';
+                    scrollArea.style.marginBottom = '0';
+                }
                 document.getElementById('formTitle').innerText = "📞 GM & DO Store Directory";
                 populateContactDoDropdown();
                 renderContactsView();
@@ -3869,6 +3857,10 @@
                         card.classList.add('status-blue');
                         ntoStatusColor = 'var(--dark-blue)';
                         ntoLabel = `🎓 NTO: ${item.ntoDate}`;
+                    } else if (item.ntoScheduled) {
+                        card.classList.add('status-blue');
+                        ntoStatusColor = 'var(--dark-blue)';
+                        ntoLabel = '📅 NTO Scheduled';
                     } else if (item.ntoSignupLinkSent) {
                         card.classList.add('status-blue');
                         ntoStatusColor = 'var(--dark-blue)';
@@ -4703,11 +4695,11 @@
                 payload.hatStyle = document.getElementById('fieldHat').value;
                 payload.payCard = document.getElementById('fieldPayCard') ? document.getElementById('fieldPayCard').value.trim() : '';
                 payload.notes = document.getElementById('fieldNotes').value.trim();
-                payload.ntoDate = (document.getElementById('fieldNtoDateText') && document.getElementById('fieldNtoDateText').value.trim()) 
-                    ? document.getElementById('fieldNtoDateText').value.trim() 
-                    : (document.getElementById('fieldNto') ? document.getElementById('fieldNto').value.trim() : '');
-                const ntoAttSelect = document.getElementById('fieldNtoAttendance');
-                payload.ntoAttendance = ntoAttSelect ? ntoAttSelect.value : (existingCand ? (existingCand.ntoAttendance || '') : '');
+                payload.ntoDate = document.getElementById('fieldNto') ? document.getElementById('fieldNto').value.trim() : (existingCand ? (existingCand.ntoDate || '') : '');
+                if (!payload.ntoDate && existingCand && existingCand.ntoDate) {
+                    payload.ntoDate = existingCand.ntoDate;
+                }
+                payload.ntoAttendance = existingCand ? (existingCand.ntoAttendance || '') : '';
                 payload.ntoStatus = payload.ntoAttendance;
                 payload.submissionReceived = document.getElementById('checkSubmission').checked;
                 payload.onboardingSent = document.getElementById('checkOnbSent').checked;
@@ -4967,6 +4959,8 @@
 
             showLoader(true, `Sending email template...`);
 
+            const storeContact = (contacts || []).find(c => String(c.store || '').replace(/\D/g, '') === String(store || '').replace(/\D/g, ''));
+
             const payload = {
                 action: "sendEmail",
                 id: id,
@@ -4977,6 +4971,12 @@
                 position: position,
                 store: store,
                 storeNum: store,
+                gmName: storeContact?.manager || '',
+                gmPhone: storeContact?.gmPhone || storeContact?.doCell || '',
+                storePhone: storeContact?.storePhone || '',
+                storeAddress: storeContact?.address || '',
+                storeEmail: storeContact?.storeEmail || '',
+                doEmail: storeContact?.doEmail || '',
                 emailType: emailType,
                 missingForms: payloadMissing,
                 payRate: payRateInput,
@@ -6939,6 +6939,9 @@
                     </span>
                 ` : '';
 
+                const candDo = item.doName || item.do || (contacts && contacts.find(c => String(c.store).trim() === String(item.store).trim())?.doName) || '';
+                const candDoDisplay = candDo ? ` • ${escapeText(candDo)}` : '';
+
                 row.innerHTML = `
                 <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; flex: 1.6; margin: 0;" title="Check to send Google Meet link">
                     <input type="checkbox" class="nto-trainee-check" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" onchange="updateNtoSendMeetLinksButtonText()" style="width: 19px; height: 19px; accent-color: var(--brand-blue); cursor: pointer; flex-shrink: 0;">
@@ -6947,7 +6950,7 @@
                             <span>${item.name}</span>
                             ${scoreBadge}
                         </div>
-                        <div style="font-family: 'Condensed', sans-serif; font-size: 16px; color: var(--text-dark); margin-top: 2px;">Store #${item.store} • ${item.position || 'CSR'} • Date: ${ntoDateVal || 'N/A'}</div>
+                        <div style="font-family: 'Condensed', sans-serif; font-size: 16px; color: var(--text-dark); margin-top: 2px;">Store #${item.store}${candDoDisplay} • ${item.position || 'CSR'} • Date: ${ntoDateVal || 'N/A'}</div>
                     </div>
                 </label>
                 <div style="flex: 1.4; display: flex; gap: 8px; align-items: center; justify-content: flex-end;">
@@ -7069,6 +7072,8 @@
             try {
                 const result = await apiCall('POST', {
                     action: "sendNtoMeetLinks",
+                    market: isDenver ? "Denver" : "Dallas",
+                    trainerName: isDenver ? "Richard Keske" : "Mike Jacobs",
                     classDate: classDate,
                     meetLink: meetUrl.trim(),
                     trainees: [{ name: name, email: targetEmail }]
@@ -8470,6 +8475,8 @@
             try {
                 const result = await apiCall('POST', {
                     action: "sendNtoMeetLinks",
+                    market: isDenver ? "Denver" : "Dallas",
+                    trainerName: isDenver ? "Richard Keske" : "Mike Jacobs",
                     classDate: classDate,
                     meetLink: meetUrl.trim(),
                     trainees: traineesWithEmails
