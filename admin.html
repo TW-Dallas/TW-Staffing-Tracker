@@ -393,6 +393,10 @@
                                                         type="checkbox" class="doc-chk"
                                                         value="Auto Insurance ID (Driver name must be listed as a covered driver)">
                                                     📄 Auto Insurance ID</label>
+                                                <label class="checkbox-item" style="color: var(--text-dark);"><input
+                                                        type="checkbox" class="doc-chk"
+                                                        value="<1 License History">
+                                                    ⏱️ &lt;1 License History</label>
                                             </div>
 
                                             <div
@@ -457,7 +461,7 @@
                                     <button type="button" onclick="triggerCandidateEmail('reminder')"
                                         style="background: var(--brand-grey);">⏰ Send Reminder</button>
                                     <button type="button" onclick="triggerCandidateEmail('orientation')"
-                                        style="background: var(--success-green);">📅 Send Orientation Link</button>
+                                        style="background: var(--med-blue); color: white;">📅 Send Orientation Link</button>
                                 </div>
                             </div>
                         </div>
@@ -2213,7 +2217,7 @@
             });
         }
 
-        function showBrandReminderPrompt(missingFormsArray, allPayErrorText) {
+        function showBrandReminderPrompt(missingFormsArray, allPayErrorText, flagNoticeInfo) {
             return new Promise((resolve) => {
                 const modal = document.getElementById('brandModal');
                 const titleEl = document.getElementById('brandModalTitle');
@@ -2246,7 +2250,13 @@
                     };
                 }
 
-                if (allPayErrorText) {
+                if (flagNoticeInfo && flagNoticeInfo.hasLicenseHistory) {
+                    titleEl.innerText = "Send Driving History Verification Notice (<1 License History)";
+                    msgEl.innerText = "Notice: Unable to verify 1+ year driving history. Candidate will receive instructions to submit prior out-of-state license or MVR driving record.";
+                } else if (flagNoticeInfo && flagNoticeInfo.isMissingDocs) {
+                    titleEl.innerText = "Send Missing Documents Notice";
+                    msgEl.innerText = `Notice: Candidate will be requested to submit: ${flagNoticeInfo.missingDocsSummary}.`;
+                } else if (allPayErrorText) {
                     titleEl.innerText = "Send AllPay I-9 Correction Notice";
                     msgEl.innerText = `Correction Notice: ${allPayErrorText}. You can attach the downloaded AllPay PDF directly or paste links below (optional).`;
                 } else {
@@ -3947,7 +3957,14 @@
                     if (!item.hired && !item.ineligible && !item.inactive && !item.withdrawn) {
                         if (isAllPayError) flags += '<span class="badge-incorrect">⚠️ AllPay Error</span> ';
                         if (item.incorrectEmail) flags += '<span class="badge-incorrect">⚠️ Email Error</span> ';
-                        if (isBlockedByDocs) flags += '<span class="badge-incorrect">⚠️ Missing Docs</span> ';
+                        if (isBlockedByDocs) {
+                            const rawLower = (rawMissingDocs || '').toLowerCase();
+                            if (rawLower.includes('<1 license') || rawLower.includes('license history') || rawLower.includes('< 1 license')) {
+                                flags += '<span class="badge-incorrect">⚠️ &lt;1 License History</span> ';
+                            } else {
+                                flags += '<span class="badge-incorrect">⚠️ Missing Docs</span> ';
+                            }
+                        }
                         if (item.missedNto) flags += '<span class="badge-incorrect">⚠️ Missed NTO</span> ';
                     }
 
@@ -4914,6 +4931,8 @@
                 }
             } else if (emailType === "reminder") {
                 const isAllPayErrorChecked = document.getElementById('checkAllPayError') ? document.getElementById('checkAllPayError').checked : false;
+                const isMissingDocsChecked = document.getElementById('checkMissingDocs') ? document.getElementById('checkMissingDocs').checked : false;
+
                 let activeAllPayErrors = [];
                 if (isAllPayErrorChecked) {
                     document.querySelectorAll('.allpay-err-chk:checked').forEach(c => activeAllPayErrors.push(c.value));
@@ -4923,17 +4942,35 @@
                 }
                 const allPayErrorText = activeAllPayErrors.join(", ");
 
+                let activeMissingDocs = [];
+                if (isMissingDocsChecked) {
+                    document.querySelectorAll('.doc-chk:checked').forEach(c => activeMissingDocs.push(c.value));
+                    const customDocVal = document.getElementById('customMissingDoc') ? document.getElementById('customMissingDoc').value.trim() : '';
+                    if (customDocVal) activeMissingDocs.push(customDocVal);
+                    if (activeMissingDocs.length === 0) activeMissingDocs.push("Missing Onboarding Documents");
+                }
+                const hasLicenseHistoryFlag = activeMissingDocs.some(d => d.toLowerCase().includes("<1 license") || d.toLowerCase().includes("license history"));
+
                 let missing = getMissingOnboardingForms();
-                if (isAllPayErrorChecked && !missing.includes("Onboarding Documents (AllPay/HR Alliance)")) {
+                if (activeMissingDocs.length > 0) {
+                    missing.push(...activeMissingDocs);
+                }
+                if (isAllPayErrorChecked && !missing.includes("Onboarding Documents (AllPay/HR Alliance - I-9 Error)")) {
                     missing.unshift("Onboarding Documents (AllPay/HR Alliance - I-9 Error)");
                 }
 
-                if (missing.length === 0 && !isAllPayErrorChecked) {
-                    showBrandAlert("All onboarding forms are currently marked as completed.", "Reminder Cancelled");
+                if (missing.length === 0 && !isAllPayErrorChecked && !isMissingDocsChecked) {
+                    showBrandAlert("All onboarding forms and requirements are currently marked as completed.", "Reminder Cancelled");
                     return;
                 }
 
-                const promptResult = await showBrandReminderPrompt(missing, allPayErrorText);
+                const flagNoticeInfo = {
+                    hasLicenseHistory: hasLicenseHistoryFlag,
+                    isMissingDocs: isMissingDocsChecked,
+                    missingDocsSummary: activeMissingDocs.join(", ")
+                };
+
+                const promptResult = await showBrandReminderPrompt(missing, allPayErrorText, flagNoticeInfo);
                 if (promptResult === null) return;
 
                 payloadMissing = missing.join(", ");
@@ -4945,8 +4982,12 @@
                 payloadFileMimeType = promptResult.fileMimeType;
                 payloadAllPayErrorText = allPayErrorText;
 
-                if (isAllPayErrorChecked) {
+                if (hasLicenseHistoryFlag) {
+                    confirmationMessage = `Send Driving History (<1 License History) Notice to ${name} (${email})?${promptResult.fileName ? `\n\n• 📎 Attached: ${promptResult.fileName}` : ''}`;
+                } else if (isAllPayErrorChecked) {
                     confirmationMessage = `Send I-9 Correction Notice to ${name} (${email}) for:\n\n• ${allPayErrorText}${promptResult.fileName ? `\n• 📎 Attached: ${promptResult.fileName}` : ''}`;
+                } else if (isMissingDocsChecked && activeMissingDocs.length > 0) {
+                    confirmationMessage = `Send Missing Documents Notice to ${name} (${email}) for:\n\n• ${activeMissingDocs.join("\n• ")}${promptResult.fileName ? `\n• 📎 Attached: ${promptResult.fileName}` : ''}`;
                 } else {
                     confirmationMessage = `Are you sure you want to send the Onboarding Reminder to ${name} (${email}) for:\n\n• ${missing.join("\n• ")}${promptResult.fileName ? `\n• 📎 Attached: ${promptResult.fileName}` : ''}`;
                 }
@@ -4977,7 +5018,7 @@
                 storeAddress: storeContact?.address || '',
                 storeEmail: storeContact?.storeEmail || '',
                 doEmail: storeContact?.doEmail || '',
-                emailType: emailType,
+                emailType: (emailType === "flag" ? "reminder" : emailType),
                 missingForms: payloadMissing,
                 payRate: payRateInput,
                 hourlyRate: payRateInput,
@@ -5042,6 +5083,7 @@
                 showBrandAlert("Error sending email: " + err.message, "Email Error");
             }
         }
+
 
         async function triggerGmInterviewEmail() {
             const id = document.getElementById('fieldId').value;
@@ -8221,6 +8263,9 @@
                                 <span style="font-family: 'Subhead2'; font-size: 15px; color: var(--text-light); margin-left: 8px;">Director of Operations</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 6px;">
+                                <button type="button" onclick="openEditDoModal('${escapeText(d.doName)}')" title="Edit DO Contact Info" style="background: var(--brand-blue); color: white; padding: 5px 10px; font-size: 13px; font-family: 'Subhead2'; border-radius: 4px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                    ✏️ <span style="font-size: 12px;">Edit DO</span>
+                                </button>
                                 <button type="button" onclick="copyToClipboard('${escapeText(d.doName + ' (DO) - ' + (d.doEmail || '') + ' - ' + (formattedCell || ''))}', this)" title="Copy DO Contact Summary" style="background: var(--crust-med); color: var(--crust-burnt); padding: 5px 10px; font-size: 13px; font-family: 'Subhead2'; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                                     ${copySvg} <span style="font-size: 12px;">Copy</span>
                                 </button>
@@ -9258,6 +9303,79 @@
             document.getElementById('editContactModal').classList.add('hidden');
         }
 
+        /* --- EDIT DO CONTACT MODAL HANDLERS --- */
+        function openEditDoModal(doName) {
+            const doStores = contacts.filter(c => String(c.doName || '').toLowerCase() === String(doName).toLowerCase());
+            const sample = doStores[0] || {};
+
+            document.getElementById('editDoOriginalName').value = doName;
+            document.getElementById('editDoNameInput').value = doName;
+            document.getElementById('editDoEmailInput').value = sample.doEmail || '';
+            document.getElementById('editDoCellInput').value = formatPhoneNumber(sample.doCell) || '';
+
+            const storeNums = doStores.map(c => `#${c.store}`).join(', ');
+            const noticeEl = document.getElementById('editDoStoresNotice');
+            if (noticeEl) {
+                noticeEl.innerHTML = `ℹ️ Saving will update email and phone across <strong>${doStores.length} stores</strong> supervised by DO ${doName} (${storeNums || 'None'}).`;
+            }
+
+            document.getElementById('editDoModalTitle').innerText = `👤 Edit DO: ${doName}`;
+            document.getElementById('editDoModal').classList.remove('hidden');
+        }
+
+        function closeEditDoModal() {
+            document.getElementById('editDoModal').classList.add('hidden');
+        }
+
+        async function saveDoContact() {
+            const doName = document.getElementById('editDoOriginalName').value.trim();
+            const doEmail = document.getElementById('editDoEmailInput').value.trim();
+            const doCell = formatPhoneNumber(document.getElementById('editDoCellInput').value.trim());
+
+            if (!doName) return;
+
+            showLoader(true, `Updating DO ${doName} contact info across all assigned stores...`);
+
+            try {
+                await apiCall('POST', {
+                    target: 'contacts',
+                    action: 'updateDoContact',
+                    doName: doName,
+                    doEmail: doEmail,
+                    doCell: doCell
+                });
+
+                // Update in local memory for all matching stores
+                contacts.forEach(c => {
+                    if (String(c.doName || '').toLowerCase() === doName.toLowerCase()) {
+                        c.doEmail = doEmail;
+                        c.doCell = doCell;
+                    }
+                });
+
+                // Update local storage cache
+                const u = localStorage.getItem('onb_user');
+                if (u) {
+                    try {
+                        const raw = localStorage.getItem(`cached_workspace_data_${u}`);
+                        if (raw) {
+                            const cached = JSON.parse(raw);
+                            cached.contacts = contacts;
+                            localStorage.setItem(`cached_workspace_data_${u}`, JSON.stringify(cached));
+                        }
+                    } catch (e) { }
+                }
+
+                showLoader(false);
+                closeEditDoModal();
+                showBrandAlert(`Successfully updated DO ${doName}'s contact info to ${doEmail} across all assigned stores!`, "DO Contact Updated");
+                renderContactsView();
+            } catch (err) {
+                showLoader(false);
+                showBrandAlert("Error updating DO contact info: " + err.message, "Update Failed");
+            }
+        }
+
         async function saveStoreContact() {
             const store = document.getElementById('editContactStore').value.trim();
             if (!store) return;
@@ -9757,6 +9875,48 @@
                     </div>
                 </form>
             </div>
+        </div>
+    </div>
+
+    <!-- EDIT DO CONTACT INFO MODAL -->
+    <div id="editDoModal" class="brand-modal-overlay hidden">
+        <div class="brand-modal-content" style="max-width: 500px; width: 90%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--crust-med); padding-bottom: 10px; margin-bottom: 16px;">
+                <h3 id="editDoModalTitle" style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 20px;">
+                    👤 Edit DO Contact Info
+                </h3>
+                <button type="button" onclick="closeEditDoModal()" style="background: var(--crust-med); color: var(--crust-burnt); border: none; font-size: 14px; padding: 4px 10px; border-radius: 6px; cursor: pointer;">
+                    ✕
+                </button>
+            </div>
+
+            <form onsubmit="event.preventDefault(); saveDoContact();">
+                <input type="hidden" id="editDoOriginalName">
+
+                <div style="margin-bottom: 14px;">
+                    <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">Director of Operations Name:</label>
+                    <input type="text" id="editDoNameInput" readonly style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); background: var(--crust-light); font-weight: bold; color: var(--dark-blue); box-sizing: border-box;">
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">DO Email Address:</label>
+                    <input type="email" id="editDoEmailInput" placeholder="e.g. jacob@team-wow.com" required style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt);">DO Cell Phone:</label>
+                    <input type="text" id="editDoCellInput" placeholder="e.g. (512) 827-6435" style="width: 100%; padding: 8px 10px; font-size: 16px; border-radius: 6px; border: 1px solid var(--crust-dark); box-sizing: border-box;">
+                </div>
+
+                <div id="editDoStoresNotice" style="font-size: 12.5px; color: var(--brand-grey); font-family: 'Condensed', sans-serif; background: #e3f2fd; border-left: 4px solid var(--brand-blue); padding: 8px 12px; border-radius: 4px; margin-bottom: 16px;">
+                    ℹ️ Saving will automatically update contact info across all stores supervised by this DO.
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" onclick="closeEditDoModal()" class="secondary" style="font-size: 15px; padding: 9px 18px;">Cancel</button>
+                    <button type="submit" style="background: var(--brand-blue); color: white; font-family: 'Subhead1'; font-size: 16px; padding: 9px 20px; border-radius: 6px; border: none; cursor: pointer;">Save DO Contact</button>
+                </div>
+            </form>
         </div>
     </div>
 
