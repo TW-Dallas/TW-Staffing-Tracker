@@ -104,6 +104,18 @@ function parseDateForSort(dateStr) {
     return isNaN(t) ? 0 : t;
 }
 
+// Security token generator for 1-click mobile GM approval/denial links
+function generateGmDecisionToken(pulseId, pin) {
+    const salt = "TwGmAccessEdgeSalt2026";
+    const str = `${String(pulseId).toLowerCase().trim()}:${String(pin).trim()}:${salt}`;
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+    }
+    return Math.abs(hash).toString(36);
+}
+
 // HTML renderer for 1-click email actions (approval, denial, deletion)
 function renderActionHtml(title, message, headerColor) {
     return `<!DOCTYPE html>
@@ -111,14 +123,16 @@ function renderActionHtml(title, message, headerColor) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title} • Team Wow Orientation</title>
+    <title>${title} • Team Wow Staffing Command</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #fefaf6; margin: 0; padding: 40px 16px; color: #472b10; display: flex; justify-content: center; align-items: center; min-height: 80vh; }
-        .card { background: white; max-width: 520px; width: 100%; border-radius: 12px; border: 2px solid #f0decc; box-shadow: 0 10px 25px rgba(71, 43, 16, 0.1); overflow: hidden; text-align: center; }
-        .header { background-color: ${headerColor || '#005c91'}; color: white; padding: 22px 24px; }
-        .header h2 { margin: 0; font-size: 21px; letter-spacing: 0.5px; }
-        .body { padding: 30px 24px; font-size: 15.5px; line-height: 1.6; }
-        .footer { font-size: 13px; color: #888; border-top: 1px dashed #f0decc; padding: 14px; background-color: #faf2e9; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #fefaf6; margin: 0; padding: 30px 16px; color: #472b10; display: flex; justify-content: center; align-items: center; min-height: 85vh; }
+        .card { background: white; max-width: 480px; width: 100%; border-radius: 14px; border: 2px solid #ebd9c8; box-shadow: 0 10px 30px rgba(71, 43, 16, 0.12); overflow: hidden; text-align: center; }
+        .header { background-color: ${headerColor || '#005c91'}; color: white; padding: 24px 20px; }
+        .header h2 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+        .body { padding: 28px 24px; font-size: 15px; line-height: 1.6; color: #472b10; }
+        .portal-btn { display: inline-block; margin-top: 22px; background-color: #005c91; color: #ffffff !important; text-decoration: none; padding: 11px 22px; border-radius: 25px; font-weight: bold; font-size: 13.5px; box-shadow: 0 3px 8px rgba(0, 92, 145, 0.25); }
+        .portal-btn:hover { background-color: #004b75; }
+        .footer { font-size: 12.5px; color: #7a5c43; border-top: 1px solid #f0decc; padding: 14px 20px; background-color: #faf2e9; }
     </style>
 </head>
 <body>
@@ -127,10 +141,16 @@ function renderActionHtml(title, message, headerColor) {
             <h2>${title}</h2>
         </div>
         <div class="body">
-            <p>${message}</p>
+            <div style="margin-bottom: 16px;">
+                <img src="https://teamwow-assets.pages.dev/image/custom-emojis/manager_lock.png" alt="Domino's Security" style="width: 52px; height: 52px; object-fit: contain;">
+            </div>
+            <div>${message}</div>
+            <div>
+                <a href="https://tw-staffing.pages.dev" class="portal-btn">&#128274; Go to GM Staffing Command</a>
+            </div>
         </div>
         <div class="footer">
-            You can safely close this window now.
+            Team Wow Staffing Command &bull; Direct Cloudflare D1 Edge Authorization
         </div>
     </div>
 </body>
@@ -300,59 +320,6 @@ async function syncHiredCandidatesToStaffing(db, market) {
         console.error("Error in syncHiredCandidatesToStaffing:", err);
         return 0;
     }
-}
-
-// Security token generator for 1-click mobile GM approval/denial links
-function generateGmDecisionToken(pulseId, pin) {
-    const salt = "TwGmAccessEdgeSalt2026";
-    const str = `${String(pulseId).toLowerCase().trim()}:${String(pin).trim()}:${salt}`;
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = ((hash << 5) - hash) + str.charCodeAt(i);
-        hash |= 0;
-    }
-    return Math.abs(hash).toString(36);
-}
-
-// HTML renderer for 1-click email actions (approval, denial, deletion)
-function renderActionHtml(title, message, headerColor) {
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title} • Team Wow Staffing Command</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #fefaf6; margin: 0; padding: 30px 16px; color: #472b10; display: flex; justify-content: center; align-items: center; min-height: 85vh; }
-        .card { background: white; max-width: 480px; width: 100%; border-radius: 14px; border: 2px solid #ebd9c8; box-shadow: 0 10px 30px rgba(71, 43, 16, 0.12); overflow: hidden; text-align: center; }
-        .header { background-color: ${headerColor || '#005c91'}; color: white; padding: 24px 20px; }
-        .header h2 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
-        .body { padding: 28px 24px; font-size: 15px; line-height: 1.6; color: #472b10; }
-        .portal-btn { display: inline-block; margin-top: 22px; background-color: #005c91; color: #ffffff !important; text-decoration: none; padding: 11px 22px; border-radius: 25px; font-weight: bold; font-size: 13.5px; box-shadow: 0 3px 8px rgba(0, 92, 145, 0.25); }
-        .portal-btn:hover { background-color: #004b75; }
-        .footer { font-size: 12.5px; color: #7a5c43; border-top: 1px solid #f0decc; padding: 14px 20px; background-color: #faf2e9; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <div class="header">
-            <h2>${title}</h2>
-        </div>
-        <div class="body">
-            <div style="margin-bottom: 16px;">
-                <img src="https://teamwow-assets.pages.dev/image/custom-emojis/manager_lock.png" alt="Domino's Security" style="width: 52px; height: 52px; object-fit: contain;">
-            </div>
-            <div>${message}</div>
-            <div>
-                <a href="https://tw-staffing.pages.dev" class="portal-btn">&#128274; Go to GM Staffing Command</a>
-            </div>
-        </div>
-        <div class="footer">
-            Team Wow Staffing Command &bull; Direct Cloudflare D1 Edge Authorization
-        </div>
-    </div>
-</body>
-</html>`;
 }
 
 export async function onRequestOptions() {
