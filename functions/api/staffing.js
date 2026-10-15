@@ -1416,7 +1416,7 @@ export async function onRequestPost(context) {
                 const storeRowMatch = await db.prepare("SELECT store_number, market, manager_name, do_name FROM stores WHERE store_number = ? LIMIT 1").bind(storeNum).first();
                 const isMatchGm = storeRowMatch && storeRowMatch.manager_name && (storeRowMatch.manager_name.toLowerCase().includes(trainerName.toLowerCase()) || trainerName.toLowerCase().includes(storeRowMatch.manager_name.toLowerCase()));
 
-                if (existingTrainer.is_gm || existingTrainer.is_do || existingTrainer.is_admin || existingTrainer.is_exec) {
+                if (existingTrainer.is_admin || existingTrainer.is_exec) {
                     return new Response(JSON.stringify({
                         success: true,
                         message: `Welcome back ${existingTrainer.trainer_name}! Manager credentials confirmed for Store #${storeNum}.`,

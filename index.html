@@ -453,7 +453,7 @@
 
             // Role verification for Staffing Command
             const u = data.user;
-            const hasAccess = u.is_gm || u.is_do || u.is_admin || u.is_exec || (u.role && u.role.toLowerCase().includes('assistant manager'));
+            const hasAccess = u.is_gm || u.is_do || u.is_admin || u.is_exec;
             if (!hasAccess) {
                 if (errEl) {
                     errEl.innerHTML = `
@@ -556,7 +556,7 @@
                 signOutAuth('Your credentials have been deactivated or revoked. Please contact Mike Jacobs.');
             } else if (data.user) {
                 const u = data.user;
-                const hasAccess = u.is_gm || u.is_do || u.is_admin || u.is_exec || (u.role && u.role.toLowerCase().includes('assistant manager'));
+                const hasAccess = u.is_gm || u.is_do || u.is_admin || u.is_exec;
                 if (!hasAccess) {
                     signOutAuth('Access level changed: Manager or Supervisor authorization required.');
                     return;
