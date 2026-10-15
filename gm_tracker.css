@@ -611,18 +611,18 @@ body {
     }
 }
 
-/* --- USER PROFILE PILL IN HEADER (Option 1: Clean Typographic Badge) --- */
+/* --- USER PROFILE PILL IN HEADER (Domino's Crust Palette) --- */
 .user-pill {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     background: #003865;
-    border: 1.5px solid rgba(255, 255, 255, 0.22);
+    border: 1.5px solid rgba(254, 250, 246, 0.25);
     padding: 0 14px;
     min-height: 32px;
     height: 32px;
     border-radius: var(--radius-pill, 20px);
-    color: #ffffff;
+    color: var(--crust-base);
     font-family: 'Subhead1', 'OneDotCd-Bold', sans-serif;
     font-size: 13.5px;
     box-sizing: border-box;
@@ -633,7 +633,7 @@ body {
 }
 .user-pill .user-name {
     font-family: 'Subhead1', 'OneDotCd-Bold', sans-serif;
-    color: #ffffff;
+    color: var(--crust-base);
     font-size: 14px;
     max-width: 150px;
     white-space: nowrap;
@@ -643,14 +643,14 @@ body {
     line-height: 1;
 }
 .user-pill .user-dot {
-    color: rgba(255, 255, 255, 0.45);
+    color: var(--crust-med);
     font-size: 10px;
     line-height: 1;
     user-select: none;
 }
 .user-pill .user-role-badge {
     background: transparent !important;
-    color: #7eceff !important;
+    color: var(--crust-med) !important;
     border: none !important;
     padding: 0 !important;
     margin: 0 !important;
@@ -664,7 +664,7 @@ body {
     line-height: 1;
 }
 .user-pill .user-divider {
-    color: rgba(255, 255, 255, 0.28);
+    color: rgba(240, 222, 204, 0.35);
     font-size: 12px;
     line-height: 1;
     margin: 0 1px;
@@ -673,7 +673,7 @@ body {
 .user-pill .signout-btn {
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.88);
+    color: var(--crust-light);
     font-family: 'Subhead2', sans-serif;
     font-size: 12px;
     text-decoration: none;
@@ -684,8 +684,8 @@ body {
     line-height: 1;
 }
 .user-pill .signout-btn:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.16);
+    color: var(--crust-base);
+    background: rgba(254, 250, 246, 0.15);
 }
 
 @media (max-width: 600px) {
