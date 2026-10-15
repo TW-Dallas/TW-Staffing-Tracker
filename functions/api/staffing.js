@@ -302,6 +302,59 @@ async function syncHiredCandidatesToStaffing(db, market) {
     }
 }
 
+// Security token generator for 1-click mobile GM approval/denial links
+function generateGmDecisionToken(pulseId, pin) {
+    const salt = "TwGmAccessEdgeSalt2026";
+    const str = `${String(pulseId).toLowerCase().trim()}:${String(pin).trim()}:${salt}`;
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+    }
+    return Math.abs(hash).toString(36);
+}
+
+// HTML renderer for 1-click email actions (approval, denial, deletion)
+function renderActionHtml(title, message, headerColor) {
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title} • Team Wow Staffing Command</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #fefaf6; margin: 0; padding: 30px 16px; color: #472b10; display: flex; justify-content: center; align-items: center; min-height: 85vh; }
+        .card { background: white; max-width: 480px; width: 100%; border-radius: 14px; border: 2px solid #ebd9c8; box-shadow: 0 10px 30px rgba(71, 43, 16, 0.12); overflow: hidden; text-align: center; }
+        .header { background-color: ${headerColor || '#005c91'}; color: white; padding: 24px 20px; }
+        .header h2 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+        .body { padding: 28px 24px; font-size: 15px; line-height: 1.6; color: #472b10; }
+        .portal-btn { display: inline-block; margin-top: 22px; background-color: #005c91; color: #ffffff !important; text-decoration: none; padding: 11px 22px; border-radius: 25px; font-weight: bold; font-size: 13.5px; box-shadow: 0 3px 8px rgba(0, 92, 145, 0.25); }
+        .portal-btn:hover { background-color: #004b75; }
+        .footer { font-size: 12.5px; color: #7a5c43; border-top: 1px solid #f0decc; padding: 14px 20px; background-color: #faf2e9; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header">
+            <h2>${title}</h2>
+        </div>
+        <div class="body">
+            <div style="margin-bottom: 16px;">
+                <img src="https://teamwow-assets.pages.dev/image/custom-emojis/manager_lock.png" alt="Domino's Security" style="width: 52px; height: 52px; object-fit: contain;">
+            </div>
+            <div>${message}</div>
+            <div>
+                <a href="https://tw-staffing.pages.dev" class="portal-btn">&#128274; Go to GM Staffing Command</a>
+            </div>
+        </div>
+        <div class="footer">
+            Team Wow Staffing Command &bull; Direct Cloudflare D1 Edge Authorization
+        </div>
+    </div>
+</body>
+</html>`;
+}
+
 export async function onRequestOptions() {
     return new Response(null, { headers: corsHeaders(), status: 204 });
 }
@@ -324,6 +377,180 @@ export async function onRequestGet(context) {
     const reqAction = url.searchParams.get("action");
     let market = url.searchParams.get("market") || url.searchParams.get("city") || "Dallas";
     market = market.toLowerCase() === "denver" ? "Denver" : "Dallas";
+
+    // Fast endpoint for Trainer / Staff PIN verification & auth check
+    if (reqAction === "verifyPin" || reqAction === "checkAuth") {
+        const rawPin = url.searchParams.get("pin") || "";
+        const cleanPin = String(rawPin).replace(/\D/g, '').padStart(4, '0');
+        if (!cleanPin || cleanPin.length !== 4) {
+            return new Response(JSON.stringify({ success: false, error: "Please enter a valid 4-digit PIN." }), {
+                status: 400,
+                headers: corsHeaders()
+            });
+        }
+        const trainer = await db.prepare("SELECT * FROM trainer_credentials WHERE trainer_pin = ? AND is_active = 1 LIMIT 1").bind(cleanPin).first();
+        if (!trainer) {
+            return new Response(JSON.stringify({ success: false, error: "Invalid or inactive PIN. Access denied." }), {
+                status: 401,
+                headers: corsHeaders()
+            });
+        }
+
+        return new Response(JSON.stringify({
+            success: true,
+            user: {
+                trainer_id: trainer.trainer_id,
+                name: trainer.trainer_name,
+                pin: trainer.trainer_pin,
+                store: trainer.store_num,
+                market: trainer.market,
+                role: trainer.role,
+                is_gm: !!trainer.is_gm,
+                is_do: !!trainer.is_do,
+                is_admin: !!trainer.is_admin,
+                is_exec: !!trainer.is_exec
+            }
+        }), {
+            status: 200,
+            headers: corsHeaders()
+        });
+    }
+
+    // 1-Click Mobile Decision Endpoint for Mike Jacobs (Approve/Deny GM Access)
+    if (reqAction === "decideGmAccess") {
+        const pulseId = (url.searchParams.get("id") || "").trim();
+        const pin = (url.searchParams.get("pin") || "").trim();
+        const token = (url.searchParams.get("token") || "").trim();
+        const decision = (url.searchParams.get("decision") || "").toLowerCase().trim();
+
+        if (!pulseId || !pin || !token || !decision) {
+            return new Response(renderActionHtml("Invalid Request", "Missing required authorization parameters.", "#910000"), {
+                status: 400,
+                headers: { "Content-Type": "text/html;charset=utf-8" }
+            });
+        }
+
+        const expectedToken = generateGmDecisionToken(pulseId, pin);
+        if (token !== expectedToken) {
+            return new Response(renderActionHtml("Security Verification Failed", "Invalid or tampered decision token. Action aborted.", "#910000"), {
+                status: 403,
+                headers: { "Content-Type": "text/html;charset=utf-8" }
+            });
+        }
+
+        const trainer = await db.prepare("SELECT * FROM trainer_credentials WHERE LOWER(trainer_id) = LOWER(?) LIMIT 1").bind(pulseId).first();
+        if (!trainer) {
+            return new Response(renderActionHtml("Trainer Not Found", `Could not locate trainer with Pulse ID: <code>${pulseId}</code> in D1 database.`, "#910000"), {
+                status: 404,
+                headers: { "Content-Type": "text/html;charset=utf-8" }
+            });
+        }
+
+        if (decision === "approve") {
+            await db.prepare("UPDATE trainer_credentials SET is_gm = 1, role = 'General Manager', updated_at = CURRENT_TIMESTAMP WHERE LOWER(trainer_id) = LOWER(?)").bind(trainer.trainer_id).run();
+
+            // Dispatch confirmation notice to the trainer and their store
+            let candidateEmail = String(trainer.email || (trainer.trainer_id && trainer.trainer_id.includes('@') ? trainer.trainer_id : '')).trim();
+            if (/^store\d+@team-wow\.com$/i.test(candidateEmail)) {
+                candidateEmail = candidateEmail.replace(/^store/i, '').toLowerCase();
+            }
+
+            await callAppsScriptProxy({
+                action: "sendGmApprovalNoticeToTrainer",
+                trainerName: trainer.trainer_name,
+                pulseId: trainer.trainer_id,
+                storeNum: trainer.store_num,
+                market: trainer.market,
+                pin: trainer.trainer_pin,
+                email: candidateEmail
+            }, context);
+
+            return new Response(renderActionHtml(
+                "GM Access Approved",
+                `<div style="text-align: left; background: #faf2e9; padding: 16px; border-radius: 8px; border-left: 4px solid #005c91; margin-bottom: 18px;">
+                    <p style="margin: 0 0 6px 0;"><strong>Name:</strong> ${trainer.trainer_name}</p>
+                    <p style="margin: 0 0 6px 0;"><strong>Store:</strong> #${trainer.store_num} (${trainer.market})</p>
+                    <p style="margin: 0 0 6px 0;"><strong>Pulse ID:</strong> <code>${trainer.trainer_id}</code></p>
+                    <p style="margin: 0;"><strong>Status:</strong> <span style="color: #005c91; font-weight: bold;">Authorized GM</span></p>
+                </div>
+                General Manager authorization has been granted in Cloudflare D1.<br><br>A confirmation notice has been sent to their store. Their 4-digit PIN (<code>${trainer.trainer_pin}</code>) will now unlock the <strong>GM Staffing Command Tracker</strong> immediately.`,
+                "#005c91"
+            ), {
+                status: 200,
+                headers: { "Content-Type": "text/html;charset=utf-8" }
+            });
+        } else if (decision === "deny") {
+            await db.prepare("UPDATE trainer_credentials SET is_gm = 0, updated_at = CURRENT_TIMESTAMP WHERE LOWER(trainer_id) = LOWER(?)").bind(trainer.trainer_id).run();
+
+            return new Response(renderActionHtml(
+                "GM Access Denied",
+                `<div style="text-align: left; background: #fff5f5; padding: 16px; border-radius: 8px; border-left: 4px solid #ff0000; margin-bottom: 18px;">
+                    <p style="margin: 0 0 6px 0;"><strong>Name:</strong> ${trainer.trainer_name}</p>
+                    <p style="margin: 0 0 6px 0;"><strong>Store:</strong> #${trainer.store_num} (${trainer.market})</p>
+                    <p style="margin: 0;"><strong>Status:</strong> <span style="color: #ff0000; font-weight: bold;">Standard Trainer Only</span></p>
+                </div>
+                GM access was declined. Their PIN will remain active for Wow Way Training modules, but blocked from GM Staffing Command.`,
+                "#910000"
+            ), {
+                status: 200,
+                headers: { "Content-Type": "text/html;charset=utf-8" }
+            });
+        }
+    }
+
+    // 1-Click Request GM Access from Barrier (When existing trainer enters PIN)
+    if (reqAction === "requestGmAccess") {
+        const trainerId = (url.searchParams.get("trainerId") || "").trim();
+        const pin = (url.searchParams.get("pin") || "").trim();
+
+        if (!trainerId || !pin) {
+            return new Response(JSON.stringify({ success: false, error: "Missing trainerId or pin" }), {
+                status: 400,
+                headers: corsHeaders()
+            });
+        }
+
+        const trainer = await db.prepare("SELECT * FROM trainer_credentials WHERE LOWER(trainer_id) = LOWER(?) LIMIT 1").bind(trainerId).first();
+        if (!trainer) {
+            return new Response(JSON.stringify({ success: false, error: "Trainer profile not found" }), {
+                status: 404,
+                headers: corsHeaders()
+            });
+        }
+
+        if (trainer.is_gm || trainer.is_do || trainer.is_admin || trainer.is_exec) {
+            return new Response(JSON.stringify({
+                success: true,
+                alreadyAuthorized: true,
+                message: "You are already authorized for GM Staffing Command! Please unlock using your PIN."
+            }), { status: 200, headers: corsHeaders() });
+        }
+
+        const token = generateGmDecisionToken(trainer.trainer_id, trainer.trainer_pin);
+        const baseUrl = "https://tw-staffing.pages.dev/api/staffing";
+        const approveUrl = `${baseUrl}?action=decideGmAccess&id=${encodeURIComponent(trainer.trainer_id)}&pin=${encodeURIComponent(trainer.trainer_pin)}&token=${token}&decision=approve`;
+        const denyUrl = `${baseUrl}?action=decideGmAccess&id=${encodeURIComponent(trainer.trainer_id)}&pin=${encodeURIComponent(trainer.trainer_pin)}&token=${token}&decision=deny`;
+
+        await callAppsScriptProxy({
+            action: "sendTrainerPinRequestEmail",
+            trainerName: trainer.trainer_name,
+            pulseId: trainer.trainer_id,
+            storeNum: trainer.store_num,
+            market: trainer.market,
+            pin: trainer.trainer_pin,
+            role: trainer.role,
+            isGm: false,
+            isDo: false,
+            isExistingTrainer: true,
+            approveUrl: approveUrl,
+            denyUrl: denyUrl
+        }, context);
+
+        return new Response(JSON.stringify({
+            success: true,
+            message: `GM access request submitted for ${trainer.trainer_name}. Mike Jacobs has been emailed a 1-click authorization link.`
+        }), { status: 200, headers: corsHeaders() });
+    }
 
     // Fast endpoint for candidate lookup (for personalized registration pre-fills)
     if (reqAction === "getCandidate") {
@@ -1141,6 +1368,280 @@ export async function onRequestPost(context) {
     };
 
     try {
+        // Fast endpoint for Trainer / Staff PIN verification & auth check
+        if (action === "verifyPin" || action === "checkAuth") {
+            const rawPin = payload.pin || url.searchParams.get("pin") || "";
+            const cleanPin = String(rawPin).replace(/\D/g, '').padStart(4, '0');
+            if (!cleanPin || cleanPin.length !== 4) {
+                return new Response(JSON.stringify({ success: false, error: "Please enter a valid 4-digit PIN." }), {
+                    status: 400,
+                    headers: corsHeaders()
+                });
+            }
+            const trainer = await db.prepare("SELECT * FROM trainer_credentials WHERE trainer_pin = ? AND is_active = 1 LIMIT 1").bind(cleanPin).first();
+            if (!trainer) {
+                return new Response(JSON.stringify({ success: false, error: "Invalid or inactive PIN. Access denied." }), {
+                    status: 401,
+                    headers: corsHeaders()
+                });
+            }
+            return new Response(JSON.stringify({
+                success: true,
+                user: {
+                    trainer_id: trainer.trainer_id,
+                    name: trainer.trainer_name,
+                    pin: trainer.trainer_pin,
+                    store: trainer.store_num,
+                    market: trainer.market,
+                    role: trainer.role,
+                    is_gm: !!trainer.is_gm,
+                    is_do: !!trainer.is_do,
+                    is_admin: !!trainer.is_admin,
+                    is_exec: !!trainer.is_exec
+                }
+            }), {
+                status: 200,
+                headers: corsHeaders()
+            });
+        }
+
+        // Register or Claim Trainer / Manager PIN
+        if (action === "registerTrainerPin") {
+            const trainerName = String(payload.trainerName || "").trim();
+            const pulseId = String(payload.pulseId || "").trim();
+            const storeNum = String(payload.storeNum || "").replace(/\D/g, '').trim();
+            const rawPin = String(payload.pin || "").replace(/\D/g, '').trim();
+            const reqMarket = (payload.market || "Dallas").toLowerCase() === "denver" ? "Denver" : "Dallas";
+
+            if (!trainerName || !pulseId || !storeNum || rawPin.length !== 4) {
+                return new Response(JSON.stringify({
+                    success: false,
+                    error: "All fields are required. Please enter your name, Pulse ID, 4-digit store number, and a 4-digit PIN."
+                }), { status: 400, headers: corsHeaders() });
+            }
+
+            const cleanPin = rawPin.padStart(4, '0');
+
+            // 1. FORBIDDEN PIN BLACKLIST
+            const FORBIDDEN_PINS = new Set([
+                "0000", "1111", "2222", "3333", "4444", "5555", "6666", "7777", "8888", "9999",
+                "1234", "4321", "2580", "0852", "1357", "2468", "9876", "6789"
+            ]);
+            if (FORBIDDEN_PINS.has(cleanPin)) {
+                return new Response(JSON.stringify({
+                    success: false,
+                    error: "That PIN is too simple and easily guessed. Please choose a more secure 4-digit PIN."
+                }), { status: 400, headers: corsHeaders() });
+            }
+
+            // 2. CHECK PIN COLLISION IN D1
+            const pinCollision = await db.prepare("SELECT trainer_id, trainer_name FROM trainer_credentials WHERE trainer_pin = ? AND is_active = 1 LIMIT 1").bind(cleanPin).first();
+            if (pinCollision && pinCollision.trainer_id.toLowerCase() !== pulseId.toLowerCase()) {
+                return new Response(JSON.stringify({
+                    success: false,
+                    error: "This 4-digit PIN is already claimed by another team member. Please choose a unique 4-digit PIN."
+                }), { status: 400, headers: corsHeaders() });
+            }
+
+            // 3. CHECK EXISTING TRAINER RECORD
+            const existingTrainer = await db.prepare("SELECT * FROM trainer_credentials WHERE LOWER(trainer_id) = LOWER(?) LIMIT 1").bind(pulseId).first();
+            if (existingTrainer) {
+                const storeRowMatch = await db.prepare("SELECT store_number, market, manager_name, do_name FROM stores WHERE store_number = ? LIMIT 1").bind(storeNum).first();
+                const isMatchGm = storeRowMatch && storeRowMatch.manager_name && (storeRowMatch.manager_name.toLowerCase().includes(trainerName.toLowerCase()) || trainerName.toLowerCase().includes(storeRowMatch.manager_name.toLowerCase()));
+
+                if (existingTrainer.is_gm || existingTrainer.is_do || existingTrainer.is_admin || existingTrainer.is_exec) {
+                    return new Response(JSON.stringify({
+                        success: true,
+                        message: `Welcome back ${existingTrainer.trainer_name}! Manager credentials confirmed for Store #${storeNum}.`,
+                        user: {
+                            trainer_id: existingTrainer.trainer_id,
+                            name: existingTrainer.trainer_name,
+                            pin: cleanPin,
+                            store: storeNum,
+                            market: reqMarket,
+                            role: existingTrainer.role || 'General Manager',
+                            is_gm: !!existingTrainer.is_gm,
+                            is_do: !!existingTrainer.is_do,
+                            is_admin: !!existingTrainer.is_admin,
+                            is_exec: !!existingTrainer.is_exec
+                        }
+                    }), { status: 200, headers: corsHeaders() });
+                }
+
+                // Existing trainer in Wow Way requesting GM access - NEVER auto-approved!
+                await db.prepare(`
+                    UPDATE trainer_credentials 
+                    SET trainer_pin = ?, store_num = ?, market = ?, updated_at = CURRENT_TIMESTAMP
+                    WHERE LOWER(trainer_id) = LOWER(?)
+                `).bind(cleanPin, storeNum, reqMarket, existingTrainer.trainer_id).run();
+
+                const token = generateGmDecisionToken(existingTrainer.trainer_id, cleanPin);
+                const baseUrl = "https://tw-staffing.pages.dev/api/staffing";
+                const approveUrl = `${baseUrl}?action=decideGmAccess&id=${encodeURIComponent(existingTrainer.trainer_id)}&pin=${encodeURIComponent(cleanPin)}&token=${token}&decision=approve`;
+                const denyUrl = `${baseUrl}?action=decideGmAccess&id=${encodeURIComponent(existingTrainer.trainer_id)}&pin=${encodeURIComponent(cleanPin)}&token=${token}&decision=deny`;
+
+                await callAppsScriptProxy({
+                    action: "sendTrainerPinRequestEmail",
+                    trainerName: existingTrainer.trainer_name,
+                    pulseId: existingTrainer.trainer_id,
+                    storeNum: storeNum,
+                    market: reqMarket,
+                    pin: cleanPin,
+                    role: isMatchGm ? 'General Manager' : (existingTrainer.role || 'Trainer'),
+                    isGm: false,
+                    isDo: false,
+                    isExistingTrainer: true,
+                    approveUrl: approveUrl,
+                    denyUrl: denyUrl
+                }, context);
+
+                return new Response(JSON.stringify({
+                    success: true,
+                    isExistingTrainerRequest: true,
+                    message: `Existing trainer profile verified! An authorization request has been sent to Mike Jacobs for GM Staffing Command access.`,
+                    user: {
+                        trainer_id: existingTrainer.trainer_id,
+                        name: existingTrainer.trainer_name,
+                        pin: cleanPin,
+                        store: storeNum,
+                        market: reqMarket,
+                        role: existingTrainer.role || 'Trainer',
+                        is_gm: false,
+                        is_do: false
+                    }
+                }), { status: 200, headers: corsHeaders() });
+            }
+
+            // 4. MARKET & STORE VALIDATION: Verify store exists and belongs to the requested market
+            const storeRow = await db.prepare("SELECT store_number, market, manager_name, do_name FROM stores WHERE store_number = ? LIMIT 1").bind(storeNum).first();
+
+            if (!storeRow) {
+                return new Response(JSON.stringify({
+                    success: false,
+                    error: `Store #${storeNum} is not a recognized Team Wow store. Please check your 4-digit store number.`
+                }), { status: 400, headers: corsHeaders() });
+            }
+
+            if (storeRow.market.toLowerCase() !== reqMarket.toLowerCase()) {
+                return new Response(JSON.stringify({
+                    success: false,
+                    error: `Store #${storeNum} belongs to the ${storeRow.market} market and cannot be registered under the ${reqMarket} market.`
+                }), { status: 400, headers: corsHeaders() });
+            }
+
+            let detectedRole = 'Trainer';
+            const gmName = (storeRow.manager_name || '').toLowerCase().trim();
+            const doName = (storeRow.do_name || '').toLowerCase().trim();
+            const inputName = trainerName.toLowerCase().trim();
+
+            if (gmName && (gmName.includes(inputName) || inputName.includes(gmName))) {
+                detectedRole = 'General Manager';
+            } else if (doName && (doName.includes(inputName) || inputName.includes(doName))) {
+                detectedRole = 'Supervisor';
+            }
+
+            // Insert into trainer_credentials with is_gm = 0, is_do = 0 (Requires Mike's explicit approval!)
+            await db.prepare(`
+                INSERT OR REPLACE INTO trainer_credentials (
+                    trainer_id, trainer_name, trainer_pin, store_num, market,
+                    role, is_wow_way_trainer, is_mit_trainer, is_gm, is_do, is_admin, is_exec, is_active, notes, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, 1, 0, 0, 0, 0, 0, 1, 'Self-Registered', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            `).bind(
+                pulseId, trainerName, cleanPin, storeNum, reqMarket,
+                detectedRole
+            ).run();
+
+            // 5. EMAIL NOTIFICATION: Notify Mike Jacobs with 1-click mobile approval links
+            const token = generateGmDecisionToken(pulseId, cleanPin);
+            const baseUrl = "https://tw-staffing.pages.dev/api/staffing";
+            const approveUrl = `${baseUrl}?action=decideGmAccess&id=${encodeURIComponent(pulseId)}&pin=${encodeURIComponent(cleanPin)}&token=${token}&decision=approve`;
+            const denyUrl = `${baseUrl}?action=decideGmAccess&id=${encodeURIComponent(pulseId)}&pin=${encodeURIComponent(cleanPin)}&token=${token}&decision=deny`;
+
+            await callAppsScriptProxy({
+                action: "sendTrainerPinRequestEmail",
+                trainerName: trainerName,
+                pulseId: pulseId,
+                storeNum: storeNum,
+                market: reqMarket,
+                pin: cleanPin,
+                role: detectedRole,
+                isGm: false,
+                isDo: false,
+                isExistingTrainer: false,
+                approveUrl: approveUrl,
+                denyUrl: denyUrl
+            }, context);
+
+            return new Response(JSON.stringify({
+                success: true,
+                message: `PIN registered! An authorization request has been sent to Mike Jacobs for GM Staffing Command access.`,
+                user: {
+                    trainer_id: pulseId,
+                    name: trainerName,
+                    pin: cleanPin,
+                    store: storeNum,
+                    market: reqMarket,
+                    role: detectedRole,
+                    is_gm: false,
+                    is_do: false
+                }
+            }), { status: 200, headers: corsHeaders() });
+        }
+
+        // 1-Click Request GM Access from Barrier (When existing trainer enters PIN)
+        if (action === "requestGmAccess") {
+            const trainerId = (payload.trainerId || "").trim();
+            const pin = (payload.pin || "").trim();
+
+            if (!trainerId || !pin) {
+                return new Response(JSON.stringify({ success: false, error: "Missing trainerId or pin" }), {
+                    status: 400,
+                    headers: corsHeaders()
+                });
+            }
+
+            const trainer = await db.prepare("SELECT * FROM trainer_credentials WHERE LOWER(trainer_id) = LOWER(?) LIMIT 1").bind(trainerId).first();
+            if (!trainer) {
+                return new Response(JSON.stringify({ success: false, error: "Trainer profile not found" }), {
+                    status: 404,
+                    headers: corsHeaders()
+                });
+            }
+
+            if (trainer.is_gm || trainer.is_do || trainer.is_admin || trainer.is_exec) {
+                return new Response(JSON.stringify({
+                    success: true,
+                    alreadyAuthorized: true,
+                    message: "You are already authorized for GM Staffing Command! Please unlock using your PIN."
+                }), { status: 200, headers: corsHeaders() });
+            }
+
+            const token = generateGmDecisionToken(trainer.trainer_id, trainer.trainer_pin);
+            const baseUrl = "https://tw-staffing.pages.dev/api/staffing";
+            const approveUrl = `${baseUrl}?action=decideGmAccess&id=${encodeURIComponent(trainer.trainer_id)}&pin=${encodeURIComponent(trainer.trainer_pin)}&token=${token}&decision=approve`;
+            const denyUrl = `${baseUrl}?action=decideGmAccess&id=${encodeURIComponent(trainer.trainer_id)}&pin=${encodeURIComponent(trainer.trainer_pin)}&token=${token}&decision=deny`;
+
+            await callAppsScriptProxy({
+                action: "sendTrainerPinRequestEmail",
+                trainerName: trainer.trainer_name,
+                pulseId: trainer.trainer_id,
+                storeNum: trainer.store_num,
+                market: trainer.market,
+                pin: trainer.trainer_pin,
+                role: trainer.role,
+                isGm: false,
+                isDo: false,
+                isExistingTrainer: true,
+                approveUrl: approveUrl,
+                denyUrl: denyUrl
+            }, context);
+
+            return new Response(JSON.stringify({
+                success: true,
+                message: `GM access request submitted for ${trainer.trainer_name}. Mike Jacobs has been emailed a 1-click authorization link.`
+            }), { status: 200, headers: corsHeaders() });
+        }
+
         // NTO Completion & Real-Time Credential Generation Flow
         if (action === "submitNtoCompletion") {
             const candidateId = (payload.candidateId || "").trim();

@@ -3,17 +3,17 @@
 
 <head>
     <meta charset="UTF-8">
-    <link class="favicon" rel="icon" type="image/png" href="images/tile_blue.png">
+    <link class="favicon" rel="icon" type="image/png" href="/images/tile_blue.png">
     <title>Denver Staffing Command Center</title>
     <meta name="theme-color" content="#005c91">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="/manifest.json">
     <!-- GLOBAL BRAND MASTER (Fonts, Tokens, Shell) -->
     <link rel="stylesheet" href="https://teamwow-assets.pages.dev/brand_master.css">
     <!-- SHARED GM TRACKER STYLES -->
-    <link rel="stylesheet" href="gm_tracker.css">
+    <link rel="stylesheet" href="/gm_tracker.css">
     <!-- OneSignal Web Push SDK -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
@@ -32,7 +32,7 @@
 
     <header>
         <div class="header-left">
-            <img src="images/New_Logo_v2.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+            <img src="/images/New_Logo_v2.png" alt="Logo" class="logo" onerror="this.style.display='none'">
             <div class="header-text">
                 <h1>Staffing Command</h1>
                 <div class="subtitle">Team Wow Hiring Tracker</div>
@@ -678,7 +678,9 @@
 
                 if (item.missingDocsText) {
                     const textLower = item.missingDocsText.toLowerCase();
-                    if (textLower.includes('id') || textLower.includes('license') || textLower.includes('social') || textLower.includes('ssn') || textLower.includes('birth') || textLower.includes('i-9') || textLower.includes('passport') || textLower.includes('mismatch')) {
+                    if (textLower.includes('<1 license') || textLower.includes('license history') || textLower.includes('< 1 license') || textLower.includes('<1 year')) {
+                        txt = `Hey ${firstName}! This is Domino's. We were unable to verify that you have more than one year of licensed driving history. Do you have a previous out-of-state license? Please reply back so we can help get this verified! Thanks!`;
+                    } else if (textLower.includes('id') || textLower.includes('license') || textLower.includes('social') || textLower.includes('ssn') || textLower.includes('birth') || textLower.includes('i-9') || textLower.includes('passport') || textLower.includes('mismatch')) {
                         txt = `Hey ${firstName}! This is Domino's. We need an updated document or correction for your onboarding (${item.missingDocsText}). Please reply back so we can arrange a time for you to bring that to the store or upload it!`;
                     } else {
                         txt = `Hey ${firstName}! This is Domino's. We are missing your ${item.missingDocsText} for your onboarding. Please reply back so we can get this updated and get you scheduled!`;

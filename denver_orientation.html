@@ -1006,6 +1006,7 @@
                         <input type="text" id="formStore" required placeholder="e.g. 6514, 6579">
                     </div>
 
+                    <div id="signupAutoFillNotice" style="display: none; background: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; border-radius: 6px; padding: 9px 12px; font-size: 13px; margin-bottom: 12px; font-weight: 600;"></div>
                     <div id="signupError" style="color: var(--brand-red); font-size: 14px; margin-bottom: 12px; display: none;"></div>
 
                     <button type="submit" class="register-btn" id="btnSubmitSignup">
@@ -1094,6 +1095,7 @@
             }
 
             await fetchClasses();
+            initFallbackCandidateLookup();
         });
 
         async function checkPersonalizedLink() {
@@ -1104,7 +1106,7 @@
 
             if (candId || email) {
                 try {
-                    const query = candId ? `action=getCandidate&id=${encodeURIComponent(candId)}` : `action=getCandidate&email=${encodeURIComponent(email)}`;
+                    const query = candId ? `action=getCandidate&market=Denver&id=${encodeURIComponent(candId)}` : `action=getCandidate&market=Denver&email=${encodeURIComponent(email)}`;
                     const res = await fetch(`${API_URL}?${query}`);
                     if (res.ok) {
                         const data = await res.json();
@@ -1132,6 +1134,84 @@
                 const firstName = cand.name.trim().split(/\s+/)[0];
                 greeting.textContent = `Welcome, ${firstName}!`;
                 banner.style.display = 'flex';
+            }
+        }
+
+        let lookupDebounce = null;
+        function initFallbackCandidateLookup() {
+            const emailInput = document.getElementById('formEmail');
+            const phoneInput = document.getElementById('formPhone');
+            if (!emailInput || !phoneInput) return;
+
+            emailInput.addEventListener('blur', triggerFallbackCandidateLookup);
+            phoneInput.addEventListener('blur', triggerFallbackCandidateLookup);
+            emailInput.addEventListener('input', () => {
+                clearTimeout(lookupDebounce);
+                lookupDebounce = setTimeout(triggerFallbackCandidateLookup, 600);
+            });
+            phoneInput.addEventListener('input', () => {
+                clearTimeout(lookupDebounce);
+                lookupDebounce = setTimeout(triggerFallbackCandidateLookup, 600);
+            });
+        }
+
+        async function triggerFallbackCandidateLookup() {
+            const emailInput = document.getElementById('formEmail');
+            const phoneInput = document.getElementById('formPhone');
+            const candIdInput = document.getElementById('formCandidateId');
+            if (!emailInput || !phoneInput) return;
+
+            // If candidate ID already resolved, skip lookup
+            if (candIdInput && candIdInput.value) return;
+
+            const emailVal = emailInput.value.trim().toLowerCase();
+            const phoneDigits = phoneInput.value.replace(/\D/g, '').slice(-10);
+
+            // Require valid email or 10-digit phone
+            if (!emailVal.includes('@') && phoneDigits.length !== 10) return;
+
+            try {
+                let url = `${API_URL}?action=getCandidate&market=Denver`;
+                if (emailVal.includes('@')) url += `&email=${encodeURIComponent(emailVal)}`;
+                if (phoneDigits.length === 10) url += `&phone=${encodeURIComponent(phoneDigits)}`;
+
+                const res = await fetch(url);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && data.candidate) {
+                        const c = data.candidate;
+                        candidateProfile = c;
+                        if (candIdInput) candIdInput.value = c.id || '';
+
+                        const nameInput = document.getElementById('formName');
+                        if (nameInput && (!nameInput.value.trim() || nameInput.value.trim().toLowerCase() === 'team member')) {
+                            nameInput.value = c.name || '';
+                        }
+                        if (emailInput && !emailInput.value.trim()) {
+                            emailInput.value = c.email || '';
+                        }
+                        if (phoneInput && !phoneInput.value.trim()) {
+                            phoneInput.value = c.phone || '';
+                        }
+
+                        const storeInput = document.getElementById('formStore');
+                        if (storeInput) {
+                            const curStore = storeInput.value.trim();
+                            if (!curStore || curStore === '12870' || curStore.length > 4) {
+                                storeInput.value = c.storeNum || '';
+                            }
+                        }
+
+                        const notice = document.getElementById('signupAutoFillNotice');
+                        if (notice) {
+                            notice.innerHTML = `✓ Found onboarding record for Store #${c.storeNum || ''}! Details auto-completed.`;
+                            notice.style.display = 'block';
+                        }
+                        renderPersonalBanner(c);
+                    }
+                }
+            } catch (err) {
+                console.warn("Fallback candidate lookup error:", err);
             }
         }
 

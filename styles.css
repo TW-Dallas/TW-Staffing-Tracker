@@ -706,3 +706,17 @@
         opacity: 1;
     }
 }
+
+/* NTO Trainee Click-to-Copy Name (Clean, Icon-Free) */
+.nto-trainee-name-click {
+    cursor: pointer;
+    user-select: text;
+    transition: color 0.15s ease, border-bottom 0.15s ease;
+    border-bottom: 1.5px dashed transparent;
+}
+
+.nto-trainee-name-click:hover {
+    color: var(--brand-blue) !important;
+    border-bottom-color: var(--brand-blue) !important;
+}
+

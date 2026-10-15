@@ -12,6 +12,7 @@
 
 # Dallas Routes
 /dallas                   /index                 200
+/dallas/                  /index                 200
 /tw-dallas-orientation    /orientation           200
 /dallas-orientation       /orientation           200
 
@@ -19,13 +20,13 @@
 /tw-denver-orientation    /denver_orientation    200
 /twdenver-orientation     /denver_orientation    200
 /denver-orientation       /denver_orientation    200
-/denver-nto               https://tw-staffing.pages.dev/denver-orientation 301
-/denver-signup            https://tw-staffing.pages.dev/denver-orientation 301
-/denverorientation        https://tw-staffing.pages.dev/denver-orientation 301
-/denver                   https://tw-staffing.pages.dev/denver-orientation 301
-/denver/                  https://tw-staffing.pages.dev/denver-orientation 301
+/denver-nto               /denver_orientation    200
+/denver-signup            /denver_orientation    200
+/denverorientation        /denver_orientation    200
 
 # Denver Staffing Command Center (GM Portal)
+/denver                   /denver_index          200
+/denver/                  /denver_index          200
 /denver-staffing          /denver_index          200
 /denver-gm                /denver_index          200
 

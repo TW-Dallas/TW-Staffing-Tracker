@@ -7,17 +7,17 @@
         }
     </script>
     <meta charset="UTF-8">
-    <link class="favicon" rel="icon" type="image/png" href="images/tile_blue.png">
+    <link class="favicon" rel="icon" type="image/png" href="/images/tile_blue.png">
     <title>Dallas Staffing Command Center</title>
     <meta name="theme-color" content="#005c91">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="/manifest.json">
     <!-- GLOBAL BRAND MASTER (Fonts, Tokens, Shell) -->
     <link rel="stylesheet" href="https://teamwow-assets.pages.dev/brand_master.css">
     <!-- SHARED GM TRACKER STYLES -->
-    <link rel="stylesheet" href="gm_tracker.css">
+    <link rel="stylesheet" href="/gm_tracker.css">
     <!-- OneSignal Web Push SDK -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
@@ -36,13 +36,18 @@
 
 <header>
     <div class="header-left">
-        <img src="images/New_Logo_v2.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+        <img src="/images/New_Logo_v2.png" alt="Logo" class="logo" onerror="this.style.display='none'">
         <div class="header-text">
             <h1>Staffing Command</h1>
             <div class="subtitle">Team Wow Hiring Tracker</div>
         </div>
     </div>
     <div class="header-actions">
+        <div id="authUserInfo" class="user-pill hidden">
+            <span id="authUserName" class="user-name">User</span>
+            <span id="authUserRoleStore" class="user-role-badge">Store</span>
+            <button type="button" class="signout-btn" onclick="signOutAuth()" title="Sign Out">Sign Out</button>
+        </div>
         <div class="market-pill">Dallas Market</div>
     </div>
 </header>
@@ -121,30 +126,54 @@
         </div>
     </div>
 </div>
-<!-- What's New Welcome Modal -->
-<div id="updateModal" class="brand-modal-overlay hidden">
-    <div class="brand-modal-card">
+<!-- Security Update Briefing Modal (Pre-Login) -->
+<div id="securityNoticeModal" class="brand-modal-overlay hidden" style="z-index: 100006;">
+    <div class="brand-modal-card" style="max-width: 480px;">
         <div class="brand-modal-brand-stripe"></div>
         <div class="brand-modal-content" style="padding: 24px;">
-            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
-                <h3 style="margin: 0; color: var(--dark-blue); font-family: 'Subhead1', sans-serif; font-size: 22px; text-transform: uppercase; letter-spacing: 0.5px;">Tracker Updates! 🍕</h3>
-                <span style="font-family: 'Subhead2', sans-serif; font-size: 15px; color: var(--crust-deep); font-weight: bold;">August 2026</span>
+            <div style="display: flex; justify-content: flex-end; margin-bottom: -10px;">
+                <button type="button" onclick="closeSecurityNoticeModal()" style="background: none; border: none; font-size: 24px; color: var(--crust-deep); cursor: pointer; line-height: 1;">&times;</button>
             </div>
-            <p style="font-size: 19px; line-height: 1.45; color: var(--crust-burnt); margin-top: 0; margin-bottom: 16px; font-family: 'Condensed';">
-                Your Hiring Tracker has been upgraded to make onboarding new team members even smoother! Here is what's new:
+
+            <div style="text-align: center; margin-bottom: 16px;">
+                <img src="https://teamwow-assets.pages.dev/image/custom-emojis/manager_lock.png" alt="Security Lock" style="width: 52px; height: 52px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); margin-bottom: 6px;">
+                <h3 style="margin: 0 0 4px 0; color: var(--dark-blue); font-family: 'ExtraBold', 'Subhead1', sans-serif; font-size: 22px; text-transform: uppercase; letter-spacing: 0.5px;">Security Update</h3>
+                <div style="font-family: 'Subhead1', sans-serif; font-size: 13.5px; color: var(--brand-blue); text-transform: uppercase; letter-spacing: 0.5px;">Staffing Command Center Access</div>
+            </div>
+
+            <p style="font-size: 14.5px; line-height: 1.45; color: var(--crust-burnt); margin: 0 0 14px 0; font-family: 'Subhead2', sans-serif; text-align: center;">
+                To safeguard applicant and onboarding team member personal information across Team Wow, the <strong>Staffing Command Center</strong> is now secured by individual 4-digit PIN authentication.
             </p>
-            <ul style="font-size: 17px; line-height: 1.5; color: var(--crust-deep); padding-left: 20px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 10px; font-family: 'Condensed';">
-                <li>💬 <strong>Improved SMS Nudge Wording:</strong> Smart candidate texting now formats clear, candidate-friendly messages for missing documents, AllPay I-9 form corrections, and covered driver insurance clauses.</li>
-                <li>🗓️ <strong>Live NTO Class Schedule:</strong> View upcoming orientation dates, class times, and trainer details at a glance directly from the collapsible schedule banner at the top of your tracker.</li>
-                <li>📞 <strong>New Contacts Directory:</strong> Tap the <em>Contacts</em> tab to access 1-tap call, text & email for GM/DO cell phones, store lines, Market Leader, Training Centers, and Admin contacts—plus each store's assigned Network IP!</li>
-                <li>🔔 <strong>Push Notifications:</strong> Select your Store or DO to receive real-time alerts for interviews, onboarding progress, and hires.</li>
-                <li>📲 <strong>Add to Home Screen:</strong> Save as an app for 1-tap access! On iPhone, tap Safari's Share button ➔ <em>Add to Home Screen</em>. Android: tap <em>Install</em> when prompted.</li>
-            </ul>
-            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1.5px solid var(--crust-med); padding-top: 14px;">
-                <label style="display: flex; align-items: center; gap: 8px; font-size: 16px; font-family: 'Condensed'; color: var(--crust-deep); cursor: pointer;">
-                    <input type="checkbox" id="hideUpdateCheckbox" style="width: 20px; height: 20px; cursor: pointer;"> Don't show this again
+
+            <div style="background: var(--crust-light, #fbf2e9); border: 1.5px solid var(--crust-med); border-radius: 10px; padding: 14px 16px; margin-bottom: 18px; display: flex; flex-direction: column; gap: 10px; text-align: left;">
+                <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span style="font-size: 18px; line-height: 1;">🔑</span>
+                    <div style="font-size: 13.5px; line-height: 1.4; color: var(--crust-deep); font-family: 'Subhead2', sans-serif;">
+                        <strong style="color: var(--dark-blue);">Use Your Wow Way PIN:</strong> Enter the same 4-digit PIN registered for your Wow Way Training account.
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span style="font-size: 18px; line-height: 1;">🏪</span>
+                    <div style="font-size: 13.5px; line-height: 1.4; color: var(--crust-deep); font-family: 'Subhead2', sans-serif;">
+                        <strong style="color: var(--dark-blue);">Instant Store Pipeline:</strong> General Managers and Supervisors are automatically recognized for their store hiring pipeline.
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span style="font-size: 18px; line-height: 1;">🆕</span>
+                    <div style="font-size: 13.5px; line-height: 1.4; color: var(--crust-deep); font-family: 'Subhead2', sans-serif;">
+                        <strong style="color: var(--dark-blue);">Need a PIN?</strong> If you haven't set up your 4-digit PIN yet, tap <em>Register PIN</em> to create your credentials in seconds.
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1.5px solid var(--crust-med); padding-top: 14px; gap: 10px; flex-wrap: wrap;">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-family: 'Subhead2', sans-serif; color: var(--crust-deep); cursor: pointer;">
+                    <input type="checkbox" id="hideSecurityNoticeCheckbox" checked style="width: 17px; height: 17px; accent-color: var(--brand-blue); cursor: pointer;"> Don't show again
                 </label>
-                <button type="button" onclick="closeUpdateModal()" style="background: var(--brand-blue); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-family: 'Subhead2'; font-size: 16px; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">Got It!</button>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" onclick="closeSecurityNoticeModal(true)" style="background: none; border: 1.5px solid var(--crust-med); color: var(--dark-blue); padding: 8px 14px; border-radius: 20px; font-family: 'Subhead1', sans-serif; font-size: 12.5px; text-transform: uppercase; cursor: pointer;">Register PIN &#8599;</button>
+                    <button type="button" onclick="closeSecurityNoticeModal(false)" style="background: var(--brand-blue); color: var(--crust-base); border: none; padding: 9px 18px; border-radius: 20px; font-family: 'Subhead1', sans-serif; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 92, 145, 0.25);">Continue to Login</button>
+                </div>
             </div>
         </div>
     </div>
@@ -173,6 +202,123 @@
     </div>
 </div>
 
+<!-- Secure PIN Authentication Barrier Modal -->
+<div id="authBarrierModal" class="auth-barrier-overlay hidden">
+    <div class="auth-barrier-card">
+        <div class="auth-barrier-stripe"></div>
+        <div class="auth-barrier-body">
+            <div class="auth-barrier-left">
+                <img src="/images/New_Logo_v2.png" alt="Team Wow Logo" class="auth-logo" onerror="this.style.display='none'">
+                <h2 class="auth-title">Staffing Command</h2>
+                <div class="auth-shield-badge">&#128274; Authorized Access Only</div>
+                <p class="auth-subtitle">
+                    Enter your 4-digit Trainer / GM PIN registered in Wow Way to unlock hiring data.
+                </p>
+                <div class="auth-reg-link-wrap">
+                    <button type="button" onclick="openPinRegistrationModal()" class="auth-reg-link-btn">
+                        &#128273; Register Manager / Trainer PIN
+                    </button>
+                </div>
+            </div>
+
+            <div class="auth-barrier-right">
+                <div id="authErrorMsg" class="auth-error-banner hidden"></div>
+                <input type="password" id="authPinInput" class="auth-pin-display" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="••••" autocomplete="off">
+                <div class="pin-keypad">
+                    <button type="button" class="pin-key-btn" onclick="pressPinKey('1')">1</button>
+                    <button type="button" class="pin-key-btn" onclick="pressPinKey('2')">2</button>
+                    <button type="button" class="pin-key-btn" onclick="pressPinKey('3')">3</button>
+                    <button type="button" class="pin-key-btn" onclick="pressPinKey('4')">4</button>
+                    <button type="button" class="pin-key-btn" onclick="pressPinKey('5')">5</button>
+                    <button type="button" class="pin-key-btn" onclick="pressPinKey('6')">6</button>
+                    <button type="button" class="pin-key-btn" onclick="pressPinKey('7')">7</button>
+                    <button type="button" class="pin-key-btn" onclick="pressPinKey('8')">8</button>
+                    <button type="button" class="pin-key-btn" onclick="pressPinKey('9')">9</button>
+                    <button type="button" class="pin-key-btn pin-fn-btn" onclick="clearPinKey()" title="Backspace">⌫</button>
+                    <button type="button" class="pin-key-btn" onclick="pressPinKey('0')">0</button>
+                    <button type="button" class="pin-key-btn pin-fn-btn" onclick="submitPinAuth()" style="color: var(--brand-blue);" title="Submit">➔</button>
+                </div>
+                <button type="button" id="authSubmitBtn" class="auth-unlock-btn" onclick="submitPinAuth()">Unlock Tracker</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Manager & Trainer PIN Registration Modal -->
+<div id="pinRegistrationModal" class="brand-modal-overlay hidden" style="z-index: 100005;">
+    <div class="brand-modal-card" style="max-width: 440px;">
+        <div class="brand-modal-brand-stripe"></div>
+        <div class="brand-modal-content" style="padding: 24px;">
+            <div style="display: flex; justify-content: flex-end; margin-bottom: -10px;">
+                <button type="button" onclick="closePinRegistrationModal()" style="background: none; border: none; font-size: 24px; color: var(--crust-deep); cursor: pointer; line-height: 1;">&times;</button>
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 16px;">
+                <img src="https://teamwow-assets.pages.dev/image/custom-emojis/manager_lock.png" alt="Manager Security" style="width: 58px; height: 58px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); margin-bottom: 6px;">
+                <h3 style="margin: 0 0 6px 0; color: var(--dark-blue); font-family: 'ExtraBold', 'Subhead1', sans-serif; font-size: 22px; text-transform: uppercase; letter-spacing: 0.5px;">Manager &amp; Trainer PIN Registration</h3>
+                <p style="font-size: 14px; line-height: 1.4; color: var(--crust-burnt); margin: 0; font-family: 'Condensed', sans-serif;">
+                    Register your individual 4-digit PIN for training &amp; management systems. Employee ID must match Pulse ID.
+                </p>
+            </div>
+
+            <div id="regErrorBanner" class="auth-error-banner hidden"></div>
+
+            <!-- REGISTRATION FORM VIEW -->
+            <div id="pinRegFormView">
+                <form id="pinRegForm" onsubmit="submitTrainerPinRegistration(event)" style="display: flex; flex-direction: column; gap: 14px;">
+                    <div>
+                        <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 4px;">Full Name *</label>
+                        <input type="text" id="regFullName" required placeholder="e.g. Jane Doe" style="width: 100%; padding: 10px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 15px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 4px;">Pulse ID *</label>
+                            <input type="text" id="regPulseId" required placeholder="e.g. jdoe24" style="width: 100%; padding: 10px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 15px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                        </div>
+                        <div>
+                            <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 4px;">Store # *</label>
+                            <input type="text" id="regStoreNum" required placeholder="e.g. 6824" inputmode="numeric" style="width: 100%; padding: 10px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 15px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 4px;">Market *</label>
+                        <select id="regMarket" style="width: 100%; padding: 10px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 15px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                            <option value="Dallas" selected>Dallas / Fort Worth Market</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 4px;">New 4-Digit PIN *</label>
+                        <input type="password" id="regPin" required maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="••••" style="width: 100%; padding: 10px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'ExtraBold', monospace, sans-serif; font-size: 20px; letter-spacing: 6px; text-align: center; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                    </div>
+
+                    <div style="margin-top: 8px;">
+                        <button type="submit" id="regSubmitBtn" style="width: 100%; padding: 12px; background: var(--brand-blue); color: var(--crust-base); border: none; border-radius: 25px; font-family: 'Subhead1', sans-serif; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 92, 145, 0.25);">
+                            Register Trainer PIN
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- REGISTRATION SUCCESS CONFIRMATION VIEW -->
+            <div id="pinRegSuccessView" class="hidden" style="text-align: center; padding-top: 6px;">
+                <div style="font-size: 40px; margin-bottom: 8px;">🎉</div>
+                <h4 id="regSuccessTitle" style="margin: 0 0 6px 0; color: var(--dark-blue); font-family: 'ExtraBold', 'Subhead1', sans-serif; font-size: 20px; text-transform: uppercase;">PIN Registered!</h4>
+                <p id="regSuccessMessage" style="font-size: 14.5px; line-height: 1.45; color: var(--crust-burnt); margin: 0 0 14px 0; font-family: 'Subhead2', sans-serif;">
+                    Your 4-digit PIN is now active.
+                </p>
+                <div id="regSuccessSubtext" style="background: rgba(0, 92, 145, 0.08); border-left: 4px solid var(--brand-blue); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; text-align: left; font-size: 13.5px; color: var(--dark-blue); line-height: 1.4; font-family: 'Condensed', sans-serif;">
+                    An authorization alert has been sent to Mike Jacobs for GM Staffing Tracker access.
+                </div>
+                <button type="button" onclick="closePinRegistrationModal()" class="auth-unlock-btn" style="background: var(--brand-blue); color: var(--crust-base);">
+                    Done &amp; Return
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxQVuU0uQ3TdkfsBwJpZ-K1iUDXTuLgvqEayPeqZgSRLDNxHOEUsOrjaSZAujI8p_874g/exec?city=Dallas&username=dallas_admin&password=dallas_password_123";
@@ -180,59 +326,470 @@
     let expandedCardIds = new Set(); 
     let showOlderForStore = false; // Tracks if GM clicked "View Older Candidates"
 
+    // =========================================================================
+    // TRAINER / GM PIN AUTHENTICATION SYSTEM
+    // =========================================================================
+    const AUTH_STORAGE_KEY = 'tw_staffing_auth_v1';
+    const AUTH_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days session
+    let currentAuthUser = null;
+
+    function getStoredAuth() {
+        try {
+            const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            if (!parsed || !parsed.user || !parsed.timestamp) return null;
+            if (Date.now() - parsed.timestamp > AUTH_MAX_AGE_MS) {
+                localStorage.removeItem(AUTH_STORAGE_KEY);
+                return null;
+            }
+            return parsed.user;
+        } catch(e) {
+            return null;
+        }
+    }
+
+    function saveStoredAuth(user) {
+        try {
+            localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
+                user: user,
+                timestamp: Date.now()
+            }));
+        } catch(e) {}
+    }
+
+    function showAuthBarrier(errorMessage = '') {
+        const modal = document.getElementById('authBarrierModal');
+        const errEl = document.getElementById('authErrorMsg');
+        const pinInput = document.getElementById('authPinInput');
+        const submitBtn = document.getElementById('authSubmitBtn');
+        if (modal) modal.classList.remove('hidden');
+        if (errEl) {
+            if (errorMessage) {
+                errEl.innerText = errorMessage;
+                errEl.classList.remove('hidden');
+            } else {
+                errEl.classList.add('hidden');
+            }
+        }
+        if (pinInput) {
+            pinInput.value = '';
+            setTimeout(() => pinInput.focus(), 120);
+        }
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Unlock Tracker';
+        }
+    }
+
+    function hideAuthBarrier() {
+        const modal = document.getElementById('authBarrierModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function renderUserBadge() {
+        const infoEl = document.getElementById('authUserInfo');
+        const nameEl = document.getElementById('authUserName');
+        const badgeEl = document.getElementById('authUserRoleStore');
+        if (!infoEl || !currentAuthUser) return;
+
+        if (nameEl) nameEl.innerText = currentAuthUser.name || 'Trainer';
+        if (badgeEl) {
+            const roleStr = currentAuthUser.is_admin ? 'Admin' : (currentAuthUser.is_exec ? 'Exec' : (currentAuthUser.is_do ? 'Supervisor' : (currentAuthUser.is_gm ? 'GM' : (currentAuthUser.role || 'Trainer'))));
+            const storeStr = currentAuthUser.store ? ` #${currentAuthUser.store}` : '';
+            badgeEl.innerText = `${roleStr}${storeStr}`;
+        }
+        infoEl.classList.remove('hidden');
+    }
+
+    function pressPinKey(digit) {
+        const pinInput = document.getElementById('authPinInput');
+        if (!pinInput || pinInput.value.length >= 4) return;
+        pinInput.value += digit;
+        if (pinInput.value.length === 4) {
+            submitPinAuth();
+        }
+    }
+
+    function clearPinKey() {
+        const pinInput = document.getElementById('authPinInput');
+        if (!pinInput) return;
+        pinInput.value = pinInput.value.slice(0, -1);
+    }
+
+    async function submitPinAuth() {
+        const pinInput = document.getElementById('authPinInput');
+        const submitBtn = document.getElementById('authSubmitBtn');
+        const errEl = document.getElementById('authErrorMsg');
+        if (!pinInput) return;
+
+        const rawPin = pinInput.value.replace(/\D/g, '').trim();
+        if (rawPin.length !== 4) {
+            if (errEl) {
+                errEl.innerText = 'Please enter a complete 4-digit PIN.';
+                errEl.classList.remove('hidden');
+            }
+            pinInput.focus();
+            return;
+        }
+
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Verifying...';
+        }
+        if (errEl) errEl.classList.add('hidden');
+
+        try {
+            const apiBase = (window.location.origin.includes('pages.dev') || window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1'))
+                ? '/api/staffing'
+                : 'https://tw-staffing.pages.dev/api/staffing';
+
+            const res = await fetch(`${apiBase}?action=verifyPin&pin=${encodeURIComponent(rawPin)}&market=Dallas`);
+            const data = await res.json();
+
+            if (!res.ok || !data.success || !data.user) {
+                throw new Error(data.error || 'Invalid or inactive PIN. Access denied.');
+            }
+
+            // Role verification for Staffing Command
+            const u = data.user;
+            const hasAccess = u.is_gm || u.is_do || u.is_admin || u.is_exec || (u.role && u.role.toLowerCase().includes('assistant manager'));
+            if (!hasAccess) {
+                if (errEl) {
+                    errEl.innerHTML = `
+                        <div style="font-size: 13px; line-height: 1.4; margin-bottom: 8px;">
+                            Your PIN is active for Wow Way Training, but GM Staffing Command requires Manager authorization.
+                        </div>
+                        <button type="button" id="requestGmBtn" onclick="requestGmAccessFromMike('${u.trainer_id}', '${rawPin}')" style="background: #005c91; color: #fff; border: none; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                            &#128273; Request GM Access from Mike
+                        </button>
+                    `;
+                    errEl.classList.remove('hidden');
+                }
+                pinInput.value = '';
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'Unlock Tracker';
+                }
+                return;
+            }
+
+            // Success
+            currentAuthUser = data.user;
+            saveStoredAuth(data.user);
+            renderUserBadge();
+            hideAuthBarrier();
+
+            // Load data
+            fetchData(true);
+            checkPushSetupStatus();
+
+        } catch (err) {
+            if (errEl) {
+                errEl.innerText = err.message || 'Verification failed. Please try again.';
+                errEl.classList.remove('hidden');
+            }
+            pinInput.value = '';
+            pinInput.focus();
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Unlock Tracker';
+            }
+        }
+    }
+
+    async function requestGmAccessFromMike(trainerId, pin) {
+        const btn = document.getElementById('requestGmBtn');
+        const errEl = document.getElementById('authErrorMsg');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerText = 'Sending Request...';
+        }
+        try {
+            const apiBase = (window.location.origin.includes('pages.dev') || window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1'))
+                ? '/api/staffing'
+                : 'https://tw-staffing.pages.dev/api/staffing';
+            const res = await fetch(`${apiBase}?action=requestGmAccess&trainerId=${encodeURIComponent(trainerId)}&pin=${encodeURIComponent(pin)}`);
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Failed to submit request.');
+            }
+            if (errEl) {
+                errEl.innerHTML = `<span style="color: #005c91; font-weight: bold;">&#10004; Request Sent to Mike Jacobs!</span><br><span style="font-size: 12px; color: var(--crust-burnt);">Mike received a 1-click mobile authorization link. Once approved, enter your PIN to unlock.</span>`;
+                errEl.classList.remove('hidden');
+            }
+        } catch (err) {
+            if (errEl) {
+                errEl.innerHTML = `<span style="color: #e70000;">${err.message || 'Error submitting request.'}</span>`;
+            }
+        }
+    }
+
+    function signOutAuth(message = '') {
+        try {
+            localStorage.removeItem(AUTH_STORAGE_KEY);
+        } catch(e) {}
+        currentAuthUser = null;
+        rawData = { onboarding: [], interviews: [], contacts: [] };
+
+        const onbEl = document.getElementById('onboardingList');
+        const intEl = document.getElementById('interviewList');
+        const cntEl = document.getElementById('contactsList');
+        if (onbEl) onbEl.innerHTML = '';
+        if (intEl) intEl.innerHTML = '';
+        if (cntEl) cntEl.innerHTML = '';
+
+        const infoEl = document.getElementById('authUserInfo');
+        if (infoEl) infoEl.classList.add('hidden');
+
+        showAuthBarrier(message);
+    }
+
+    async function revalidateAuthWithServer(pin) {
+        try {
+            const apiBase = (window.location.origin.includes('pages.dev') || window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1'))
+                ? '/api/staffing'
+                : 'https://tw-staffing.pages.dev/api/staffing';
+            const res = await fetch(`${apiBase}?action=checkAuth&pin=${encodeURIComponent(pin)}&market=Dallas`);
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                signOutAuth('Your credentials have been deactivated or revoked. Please contact Mike Jacobs.');
+            } else if (data.user) {
+                const u = data.user;
+                const hasAccess = u.is_gm || u.is_do || u.is_admin || u.is_exec || (u.role && u.role.toLowerCase().includes('assistant manager'));
+                if (!hasAccess) {
+                    signOutAuth('Access level changed: Manager or Supervisor authorization required.');
+                    return;
+                }
+                currentAuthUser = data.user;
+                saveStoredAuth(data.user);
+                renderUserBadge();
+            }
+        } catch(e) {
+            // Keep current session on temporary network issue
+        }
+    }
+
+    // =========================================================================
+    // MANAGER & TRAINER PIN REGISTRATION MODAL CONTROLLERS
+    // =========================================================================
+    function openPinRegistrationModal() {
+        // Keep authBarrierModal active behind this registration modal (never remove page blocker)
+        const modal = document.getElementById('pinRegistrationModal');
+        if (modal) modal.classList.remove('hidden');
+
+        const formView = document.getElementById('pinRegFormView');
+        const successView = document.getElementById('pinRegSuccessView');
+        if (formView) formView.classList.remove('hidden');
+        if (successView) successView.classList.add('hidden');
+
+        const errEl = document.getElementById('regErrorBanner');
+        if (errEl) errEl.classList.add('hidden');
+
+        const form = document.getElementById('pinRegForm');
+        if (form) form.reset();
+        setTimeout(() => {
+            const nameInp = document.getElementById('regFullName');
+            if (nameInp) nameInp.focus();
+        }, 120);
+    }
+
+    function closePinRegistrationModal() {
+        const modal = document.getElementById('pinRegistrationModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    async function submitTrainerPinRegistration(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        const errEl = document.getElementById('regErrorBanner');
+        const submitBtn = document.getElementById('regSubmitBtn');
+        const formView = document.getElementById('pinRegFormView');
+        const successView = document.getElementById('pinRegSuccessView');
+        const successTitle = document.getElementById('regSuccessTitle');
+        const successMsg = document.getElementById('regSuccessMessage');
+        const successSub = document.getElementById('regSuccessSubtext');
+
+        const name = (document.getElementById('regFullName')?.value || '').trim();
+        const pulseId = (document.getElementById('regPulseId')?.value || '').trim();
+        const store = (document.getElementById('regStoreNum')?.value || '').trim();
+        const market = (document.getElementById('regMarket')?.value || 'Dallas').trim();
+        const pin = (document.getElementById('regPin')?.value || '').trim();
+
+        if (!name || !pulseId || !store || pin.length !== 4) {
+            if (errEl) {
+                errEl.innerText = 'Please complete all required fields. PIN must be 4 digits.';
+                errEl.classList.remove('hidden');
+            }
+            return;
+        }
+
+        if (errEl) errEl.classList.add('hidden');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Registering PIN...';
+        }
+
+        try {
+            const apiBase = (window.location.origin.includes('pages.dev') || window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1'))
+                ? '/api/staffing'
+                : 'https://tw-staffing.pages.dev/api/staffing';
+
+            const res = await fetch(`${apiBase}?action=registerTrainerPin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name,
+                    pulseId,
+                    store,
+                    market,
+                    pin
+                })
+            });
+
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Failed to register PIN.');
+            }
+
+            const isAuthorizedRole = data.user && (data.user.is_gm || data.user.is_do || data.user.is_admin || data.user.is_exec);
+
+            if (formView) formView.classList.add('hidden');
+            if (successView) successView.classList.remove('hidden');
+
+            if (isAuthorizedRole) {
+                if (successTitle) successTitle.innerText = 'Manager Access Confirmed!';
+                if (successMsg) successMsg.innerHTML = `Welcome <strong>${name}</strong>! Your credentials have been verified for Store #${store}. Unlocking Staffing Command...`;
+                if (successSub) successSub.innerText = 'Store hiring pipeline access active. Opening portal...';
+
+                setTimeout(() => {
+                    closePinRegistrationModal();
+                    const mainPinInput = document.getElementById('authPinInput');
+                    if (mainPinInput) {
+                        mainPinInput.value = pin;
+                        submitPinAuth();
+                    }
+                }, 1500);
+            } else if (data.isExistingTrainerRequest) {
+                if (successTitle) successTitle.innerText = 'Approval Request Sent to Mike Jacobs!';
+                if (successMsg) successMsg.innerHTML = `Your Wow Way profile (<strong>${name}</strong>) has been verified for Store #${store}.`;
+                if (successSub) successSub.innerHTML = 'Mike Jacobs has been sent a 1-click mobile authorization link. Once approved, your PIN will unlock GM Staffing Command immediately.';
+            } else {
+                if (successTitle) successTitle.innerText = 'PIN Registered Successfully!';
+                if (successMsg) successMsg.innerHTML = `Your 4-digit PIN (<strong>${pin}</strong>) is active for Wow Way Training for <strong>${name}</strong>.`;
+                if (successSub) successSub.innerHTML = 'An authorization notice has been emailed to Mike Jacobs with 1-click mobile approval for GM Staffing Tracker access. Once approved, your PIN will unlock this portal.';
+            }
+
+        } catch (err) {
+            if (errEl) {
+                errEl.innerText = err.message || 'Registration failed. Please try again.';
+                errEl.classList.remove('hidden');
+            }
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Register Trainer PIN';
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const pinInput = document.getElementById('authPinInput');
+        if (pinInput) {
+            pinInput.addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                if (e.target.value.length === 4) {
+                    submitPinAuth();
+                }
+            });
+            pinInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    submitPinAuth();
+                }
+            });
+        }
+    });
+
     function toggleOlderCandidates() {
         showOlderForStore = !showOlderForStore;
         renderOnboarding();
         if (typeof renderInterviews === 'function') renderInterviews();
     }
 
-    // Check if we should display the welcome modal
-    (function() {
+    // Check if we should display the pre-login security briefing modal
+    (function checkSecurityNoticeOnLoad() {
         try {
-            const hideModal = localStorage.getItem('hideTrackerUpdate_v4');
-            if (hideModal !== 'true') {
-                document.getElementById('updateModal').classList.remove('hidden');
+            const hasSeen = localStorage.getItem('seenSecurityBriefing_v1');
+            if (hasSeen !== 'true') {
+                const modal = document.getElementById('securityNoticeModal');
+                if (modal) modal.classList.remove('hidden');
             }
-        } catch (e) {
-            document.getElementById('updateModal').classList.remove('hidden');
-        }
+        } catch (e) {}
     })();
 
-    function closeUpdateModal() {
-        const dontShowAgain = document.getElementById('hideUpdateCheckbox').checked;
-        if (dontShowAgain) {
+    function closeSecurityNoticeModal(openRegistration = false) {
+        const dontShow = document.getElementById('hideSecurityNoticeCheckbox')?.checked;
+        if (dontShow) {
             try {
-                localStorage.setItem('hideTrackerUpdate_v4', 'true');
+                localStorage.setItem('seenSecurityBriefing_v1', 'true');
             } catch (e) {}
         }
-        document.getElementById('updateModal').classList.add('hidden');
+        const modal = document.getElementById('securityNoticeModal');
+        if (modal) modal.classList.add('hidden');
+
+        if (openRegistration) {
+            openPinRegistrationModal();
+        } else {
+            const pinInp = document.getElementById('authPinInput');
+            if (pinInp) pinInp.focus();
+        }
     }
 
-    // Initial load
-    fetchData(true);
+    // Initial authentication & load flow
+    const cachedUser = getStoredAuth();
+    if (cachedUser) {
+        currentAuthUser = cachedUser;
+        renderUserBadge();
+        hideAuthBarrier();
+        fetchData(true);
+        revalidateAuthWithServer(cachedUser.pin);
+    } else {
+        showAuthBarrier();
+    }
 
     // Smart background sync: only poll if user is actively looking at the page, and at a safe 3-minute interval
     setInterval(() => {
-        if (document.visibilityState === 'visible') {
+        if (document.visibilityState === 'visible' && currentAuthUser) {
             fetchData(false);
         }
     }, 180000);
 
     // Auto-refresh when user switches back to this tab
     document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
+        if (document.visibilityState === 'visible' && currentAuthUser) {
             fetchData(false);
         }
     });
 
     function fetchData(showFullScreenLoader) {
+        if (!currentAuthUser) {
+            showAuthBarrier();
+            return;
+        }
+
         if (showFullScreenLoader) {
             document.getElementById('loader').classList.remove('hidden');
         }
 
-        const d1Url = (window.location.origin.includes('pages.dev') || window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1'))
+        const isGmOrAm = !currentAuthUser.is_do && !currentAuthUser.is_admin && !currentAuthUser.is_exec;
+        const userStore = String(currentAuthUser.store || '').replace(/\D/g, '').trim();
+
+        let d1Url = (window.location.origin.includes('pages.dev') || window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1'))
             ? '/api/staffing?market=Dallas'
             : 'https://tw-staffing.pages.dev/api/staffing?market=Dallas';
+
+        if (isGmOrAm && userStore) {
+            d1Url += `&storeNum=${encodeURIComponent(userStore)}`;
+        }
 
         fetch(d1Url)
             .then(res => {
@@ -438,11 +995,13 @@
         const targetView = urlParams.get('view');
         const targetDo = urlParams.get('do');
 
-        if (targetDo) {
+        const isGmOrAm = currentAuthUser && !currentAuthUser.is_do && !currentAuthUser.is_admin && !currentAuthUser.is_exec;
+
+        if (targetDo && !isGmOrAm) {
             const doSelect = document.getElementById('doFilter');
             if (doSelect) { doSelect.value = targetDo; }
         }
-        if (targetStore) {
+        if (targetStore && !isGmOrAm) {
             const storeSelect = document.getElementById('storeFilter');
             if (storeSelect) { storeSelect.value = targetStore; }
         }
@@ -466,32 +1025,49 @@
         } catch(e) {}
     }
 
-    function populateFilters() {
-        const activeDo = document.getElementById('doFilter').value;
-        const activeStore = document.getElementById('storeFilter').value;
+function populateFilters() {
+    const activeDo = document.getElementById('doFilter') ? document.getElementById('doFilter').value : 'All';
+    const activeStore = document.getElementById('storeFilter') ? document.getElementById('storeFilter').value : 'All';
 
-        const allDos = [
-            ...(rawData.contacts || []).map(c => c.doName),
-            ...(rawData.onboarding || []).map(i => i.doName),
-            ...(rawData.interviews || []).map(i => i.doName)
-        ];
-        const dos = [...new Set(allDos.filter(d => d && d !== 'DO').map(d => d.toString().trim()))].sort();
-        const allStores = [
-            ...(rawData.contacts || []).map(c => c.store),
-            ...(rawData.onboarding || []).map(i => i.store),
-            ...(rawData.interviews || []).map(i => i.store)
-        ];
-        const stores = [...new Set(allStores.filter(s => s && s !== 'Store #').map(s => s.toString().trim()))].sort();
+    const isGmOrAm = currentAuthUser && !currentAuthUser.is_do && !currentAuthUser.is_admin && !currentAuthUser.is_exec;
+    const userStore = currentAuthUser ? String(currentAuthUser.store || '').replace(/\D/g, '').trim() : '';
 
-        const doSelect = document.getElementById('doFilter');
-        doSelect.innerHTML = '<option value="All">All DOs</option>';
-        dos.forEach(d => { let opt = document.createElement('option'); opt.value = d; opt.innerText = d; doSelect.appendChild(opt); });
-        doSelect.value = activeDo;
+    const doSelect = document.getElementById('doFilter');
+    const storeSelect = document.getElementById('storeFilter');
 
-        const storeSelect = document.getElementById('storeFilter');
-        storeSelect.innerHTML = '<option value="All">All Stores</option>';
-        stores.forEach(s => { let opt = document.createElement('option'); opt.value = s; opt.innerText = s; storeSelect.appendChild(opt); });
-        storeSelect.value = activeStore;
+        if (isGmOrAm && userStore) {
+            if (doSelect) doSelect.style.display = 'none';
+            if (storeSelect) {
+                storeSelect.innerHTML = `<option value="${userStore}">Store #${userStore}</option>`;
+                storeSelect.value = userStore;
+                storeSelect.disabled = true;
+                storeSelect.title = "Locked to your assigned store";
+            }
+        } else {
+            if (doSelect) doSelect.style.display = '';
+            if (storeSelect) storeSelect.disabled = false;
+
+            const allDos = [
+                ...(rawData.contacts || []).map(c => c.doName),
+                ...(rawData.onboarding || []).map(i => i.doName),
+                ...(rawData.interviews || []).map(i => i.doName)
+            ];
+            const dos = [...new Set(allDos.filter(d => d && d !== 'DO').map(d => d.toString().trim()))].sort();
+            const allStores = [
+                ...(rawData.contacts || []).map(c => c.store),
+                ...(rawData.onboarding || []).map(i => i.store),
+                ...(rawData.interviews || []).map(i => i.store)
+            ];
+            const stores = [...new Set(allStores.filter(s => s && s !== 'Store #').map(s => s.toString().trim()))].sort();
+
+            doSelect.innerHTML = '<option value="All">All DOs</option>';
+            dos.forEach(d => { let opt = document.createElement('option'); opt.value = d; opt.innerText = d; doSelect.appendChild(opt); });
+            doSelect.value = activeDo;
+
+            storeSelect.innerHTML = '<option value="All">All Stores</option>';
+            stores.forEach(s => { let opt = document.createElement('option'); opt.value = s; opt.innerText = s; storeSelect.appendChild(opt); });
+            storeSelect.value = activeStore;
+        }
 
         doSelect.onchange = () => { 
             showOlderForStore = false; 
@@ -712,6 +1288,9 @@
 
         const idCount = (hasA ? 1 : 0) + (hasB ? 1 : 0) + (hasC ? 1 : 0);
 
+        if (t.includes("<1 license") || t.includes("license history") || t.includes("< 1 license")) {
+            return "driving record / 1+ year license history";
+        }
         if (hasMismatch) {
             return "updated ID (due to a document mismatch)";
         }
@@ -797,6 +1376,11 @@
         if (item.hasMissingDocs) {
             const rawDoc = item.missingDocsText || '';
             const rawLower = rawDoc.toLowerCase();
+
+            if (rawLower.includes('<1 license') || rawLower.includes('license history') || rawLower.includes('< 1 license') || rawLower.includes('<1 year')) {
+                return `Hey ${firstName}! This is Domino's. We were unable to verify that you have more than one year of licensed driving history. Do you have a previous out-of-state license? Please reply back so we can help get this verified! Thanks!`;
+            }
+
             const isCorrection = rawLower.includes('dob') || rawLower.includes('date of birth') || rawLower.includes('ssn') || rawLower.includes('correct') || rawLower.includes('mismatch') || rawLower.includes('spelling') || rawLower.includes('i-9') || rawLower.includes('i9') || rawLower.includes('w-4') || rawLower.includes('w4') || rawLower.includes('address');
 
             if (isCorrection && !rawLower.includes('list a') && !rawLower.includes('list b') && !rawLower.includes('list c')) {
