@@ -6,7 +6,7 @@
         @font-face { font-family: 'Subhead1'; src: url('fonts/Dominos Sans Subhead 1.ttf') format('truetype'); font-weight: normal; }
         @font-face { font-family: 'Subhead2'; src: url('fonts/Dominos Sans Subhead 2.ttf') format('truetype'); font-weight: normal; }
         @font-face { font-family: 'Condensed'; src: url('fonts/Dominos Sans Body Condensed.ttf') format('truetype'); font-weight: normal; }
-        @font-face { font-family: 'Compact'; src: url('fonts/Dominos Sans Body Compact.ttf') format('truetype'); font-weight: normal; }
+        @font-face { font-family: 'Compact'; src: url('fonts/Dominos Sans Body Condensed.ttf') format('truetype'); font-weight: normal; }
 
         :root {
             --brand-red: #ff0000;
@@ -23,7 +23,7 @@
             --brand-grey: #6c757d;
             --card-bg: #FFFFFF;
             --border-radius: 12px;
-            --success-green: #117a30; 
+            --success-green: var(--dark-blue); /* Banish all green! */
             --bg-color: var(--crust-light);
             --text-dark: var(--crust-burnt);
             --text-light: var(--crust-deep);
@@ -54,6 +54,15 @@
         body:has(#appContainer:not(.hidden)) { 
             background-image: none; 
             background-color: var(--bg-color); 
+        }
+
+        /* Universal Anti-Synthetic-Bolding Safeguards: Prevent browser fallback to Arial */
+        strong, b {
+            font-family: 'Subhead2', sans-serif;
+            font-weight: normal;
+        }
+        em, i {
+            font-style: normal;
         }
 
         /* ==========================================================================
@@ -270,10 +279,181 @@
             justify-content: center;
             box-shadow: none;
         }
-        .control-row { display: flex; gap: 10px; margin-bottom: 8px; }
-        .control-row select { padding: 8px 10px; border-radius: 6px; border: 1px solid var(--crust-dark); font-family: 'Condensed', sans-serif; font-size: 16px; background: white; flex: 1; }
-        .search-container { margin-bottom: 8px; }
-        .search-container input { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--crust-dark); font-family: 'Condensed', sans-serif; font-size: 16px; box-sizing: border-box; }
+        .search-container { margin-bottom: 4px; }
+        .search-container input { 
+            width: 100%; 
+            padding: 9px 12px; 
+            border-radius: 8px; 
+            border: 1.5px solid var(--crust-dark); 
+            font-family: 'Condensed', sans-serif; 
+            font-size: 16px; 
+            box-sizing: border-box; 
+            background: #ffffff;
+            color: var(--crust-burnt);
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .search-container input::placeholder {
+            color: var(--crust-dark);
+            opacity: 0.9;
+        }
+        .search-container input:focus {
+            outline: none;
+            border-color: var(--brand-blue);
+            box-shadow: 0 0 0 2px rgba(0, 144, 226, 0.2);
+        }
+        .list-meta-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 4px 8px;
+            font-family: 'Subhead1', sans-serif;
+            font-size: 13px;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+        }
+        .custom-sort-dropdown {
+            position: relative;
+        }
+        #sortDropdownTrigger {
+            background: transparent;
+            border: 1.5px solid transparent;
+            border-radius: 6px;
+            padding: 3px 6px;
+            font-family: 'Subhead1', sans-serif;
+            font-size: 13px;
+            letter-spacing: 0.06em;
+            color: var(--crust-burnt);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            text-transform: uppercase;
+            font-weight: bold;
+            transition: all 0.15s ease;
+        }
+        #sortDropdownTrigger:hover {
+            background: var(--crust-light);
+            border-color: var(--crust-med);
+            color: var(--dark-blue);
+        }
+        .sort-popover-menu {
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 0;
+            min-width: 175px;
+            background: #ffffff;
+            border: 1.5px solid var(--crust-dark);
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(71, 43, 16, 0.18);
+            padding: 5px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .sort-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Subhead1', sans-serif;
+            font-size: 13px;
+            letter-spacing: 0.05em;
+            color: var(--crust-burnt);
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.12s ease;
+        }
+        .sort-option:hover {
+            background: var(--crust-light);
+            color: var(--dark-blue);
+        }
+        .sort-option.selected {
+            background: var(--dark-blue);
+            color: #ffffff;
+            font-weight: bold;
+        }
+        .sort-option .sort-check {
+            font-size: 12px;
+            opacity: 0;
+        }
+        .sort-option.selected .sort-check {
+            opacity: 1;
+        }
+
+        textarea#fieldNotes:focus {
+            outline: none;
+            border-color: var(--brand-blue);
+            box-shadow: 0 0 0 2px rgba(0, 144, 226, 0.2);
+        }
+
+        /* ==========================================================================
+           7. ONBOARDING ACTIVE FLAGS & STATUS BUTTONS
+           ========================================================================== */
+        .flag-pill {
+            background: #ffffff;
+            border: 1.5px solid var(--crust-dark);
+            border-radius: 8px;
+            color: var(--crust-burnt);
+            padding: 8px 10px;
+            font-family: 'Subhead2', sans-serif;
+            font-size: 13.5px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            transition: all 0.15s ease;
+        }
+        .flag-pill:hover {
+            border-color: var(--crust-deep);
+            background: var(--crust-light);
+        }
+        .flag-pill-check {
+            width: 17px;
+            height: 17px;
+            border-radius: 4px;
+            border: 1.5px solid var(--crust-dark);
+            background: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            color: transparent;
+            flex-shrink: 0;
+            transition: all 0.15s ease;
+        }
+        .flag-pill.is-active {
+            background: #fff1f1 !important;
+            border: 2px solid var(--brand-red) !important;
+            color: var(--dark-red) !important;
+            font-weight: bold !important;
+            box-shadow: 0 2px 6px rgba(255, 0, 0, 0.15) !important;
+        }
+        .flag-pill.is-active .flag-pill-check {
+            background: var(--dark-red) !important;
+            border-color: var(--dark-red) !important;
+            color: #ffffff !important;
+        }
+
+        .cand-status-btn {
+            flex: 1;
+            padding: 7px 6px;
+            border-radius: 6px;
+            border: none;
+            font-family: 'Subhead1', sans-serif;
+            font-size: 13.5px;
+            cursor: pointer;
+            background: transparent;
+            color: var(--crust-burnt);
+            transition: all 0.15s ease;
+        }
+        .cand-status-btn:hover {
+            background: var(--crust-med);
+        }
 
         /* ==========================================================================
            7. CARDS & BADGES
@@ -478,13 +658,30 @@
         }
         button:hover { opacity: 0.9; }
         button.secondary { background: var(--brand-grey); }
-        button.btn-add { 
-            margin-bottom: 8px; 
-            background: var(--brand-blue); 
-            width: 100%; 
-            flex: 0 0 auto; 
-            font-size: 20px;
-            padding: 12px 16px;
+        button.btn-add,
+        #btnAddMain { 
+            background: var(--med-blue); 
+            color: white; 
+            padding: 0 18px; 
+            height: 38px; 
+            font-size: 13.5px; 
+            border-radius: 6px; 
+            font-family: 'Subhead1', sans-serif; 
+            cursor: pointer; 
+            border: none; 
+            white-space: nowrap; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 6px; 
+            box-shadow: var(--shadow-sm); 
+            margin: 0;
+            width: auto;
+            flex: 0 0 auto;
+        }
+        button.btn-add:hover,
+        #btnAddMain:hover {
+            background: var(--dark-blue);
+            opacity: 1;
         }
 
         .hidden { display: none !important; }
@@ -525,7 +722,7 @@
             box-sizing: border-box;
         }
         .brand-modal-card {
-            background: var(--card-bg);
+            background: var(--crust-base, #fefaf6);
             width: 95%;
             max-width: 480px;
             max-height: 90vh;
@@ -567,6 +764,15 @@
             color: var(--crust-burnt);
             line-height: 1.45;
         }
+        .brand-modal-content strong,
+        .brand-modal-content b {
+            font-family: 'Subhead2', sans-serif;
+            font-weight: normal;
+        }
+        .brand-modal-content em,
+        .brand-modal-content i {
+            font-style: normal;
+        }
         .brand-modal-actions {
             display: flex;
             justify-content: flex-end;
@@ -583,6 +789,24 @@
             font-size: 16px;
             box-sizing: border-box;
             margin-top: 4px;
+        }
+
+        .rate-chip {
+            background: #ffffff;
+            border: 1px solid var(--crust-dark);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-family: 'Subhead2', sans-serif;
+            color: var(--dark-blue);
+            font-weight: normal;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+        .rate-chip:hover {
+            background: var(--crust-med);
+            border-color: var(--dark-blue);
         }
 
         /* ==========================================================================
@@ -719,4 +943,134 @@
     color: var(--brand-blue) !important;
     border-bottom-color: var(--brand-blue) !important;
 }
+
+/* ==========================================================================
+   CREDENTIAL GOVERNANCE & AUDIT SYSTEM (Admin Hub)
+   ========================================================================== */
+@keyframes credGlowPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+        transform: scale(1);
+    }
+    70% {
+        box-shadow: 0 0 0 8px rgba(255, 0, 0, 0);
+        transform: scale(1.08);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+        transform: scale(1);
+    }
+}
+
+.cred-glow-badge {
+    background: var(--brand-red, #ff0000);
+    color: white;
+    font-family: 'Subhead2', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    animation: credGlowPulse 1.8s infinite ease-in-out;
+}
+
+.cred-card {
+    background: white;
+    border: 1.5px solid var(--crust-med);
+    border-radius: var(--radius-md, 10px);
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.cred-card:hover {
+    border-color: var(--brand-blue);
+    box-shadow: 0 4px 12px rgba(0, 144, 226, 0.12);
+}
+
+.cred-card.is-pending {
+    border-left: 4px solid var(--brand-red);
+    background: #fffdfb;
+}
+
+.cred-matrix-pill {
+    font-family: 'Subhead2', sans-serif;
+    font-size: 11.5px;
+    font-weight: normal !important;
+    padding: 3px 9px;
+    border-radius: 9999px;
+    cursor: pointer;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s ease;
+    border: 1.5px solid var(--crust-med);
+    background: white;
+    color: var(--crust-dark);
+}
+
+.cred-matrix-pill:hover {
+    border-color: var(--brand-blue);
+    color: var(--dark-blue);
+}
+
+.cred-matrix-pill.active-ww,
+.cred-matrix-pill.active-mit,
+.cred-matrix-pill.active-gm,
+.cred-matrix-pill.active-do,
+.cred-matrix-pill.active-admin,
+.cred-matrix-pill.active-exec {
+    background: #edf6fd;
+    color: var(--dark-blue);
+    border-color: var(--brand-blue);
+}
+
+.cred-matrix-pill.inactive {
+    background: white;
+    color: var(--crust-dark);
+    border-color: var(--crust-med);
+    opacity: 0.85;
+}
+
+.cred-matrix-pill.inactive:hover {
+    opacity: 1;
+    border-color: var(--crust-dark);
+    color: var(--crust-burnt);
+}
+
+.cred-log-drawer {
+    background: var(--crust-light);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-top: 6px;
+    font-size: 13px;
+    border: 1px solid var(--crust-med);
+}
+
+.cred-log-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.cred-log-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 4px 0;
+    border-bottom: 1px dashed var(--crust-med);
+}
+
+.cred-log-item:last-child {
+    border-bottom: none;
+}
+
 

@@ -60,23 +60,23 @@
     font-style: normal;
 }
 
-/* Tier 5: Body & Reading (Body Compact Regular) */
+/* Tier 5: Data Tables, Form Numbers & UI Body (Body Condensed Regular) */
+@font-face {
+    font-family: 'Condensed';
+    src: url('fonts/Dominos Sans Body Condensed.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Automatic Brand Alias: Map legacy 'Compact' and 'OneDotCd' directly to 'Condensed' to unify all portals */
 @font-face {
     font-family: 'Compact';
-    src: url('fonts/Dominos Sans Body Compact.ttf') format('truetype');
+    src: url('fonts/Dominos Sans Body Condensed.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
 }
 @font-face {
     font-family: 'OneDotCd';
-    src: url('fonts/Dominos Sans Body Compact.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-}
-
-/* Tier 6: Data Tables, Form Numbers & Compact Values (Body Condensed Regular) */
-@font-face {
-    font-family: 'Condensed';
     src: url('fonts/Dominos Sans Body Condensed.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
@@ -108,7 +108,7 @@
     --inner-white: #ffffff;         /* Inner Sub-Cards, White Card Tiles */
     --brand-grey: #6c757d;          /* Muted Secondary Text, Disabled State Backgrounds */
     --disabled-bg: #bcc6cc;         /* Disabled Action Buttons */
-    --success-green: #117a30;       /* Positive Status Indicators, Verified Checkmarks */
+    --success-green: var(--dark-blue);       /* We shall banish all green! */
 
     /* --- Radii & Elevation --- */
     --radius-sm: 6px;
@@ -129,9 +129,13 @@
 body {
     background-color: var(--crust-base);
     color: var(--crust-burnt);
-    font-family: 'Compact', 'Condensed', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: 'Condensed', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     margin: 0;
     padding: 0;
+}
+
+button, input, select, textarea, option {
+    font-family: inherit;
 }
 
 .hidden {
@@ -139,7 +143,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   4. THE MASTER 6-TIER DOMINO'S TYPOGRAPHY CLASSES
+   4. THE MASTER 5-WEIGHT DOMINO'S CONDENSED TYPOGRAPHY SYSTEM
    -------------------------------------------------------------------------- */
 /* Tier 1: Display & Page Heroes ("WHAT'S NEW", "START YOUR ORDER") */
 .font-hero, h1.brand-hero {
@@ -169,18 +173,21 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* Tier 5: Body & Reading (Long-form descriptions, policies, articles) */
-.font-reading, p.brand-reading {
-    font-family: 'Compact', sans-serif;
-    font-weight: normal !important;
-    line-height: 1.55;
-}
-
-/* Tier 6: Data Tables, Form Numbers & Compact Values */
-.font-data, table.brand-data, input.input-dominos {
+/* Tier 5: Data Tables, Form Numbers, High-Density Values & UI Body */
+.font-data, table.brand-data, input.input-dominos, .font-reading, p.brand-reading {
     font-family: 'Condensed', sans-serif;
     font-weight: normal !important;
     letter-spacing: 0.3px;
+}
+
+/* Universal Anti-Synthetic-Bolding Safeguards: Prevent browser fallback to Arial */
+strong, b {
+    font-family: 'Subhead2', sans-serif;
+    font-weight: normal;
+}
+
+em, i {
+    font-style: normal;
 }
 
 /* --------------------------------------------------------------------------
