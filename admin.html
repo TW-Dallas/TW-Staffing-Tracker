@@ -220,7 +220,7 @@
                     </div>
                 </div>
 
-                <div id="formHeaderRow" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div id="formHeaderRow" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                     <h2 id="formTitle"
                         style="margin: 0; font-family: 'ExtraBold', sans-serif; font-size: 22px; color: var(--dark-blue); text-transform: uppercase; display: flex; align-items: center;">
                         Candidate details</h2>
@@ -272,7 +272,7 @@
                         <div id="onboardingFormFields">
 
                             <!-- Sleek Read-Only Pipeline Journey -->
-                            <div id="onboardingPipelineBar" style="display: flex; align-items: center; justify-content: space-between; background: var(--crust-light); border: 1.5px solid var(--crust-med); border-radius: 8px; padding: 7px 14px; margin-bottom: 12px; font-family: 'Subhead2', sans-serif; font-size: 12.5px; color: var(--crust-burnt);">
+                            <div id="onboardingPipelineBar" style="display: flex; align-items: center; justify-content: space-between; background: var(--crust-light); border: 1.5px solid var(--crust-med); border-radius: 8px; padding: 5px 12px; margin-bottom: 7px; font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-burnt);">
                                 <span id="pipeIntake" style="display: inline-flex; align-items: center; gap: 4px; color: var(--crust-dark);"><span class="pipe-dot">○</span> Intake Rec'd</span>
                                 <span style="color: var(--crust-dark);">➔</span>
                                 <span id="pipeLink" style="display: inline-flex; align-items: center; gap: 4px; color: var(--crust-dark);"><span class="pipe-dot">○</span> Onboarding Sent</span>
@@ -285,27 +285,27 @@
                             </div>
 
                             <!-- Row 1: Full Name -->
-                            <div class="form-group" style="margin-bottom: 10px;">
-                                <label style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-burnt); text-transform: uppercase;">Full Name</label>
+                            <div class="form-group" style="margin-bottom: 7px;">
+                                <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 2px;">Full Name</label>
                                 <input type="text" id="fieldName" style="width: 100%; box-sizing: border-box;">
                             </div>
 
                             <!-- Row 2: Email Address & Phone Number -->
-                            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
+                            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 7px;">
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-burnt); text-transform: uppercase;">Email Address</label>
+                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 2px;">Email Address</label>
                                     <input type="text" id="fieldEmail" onblur="this.value = cleanEmailInput(this.value)" style="width: 100%; box-sizing: border-box;">
                                 </div>
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-burnt); text-transform: uppercase;">Phone Number</label>
+                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 2px;">Phone Number</label>
                                     <input type="text" id="fieldPhone" placeholder="(xxx) xxx-xxxx" style="width: 100%; box-sizing: border-box;">
                                 </div>
                             </div>
 
                             <!-- Row 3: Position, Store #, Shirt Size, Hat Style, Pay Card Checkbox (1 Line) -->
-                            <div class="form-row" style="display: grid; grid-template-columns: 1.15fr 0.95fr 1.15fr 1.15fr auto; gap: 10px; align-items: end; margin-bottom: 10px;">
+                            <div class="form-row" style="display: grid; grid-template-columns: 1.15fr 0.95fr 1.15fr 1.15fr auto; gap: 8px; align-items: end; margin-bottom: 7px;">
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-burnt); text-transform: uppercase;">Position</label>
+                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 2px;">Position</label>
                                     <select id="fieldPosition" style="width: 100%; box-sizing: border-box;">
                                         <option value="">Position</option>
                                         <option value="CSR">CSR</option>
@@ -315,11 +315,11 @@
                                     </select>
                                 </div>
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-burnt); text-transform: uppercase;">Store #</label>
+                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 2px;">Store #</label>
                                     <input type="text" id="fieldStore" placeholder="####" style="width: 100%; box-sizing: border-box;">
                                 </div>
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-burnt); text-transform: uppercase;">Shirt size</label>
+                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 2px;">Shirt size</label>
                                     <select id="fieldShirt" style="width: 100%; box-sizing: border-box;">
                                         <option value="">None</option>
                                         <option value="Small">Small</option>
@@ -336,7 +336,7 @@
                                     </select>
                                 </div>
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-burnt); text-transform: uppercase;">Hat style</label>
+                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 2px;">Hat style</label>
                                     <select id="fieldHat" style="width: 100%; box-sizing: border-box;">
                                         <option value="">None</option>
                                         <option value="Cap">Cap</option>
@@ -345,44 +345,44 @@
                                 </div>
                                 <div class="form-group" id="payCardFormGroup" style="margin-bottom: 0;">
                                     <input type="hidden" id="fieldPayCard">
-                                    <label id="payCardCheckLabel" style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; height: 38px; padding: 0 12px; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white; white-space: nowrap; font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-burnt); box-sizing: border-box;">
-                                        <input type="checkbox" id="fieldPayCardCheck" onchange="syncPayCardCheckbox(this)" style="margin: 0; width: 17px; height: 17px; cursor: pointer; accent-color: var(--dark-blue);">
+                                    <label id="payCardCheckLabel" style="display: inline-flex; align-items: center; gap: 7px; cursor: pointer; height: 33px; padding: 0 10px; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white; white-space: nowrap; font-family: 'Subhead2', sans-serif; font-size: 13px; color: var(--crust-burnt); box-sizing: border-box;">
+                                        <input type="checkbox" id="fieldPayCardCheck" onchange="syncPayCardCheckbox(this)" style="margin: 0; width: 16px; height: 16px; cursor: pointer; accent-color: var(--dark-blue);">
                                         <span>Pay card</span>
                                     </label>
                                 </div>
                             </div>
 
                             <!-- Row 4: Side-by-Side: Internal notes (Left) & Stage 2: Paperwork (Right) -->
-                            <div class="form-row" style="display: grid; grid-template-columns: 1.55fr 1fr; gap: 14px; margin-bottom: 12px; align-items: start;">
+                            <div class="form-row" style="display: grid; grid-template-columns: 1.55fr 1fr; gap: 12px; margin-bottom: 7px; align-items: start;">
                                 <!-- Left Column: Internal notes -->
                                 <div class="form-group" style="margin-bottom: 0; display: flex; flex-direction: column;">
-                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 14px; color: var(--crust-burnt); margin-bottom: 6px; font-weight: bold;">Internal notes</label>
-                                    <textarea id="fieldNotes" placeholder="Write any specific candidate notes here..." rows="4" style="width: 100%; height: 110px; box-sizing: border-box; padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--crust-dark); font-family: 'Condensed', sans-serif; font-size: 15.5px; line-height: 1.4; resize: none; background: #ffffff; color: var(--crust-burnt); outline: none;"></textarea>
+                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-burnt); margin-bottom: 4px; font-weight: bold;">Internal notes</label>
+                                    <textarea id="fieldNotes" placeholder="Write any specific candidate notes here..." rows="4" style="width: 100%; height: 94px; box-sizing: border-box; padding: 8px 10px; border-radius: 8px; border: 1.5px solid var(--crust-dark); font-family: 'Condensed', sans-serif; font-size: 15px; line-height: 1.35; resize: none; background: #ffffff; color: var(--crust-burnt); outline: none;"></textarea>
                                 </div>
 
                                 <!-- Right Column: Onboarding Requirements -->
                                 <div class="form-group" style="margin-bottom: 0; display: flex; flex-direction: column;">
-                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 14px; color: var(--crust-burnt); margin-bottom: 6px; font-weight: bold;">Onboarding Requirements</label>
-                                    <div style="background: #faf2e9; border: 1.5px solid #ebd9c6; border-radius: 10px; height: 110px; padding: 12px 14px; display: flex; flex-direction: column; justify-content: center; gap: 10px; box-sizing: border-box;">
-                                        <label style="display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-family: 'Condensed', sans-serif; font-size: 15px; color: var(--crust-burnt);">
-                                            <input type="checkbox" id="checkBgc" onchange="updateStageBadges()" class="custom-chk">
-                                            <span>Background check done</span>
+                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-burnt); margin-bottom: 4px; font-weight: bold;">Onboarding Requirements</label>
+                                    <div style="background: #faf2e9; border: 1.5px solid #ebd9c6; border-radius: 8px; height: 94px; padding: 8px 12px; display: flex; flex-direction: column; justify-content: center; gap: 7px; box-sizing: border-box;">
+                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-family: 'Condensed', sans-serif; font-size: 14.5px; color: var(--crust-burnt);">
+                                             <input type="checkbox" id="checkBgc" onchange="updateStageBadges()" class="custom-chk">
+                                             <span>Background check done</span>
                                         </label>
-                                        <label style="display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-family: 'Condensed', sans-serif; font-size: 15px; color: var(--crust-burnt);">
-                                            <input type="checkbox" id="checkAllPay" onchange="updateStageBadges()" class="custom-chk">
-                                            <span>AllPay done</span>
+                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-family: 'Condensed', sans-serif; font-size: 14.5px; color: var(--crust-burnt);">
+                                             <input type="checkbox" id="checkAllPay" onchange="updateStageBadges()" class="custom-chk">
+                                             <span>AllPay done</span>
                                         </label>
-                                        <label style="display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-family: 'Condensed', sans-serif; font-size: 15px; color: var(--crust-burnt);">
-                                            <input type="checkbox" id="checkPulseForm" onchange="updateStageBadges()" class="custom-chk">
-                                            <span>Pulse form complete</span>
+                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-family: 'Condensed', sans-serif; font-size: 14.5px; color: var(--crust-burnt);">
+                                             <input type="checkbox" id="checkPulseForm" onchange="updateStageBadges()" class="custom-chk">
+                                             <span>Pulse form complete</span>
                                         </label>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Row 5: Active Flags & Blockers + Candidate Status -->
-                            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;">
-                                <div style="font-family: 'Subhead1', sans-serif; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dark-blue); padding-bottom: 4px; border-bottom: 1.5px solid var(--crust-med);">
+                            <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 4px;">
+                                <div style="font-family: 'Subhead1', sans-serif; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dark-blue); padding-bottom: 3px; border-bottom: 1.5px solid var(--crust-med);">
                                     Active Flags &amp; Blockers
                                 </div>
                                 <div style="display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 8px;">
