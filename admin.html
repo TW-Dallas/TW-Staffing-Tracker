@@ -228,6 +228,25 @@
                         <span id="formLastUpdated"
                             style="font-family: 'Subhead2', sans-serif; font-size: 12.5px; color: var(--brand-blue);"></span>
                         <div id="formHeaderActions" style="display: flex; gap: 8px; align-items: center;">
+                            <!-- Header Email Quick Actions Dropdown -->
+                            <div class="custom-sort-dropdown hidden" id="emailQuickActions" style="position: relative;">
+                                <button type="button" id="btnEmailActionsTrigger" onclick="toggleEmailActionsMenu(event)" style="background: white; border: 1.5px solid var(--crust-dark); color: var(--dark-blue); font-family: 'Subhead1', sans-serif; font-size: 13.5px; padding: 0 13px; height: 38px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: var(--shadow-sm); white-space: nowrap; transition: all 0.15s ease;">
+                                    <span>✉️ Quick Email</span>
+                                    <span id="emailDropdownChevron" style="font-size: 11px; transition: transform 0.2s ease;">▾</span>
+                                </button>
+                                <div id="emailActionsDropdownMenu" class="sort-popover-menu hidden" style="min-width: 235px; right: 0; z-index: 10000;">
+                                    <div class="sort-option" onclick="triggerCandidateEmail('welcome'); toggleEmailActionsMenu();">
+                                        <span>👋 Send Welcome Email</span>
+                                    </div>
+                                    <div class="sort-option" onclick="triggerCandidateEmail('reminder'); toggleEmailActionsMenu();">
+                                        <span>⏰ Send Reminder</span>
+                                    </div>
+                                    <div class="sort-option" onclick="triggerCandidateEmail('orientation'); toggleEmailActionsMenu();">
+                                        <span>📋 Send NTO Registration Link</span>
+                                    </div>
+                                </div>
+                            </div>
+
                             <button type="button" class="btn-add" id="btnAddMain" onclick="prepareAddNew()">
                                 + Add Candidate
                             </button>
@@ -341,9 +360,9 @@
                                     <textarea id="fieldNotes" placeholder="Write any specific candidate notes here..." rows="4" style="width: 100%; height: 110px; box-sizing: border-box; padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--crust-dark); font-family: 'Condensed', sans-serif; font-size: 15.5px; line-height: 1.4; resize: none; background: #ffffff; color: var(--crust-burnt); outline: none;"></textarea>
                                 </div>
 
-                                <!-- Right Column: Stage 2: Paperwork -->
+                                <!-- Right Column: Onboarding Requirements -->
                                 <div class="form-group" style="margin-bottom: 0; display: flex; flex-direction: column;">
-                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 14px; color: var(--crust-burnt); margin-bottom: 6px; font-weight: bold;">Stage 2: Paperwork</label>
+                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 14px; color: var(--crust-burnt); margin-bottom: 6px; font-weight: bold;">Onboarding Requirements</label>
                                     <div style="background: #faf2e9; border: 1.5px solid #ebd9c6; border-radius: 10px; height: 110px; padding: 12px 14px; display: flex; flex-direction: column; justify-content: center; gap: 10px; box-sizing: border-box;">
                                         <label style="display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-family: 'Condensed', sans-serif; font-size: 15px; color: var(--crust-burnt);">
                                             <input type="checkbox" id="checkBgc" onchange="updateStageBadges()" class="custom-chk">
@@ -408,25 +427,6 @@
                             <input type="checkbox" id="checkNto" class="hidden">
                             <input type="checkbox" id="checkHired" class="hidden">
                             <input type="checkbox" id="checkMissedNto" class="hidden">
-
-                            <!-- MANUAL EMAIL QUICK ACTIONS -->
-                            <div id="emailQuickActions" class="email-actions-container hidden">
-                                <div
-                                    style="font-family: 'ExtraBold', sans-serif; font-size: 14px; color: var(--dark-blue); text-transform: uppercase; border-bottom: 1px solid var(--crust-dark); padding-bottom: 4px; display: flex; align-items: center; justify-content: space-between;">
-                                    <span>✉️ Email Quick Actions</span>
-                                    <span
-                                        style="font-size: 11px; font-family: 'Condensed'; font-weight: normal; color: var(--brand-grey);">Will
-                                        auto-update checklists upon sending</span>
-                                </div>
-                                <div class="email-action-row">
-                                    <button type="button" onclick="triggerCandidateEmail('welcome')"
-                                        style="background: var(--brand-blue);">👋 Send Welcome Email</button>
-                                    <button type="button" onclick="triggerCandidateEmail('reminder')"
-                                        style="background: var(--brand-grey);">⏰ Send Reminder</button>
-                                    <button type="button" onclick="triggerCandidateEmail('orientation')"
-                                        style="background: var(--med-blue); color: white;">📅 Send Orientation Link</button>
-                                </div>
-                            </div>
                         </div>
 
                         <!-- 2. INTERVIEWS FORM TEMPLATE -->
@@ -1090,8 +1090,8 @@
 
                     <!-- Fixed Footer Action Buttons -->
                     <div class="form-actions" style="display: flex; gap: 12px; margin-top: 4px; padding-top: 10px; border-top: 1.5px solid var(--crust-med);">
-                        <button type="submit" id="btnSaveMain" style="flex: 1; background: var(--dark-blue); color: #ffffff; border: none; border-radius: 8px; font-family: 'Subhead1', sans-serif; font-size: 16.5px; padding: 11px 18px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(0, 92, 145, 0.25);">Save Details</button>
-                        <button type="button" id="btnCancel" onclick="clearForm()" style="flex: 1; background: #ffffff; color: var(--dark-blue); border: 2px solid var(--dark-blue); border-radius: 8px; font-family: 'Subhead1', sans-serif; font-size: 16.5px; padding: 11px 18px; cursor: pointer; transition: all 0.15s ease;">Clear / Deselect</button>
+                        <button type="submit" id="btnSaveMain" style="flex: 1; background: var(--brand-blue); color: #ffffff; border: none; border-radius: 8px; font-family: 'Subhead1', sans-serif; font-size: 16.5px; padding: 11px 18px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(0, 144, 226, 0.25);">Save Details</button>
+                        <button type="button" id="btnCancel" onclick="clearForm()" style="flex: 1; background: #ffffff; color: var(--brand-blue); border: 2px solid var(--brand-blue); border-radius: 8px; font-family: 'Subhead1', sans-serif; font-size: 16.5px; padding: 11px 18px; cursor: pointer; transition: all 0.15s ease;">Clear / Deselect</button>
                         <button type="button" id="btnDelete" onclick="deleteCurrentCandidate()" class="hidden"
                             style="background: var(--brand-red); color: white; padding: 0 16px; border-radius: 8px; border: none; font-family: 'Subhead1', sans-serif; font-size: 15px;">🗑️ Delete</button>
                     </div>
@@ -2301,6 +2301,21 @@
             renderList();
         }
 
+        function toggleEmailActionsMenu(e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById('emailActionsDropdownMenu');
+            const chevron = document.getElementById('emailDropdownChevron');
+            if (!menu) return;
+            const isHidden = menu.classList.contains('hidden');
+            if (isHidden) {
+                menu.classList.remove('hidden');
+                if (chevron) chevron.style.transform = 'rotate(180deg)';
+            } else {
+                menu.classList.add('hidden');
+                if (chevron) chevron.style.transform = '';
+            }
+        }
+
         document.addEventListener('click', (e) => {
             const dropdown = document.getElementById('customSortDropdown');
             const menu = document.getElementById('sortDropdownMenu');
@@ -2309,6 +2324,16 @@
                 if (dropdown && !dropdown.contains(e.target)) {
                     menu.classList.add('hidden');
                     if (chevron) chevron.style.transform = '';
+                }
+            }
+
+            const emailDropdown = document.getElementById('emailQuickActions');
+            const emailMenu = document.getElementById('emailActionsDropdownMenu');
+            const emailChevron = document.getElementById('emailDropdownChevron');
+            if (emailMenu && !emailMenu.classList.contains('hidden')) {
+                if (emailDropdown && !emailDropdown.contains(e.target)) {
+                    emailMenu.classList.add('hidden');
+                    if (emailChevron) emailChevron.style.transform = '';
                 }
             }
         });
