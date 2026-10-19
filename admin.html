@@ -4505,7 +4505,7 @@
                         </span>
                     </div>
                     <div class="card-sub">
-                        <span>Store #${item.store} (${formatPositionWithEmoji(item.position)})</span>
+                        <span>Store #${item.store} (${item.position})</span>
                         <span style="font-weight: bold; color: ${isComplete ? 'var(--success-green)' : 'var(--dark-red)'};">
                             ${item.ntoDate ? 'NTO: ' + item.ntoDate : 'Manual Entry'}
                         </span>
@@ -4593,7 +4593,7 @@
                         <span class="badge-review" style="background:${isTerm ? '#ffebee' : '#e8f5e9'}; color:${isTerm ? 'var(--brand-red)' : 'var(--success-green)'};">${item.period}</span>
                     </div>
                     <div class="card-sub">
-                        <span>Store #${item.store} (${formatPositionWithEmoji(item.position)})</span>
+                        <span>Store #${item.store} (${item.position})</span>
                         <span style="font-weight: bold; color: ${isTerm ? 'var(--brand-red)' : 'var(--success-green)'};">${isTerm ? 'Terminated' : 'Active Hire'}</span>
                     </div>
                     ${item.lastUpdated ? `<div class="card-sub" style="font-size: 11.5px; color: var(--text-light); margin-top: 2px;"><span>🕒 Updated: ${formatDisplayDateTime(item.lastUpdated)}</span></div>` : ''}
@@ -4663,7 +4663,7 @@
                     card.innerHTML = `
                     <div class="card-name">${item.name}</div>
                     <div class="card-sub" style="display: flex; justify-content: space-between; align-items: center; gap: 6px;">
-                        <span>Store #${item.store} (${formatPositionWithEmoji(item.position)})</span>
+                        <span>Store #${item.store} (${item.position})</span>
                         <span class="int-chip" style="background: ${chipBg}; color: ${chipColor};">${statusDisplay}</span>
                     </div>
                     ${dateTimeDisplay ? `<div class="card-sub" style="margin-top: 4px; color: var(--dark-blue); font-weight: 600; font-size: 13.5px;"><span>${dateTimeDisplay}</span></div>` : ''}
@@ -4792,7 +4792,7 @@
                     card.innerHTML = `
                     <div class="card-name">${item.name}</div>
                     <div class="card-sub">
-                        <span>Store #${item.store} (${formatPositionWithEmoji(item.position || 'CSR')})</span>
+                        <span>Store #${item.store} (${item.position || 'CSR'})</span>
                         <span style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: ${ntoStatusColor};">${ntoLabel}</span>
                     </div>
                     ${item.ntoDate ? `<div class="card-sub" style="margin-top: 3px; color: var(--dark-blue); font-weight: 600; font-size: 13px;"><span>📅 ${dayStr ? dayStr + ' ' : ''}${item.ntoDate}</span></div>` : ''}
@@ -4882,7 +4882,7 @@
                         ${flags ? `<div style="display: flex; gap: 4px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end;">${flags}</div>` : ''}
                     </div>
                     <div class="card-sub">
-                        <span>Store #${item.store} (${formatPositionWithEmoji(item.position)})</span>
+                        <span>Store #${item.store} (${item.position})</span>
                         <span style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: ${statusStyleColor};">${activeStatusText}</span>
                     </div>
                     ${item.lastUpdated ? `<div class="card-sub" style="font-size: 11.5px; color: var(--text-light); margin-top: 2px;"><span>🕒 Updated: ${formatDisplayDateTime(item.lastUpdated)}</span></div>` : ''}
