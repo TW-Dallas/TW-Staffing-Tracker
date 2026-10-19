@@ -209,7 +209,7 @@
             padding: 4px 6px 8px 4px; 
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 7px;
         }
 
         /* Middle Form Panel */
@@ -556,7 +556,7 @@
            ========================================================================== */
         .candidate-card { 
             background: white; 
-            padding: 12px 14px; 
+            padding: 10px 14px; 
             border-radius: var(--border-radius); 
             box-shadow: 0 3px 5px rgba(0,0,0,0.02); 
             border-left: 6px solid var(--brand-blue); 
@@ -565,19 +565,19 @@
             position: relative; 
         }
         .candidate-card:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.04); }
-        .candidate-card.selected { background: var(--crust-light); box-shadow: 0 4px 12px rgba(0, 144, 226, 0.15); border: 1.5px solid var(--brand-blue); }
+        .candidate-card.selected { background: var(--crust-light); box-shadow: 0 4px 12px rgba(0, 144, 226, 0.15); border: 1.5px solid var(--brand-blue); border-left-width: 6px; }
 
-        /* Status Border & Color Variants */
-        .candidate-card.status-blue { border-left-color: var(--brand-blue); }
-        .candidate-card.status-subrec { border-left-color: var(--brand-blue); border-left-width: 8px; background-color: #f4f9fd; }
-        .candidate-card.status-processing { border-left-color: var(--med-blue); }
-        .candidate-card.status-nto { border-left-color: var(--dark-blue); }
-        .candidate-card.status-gminterview { border-left-color: var(--dark-blue); border-left-width: 7px; background-color: #f2f7fb; }
-        .candidate-card.status-tbd { border-left-color: var(--crust-dark); border-left-width: 7px; background-color: #faf6f0; }
-        .candidate-card.status-green { border-left-color: var(--success-green); border-left-width: 8px; }
-        .candidate-card.status-red { border-left-color: var(--brand-red); border: 1.5px solid var(--brand-red); }
-        .candidate-card.status-reviewing { border-left-color: var(--crust-dark); box-shadow: 0 0 8px rgba(192, 165, 136, 0.3); }
-        .candidate-card.status-gray { border-left-color: var(--brand-grey); opacity: 0.6; background-color: #fbfbfb; }
+        /* Status Border & Color Variants (Uniform 6px Accent Stripe) */
+        .candidate-card.status-blue { border-left-color: var(--brand-blue); border-left-width: 6px; }
+        .candidate-card.status-subrec { border-left-color: var(--brand-blue); border-left-width: 6px; background-color: #f4f9fd; }
+        .candidate-card.status-processing { border-left-color: var(--med-blue); border-left-width: 6px; }
+        .candidate-card.status-nto { border-left-color: var(--dark-blue); border-left-width: 6px; }
+        .candidate-card.status-gminterview { border-left-color: var(--dark-blue); border-left-width: 6px; background-color: #f2f7fb; }
+        .candidate-card.status-tbd { border-left-color: var(--crust-dark); border-left-width: 6px; background-color: #faf6f0; }
+        .candidate-card.status-green { border-left-color: var(--success-green); border-left-width: 6px; }
+        .candidate-card.status-red { border-left-color: var(--brand-red); border: 1.5px solid var(--brand-red); border-left-width: 6px; }
+        .candidate-card.status-reviewing { border-left-color: var(--crust-dark); border-left-width: 6px; box-shadow: 0 0 8px rgba(192, 165, 136, 0.3); }
+        .candidate-card.status-gray { border-left-color: var(--brand-grey); border-left-width: 6px; opacity: 0.6; background-color: #fbfbfb; }
 
         .card-name { font-family: 'Subhead2', sans-serif; font-size: 19px; }
         .card-sub { font-family: 'Subhead2', sans-serif; font-size: 15px; color: var(--text-light); margin-top: 6px; display: flex; justify-content: space-between; align-items: center; }
@@ -1309,13 +1309,9 @@
 /* ==========================================================================
    14. CONTACTS DIRECTORY: DO SIDEBAR & STORE CARDS
    ========================================================================== */
-#candidateList:has(.do-card) {
-    gap: 5px;
-}
-
 .do-card {
     background: white;
-    padding: 8px 14px;
+    padding: 10px 14px;
     border-radius: var(--border-radius);
     box-shadow: 0 3px 5px rgba(0,0,0,0.02);
     border-left: 6px solid var(--brand-blue);

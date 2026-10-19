@@ -12,7 +12,7 @@
     <title>Onboarder Portal</title>
     <link class="favicon" rel="icon" type="image/png" href="images/staffing_icon.png">
     <link rel="apple-touch-icon" href="images/staffing_icon.png">
-    <link rel="stylesheet" href="styles.css?v=20261019_0423">
+    <link rel="stylesheet" href="styles.css?v=20261019_0432">
 </head>
 
 <body>
@@ -4339,7 +4339,6 @@
         function renderList() {
             const listContainer = document.getElementById('candidateList');
             listContainer.innerHTML = '';
-            listContainer.style.gap = '';
 
             const sortBy = document.getElementById('sortControl').value;
             const searchQuery = document.getElementById('searchControl').value.toLowerCase().trim();
@@ -9155,7 +9154,6 @@
             const listContainer = document.getElementById('candidateList');
             if (!listContainer) return;
             listContainer.innerHTML = '';
-            listContainer.style.gap = '5px';
 
             const listCounterLabel = document.getElementById('listCounterLabel');
             if (listCounterLabel) {
