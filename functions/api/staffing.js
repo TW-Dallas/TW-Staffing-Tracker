@@ -363,6 +363,19 @@ export async function onRequestGet(context) {
             });
         }
 
+        // Log Staffing Command access in credential_usage_logs
+        try {
+            await db.prepare(`
+                INSERT INTO credential_usage_logs (trainer_id, trainer_name, store_num, portal, action, metadata, created_at)
+                VALUES (?, ?, ?, 'Staffing Tracker', 'Staffing Command Unlock', ?, CURRENT_TIMESTAMP)
+            `).bind(
+                trainer.trainer_id,
+                trainer.trainer_name,
+                trainer.store_num,
+                JSON.stringify({ role: trainer.role, market: trainer.market })
+            ).run();
+        } catch (_) {}
+
         return new Response(JSON.stringify({
             success: true,
             user: {
@@ -413,10 +426,80 @@ export async function onRequestGet(context) {
             });
         }
 
-        if (decision === "approve") {
-            await db.prepare("UPDATE trainer_credentials SET is_gm = 1, role = 'General Manager', updated_at = CURRENT_TIMESTAMP WHERE LOWER(trainer_id) = LOWER(?)").bind(trainer.trainer_id).run();
+        const reqScope = (url.searchParams.get("scope") || "").toLowerCase().trim();
+        const isMitScope = reqScope === "mit";
 
-            // Dispatch confirmation notice to the trainer and their store
+        if (isMitScope) {
+            if (decision === "approve") {
+                await db.prepare("UPDATE trainer_credentials SET is_mit_trainer = 1, notes = TRIM(REPLACE(REPLACE(REPLACE(REPLACE(COALESCE(notes, ''), ' - Pending Approval', ''), 'Pending Approval', ''), ' - Pending GM Access Approval', ''), '[Pending GM Access Approval]', '')), updated_at = CURRENT_TIMESTAMP WHERE LOWER(trainer_id) = LOWER(?)").bind(trainer.trainer_id).run();
+
+                let candidateEmail = String(trainer.email || (trainer.trainer_id && trainer.trainer_id.includes('@') ? trainer.trainer_id : '')).trim();
+                if (/^store\d+@team-wow\.com$/i.test(candidateEmail)) {
+                    candidateEmail = candidateEmail.replace(/^store/i, '').toLowerCase();
+                }
+
+                await callAppsScriptProxy({
+                    action: "sendGmApprovalNoticeToTrainer",
+                    trainerName: trainer.trainer_name,
+                    pulseId: trainer.trainer_id,
+                    storeNum: trainer.store_num,
+                    market: trainer.market,
+                    pin: trainer.trainer_pin,
+                    email: candidateEmail,
+                    role: trainer.role || "MIT Trainer",
+                    scope: "mit",
+                    isMitApproval: true,
+                    isDo: !!trainer.is_do,
+                    isAboveStore: !!trainer.is_do
+                }, context);
+
+                return new Response(renderActionHtml(
+                    "MIT Trainer Access Approved",
+                    `<div style="text-align: left; background: #faf2e9; padding: 16px; border-radius: 8px; border-left: 4px solid #005c91; margin-bottom: 18px;">
+                        <p style="margin: 0 0 6px 0;"><strong>Name:</strong> ${trainer.trainer_name}</p>
+                        <p style="margin: 0 0 6px 0;"><strong>Store / Scope:</strong> ${trainer.store_num === 'Above-Store' ? 'Above-Store' : 'Store #' + trainer.store_num} (${trainer.market})</p>
+                        <p style="margin: 0 0 6px 0;"><strong>Pulse ID:</strong> <code>${trainer.trainer_id}</code></p>
+                        <p style="margin: 0;"><strong>Status:</strong> <span style="color: #005c91; font-weight: bold;">Authorized MIT Trainer</span></p>
+                    </div>
+                    MIT Trainer authorization has been activated in Cloudflare D1.<br><br>Their 4-digit PIN (<code>${trainer.trainer_pin}</code>) is now authorized to unlock MIT session rosters, attendance verification, and in-class QR certification codes.<br><br>A confirmation notice has been emailed to <strong>${candidateEmail || 'their registered address'}</strong>.`,
+                    "#005c91"
+                ), {
+                    status: 200,
+                    headers: { "Content-Type": "text/html;charset=utf-8" }
+                });
+            } else if (decision === "deny") {
+                await db.prepare("UPDATE trainer_credentials SET is_mit_trainer = 0, notes = TRIM(REPLACE(REPLACE(REPLACE(COALESCE(notes, ''), ' - Pending Approval', ''), 'Pending Approval', 'Access Declined'), ' - Pending GM Access Approval', '')), updated_at = CURRENT_TIMESTAMP WHERE LOWER(trainer_id) = LOWER(?)").bind(trainer.trainer_id).run();
+
+                return new Response(renderActionHtml(
+                    "MIT Trainer Access Denied",
+                    `MIT Trainer Portal authorization request for <strong>${trainer.trainer_name}</strong> has been denied.<br><br>Their PIN remains restricted from the MIT Trainer Portal.`,
+                    "#910000"
+                ), {
+                    status: 200,
+                    headers: { "Content-Type": "text/html;charset=utf-8" }
+                });
+            }
+        }
+
+        if (decision === "approve") {
+            const isDoOrAboveStore = !!trainer.is_do || 
+                                     trainer.role === 'Supervisor' || 
+                                     trainer.role === 'Director of Operations' || 
+                                     trainer.role === 'Director of Ops' || 
+                                     trainer.role === 'Training Director' || 
+                                     trainer.role === 'Market Leader' || 
+                                     trainer.role === 'Executive' || 
+                                     trainer.store_num === 'Above-Store' || 
+                                     trainer.store_num === 'DO' || 
+                                     trainer.store_num === 'Exec';
+
+            if (isDoOrAboveStore) {
+                await db.prepare("UPDATE trainer_credentials SET is_do = 1, is_gm = 1, is_active = 1, role = CASE WHEN role = 'General Manager' THEN 'Director of Ops' ELSE COALESCE(role, 'Director of Ops') END, notes = TRIM(REPLACE(REPLACE(REPLACE(REPLACE(COALESCE(notes, ''), ' - Pending GM Access Approval', ''), ' - Pending Approval', ''), 'Pending Approval', ''), '[Pending GM Access Approval]', '')), updated_at = CURRENT_TIMESTAMP WHERE LOWER(trainer_id) = LOWER(?)").bind(trainer.trainer_id).run();
+            } else {
+                await db.prepare("UPDATE trainer_credentials SET is_gm = 1, is_active = 1, role = 'General Manager', notes = TRIM(REPLACE(REPLACE(REPLACE(REPLACE(COALESCE(notes, ''), ' - Pending GM Access Approval', ''), ' - Pending Approval', ''), 'Pending Approval', ''), '[Pending GM Access Approval]', '')), updated_at = CURRENT_TIMESTAMP WHERE LOWER(trainer_id) = LOWER(?)").bind(trainer.trainer_id).run();
+            }
+
+            // Dispatch confirmation notice to the trainer (Strictly corporate email for above-store!)
             let candidateEmail = String(trainer.email || (trainer.trainer_id && trainer.trainer_id.includes('@') ? trainer.trainer_id : '')).trim();
             if (/^store\d+@team-wow\.com$/i.test(candidateEmail)) {
                 candidateEmail = candidateEmail.replace(/^store/i, '').toLowerCase();
@@ -426,28 +509,34 @@ export async function onRequestGet(context) {
                 action: "sendGmApprovalNoticeToTrainer",
                 trainerName: trainer.trainer_name,
                 pulseId: trainer.trainer_id,
-                storeNum: trainer.store_num,
+                storeNum: isDoOrAboveStore ? "Above-Store" : trainer.store_num,
                 market: trainer.market,
                 pin: trainer.trainer_pin,
-                email: candidateEmail
+                email: candidateEmail,
+                role: isDoOrAboveStore ? (trainer.role === 'General Manager' ? 'Director of Ops' : (trainer.role || 'Director of Ops')) : 'General Manager',
+                isDo: isDoOrAboveStore,
+                isAboveStore: isDoOrAboveStore
             }, context);
 
+            const displayScope = isDoOrAboveStore ? `Above-Store Leadership (${trainer.market})` : `#${trainer.store_num} (${trainer.market})`;
+            const displayStatus = isDoOrAboveStore ? `Authorized Director of Operations` : `Authorized GM`;
+
             return new Response(renderActionHtml(
-                "GM Access Approved",
+                isDoOrAboveStore ? "DO Access Approved" : "GM Access Approved",
                 `<div style="text-align: left; background: #faf2e9; padding: 16px; border-radius: 8px; border-left: 4px solid #005c91; margin-bottom: 18px;">
                     <p style="margin: 0 0 6px 0;"><strong>Name:</strong> ${trainer.trainer_name}</p>
-                    <p style="margin: 0 0 6px 0;"><strong>Store:</strong> #${trainer.store_num} (${trainer.market})</p>
+                    <p style="margin: 0 0 6px 0;"><strong>Scope:</strong> ${displayScope}</p>
                     <p style="margin: 0 0 6px 0;"><strong>Pulse ID:</strong> <code>${trainer.trainer_id}</code></p>
-                    <p style="margin: 0;"><strong>Status:</strong> <span style="color: #005c91; font-weight: bold;">Authorized GM</span></p>
+                    <p style="margin: 0;"><strong>Status:</strong> <span style="color: #005c91; font-weight: bold;">${displayStatus}</span></p>
                 </div>
-                General Manager authorization has been granted in Cloudflare D1.<br><br>A confirmation notice has been sent to their store. Their 4-digit PIN (<code>${trainer.trainer_pin}</code>) will now unlock the <strong>GM Staffing Command Tracker</strong> immediately.`,
+                ${isDoOrAboveStore ? 'Director of Operations authorization has been granted in Cloudflare D1.<br><br>Confirmation has been emailed strictly to their corporate address. Store accounts were not messaged.' : 'General Manager authorization has been granted in Cloudflare D1.<br><br>A confirmation notice has been sent to their store.'}<br><br>Their 4-digit PIN (<code>${trainer.trainer_pin}</code>) will now unlock the <strong>Staffing Command Tracker</strong> immediately.`,
                 "#005c91"
             ), {
                 status: 200,
                 headers: { "Content-Type": "text/html;charset=utf-8" }
             });
         } else if (decision === "deny") {
-            await db.prepare("UPDATE trainer_credentials SET is_gm = 0, updated_at = CURRENT_TIMESTAMP WHERE LOWER(trainer_id) = LOWER(?)").bind(trainer.trainer_id).run();
+            await db.prepare("UPDATE trainer_credentials SET is_gm = 0, is_do = 0, notes = TRIM(REPLACE(REPLACE(REPLACE(COALESCE(notes, ''), ' - Pending GM Access Approval', ''), ' - Pending Approval', ''), 'Pending Approval', 'Access Declined')), updated_at = CURRENT_TIMESTAMP WHERE LOWER(trainer_id) = LOWER(?)").bind(trainer.trainer_id).run();
 
             return new Response(renderActionHtml(
                 "GM Access Denied",
@@ -463,6 +552,42 @@ export async function onRequestGet(context) {
                 headers: { "Content-Type": "text/html;charset=utf-8" }
             });
         }
+    }
+
+    // On-demand Dispatch of Credentials Email from Admin Hub (GET)
+    if (reqAction === "sendCredentialsEmail" || reqAction === "resendCredentials") {
+        const trainerId = String(url.searchParams.get("trainerId") || "").trim();
+        if (!trainerId) {
+            return new Response(JSON.stringify({ success: false, error: "Missing trainerId" }), { status: 400, headers: corsHeaders() });
+        }
+        const trainer = await db.prepare("SELECT * FROM trainer_credentials WHERE LOWER(trainer_id) = LOWER(?) LIMIT 1").bind(trainerId).first();
+        if (!trainer) {
+            return new Response(JSON.stringify({ success: false, error: "Trainer profile not found" }), { status: 404, headers: corsHeaders() });
+        }
+        if (!trainer.email) {
+            return new Response(JSON.stringify({ success: false, error: "Trainer does not have an email address on file. Please edit profile and add an email." }), { status: 400, headers: corsHeaders() });
+        }
+        const isDo = !!trainer.is_do || !!trainer.is_exec || trainer.role === 'Supervisor' || trainer.role === 'Director of Operations' || trainer.role === 'Director of Ops' || trainer.role === 'Training Director' || trainer.role === 'Market Leader' || trainer.role === 'Executive' || trainer.store_num === 'Above-Store' || trainer.store_num === 'Exec' || trainer.store_num === 'DO';
+
+        await callAppsScriptProxy({
+            action: "sendGmApprovalNoticeToTrainer",
+            trainerName: trainer.trainer_name,
+            pulseId: trainer.trainer_id,
+            storeNum: trainer.store_num,
+            market: trainer.market,
+            pin: trainer.trainer_pin,
+            email: trainer.email,
+            role: trainer.role || (isDo ? 'Director of Ops' : 'General Manager'),
+            isDo: isDo,
+            isAboveStore: isDo,
+            isProvisioned: true,
+            portal: "Admin Hub"
+        }, context);
+
+        return new Response(JSON.stringify({
+            success: true,
+            message: `Credentials email dispatched directly to ${trainer.trainer_name} (${trainer.email}).`
+        }), { status: 200, headers: corsHeaders() });
     }
 
     // 1-Click Request GM Access from Barrier (When existing trainer enters PIN)
@@ -498,16 +623,19 @@ export async function onRequestGet(context) {
         const approveUrl = `${baseUrl}?action=decideGmAccess&id=${encodeURIComponent(trainer.trainer_id)}&pin=${encodeURIComponent(trainer.trainer_pin)}&token=${token}&decision=approve`;
         const denyUrl = `${baseUrl}?action=decideGmAccess&id=${encodeURIComponent(trainer.trainer_id)}&pin=${encodeURIComponent(trainer.trainer_pin)}&token=${token}&decision=deny`;
 
+        const isTrainerAboveStore = !!(trainer.is_do || trainer.role === 'Supervisor' || trainer.role === 'Director of Operations' || trainer.role === 'Executive' || trainer.store_num === 'Above-Store' || trainer.store_num === 'DO');
         await callAppsScriptProxy({
             action: "sendTrainerPinRequestEmail",
             trainerName: trainer.trainer_name,
             pulseId: trainer.trainer_id,
-            storeNum: trainer.store_num,
+            storeNum: isTrainerAboveStore ? "Above-Store" : trainer.store_num,
             market: trainer.market,
             pin: trainer.trainer_pin,
             role: trainer.role,
+            email: trainer.email || (trainer.trainer_id && trainer.trainer_id.includes('@') ? trainer.trainer_id : ''),
             isGm: false,
-            isDo: false,
+            isDo: isTrainerAboveStore,
+            isAboveStore: isTrainerAboveStore,
             isExistingTrainer: true,
             approveUrl: approveUrl,
             denyUrl: denyUrl
@@ -516,6 +644,88 @@ export async function onRequestGet(context) {
         return new Response(JSON.stringify({
             success: true,
             message: `GM access request submitted for ${trainer.trainer_name}. Mike Jacobs has been emailed a 1-click authorization link.`
+        }), { status: 200, headers: corsHeaders() });
+    }
+
+    // -------------------------------------------------------------
+    // CREDENTIAL GOVERNANCE & AUDIT ENDPOINTS
+    // -------------------------------------------------------------
+    if (reqAction === "getCredentialsList") {
+        const creds = await db.prepare(`
+            SELECT 
+                t.trainer_id,
+                t.trainer_name,
+                t.trainer_pin,
+                t.store_num,
+                t.market,
+                t.email,
+                t.phone,
+                t.role,
+                t.is_wow_way_trainer,
+                t.is_mit_trainer,
+                t.is_gm,
+                t.is_do,
+                t.is_admin,
+                t.is_exec,
+                t.is_active,
+                t.notes,
+                t.created_at,
+                t.updated_at,
+                s.do_name,
+                s.do_email
+            FROM trainer_credentials t
+            LEFT JOIN stores s ON t.store_num = s.store_number
+            ORDER BY t.market ASC, CAST(t.store_num AS INTEGER) ASC, t.trainer_name ASC
+        `).all();
+
+        const pendingResets = await db.prepare(`
+            SELECT * FROM credential_reset_requests WHERE status = 'pending' ORDER BY created_at DESC
+        `).all();
+
+        const credList = creds.results || [];
+        const resetList = pendingResets.results || [];
+        const pendingApprovals = credList.filter(c => {
+            const notes = (c.notes || '').toLowerCase();
+            const isExplicitlyRevoked = notes.includes('revoked') || notes.includes('terminated') || notes.includes('duplicate');
+            if (isExplicitlyRevoked) return false;
+            if (notes.includes('approved') && !notes.includes('pending')) return false;
+            const isUnapprovedAboveStore = (notes.includes('above-store') || c.role === 'Director of Ops' || c.store_num === 'Above-Store') && (!c.is_do && !c.is_exec && !c.is_admin);
+            return (c.is_active === 0 || notes.includes('pending') || notes.includes('awaiting') || isUnapprovedAboveStore);
+        });
+
+        return new Response(JSON.stringify({
+            success: true,
+            credentials: credList,
+            pendingResets: resetList,
+            pendingApprovalCount: pendingApprovals.length,
+            pendingResetCount: resetList.length,
+            totalPending: pendingApprovals.length + resetList.length
+        }), { status: 200, headers: corsHeaders() });
+    }
+
+    if (reqAction === "getTrainerUsageLogs") {
+        const trainerId = (url.searchParams.get("trainerId") || "").trim();
+        let logsQuery = "SELECT * FROM credential_usage_logs";
+        const binds = [];
+        if (trainerId) {
+            logsQuery += " WHERE LOWER(trainer_id) = LOWER(?) OR LOWER(trainer_name) = LOWER(?)";
+            binds.push(trainerId, trainerId);
+        }
+        logsQuery += " ORDER BY id DESC LIMIT 50";
+        const logs = await db.prepare(logsQuery).bind(...binds).all();
+        return new Response(JSON.stringify({
+            success: true,
+            logs: logs.results || []
+        }), { status: 200, headers: corsHeaders() });
+    }
+
+    if (reqAction === "getPendingResets") {
+        const pendingResets = await db.prepare(`
+            SELECT * FROM credential_reset_requests WHERE status = 'pending' ORDER BY created_at DESC
+        `).all();
+        return new Response(JSON.stringify({
+            success: true,
+            requests: pendingResets.results || []
         }), { status: 200, headers: corsHeaders() });
     }
 
@@ -1374,20 +1584,56 @@ export async function onRequestPost(context) {
 
         // Register or Claim Trainer / Manager PIN
         if (action === "registerTrainerPin") {
-            const trainerName = String(payload.trainerName || "").trim();
+            const trainerName = String(payload.trainerName || payload.name || "").trim();
             const pulseId = String(payload.pulseId || "").trim();
-            const storeNum = String(payload.storeNum || "").replace(/\D/g, '').trim();
+            const rawStoreNum = String(payload.storeNum || payload.store || "").trim();
             const rawPin = String(payload.pin || "").replace(/\D/g, '').trim();
-            const reqMarket = (payload.market || "Dallas").toLowerCase() === "denver" ? "Denver" : "Dallas";
+            const rawMarket = String(payload.market || "").trim().toLowerCase();
+            let reqMarket = "Dallas";
+            if (rawMarket === "denver") reqMarket = "Denver";
+            else if (rawMarket === "el paso" || rawMarket === "elpaso") reqMarket = "El Paso";
+            else if (rawMarket === "la" || rawMarket === "los angeles") reqMarket = "LA";
+            else if (rawMarket === "all markets" || rawMarket === "all" || rawMarket === "corporate") reqMarket = "All Markets";
+            else if (rawMarket === "dallas") reqMarket = "Dallas";
+            else if (payload.market) reqMarket = String(payload.market).trim();
 
-            if (!trainerName || !pulseId || !storeNum || rawPin.length !== 4) {
+            const isAboveStore = !!payload.isAboveStore || payload.accountType === 'above' || rawStoreNum.toLowerCase() === 'above-store' || rawStoreNum.toLowerCase() === 'do';
+            const email = String(payload.email || (pulseId.includes('@') ? pulseId : '')).trim();
+            const requestedRole = String(payload.role || (isAboveStore ? 'Director of Ops' : 'Trainer')).trim();
+
+            if (!payload.market || !String(payload.market).trim()) {
                 return new Response(JSON.stringify({
                     success: false,
-                    error: "All fields are required. Please enter your name, Pulse ID, 4-digit store number, and a 4-digit PIN."
+                    error: "Please select a Market."
                 }), { status: 400, headers: corsHeaders() });
             }
 
+            if (isAboveStore) {
+                if (!payload.role || !String(payload.role).trim()) {
+                    return new Response(JSON.stringify({
+                        success: false,
+                        error: "Please select a Leadership Role."
+                    }), { status: 400, headers: corsHeaders() });
+                }
+                if (!trainerName || (!pulseId && !email) || !email || rawPin.length !== 4) {
+                    return new Response(JSON.stringify({
+                        success: false,
+                        error: "All fields are required. Please enter your Full Name, Company Email, Pulse ID / User ID, and a 4-digit PIN."
+                    }), { status: 400, headers: corsHeaders() });
+                }
+            } else {
+                const cleanStoreNum = rawStoreNum.replace(/\D/g, '').trim();
+                if (!trainerName || !pulseId || !cleanStoreNum || !email || rawPin.length !== 4) {
+                    return new Response(JSON.stringify({
+                        success: false,
+                        error: "All fields are required. Please enter your name, Pulse ID, 4-digit store number, email address, and a 4-digit PIN."
+                    }), { status: 400, headers: corsHeaders() });
+                }
+            }
+
             const cleanPin = rawPin.padStart(4, '0');
+            const cleanStoreNum = isAboveStore ? 'Above-Store' : rawStoreNum.replace(/\D/g, '').trim();
+            const effectiveId = pulseId || email;
 
             // 1. FORBIDDEN PIN BLACKLIST
             const FORBIDDEN_PINS = new Set([
@@ -1403,30 +1649,85 @@ export async function onRequestPost(context) {
 
             // 2. CHECK PIN COLLISION IN D1
             const pinCollision = await db.prepare("SELECT trainer_id, trainer_name FROM trainer_credentials WHERE trainer_pin = ? AND is_active = 1 LIMIT 1").bind(cleanPin).first();
-            if (pinCollision && pinCollision.trainer_id.toLowerCase() !== pulseId.toLowerCase()) {
+            if (pinCollision && pinCollision.trainer_id.toLowerCase() !== effectiveId.toLowerCase() && (!email || pinCollision.trainer_id.toLowerCase() !== email.toLowerCase())) {
                 return new Response(JSON.stringify({
                     success: false,
                     error: "This 4-digit PIN is already claimed by another team member. Please choose a unique 4-digit PIN."
                 }), { status: 400, headers: corsHeaders() });
             }
 
-            // 3. CHECK EXISTING TRAINER RECORD
-            const existingTrainer = await db.prepare("SELECT * FROM trainer_credentials WHERE LOWER(trainer_id) = LOWER(?) LIMIT 1").bind(pulseId).first();
-            if (existingTrainer) {
-                const storeRowMatch = await db.prepare("SELECT store_number, market, manager_name, do_name FROM stores WHERE store_number = ? LIMIT 1").bind(storeNum).first();
-                const isMatchGm = storeRowMatch && storeRowMatch.manager_name && (storeRowMatch.manager_name.toLowerCase().includes(trainerName.toLowerCase()) || trainerName.toLowerCase().includes(storeRowMatch.manager_name.toLowerCase()));
+            const requestedPortal = String(payload.portal || payload.source || "").trim();
+            const isMitPortal = requestedPortal.toLowerCase().includes("mit");
+            const isAdminHub = requestedPortal.toLowerCase().includes("admin");
 
-                if (existingTrainer.is_admin || existingTrainer.is_exec) {
+            // 3. CHECK EXISTING TRAINER RECORD
+            const existingTrainer = await db.prepare("SELECT * FROM trainer_credentials WHERE LOWER(trainer_id) = LOWER(?) OR (email != '' AND LOWER(email) = LOWER(?)) LIMIT 1").bind(effectiveId, email).first();
+            if (existingTrainer) {
+                const isExistingAboveStore = isAboveStore || !!existingTrainer.is_do || existingTrainer.role === 'Supervisor' || existingTrainer.role === 'Director of Operations' || existingTrainer.role === 'Director of Ops' || existingTrainer.role === 'Training Director' || existingTrainer.role === 'Market Leader' || existingTrainer.role === 'Executive' || existingTrainer.store_num === 'Above-Store' || existingTrainer.store_num === 'Exec' || existingTrainer.store_num === 'DO';
+
+                // ADMIN HUB DIRECT PROVISIONING: Mike is explicitly configuring or updating them!
+                if (isAdminHub) {
+                    const targetRole = requestedRole || existingTrainer.role || (isExistingAboveStore ? 'Director of Ops' : 'General Manager');
+                    const targetIsDo = isExistingAboveStore ? 1 : (existingTrainer.is_do ? 1 : 0);
+                    const targetIsGm = (isExistingAboveStore || targetRole === 'General Manager') ? 1 : (existingTrainer.is_gm ? 1 : 0);
+                    const targetIsExec = targetRole === 'Executive' ? 1 : (existingTrainer.is_exec ? 1 : 0);
+                    const targetIsAdmin = targetRole === 'Executive' ? 1 : (existingTrainer.is_admin ? 1 : 0);
+                    const targetEmail = email || existingTrainer.email;
+
+                    const finalPulseId = effectiveId || existingTrainer.trainer_id;
+
+                    await db.prepare(`
+                        UPDATE trainer_credentials 
+                        SET trainer_id = ?, trainer_pin = ?, store_num = ?, market = ?, email = COALESCE(NULLIF(?, ''), email), role = ?, is_wow_way_trainer = 1, is_mit_trainer = 1, is_gm = ?, is_do = ?, is_exec = ?, is_admin = ?, is_active = 1, notes = 'Provisioned via Admin Hub', updated_at = CURRENT_TIMESTAMP
+                        WHERE LOWER(trainer_id) = LOWER(?)
+                    `).bind(finalPulseId, cleanPin, isExistingAboveStore ? 'Above-Store' : cleanStoreNum, reqMarket, email, targetRole, targetIsGm, targetIsDo, targetIsExec, targetIsAdmin, existingTrainer.trainer_id).run();
+
+                    if (targetEmail) {
+                        await callAppsScriptProxy({
+                            action: "sendGmApprovalNoticeToTrainer",
+                            trainerName: existingTrainer.trainer_name || trainerName,
+                            pulseId: existingTrainer.trainer_id,
+                            storeNum: isExistingAboveStore ? "Above-Store" : cleanStoreNum,
+                            market: reqMarket,
+                            pin: cleanPin,
+                            email: targetEmail,
+                            role: targetRole,
+                            isDo: isExistingAboveStore,
+                            isAboveStore: isExistingAboveStore,
+                            isProvisioned: true,
+                            portal: "Admin Hub"
+                        }, context);
+                    }
+
                     return new Response(JSON.stringify({
                         success: true,
-                        message: `Welcome back ${existingTrainer.trainer_name}! Manager credentials confirmed for Store #${storeNum}.`,
+                        message: `Credentials updated and emailed directly to ${existingTrainer.trainer_name || trainerName} (${targetEmail || 'on file'}).`,
+                        user: {
+                            trainer_id: existingTrainer.trainer_id,
+                            name: existingTrainer.trainer_name || trainerName,
+                            pin: cleanPin,
+                            store: isExistingAboveStore ? 'Above-Store' : cleanStoreNum,
+                            market: reqMarket,
+                            role: targetRole,
+                            is_gm: !!targetIsGm,
+                            is_do: !!targetIsDo,
+                            is_admin: !!targetIsAdmin,
+                            is_exec: !!targetIsExec
+                        }
+                    }), { status: 200, headers: corsHeaders() });
+                }
+
+                if (existingTrainer.is_admin || existingTrainer.is_exec || (isExistingAboveStore && existingTrainer.is_do) || (!isExistingAboveStore && existingTrainer.is_gm)) {
+                    return new Response(JSON.stringify({
+                        success: true,
+                        message: `Welcome back ${existingTrainer.trainer_name}! Access credentials confirmed.`,
                         user: {
                             trainer_id: existingTrainer.trainer_id,
                             name: existingTrainer.trainer_name,
                             pin: cleanPin,
-                            store: storeNum,
+                            store: isExistingAboveStore ? 'Above-Store' : cleanStoreNum,
                             market: reqMarket,
-                            role: existingTrainer.role || 'General Manager',
+                            role: existingTrainer.role || (isExistingAboveStore ? 'Director of Ops' : 'General Manager'),
                             is_gm: !!existingTrainer.is_gm,
                             is_do: !!existingTrainer.is_do,
                             is_admin: !!existingTrainer.is_admin,
@@ -1435,12 +1736,14 @@ export async function onRequestPost(context) {
                     }), { status: 200, headers: corsHeaders() });
                 }
 
-                // Existing trainer in Wow Way requesting GM access - NEVER auto-approved!
+                // Existing trainer in Wow Way requesting GM / DO access from public portal - NEVER auto-approved!
                 await db.prepare(`
                     UPDATE trainer_credentials 
-                    SET trainer_pin = ?, store_num = ?, market = ?, updated_at = CURRENT_TIMESTAMP
+                    SET trainer_pin = ?, store_num = ?, market = ?, email = COALESCE(NULLIF(?, ''), email),
+                        notes = CASE WHEN notes LIKE '%Pending%' THEN notes ELSE COALESCE(notes, '') || ' - Pending GM Access Approval' END,
+                        updated_at = CURRENT_TIMESTAMP
                     WHERE LOWER(trainer_id) = LOWER(?)
-                `).bind(cleanPin, storeNum, reqMarket, existingTrainer.trainer_id).run();
+                `).bind(cleanPin, isExistingAboveStore ? 'Above-Store' : cleanStoreNum, reqMarket, email, existingTrainer.trainer_id).run();
 
                 const token = generateGmDecisionToken(existingTrainer.trainer_id, cleanPin);
                 const baseUrl = "https://tw-staffing.pages.dev/api/staffing";
@@ -1451,12 +1754,14 @@ export async function onRequestPost(context) {
                     action: "sendTrainerPinRequestEmail",
                     trainerName: existingTrainer.trainer_name,
                     pulseId: existingTrainer.trainer_id,
-                    storeNum: storeNum,
+                    storeNum: isExistingAboveStore ? "Above-Store" : cleanStoreNum,
                     market: reqMarket,
                     pin: cleanPin,
-                    role: isMatchGm ? 'General Manager' : (existingTrainer.role || 'Trainer'),
+                    email: email || existingTrainer.email,
+                    role: isExistingAboveStore ? (requestedRole || existingTrainer.role || 'Director of Ops') : (existingTrainer.role || 'Trainer'),
                     isGm: false,
-                    isDo: false,
+                    isDo: isExistingAboveStore,
+                    isAboveStore: isExistingAboveStore,
                     isExistingTrainer: true,
                     approveUrl: approveUrl,
                     denyUrl: denyUrl
@@ -1465,93 +1770,212 @@ export async function onRequestPost(context) {
                 return new Response(JSON.stringify({
                     success: true,
                     isExistingTrainerRequest: true,
-                    message: `Existing trainer profile verified! An authorization request has been sent to Mike Jacobs for GM Staffing Command access.`,
+                    message: `Profile verified! An authorization request has been sent to Mike Jacobs for Staffing Command access.`,
                     user: {
                         trainer_id: existingTrainer.trainer_id,
                         name: existingTrainer.trainer_name,
                         pin: cleanPin,
-                        store: storeNum,
+                        store: isExistingAboveStore ? 'Above-Store' : cleanStoreNum,
                         market: reqMarket,
-                        role: existingTrainer.role || 'Trainer',
+                        role: existingTrainer.role || (isExistingAboveStore ? 'Director of Ops' : 'Trainer'),
                         is_gm: false,
                         is_do: false
                     }
                 }), { status: 200, headers: corsHeaders() });
             }
 
-            // 4. MARKET & STORE VALIDATION: Verify store exists and belongs to the requested market
-            const storeRow = await db.prepare("SELECT store_number, market, manager_name, do_name FROM stores WHERE store_number = ? LIMIT 1").bind(storeNum).first();
+            // 4. ROLE DETECTION & VALIDATION
+            let detectedRole = isAboveStore ? (requestedRole || 'Director of Ops') : 'Trainer';
 
-            if (!storeRow) {
+            if (isAboveStore) {
+                // Check if email or name matches a recognized DO in stores
+                const doMatch = await db.prepare("SELECT DISTINCT do_name, do_email, market FROM stores WHERE (LOWER(do_email) = LOWER(?) AND do_email != '') OR LOWER(do_name) = LOWER(?) LIMIT 1").bind(email, trainerName).first();
+                if (doMatch) {
+                    detectedRole = requestedRole || 'Director of Ops';
+                }
+            } else {
+                // Store-level validation
+                const storeRow = await db.prepare("SELECT store_number, market, manager_name, do_name FROM stores WHERE store_number = ? LIMIT 1").bind(cleanStoreNum).first();
+
+                if (!storeRow) {
+                    return new Response(JSON.stringify({
+                        success: false,
+                        error: `Store #${cleanStoreNum} is not a recognized Team Wow store. Please check your 4-digit store number.`
+                    }), { status: 400, headers: corsHeaders() });
+                }
+
+                if (storeRow.market.toLowerCase() !== reqMarket.toLowerCase()) {
+                    return new Response(JSON.stringify({
+                        success: false,
+                        error: `Store #${cleanStoreNum} belongs to the ${storeRow.market} market and cannot be registered under the ${reqMarket} market.`
+                    }), { status: 400, headers: corsHeaders() });
+                }
+
+                const gmName = (storeRow.manager_name || '').toLowerCase().trim();
+                const doName = (storeRow.do_name || '').toLowerCase().trim();
+                const inputName = trainerName.toLowerCase().trim();
+
+                if (gmName && (gmName.includes(inputName) || inputName.includes(gmName))) {
+                    detectedRole = 'General Manager';
+                } else if (doName && (doName.includes(inputName) || inputName.includes(doName))) {
+                    detectedRole = 'Director of Ops';
+                }
+            }
+
+            // ADMIN HUB PROVISIONING (Mike Jacobs creating user directly in hub)
+            if (isAdminHub) {
+                const finalRole = isAboveStore ? (requestedRole || 'Director of Ops') : (requestedRole || (detectedRole === 'General Manager' ? 'General Manager' : 'Trainer'));
+                const isExecRole = finalRole === 'Executive';
+                const isGmRole = isAboveStore || finalRole === 'General Manager';
+                const isDoRole = isAboveStore || finalRole === 'Director of Ops';
+                const regNote = isAboveStore ? 'Provisioned via Admin Hub (Above-Store)' : 'Provisioned via Admin Hub';
+
+                await db.prepare(`
+                    INSERT OR REPLACE INTO trainer_credentials (
+                        trainer_id, trainer_name, trainer_pin, store_num, market,
+                        email, role, is_wow_way_trainer, is_mit_trainer, is_gm, is_do, is_admin, is_exec, is_active, notes, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, 1, 1, ?, ?, ?, ?, 1, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                `).bind(
+                    effectiveId, trainerName, cleanPin, cleanStoreNum, reqMarket,
+                    email, finalRole, isGmRole ? 1 : 0, isDoRole ? 1 : 0, isExecRole ? 1 : 0, isExecRole ? 1 : 0, regNote
+                ).run();
+
+                // Send Credentials email directly to the recipient!
+                if (email) {
+                    await callAppsScriptProxy({
+                        action: "sendGmApprovalNoticeToTrainer",
+                        trainerName: trainerName,
+                        pulseId: effectiveId,
+                        storeNum: cleanStoreNum,
+                        market: reqMarket,
+                        pin: cleanPin,
+                        email: email,
+                        role: finalRole,
+                        isDo: isAboveStore,
+                        isAboveStore: isAboveStore,
+                        isProvisioned: true,
+                        portal: "Admin Hub"
+                    }, context);
+                }
+
                 return new Response(JSON.stringify({
-                    success: false,
-                    error: `Store #${storeNum} is not a recognized Team Wow store. Please check your 4-digit store number.`
-                }), { status: 400, headers: corsHeaders() });
+                    success: true,
+                    message: `Profile registered! Credentials and login PIN have been emailed directly to ${trainerName} (${email || 'on file'}).`,
+                    user: {
+                        trainer_id: effectiveId,
+                        name: trainerName,
+                        pin: cleanPin,
+                        store: cleanStoreNum,
+                        market: reqMarket,
+                        role: finalRole,
+                        is_gm: isGmRole,
+                        is_do: isDoRole,
+                        is_admin: isExecRole,
+                        is_exec: isExecRole,
+                        is_wow_way_trainer: true,
+                        is_mit_trainer: true
+                    }
+                }), { status: 200, headers: corsHeaders() });
             }
 
-            if (storeRow.market.toLowerCase() !== reqMarket.toLowerCase()) {
-                return new Response(JSON.stringify({
-                    success: false,
-                    error: `Store #${storeNum} belongs to the ${storeRow.market} market and cannot be registered under the ${reqMarket} market.`
-                }), { status: 400, headers: corsHeaders() });
-            }
+            // PUBLIC SELF-REGISTRATION WORKFLOW (Requires Mike's explicit approval!)
+            const regNote = isMitPortal
+                ? (isAboveStore ? 'Self-Registered Above-Store (MIT) - Pending Approval' : 'Self-Registered (MIT Portal) - Pending Approval')
+                : (isAboveStore ? 'Self-Registered Above-Store - Pending Approval' : 'Self-Registered - Pending Approval');
 
-            let detectedRole = 'Trainer';
-            const gmName = (storeRow.manager_name || '').toLowerCase().trim();
-            const doName = (storeRow.do_name || '').toLowerCase().trim();
-            const inputName = trainerName.toLowerCase().trim();
-
-            if (gmName && (gmName.includes(inputName) || inputName.includes(gmName))) {
-                detectedRole = 'General Manager';
-            } else if (doName && (doName.includes(inputName) || inputName.includes(doName))) {
-                detectedRole = 'Supervisor';
-            }
-
-            // Insert into trainer_credentials with is_gm = 0, is_do = 0 (Requires Mike's explicit approval!)
             await db.prepare(`
                 INSERT OR REPLACE INTO trainer_credentials (
                     trainer_id, trainer_name, trainer_pin, store_num, market,
-                    role, is_wow_way_trainer, is_mit_trainer, is_gm, is_do, is_admin, is_exec, is_active, notes, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, 1, 0, 0, 0, 0, 0, 1, 'Self-Registered', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                    email, role, is_wow_way_trainer, is_mit_trainer, is_gm, is_do, is_admin, is_exec, is_active, notes, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, 0, 0, 0, 0, 1, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             `).bind(
-                pulseId, trainerName, cleanPin, storeNum, reqMarket,
-                detectedRole
+                effectiveId, trainerName, cleanPin, cleanStoreNum, reqMarket,
+                email, detectedRole, isAboveStore ? 1 : 0, regNote
             ).run();
 
             // 5. EMAIL NOTIFICATION: Notify Mike Jacobs with 1-click mobile approval links
-            const token = generateGmDecisionToken(pulseId, cleanPin);
+            const token = generateGmDecisionToken(effectiveId, cleanPin);
             const baseUrl = "https://tw-staffing.pages.dev/api/staffing";
-            const approveUrl = `${baseUrl}?action=decideGmAccess&id=${encodeURIComponent(pulseId)}&pin=${encodeURIComponent(cleanPin)}&token=${token}&decision=approve`;
-            const denyUrl = `${baseUrl}?action=decideGmAccess&id=${encodeURIComponent(pulseId)}&pin=${encodeURIComponent(cleanPin)}&token=${token}&decision=deny`;
+            const scopeParam = isMitPortal ? "&scope=mit" : "";
+            const approveUrl = `${baseUrl}?action=decideGmAccess&id=${encodeURIComponent(effectiveId)}&pin=${encodeURIComponent(cleanPin)}&token=${token}&decision=approve${scopeParam}`;
+            const denyUrl = `${baseUrl}?action=decideGmAccess&id=${encodeURIComponent(effectiveId)}&pin=${encodeURIComponent(cleanPin)}&token=${token}&decision=deny${scopeParam}`;
 
             await callAppsScriptProxy({
                 action: "sendTrainerPinRequestEmail",
                 trainerName: trainerName,
-                pulseId: pulseId,
-                storeNum: storeNum,
+                pulseId: effectiveId,
+                storeNum: cleanStoreNum,
                 market: reqMarket,
                 pin: cleanPin,
+                email: email,
                 role: detectedRole,
+                portal: isMitPortal ? "MIT Trainer Portal" : (isAboveStore ? "Above-Store Command" : "GM Staffing Command"),
+                isMitRequest: isMitPortal,
                 isGm: false,
-                isDo: false,
+                isDo: isAboveStore || detectedRole === 'Supervisor' || detectedRole === 'Director of Ops',
+                isAboveStore: isAboveStore,
                 isExistingTrainer: false,
                 approveUrl: approveUrl,
                 denyUrl: denyUrl
             }, context);
 
+            let successNotice = `PIN registered! An authorization request has been sent to Mike Jacobs for GM Staffing Command access.`;
+            if (isMitPortal) {
+                successNotice = `PIN registered! An authorization request has been sent to Mike Jacobs for MIT Trainer Portal access.`;
+            } else if (isAboveStore) {
+                successNotice = `PIN registered! An authorization request has been sent to Mike Jacobs for Above-Store Staffing Command access.`;
+            }
+
             return new Response(JSON.stringify({
                 success: true,
-                message: `PIN registered! An authorization request has been sent to Mike Jacobs for GM Staffing Command access.`,
+                message: successNotice,
                 user: {
-                    trainer_id: pulseId,
+                    trainer_id: effectiveId,
                     name: trainerName,
                     pin: cleanPin,
-                    store: storeNum,
+                    store: cleanStoreNum,
                     market: reqMarket,
                     role: detectedRole,
                     is_gm: false,
-                    is_do: false
+                    is_do: false,
+                    is_mit_trainer: false
                 }
+            }), { status: 200, headers: corsHeaders() });
+        }
+
+        // On-demand Dispath of Credentials Email from Admin Hub
+        if (action === "sendCredentialsEmail" || action === "resendCredentials") {
+            const trainerId = String(payload.trainerId || url.searchParams.get("trainerId") || "").trim();
+            if (!trainerId) {
+                return new Response(JSON.stringify({ success: false, error: "Missing trainerId" }), { status: 400, headers: corsHeaders() });
+            }
+            const trainer = await db.prepare("SELECT * FROM trainer_credentials WHERE LOWER(trainer_id) = LOWER(?) LIMIT 1").bind(trainerId).first();
+            if (!trainer) {
+                return new Response(JSON.stringify({ success: false, error: "Trainer profile not found" }), { status: 404, headers: corsHeaders() });
+            }
+            if (!trainer.email) {
+                return new Response(JSON.stringify({ success: false, error: "Trainer does not have an email address on file. Please edit profile and add an email." }), { status: 400, headers: corsHeaders() });
+            }
+            const isDo = !!trainer.is_do || !!trainer.is_exec || trainer.role === 'Supervisor' || trainer.role === 'Director of Operations' || trainer.role === 'Director of Ops' || trainer.role === 'Training Director' || trainer.role === 'Market Leader' || trainer.role === 'Executive' || trainer.store_num === 'Above-Store' || trainer.store_num === 'Exec' || trainer.store_num === 'DO';
+
+            await callAppsScriptProxy({
+                action: "sendGmApprovalNoticeToTrainer",
+                trainerName: trainer.trainer_name,
+                pulseId: trainer.trainer_id,
+                storeNum: trainer.store_num,
+                market: trainer.market,
+                pin: trainer.trainer_pin,
+                email: trainer.email,
+                role: trainer.role || (isDo ? 'Director of Ops' : 'General Manager'),
+                isDo: isDo,
+                isAboveStore: isDo,
+                isProvisioned: true,
+                portal: "Admin Hub"
+            }, context);
+
+            return new Response(JSON.stringify({
+                success: true,
+                message: `Credentials email dispatched directly to ${trainer.trainer_name} (${trainer.email}).`
             }), { status: 200, headers: corsHeaders() });
         }
 
@@ -1583,21 +2007,32 @@ export async function onRequestPost(context) {
                 }), { status: 200, headers: corsHeaders() });
             }
 
+            // Mark profile notes as pending GM access
+            await db.prepare(`
+                UPDATE trainer_credentials 
+                SET notes = CASE WHEN notes LIKE '%Pending%' THEN notes ELSE COALESCE(notes, '') || ' - Pending GM Access Approval' END,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE LOWER(trainer_id) = LOWER(?)
+            `).bind(trainer.trainer_id).run();
+
             const token = generateGmDecisionToken(trainer.trainer_id, trainer.trainer_pin);
             const baseUrl = "https://tw-staffing.pages.dev/api/staffing";
             const approveUrl = `${baseUrl}?action=decideGmAccess&id=${encodeURIComponent(trainer.trainer_id)}&pin=${encodeURIComponent(trainer.trainer_pin)}&token=${token}&decision=approve`;
             const denyUrl = `${baseUrl}?action=decideGmAccess&id=${encodeURIComponent(trainer.trainer_id)}&pin=${encodeURIComponent(trainer.trainer_pin)}&token=${token}&decision=deny`;
 
+            const isTrainerAboveStore = !!(trainer.is_do || trainer.role === 'Supervisor' || trainer.role === 'Director of Operations' || trainer.role === 'Executive' || trainer.store_num === 'Above-Store' || trainer.store_num === 'DO');
             await callAppsScriptProxy({
                 action: "sendTrainerPinRequestEmail",
                 trainerName: trainer.trainer_name,
                 pulseId: trainer.trainer_id,
-                storeNum: trainer.store_num,
+                storeNum: isTrainerAboveStore ? "Above-Store" : trainer.store_num,
                 market: trainer.market,
                 pin: trainer.trainer_pin,
                 role: trainer.role,
+                email: trainer.email || (trainer.trainer_id && trainer.trainer_id.includes('@') ? trainer.trainer_id : ''),
                 isGm: false,
-                isDo: false,
+                isDo: isTrainerAboveStore,
+                isAboveStore: isTrainerAboveStore,
                 isExistingTrainer: true,
                 approveUrl: approveUrl,
                 denyUrl: denyUrl
@@ -2462,6 +2897,19 @@ export async function onRequestPost(context) {
                 await db.prepare("UPDATE training_classes SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(classId).run();
             }
             return new Response(JSON.stringify({ success: true, message: "MIT class deactivated." }), { status: 200, headers: corsHeaders() });
+        }
+
+        if (action === "removeMitAttendee" || action === "deleteMitRegistration") {
+            const regId = payload.registrationId || payload.id;
+            const classId = payload.classId;
+            if (regId) {
+                await db.prepare("DELETE FROM class_registrations WHERE id = ?").bind(regId).run();
+                if (classId) {
+                    await db.prepare("UPDATE training_classes SET spots_taken = MAX(0, spots_taken - 1), updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(classId).run();
+                }
+                return new Response(JSON.stringify({ success: true, message: "Attendee removed from session." }), { status: 200, headers: corsHeaders() });
+            }
+            return new Response(JSON.stringify({ success: false, error: "Missing registrationId" }), { status: 400, headers: corsHeaders() });
         }
 
         if (action === "updateMitClass") {
@@ -3769,18 +4217,18 @@ export async function onRequestPost(context) {
 
             await db.prepare(`
                 UPDATE onboarding_candidates SET
-                    name = COALESCE(?, name),
-                    position = COALESCE(?, position),
-                    store_num = COALESCE(?, store_num),
-                    do_name = COALESCE(?, do_name),
+                    name = COALESCE(NULLIF(?, ''), name),
+                    position = COALESCE(NULLIF(?, ''), position),
+                    store_num = COALESCE(NULLIF(?, ''), store_num),
+                    do_name = COALESCE(NULLIF(?, ''), do_name),
                     nto_date = COALESCE(NULLIF(?, ''), nto_date),
                     nto_attendance = COALESCE(NULLIF(?, ''), nto_attendance),
                     notes = COALESCE(?, notes),
                     shirt_size = COALESCE(?, shirt_size),
                     hat_style = COALESCE(?, hat_style),
                     pay_card = COALESCE(?, pay_card),
-                    phone_number = COALESCE(?, phone_number),
-                    email = COALESCE(?, email),
+                    phone_number = COALESCE(NULLIF(?, ''), phone_number),
+                    email = COALESCE(NULLIF(?, ''), email),
                     submission_received = COALESCE(?, submission_received),
                     onboarding_sent = COALESCE(?, onboarding_sent),
                     bgc_complete = COALESCE(?, bgc_complete),
@@ -3864,11 +4312,11 @@ export async function onRequestPost(context) {
                 if (!item.id) continue;
                 statements.push(db.prepare(`
                     UPDATE onboarding_candidates SET
-                        name = COALESCE(?, name),
-                        phone_number = COALESCE(?, phone_number),
-                        email = COALESCE(?, email),
-                        store_num = COALESCE(?, store_num),
-                        position = COALESCE(?, position),
+                        name = COALESCE(NULLIF(?, ''), name),
+                        phone_number = COALESCE(NULLIF(?, ''), phone_number),
+                        email = COALESCE(NULLIF(?, ''), email),
+                        store_num = COALESCE(NULLIF(?, ''), store_num),
+                        position = COALESCE(NULLIF(?, ''), position),
                         shirt_size = COALESCE(?, shirt_size),
                         hat_style = COALESCE(?, hat_style),
                         pay_card = COALESCE(?, pay_card),
@@ -3886,8 +4334,8 @@ export async function onRequestPost(context) {
                         missing_docs = COALESCE(?, missing_docs),
                         pulse_form_complete = COALESCE(?, pulse_form_complete),
                         notes = COALESCE(?, notes),
-                        nto_date = COALESCE(?, nto_date),
-                        nto_attendance = COALESCE(?, nto_attendance),
+                        nto_date = COALESCE(NULLIF(?, ''), nto_date),
+                        nto_attendance = COALESCE(NULLIF(?, ''), nto_attendance),
                         last_updated = ?,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE id = ?
@@ -4067,6 +4515,293 @@ export async function onRequestPost(context) {
                 return new Response(JSON.stringify({ success: true, count: list.length }), { status: 200, headers: corsHeaders() });
             }
             return new Response(JSON.stringify({ error: "Invalid contacts list" }), { status: 400, headers: corsHeaders() });
+        }
+
+        // 9. Update Trainer / Manager Access Permissions (and ID/Profile Changes)
+        if (action === "updateTrainerAccess") {
+            const originalId = String(payload.originalTrainerId || payload.trainerId || payload.trainer_id || "").trim();
+            const newTrainerId = String(payload.newTrainerId || payload.trainer_id || payload.trainerId || "").trim();
+            if (!originalId) {
+                return new Response(JSON.stringify({ success: false, error: "Missing trainerId" }), { status: 400, headers: corsHeaders() });
+            }
+
+            // If ID is being changed, verify the new ID isn't already taken by another account
+            if (newTrainerId && newTrainerId.toLowerCase() !== originalId.toLowerCase()) {
+                const existingWithNewId = await db.prepare("SELECT trainer_id, trainer_name FROM trainer_credentials WHERE LOWER(trainer_id) = LOWER(?) LIMIT 1").bind(newTrainerId).first();
+                if (existingWithNewId) {
+                    return new Response(JSON.stringify({ 
+                        success: false, 
+                        error: `The ID '${newTrainerId}' is already claimed by ${existingWithNewId.trainer_name}. Please choose a unique ID.` 
+                    }), { status: 409, headers: corsHeaders() });
+                }
+            }
+
+            // If PIN is being updated, verify it is not claimed by another user
+            if (payload.trainer_pin) {
+                const cleanPin = String(payload.trainer_pin).replace(/\D/g, '').trim();
+                if (cleanPin.length === 4) {
+                    const pinCollision = await db.prepare("SELECT trainer_id, trainer_name FROM trainer_credentials WHERE trainer_pin = ? AND LOWER(trainer_id) != LOWER(?) LIMIT 1").bind(cleanPin, originalId).first();
+                    if (pinCollision) {
+                        return new Response(JSON.stringify({ 
+                            success: false, 
+                            error: `PIN ${cleanPin} is already assigned to ${pinCollision.trainer_name}. Please choose a unique 4-digit PIN.` 
+                        }), { status: 409, headers: corsHeaders() });
+                    }
+                }
+            }
+
+            const updates = [];
+            const binds = [];
+
+            // If ID changed, include trainer_id in updates
+            if (newTrainerId && newTrainerId.toLowerCase() !== originalId.toLowerCase()) {
+                updates.push("trainer_id = ?");
+                binds.push(newTrainerId);
+            }
+
+            const allowedFields = [
+                'trainer_name', 'is_wow_way_trainer', 'is_mit_trainer', 'is_gm', 'is_do', 'is_admin', 'is_exec', 'is_active',
+                'role', 'market', 'store_num', 'email', 'phone', 'trainer_pin', 'notes'
+            ];
+
+            for (const field of allowedFields) {
+                if (payload[field] !== undefined) {
+                    updates.push(`${field} = ?`);
+                    binds.push(payload[field]);
+                }
+            }
+
+            if (updates.length === 0) {
+                return new Response(JSON.stringify({ success: false, error: "No fields to update" }), { status: 400, headers: corsHeaders() });
+            }
+
+            updates.push("updated_at = CURRENT_TIMESTAMP");
+            binds.push(originalId);
+
+            await db.prepare(`
+                UPDATE trainer_credentials 
+                SET ${updates.join(', ')} 
+                WHERE LOWER(trainer_id) = LOWER(?)
+            `).bind(...binds).run();
+
+            const finalId = newTrainerId || originalId;
+
+            // If ID changed, cascade ID to usage logs and reset requests
+            if (newTrainerId && newTrainerId.toLowerCase() !== originalId.toLowerCase()) {
+                try {
+                    await db.prepare("UPDATE credential_usage_logs SET trainer_id = ? WHERE LOWER(trainer_id) = LOWER(?)").bind(newTrainerId, originalId).run();
+                    await db.prepare("UPDATE credential_reset_requests SET trainer_id = ? WHERE LOWER(trainer_id) = LOWER(?)").bind(newTrainerId, originalId).run();
+                } catch (_) {}
+            }
+
+            // Log admin audit event
+            try {
+                await db.prepare(`
+                    INSERT INTO credential_usage_logs (trainer_id, trainer_name, store_num, portal, action, metadata, created_at)
+                    VALUES (?, ?, '', 'Admin Hub', 'Profile Updated', ?, CURRENT_TIMESTAMP)
+                `).bind(finalId, payload.trainer_name || payload.trainerName || finalId, JSON.stringify(payload)).run();
+            } catch (_) {}
+
+            const updated = await db.prepare("SELECT * FROM trainer_credentials WHERE LOWER(trainer_id) = LOWER(?) LIMIT 1").bind(finalId).first();
+            return new Response(JSON.stringify({ success: true, user: updated }), { status: 200, headers: corsHeaders() });
+        }
+
+        // 9b. Self-Service Pulse ID Upgrade (Convert Legacy Email ID to Pulse ID)
+        if (action === "updatePulseId" || action === "setPulseId") {
+            const rawPin = String(payload.pin || url.searchParams.get("pin") || "").replace(/\D/g, '').trim();
+            const originalTrainerId = String(payload.originalTrainerId || payload.trainerId || "").trim();
+            const newPulseId = String(payload.newPulseId || payload.pulseId || "").trim();
+
+            if (!rawPin || rawPin.length !== 4) {
+                return new Response(JSON.stringify({ success: false, error: "Valid 4-digit PIN required." }), { status: 400, headers: corsHeaders() });
+            }
+            if (!newPulseId || newPulseId.includes('@')) {
+                return new Response(JSON.stringify({ success: false, error: "Please enter a valid Pulse ID (cannot contain @)." }), { status: 400, headers: corsHeaders() });
+            }
+
+            // Verify trainer credentials by PIN
+            const trainer = await db.prepare("SELECT * FROM trainer_credentials WHERE trainer_pin = ? AND is_active = 1 LIMIT 1").bind(rawPin).first();
+            if (!trainer) {
+                return new Response(JSON.stringify({ success: false, error: "Account not found or inactive." }), { status: 404, headers: corsHeaders() });
+            }
+
+            // Check if new Pulse ID is already taken by another person
+            const collision = await db.prepare("SELECT trainer_id, trainer_name FROM trainer_credentials WHERE LOWER(trainer_id) = LOWER(?) AND trainer_pin != ? LIMIT 1").bind(newPulseId, rawPin).first();
+            if (collision) {
+                return new Response(JSON.stringify({ success: false, error: `Pulse ID '${newPulseId}' is already in use by ${collision.trainer_name}. Please choose a unique ID.` }), { status: 409, headers: corsHeaders() });
+            }
+
+            const targetId = originalTrainerId || trainer.trainer_id;
+
+            await db.prepare("UPDATE trainer_credentials SET trainer_id = ?, updated_at = CURRENT_TIMESTAMP WHERE trainer_pin = ?").bind(newPulseId, rawPin).run();
+
+            // Cascade to usage logs & reset requests
+            try {
+                await db.prepare("UPDATE credential_usage_logs SET trainer_id = ? WHERE LOWER(trainer_id) = LOWER(?)").bind(newPulseId, targetId).run();
+                await db.prepare("UPDATE credential_reset_requests SET trainer_id = ? WHERE LOWER(trainer_id) = LOWER(?)").bind(newPulseId, targetId).run();
+                await db.prepare(`
+                    INSERT INTO credential_usage_logs (trainer_id, trainer_name, store_num, portal, action, metadata, created_at)
+                    VALUES (?, ?, ?, 'Staffing Command', 'Pulse ID Upgrade', ?, CURRENT_TIMESTAMP)
+                `).bind(newPulseId, trainer.trainer_name, trainer.store_num, JSON.stringify({ previousId: targetId })).run();
+            } catch (_) {}
+
+            return new Response(JSON.stringify({ success: true, trainer_id: newPulseId, message: "Pulse ID updated successfully." }), { status: 200, headers: corsHeaders() });
+        }
+
+        // 10. Decide / Resolve PIN Reset Request
+        if (action === "decidePinReset") {
+            const requestId = parseInt(payload.requestId, 10);
+            const decision = String(payload.decision || "").toLowerCase().trim(); // 'approve' | 'deny'
+            const newPin = String(payload.newPin || "").replace(/\D/g, '').trim();
+
+            const resetReq = await db.prepare("SELECT * FROM credential_reset_requests WHERE id = ?").bind(requestId).first();
+            if (!resetReq) {
+                return new Response(JSON.stringify({ success: false, error: "Reset request not found" }), { status: 404, headers: corsHeaders() });
+            }
+
+            if (decision === 'approve') {
+                const finalPin = (newPin && newPin.length === 4) ? newPin : (resetReq.requested_pin || String(Math.floor(1000 + Math.random() * 9000)));
+                await db.prepare(`
+                    UPDATE trainer_credentials 
+                    SET trainer_pin = ?, is_active = 1, updated_at = CURRENT_TIMESTAMP 
+                    WHERE LOWER(trainer_id) = LOWER(?) OR (email != '' AND LOWER(email) = LOWER(?))
+                `).bind(finalPin, resetReq.trainer_id, resetReq.email).run();
+
+                await db.prepare(`
+                    UPDATE credential_reset_requests 
+                    SET status = 'approved', resolved_at = CURRENT_TIMESTAMP, resolved_by = 'Mike Jacobs' 
+                    WHERE id = ?
+                `).bind(requestId).run();
+
+                // Log to credential_usage_logs
+                try {
+                    await db.prepare(`
+                        INSERT INTO credential_usage_logs (trainer_id, trainer_name, store_num, portal, action, metadata, created_at)
+                        VALUES (?, ?, ?, 'Admin Hub', 'PIN Reset Approved', ?, CURRENT_TIMESTAMP)
+                    `).bind(resetReq.trainer_id, resetReq.trainer_name, resetReq.store_num, JSON.stringify({ newPin: finalPin })).run();
+                } catch (_) {}
+
+                // Send Apps Script notice to trainer
+                await callAppsScriptProxy({
+                    action: "sendPinResetApprovedEmail",
+                    trainerName: resetReq.trainer_name,
+                    email: resetReq.email,
+                    pulseId: resetReq.trainer_id,
+                    newPin: finalPin,
+                    storeNum: resetReq.store_num
+                }, context);
+
+                return new Response(JSON.stringify({ success: true, message: `PIN reset approved. New PIN (${finalPin}) assigned.`, newPin: finalPin }), { status: 200, headers: corsHeaders() });
+            } else {
+                await db.prepare(`
+                    UPDATE credential_reset_requests 
+                    SET status = 'rejected', resolved_at = CURRENT_TIMESTAMP, resolved_by = 'Mike Jacobs' 
+                    WHERE id = ?
+                `).bind(requestId).run();
+
+                return new Response(JSON.stringify({ success: true, message: "PIN reset request dismissed." }), { status: 200, headers: corsHeaders() });
+            }
+        }
+
+        // 11. Decide / Authorize Trainer Access Directly from Admin Hub
+        if (action === "approveTrainerAccess" || action === "decideTrainerAccess") {
+            const trainerId = String(payload.trainerId || payload.trainer_id || "").trim();
+            const decision = String(payload.decision || "approve").toLowerCase().trim(); // 'approve' | 'deny'
+            if (!trainerId) {
+                return new Response(JSON.stringify({ success: false, error: "Missing trainerId" }), { status: 400, headers: corsHeaders() });
+            }
+
+            const trainer = await db.prepare("SELECT * FROM trainer_credentials WHERE LOWER(trainer_id) = LOWER(?) LIMIT 1").bind(trainerId).first();
+            if (!trainer) {
+                return new Response(JSON.stringify({ success: false, error: "Trainer profile not found" }), { status: 404, headers: corsHeaders() });
+            }
+
+            if (decision === "approve") {
+                const isDoOrAboveStore = !!trainer.is_do || 
+                                         trainer.role === 'Supervisor' || 
+                                         trainer.role === 'Director of Operations' || 
+                                         trainer.role === 'Director of Ops' || 
+                                         trainer.role === 'Training Director' || 
+                                         trainer.role === 'Market Leader' || 
+                                         trainer.role === 'Executive' || 
+                                         trainer.store_num === 'Above-Store' || 
+                                         trainer.store_num === 'DO' || 
+                                         trainer.store_num === 'Exec';
+
+                const newRole = isDoOrAboveStore 
+                    ? (trainer.role === 'General Manager' ? 'Director of Ops' : (trainer.role || 'Director of Ops')) 
+                    : 'General Manager';
+
+                await db.prepare(`
+                    UPDATE trainer_credentials 
+                    SET is_gm = 1,
+                        is_do = ?,
+                        is_active = 1,
+                        role = ?,
+                        notes = TRIM(REPLACE(REPLACE(REPLACE(REPLACE(COALESCE(notes, ''), ' - Pending GM Access Approval', ''), ' - Pending Approval', ''), 'Pending Approval', ''), '[Pending GM Access Approval]', '')),
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE LOWER(trainer_id) = LOWER(?)
+                `).bind(isDoOrAboveStore ? 1 : 0, newRole, trainer.trainer_id).run();
+
+                // Dispatch confirmation notice to the trainer
+                let candidateEmail = String(trainer.email || (trainer.trainer_id && trainer.trainer_id.includes('@') ? trainer.trainer_id : '')).trim();
+                if (/^store\d+@team-wow\.com$/i.test(candidateEmail)) {
+                    candidateEmail = candidateEmail.replace(/^store/i, '').toLowerCase();
+                }
+
+                if (candidateEmail) {
+                    await callAppsScriptProxy({
+                        action: "sendGmApprovalNoticeToTrainer",
+                        trainerName: trainer.trainer_name,
+                        pulseId: trainer.trainer_id,
+                        storeNum: isDoOrAboveStore ? "Above-Store" : trainer.store_num,
+                        market: trainer.market,
+                        pin: trainer.trainer_pin,
+                        email: candidateEmail,
+                        role: newRole,
+                        isDo: isDoOrAboveStore,
+                        isAboveStore: isDoOrAboveStore
+                    }, context);
+                }
+
+                // Log to credential_usage_logs
+                try {
+                    await db.prepare(`
+                        INSERT INTO credential_usage_logs (trainer_id, trainer_name, store_num, portal, action, metadata, created_at)
+                        VALUES (?, ?, ?, 'Admin Hub', 'Access Approved', ?, CURRENT_TIMESTAMP)
+                    `).bind(trainer.trainer_id, trainer.trainer_name, trainer.store_num, JSON.stringify({ role: newRole, is_do: isDoOrAboveStore ? 1 : 0 })).run();
+                } catch (_) {}
+
+                return new Response(JSON.stringify({ 
+                    success: true, 
+                    message: `Access approved for ${trainer.trainer_name} (${newRole}). Confirmation email dispatched.` 
+                }), { status: 200, headers: corsHeaders() });
+            } else {
+                await db.prepare(`
+                    UPDATE trainer_credentials 
+                    SET is_gm = 0,
+                        is_do = 0,
+                        notes = TRIM(REPLACE(REPLACE(REPLACE(COALESCE(notes, ''), ' - Pending GM Access Approval', ''), ' - Pending Approval', ''), 'Pending Approval', 'Access Declined')),
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE LOWER(trainer_id) = LOWER(?)
+                `).bind(trainer.trainer_id).run();
+
+                return new Response(JSON.stringify({ success: true, message: `Access request for ${trainer.trainer_name} was declined.` }), { status: 200, headers: corsHeaders() });
+            }
+        }
+
+        // 12. Log Credential Activity (PIN reveals, etc.)
+        if (action === "logCredentialActivity") {
+            const trainerId = String(payload.trainerId || payload.trainer_id || "").trim();
+            const trainerName = String(payload.trainerName || payload.trainer_name || "").trim();
+            const act = String(payload.activity || payload.action || "PIN Peeked / Revealed").trim();
+            try {
+                await db.prepare(`
+                    INSERT INTO credential_usage_logs (trainer_id, trainer_name, store_num, portal, action, created_at)
+                    VALUES (?, ?, 'Admin Hub', 'Admin Hub', ?, CURRENT_TIMESTAMP)
+                `).bind(trainerId, trainerName, act).run();
+            } catch (_) {}
+            return new Response(JSON.stringify({ success: true }), { status: 200, headers: corsHeaders() });
         }
 
         // Fallback: action not recognized

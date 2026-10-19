@@ -12,7 +12,7 @@
     <title>Onboarder Portal</title>
     <link class="favicon" rel="icon" type="image/png" href="images/staffing_icon.png">
     <link rel="apple-touch-icon" href="images/staffing_icon.png">
-    <link rel="stylesheet" href="styles.css?v=20261019_0950">
+    <link rel="stylesheet" href="styles.css?v=20261019_1015">
 </head>
 
 <body>
@@ -156,12 +156,40 @@
                     <input type="text" id="searchControl" placeholder="Search candidates..." oninput="renderList()">
                 </div>
 
+                <!-- MIT Class Sidebar Filters -->
+                <div id="mitSidebarFilters" class="hidden" style="margin-bottom: 8px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <select id="mitSidebarCenterFilter" onchange="renderMitSidebar()"
+                            style="height: 38px; font-size: 15px; border-radius: 8px; border: 1.5px solid var(--crust-dark); background: white; color: var(--crust-burnt); padding: 0 10px; font-family: 'Condensed', sans-serif;">
+                            <option value="ALL">All centers ▾</option>
+                            <option value="McKinney">McKinney Center</option>
+                            <option value="Mesquite">Mesquite Center</option>
+                            <option value="Academy">Academy Center</option>
+                            <option value="Virtual">Virtual</option>
+                        </select>
+                        <select id="mitSidebarLevelFilter" onchange="renderMitSidebar()"
+                            style="height: 38px; font-size: 15px; border-radius: 8px; border: 1.5px solid var(--crust-dark); background: white; color: var(--crust-burnt); padding: 0 10px; font-family: 'Condensed', sans-serif;">
+                            <option value="ALL">All levels ▾</option>
+                            <option value="1">Level 1</option>
+                            <option value="2">Level 2</option>
+                            <option value="3">Level 3</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="list-meta-bar" style="display: flex; justify-content: space-between; align-items: center; padding: 4px 4px 8px; font-family: 'Subhead1', sans-serif; font-size: 13px; letter-spacing: 0.07em; text-transform: uppercase;">
                     <span id="listCounterLabel" style="color: var(--crust-burnt); font-weight: bold;">CANDIDATES · <span id="listCountNum">0</span></span>
                     
                     <div id="ntoSidebarActions" class="hidden" style="display: flex; align-items: center;">
                         <label style="cursor: pointer; display: inline-flex; align-items: center; gap: 5px; color: var(--brand-blue); font-family: 'Subhead1', sans-serif; font-size: 13px; font-weight: 700; text-transform: none; margin: 0;">
                             <input type="checkbox" id="ntoShowPastClasses" onchange="renderNtoSidebar()" style="accent-color: var(--brand-blue); cursor: pointer; width: 15px; height: 15px;">
+                            <span>Show past</span>
+                        </label>
+                    </div>
+
+                    <div id="mitSidebarActions" class="hidden" style="display: flex; align-items: center;">
+                        <label style="cursor: pointer; display: inline-flex; align-items: center; gap: 5px; color: var(--brand-blue); font-family: 'Subhead1', sans-serif; font-size: 13px; font-weight: 700; text-transform: none; margin: 0;">
+                            <input type="checkbox" id="mitShowPastClasses" onchange="renderMitSidebar()" style="accent-color: var(--brand-blue); cursor: pointer; width: 15px; height: 15px;">
                             <span>Show past</span>
                         </label>
                     </div>
@@ -1096,62 +1124,91 @@
                             </div>
                         </div>
 
-                        <!-- 7. MIT CLASS SCHEDULER & ROSTER TEMPLATE -->
-                        <div id="mitFormFields" class="hidden" style="display: flex; flex-direction: column; height: 100%; box-sizing: border-box; overflow: hidden;">
-                            <!-- Action & Filter Bar -->
-                            <div class="mit-filter-bar">
-                                <div style="display: flex; gap: 8px;">
-                                    <button type="button" onclick="openMitClassModal()" class="mit-btn-schedule">
-                                        ➕ Schedule MIT Session
-                                    </button>
-                                    <button type="button" onclick="fetchMitSchedulerClasses()" class="mit-btn-refresh">
-                                        🔄 Refresh
-                                    </button>
+                        <!-- 7. MIT CLASS SCHEDULER & ROSTER (3-Column Harmonized Layout) -->
+                        <div id="mitFormFields" class="hidden" style="display: flex; flex-direction: column; height: 100%; box-sizing: border-box; overflow-y: auto; gap: 14px; padding-right: 2px;">
+                            <!-- Panel Header -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; min-height: 44px;">
+                                <h2 id="mitHeaderDateText" style="margin: 0; font-family: 'Subhead1', 'Oswald', sans-serif; font-weight: 700; font-size: 26px; text-transform: uppercase; color: var(--dark-blue, #005c91);">
+                                    MIT Session
+                                </h2>
+                                <button type="button" onclick="openMitClassModal()" class="btn p" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                                    + Schedule MIT Session
+                                </button>
+                            </div>
+
+                            <!-- Hero Card -->
+                            <div class="mit-hero-box" id="mitHeroBox">
+                                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                    <span id="mitHeroCourseName" style="font-family: 'Subhead1', 'Oswald', sans-serif; font-weight: 700; font-size: 26px; color: var(--dark-blue, #005c91);">
+                                        Select a Session
+                                    </span>
+                                    <span id="mitHeroLevelPill" class="mit-lv-pill mit-lv-1" style="display: none;">
+                                        Level 1 · every 4 wks
+                                    </span>
+                                    <span id="mitHeroStatusChip" class="mit-chip-status" style="background: var(--dark-blue, #005c91); color: #ffffff;">
+                                        Upcoming
+                                    </span>
+                                    <span style="flex: 1;"></span>
+                                    <span id="mitHeroSessionId" style="font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 600; color: var(--crust-deep, #603913);">
+                                        —
+                                    </span>
                                 </div>
-                                <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
-                                    <select id="mitFilterLocation" onchange="renderMitSchedulerTable()" class="mit-select-filter">
-                                        <option value="ALL">All Centers</option>
-                                        <option value="McKinney">McKinney Center</option>
-                                        <option value="Mesquite">Mesquite Center</option>
-                                        <option value="Virtual">Virtual</option>
-                                    </select>
-                                    <select id="mitFilterLevel" onchange="renderMitSchedulerTable()" class="mit-select-filter">
-                                        <option value="ALL">All Levels</option>
-                                        <option value="1">Level 1</option>
-                                        <option value="2">Level 2</option>
-                                        <option value="3">Level 3</option>
-                                    </select>
-                                    <input type="text" id="mitSearchInput" placeholder="🔍 Search course, trainer..." oninput="renderMitSchedulerTable()" class="mit-search-filter">
+                                <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
+                                    <span class="mit-fact-item">
+                                        <small>Center</small>
+                                        <span id="mitHeroCenter">—</span>
+                                    </span>
+                                    <span class="mit-fact-item">
+                                        <small>Time</small>
+                                        <span id="mitHeroTime">—</span>
+                                    </span>
+                                    <span class="mit-fact-item">
+                                        <small>Trainer</small>
+                                        <span id="mitHeroTrainer">—</span>
+                                    </span>
+                                    <span class="mit-fact-item">
+                                        <small>Seats</small>
+                                        <span id="mitHeroSeatsText">0 of 15</span>
+                                        <span style="height: 6px; border-radius: 3px; background: var(--crust-med, #f0decc); margin-top: 4px; display: block; overflow: hidden;">
+                                            <span id="mitHeroProgressBar" style="display: block; width: 0%; height: 6px; border-radius: 3px; background: var(--brand-blue, #0077bd); transition: width 0.25s ease;"></span>
+                                        </span>
+                                    </span>
                                 </div>
                             </div>
 
-                            <!-- Sessions Count / Summary Badge Bar -->
-                            <div class="mit-summary-bar">
-                                <div>Showing: <strong id="mitSessionCountDisp">0</strong> Upcoming Sessions</div>
-                                <div id="mitLevelLegendBar" style="display: flex; gap: 12px; font-size: 12px;">
-                                    <span style="color: var(--dark-blue);">● Level 1: Every 4 Wks</span>
-                                    <span style="color: var(--crust-deep);">● Level 2: Every 8 Wks</span>
-                                    <span style="color: var(--brand-red);">● Level 3: Every 12 Wks</span>
+                            <!-- Roster Section -->
+                            <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 2px 2px 0; font-family: 'Subhead1', 'Oswald', sans-serif; font-weight: 700; font-size: 14.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--crust-deep, #603913);">
+                                <span id="mitRosterCountHeader">Roster · 0 of 15</span>
+                                <button type="button" onclick="openMitEnrollModal()" style="color: var(--brand-blue, #0077bd); background: none; border: none; font-weight: 700; font-size: 15px; cursor: pointer; font-family: 'Subhead1', sans-serif; text-transform: none;">
+                                    + Add MIT to session
+                                </button>
+                            </div>
+
+                            <div class="mit-roster-container">
+                                <div id="mitRosterList">
+                                    <div style="padding: 24px; text-align: center; color: var(--crust-deep); font-size: 16px;">
+                                        Select a session from the list to view attendee roster.
+                                    </div>
+                                </div>
+                                <div id="mitEmptySeatsBanner" class="mit-empty-seats-pattern">
+                                    15 open seats
                                 </div>
                             </div>
 
-                            <!-- Table Container -->
-                            <div class="mit-table-wrapper">
-                                <table class="mit-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Date & ID</th>
-                                            <th id="mitThCourse">Course & Level</th>
-                                            <th style="text-align: center;">Center / Time</th>
-                                            <th style="text-align: center;">Trainer</th>
-                                            <th style="text-align: center;">Seats</th>
-                                            <th style="text-align: center;">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="mitSchedulerTableBody">
-                                        <!-- Dynamically loaded -->
-                                    </tbody>
-                                </table>
+                            <div style="flex: 1; min-height: 8px;"></div>
+
+                            <!-- Fixed Bottom Action Bar -->
+                            <div style="display: flex; gap: 12px; padding-top: 14px; border-top: 1.5px solid var(--crust-med, #f0decc); margin-top: auto;">
+                                <button type="button" id="btnSaveMitRoster" onclick="saveCurrentMitRoster()" class="btn p" style="flex: 1.2;">
+                                    Save Roster
+                                </button>
+                                <button type="button" id="btnEditMitSession" onclick="editCurrentMitSession()" class="btn s">
+                                    Edit Session
+                                </button>
+                                <span style="flex: 1;"></span>
+                                <button type="button" id="btnCancelMitSession" onclick="cancelCurrentMitSession()" class="btn d">
+                                    Cancel Session
+                                </button>
                             </div>
                         </div>
                     </div> <!-- Scrollable area closes here -->
@@ -1331,6 +1388,30 @@
                         <button type="button" onclick="exportAccessRosterCsv()"
                             style="width: 100%; margin-top: 6px; padding: 9px 12px; background: var(--dark-blue); color: white; border-radius: 9999px; font-family: 'Subhead1', sans-serif; font-size: 13.5px; text-transform: uppercase; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                             📥 Export Access Roster
+                        </button>
+                    </div>
+
+                    <!-- MIT Program Audit Content (Harmonized 3-Column View) -->
+                    <div id="auditMitContent" class="hidden" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 16.5px;">
+                            <span>Upcoming sessions:</span>
+                            <b id="mitAuditUpcomingCount" style="color: var(--dark-blue, #005c91); font-family: 'Subhead2', sans-serif; font-size: 18px;">0</b>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 16.5px;">
+                            <span>Seats filled (next 30 days):</span>
+                            <b id="mitAuditSeatsFilled" style="color: var(--brand-blue, #0077bd); font-family: 'Subhead2', sans-serif; font-size: 17.5px;">0 / 0</b>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 16.5px;">
+                            <span>MITs in progress:</span>
+                            <b id="mitAuditMitsInProgress" style="color: var(--crust-burnt, #472b10); font-family: 'Subhead2', sans-serif; font-size: 18px;">0</b>
+                        </div>
+                        <div style="background: #fff1f1; margin: 0 -6px; padding: 6px 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 16px;">
+                            <span style="font-weight: 700; color: #910000;">Sessions under 3 seats:</span>
+                            <b id="mitAuditUnder3Seats" style="color: #910000; font-family: 'Subhead2', sans-serif; font-size: 18px;">0</b>
+                        </div>
+                        <div style="flex: 1; min-height: 8px;"></div>
+                        <button type="button" onclick="openMitScheduleSummaryModal()" class="btn" style="background: var(--dark-blue, #005c91); color: #ffffff; border-radius: 10px; font-family: 'Subhead1', sans-serif; font-weight: 600; text-transform: uppercase; font-size: 15px; padding: 9px 14px; width: 100%; border: none; cursor: pointer;">
+                            View Full MIT Schedule
                         </button>
                     </div>
 
@@ -3775,6 +3856,9 @@
             const auditWeekly = document.getElementById('auditWeeklyContent');
             const auditPeriod = document.getElementById('auditPeriodContent');
             const auditCred = document.getElementById('auditCredSnapshotContent');
+            const auditMit = document.getElementById('auditMitContent');
+            const mitSidebarFilters = document.getElementById('mitSidebarFilters');
+            const mitSidebarActions = document.getElementById('mitSidebarActions');
             const auditTitle = document.getElementById('auditTitleHeader');
             const auditRange = document.getElementById('metricsWeekRange');
             const btnStoreTrends = document.getElementById('btnStoreTrendsAudit');
@@ -3803,7 +3887,7 @@
                 else if (view === 'staffing') searchInput.placeholder = "Search employee files...";
                 else if (view === 'paycards') searchInput.placeholder = "Search pay cards...";
                 else if (view === 'nto') searchInput.placeholder = "Search trainees...";
-                else if (view === 'mit') searchInput.placeholder = "Search MIT roster...";
+                else if (view === 'mit') searchInput.placeholder = "Search course, trainer, MIT...";
                 else if (view === 'credentials') searchInput.placeholder = "Search credentials...";
                 else if (view === 'contacts') searchInput.placeholder = "Search directory...";
             }
@@ -3818,6 +3902,9 @@
                 if (f) f.classList.add('hidden');
             });
             if (auditCred) auditCred.classList.add('hidden');
+            if (auditMit) auditMit.classList.add('hidden');
+            if (mitSidebarFilters) mitSidebarFilters.classList.add('hidden');
+            if (mitSidebarActions) mitSidebarActions.classList.add('hidden');
             if (btnStoreTrends) btnStoreTrends.classList.remove('hidden');
 
             const credHeaderActions = document.getElementById('credHeaderActions');
@@ -3962,16 +4049,47 @@
                 if (btnAddMain) btnAddMain.classList.add('hidden');
                 if (formActions) formActions.classList.add('hidden');
                 if (mitFormFields) mitFormFields.classList.remove('hidden');
+                if (mitSidebarFilters) mitSidebarFilters.classList.remove('hidden');
+                if (mitSidebarActions) mitSidebarActions.classList.remove('hidden');
+                if (customSortDropdown) customSortDropdown.classList.add('hidden');
+
+                // Denver Exception: Denver does NOT do levels for their classes!
+                const isDen = isDenverActive();
+                const lvlFilter = document.getElementById('mitSidebarLevelFilter');
+                if (lvlFilter) {
+                    lvlFilter.style.display = isDen ? 'none' : '';
+                }
+
                 if (scrollArea) {
-                    scrollArea.style.overflowY = 'hidden';
+                    scrollArea.style.overflowY = 'auto';
                     scrollArea.style.display = 'flex';
                     scrollArea.style.flexDirection = 'column';
                     scrollArea.style.height = '100%';
                     scrollArea.style.paddingRight = '0';
                     scrollArea.style.marginBottom = '0';
                 }
-                document.getElementById('formTitle').innerText = "🎓 MIT Leadership Class Scheduler";
-                fetchMitSchedulerClasses();
+                document.getElementById('formTitle').innerText = "🎓 MIT Leadership Class";
+
+                if (auditWeekly) auditWeekly.classList.add('hidden');
+                if (auditPeriod) auditPeriod.classList.add('hidden');
+                if (auditCred) auditCred.classList.add('hidden');
+                if (auditMit) auditMit.classList.remove('hidden');
+                if (btnStoreTrends) btnStoreTrends.classList.add('hidden');
+                if (auditTitle) auditTitle.innerText = "MIT PROGRAM AUDIT";
+                if (auditRange) {
+                    const today = new Date();
+                    const next30 = new Date();
+                    next30.setDate(today.getDate() + 30);
+                    auditRange.innerText = `${today.getMonth() + 1}/${today.getDate()} – ${next30.getMonth() + 1}/${next30.getDate()}`;
+                }
+
+                renderMitSidebar();
+                renderMitClassView();
+                if (!window.mitCalendarClassesCache || window.mitCalendarClassesCache.length === 0) {
+                    fetchMitSchedulerClasses();
+                } else {
+                    updateMitAuditMetrics();
+                }
 
             } else if (view === 'credentials') {
                 if (btnCred) {
@@ -4691,6 +4809,10 @@
 
             } else if (currentView === 'nto') {
                 renderNtoSidebar();
+                return;
+
+            } else if (currentView === 'mit') {
+                renderMitSidebar();
                 return;
 
             } else {
@@ -10551,8 +10673,18 @@
             }
         }
 
-        // --- MIT CLASS SCHEDULER & ROSTER FUNCTIONS ---
+        // --- MIT CLASS SCHEDULER & ROSTER FUNCTIONS (Harmonized 3-Column View) ---
         window.mitCalendarClassesCache = [];
+        window.currentSelectedMitClassId = null;
+        window.currentMitRosterCache = [];
+
+        function isDenverActive() {
+            const u = localStorage.getItem('onb_user') || '';
+            const headerCityText = document.getElementById('headerCity') ? document.getElementById('headerCity').innerText : '';
+            return (window.currentCity || '').toLowerCase() === 'denver' ||
+                   (typeof getCityFromUser === 'function' && getCityFromUser(u).toLowerCase() === 'denver') ||
+                   headerCityText.toLowerCase().includes('denver');
+        }
 
         function getMitClassTimestamp(c) {
             if (!c || !c.classDate) return 0;
@@ -10577,15 +10709,33 @@
             return new Date(y, m, d, hours, minutes).getTime();
         }
 
-        async function fetchMitSchedulerClasses() {
-            const tbody = document.getElementById('mitSchedulerTableBody');
-            const countDisp = document.getElementById('mitSessionCountDisp');
-            if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 25px; color:#888; font-size: 16px;">Loading scheduled MIT classes from D1...</td></tr>`;
+        function formatMitDateDisplay(dateStr) {
+            if (!dateStr) return { dayOfWeek: '', formattedDate: '', isToday: false, isPast: false };
+            const parts = dateStr.split('/');
+            if (parts.length !== 3) return { dayOfWeek: '', formattedDate: dateStr, isToday: false, isPast: false };
+            const m = parseInt(parts[0], 10) - 1;
+            const d = parseInt(parts[1], 10);
+            const y = parseInt(parts[2], 10);
+            const dt = new Date(y, m, d);
+            
+            const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+            const dayOfWeek = days[dt.getDay()] || '';
+            const formattedDate = `${dayOfWeek} ${parts[0]}/${parts[1]}`;
 
+            const now = new Date();
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+            const classStart = new Date(y, m, d).getTime();
+            const isToday = classStart === todayStart;
+            const isPast = classStart < todayStart;
+
+            return { dayOfWeek, formattedDate, isToday, isPast };
+        }
+
+        async function fetchMitSchedulerClasses() {
             try {
                 const u = localStorage.getItem('onb_user') || '';
                 const headerCityText = document.getElementById('headerCity') ? document.getElementById('headerCity').innerText : '';
-                let currentCity = window.currentCity || getCityFromUser(u);
+                let currentCity = window.currentCity || (typeof getCityFromUser === 'function' ? getCityFromUser(u) : '');
                 if (!currentCity || currentCity === 'System') {
                     if (headerCityText.toLowerCase().includes('denver')) currentCity = 'Denver';
                     else currentCity = 'Dallas';
@@ -10594,139 +10744,627 @@
                 const data = await res.json();
                 if (!data.success || !data.classes || data.classes.length === 0) {
                     window.mitCalendarClassesCache = [];
-                    if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 25px; color:#888; font-size: 16px;">No scheduled MIT classes found in D1.</td></tr>`;
-                    if (countDisp) countDisp.innerText = '0';
+                    renderMitSidebar();
+                    renderMitClassView();
+                    updateMitAuditMetrics();
                     return;
                 }
 
                 window.mitCalendarClassesCache = data.classes;
-                renderMitSchedulerTable();
+                renderMitSidebar();
+                renderMitClassView(window.currentSelectedMitClassId);
+                updateMitAuditMetrics();
             } catch (err) {
-                if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 25px; color: var(--brand-red); font-size: 16px;">Error loading MIT schedule: ${err.message}</td></tr>`;
+                console.error("Error loading MIT classes:", err);
             }
         }
 
-        function renderMitSchedulerTable() {
-            const tbody = document.getElementById('mitSchedulerTableBody');
-            const countDisp = document.getElementById('mitSessionCountDisp');
-            if (!tbody || !window.mitCalendarClassesCache) return;
+        function renderMitSidebar() {
+            const listContainer = document.getElementById('candidateList');
+            if (!listContainer) return;
 
-            const locFilter = document.getElementById('mitFilterLocation') ? document.getElementById('mitFilterLocation').value : 'ALL';
-            const lvlFilter = document.getElementById('mitFilterLevel') ? document.getElementById('mitFilterLevel').value : 'ALL';
-            const searchVal = document.getElementById('mitSearchInput') ? document.getElementById('mitSearchInput').value.trim().toLowerCase() : '';
+            const listCounterLabel = document.getElementById('listCounterLabel');
+            const sortDropdown = document.getElementById('customSortDropdown');
+            if (sortDropdown) sortDropdown.classList.add('hidden');
+
+            const isDenver = isDenverActive();
+            const levelFilterEl = document.getElementById('mitSidebarLevelFilter');
+            if (levelFilterEl) {
+                levelFilterEl.style.display = isDenver ? 'none' : '';
+            }
+
+            const searchVal = (document.getElementById('searchControl')?.value || '').trim().toLowerCase();
+            const locFilter = document.getElementById('mitSidebarCenterFilter')?.value || 'ALL';
+            const lvlFilter = (!isDenver && document.getElementById('mitSidebarLevelFilter')) ? document.getElementById('mitSidebarLevelFilter').value : 'ALL';
+            const showPast = document.getElementById('mitShowPastClasses')?.checked || false;
 
             const now = new Date();
             const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
 
-            const filtered = window.mitCalendarClassesCache.filter(c => {
-                // Exclude past classes - only include today and future sessions
-                const parts = (c.classDate || '').split('/');
-                if (parts.length === 3) {
-                    const classEndOfDay = new Date(parseInt(parts[2], 10), parseInt(parts[0], 10) - 1, parseInt(parts[1], 10), 23, 59, 59).getTime();
-                    if (classEndOfDay < todayStart) return false;
-                }
+            let classes = (window.mitCalendarClassesCache || []).slice();
 
+            // Filter
+            classes = classes.filter(c => {
+                const dateInfo = formatMitDateDisplay(c.classDate);
+                if (!showPast && !searchVal && dateInfo.isPast && !dateInfo.isToday) {
+                    return false;
+                }
                 if (locFilter !== 'ALL' && c.location !== locFilter) return false;
-                if (lvlFilter !== 'ALL' && String(c.level) !== String(lvlFilter)) return false;
+                if (!isDenver && lvlFilter !== 'ALL' && String(c.level) !== String(lvlFilter)) return false;
                 if (searchVal) {
                     const matchName = (c.name || '').toLowerCase().includes(searchVal);
                     const matchTrainer = (c.trainer || '').toLowerCase().includes(searchVal);
                     const matchLoc = (c.location || '').toLowerCase().includes(searchVal);
                     const matchId = (c.id || '').toLowerCase().includes(searchVal);
                     const matchDate = (c.classDate || '').toLowerCase().includes(searchVal);
-                    if (!matchName && !matchTrainer && !matchLoc && !matchId && !matchDate) return false;
+                    const matchAttendee = (c.attendees || []).some(a => String(a.candidate_name || a.name || '').toLowerCase().includes(searchVal));
+                    if (!matchName && !matchTrainer && !matchLoc && !matchId && !matchDate && !matchAttendee) return false;
                 }
                 return true;
             });
 
-            // Sort soonest upcoming first in chronological order
-            filtered.sort((a, b) => getMitClassTimestamp(a) - getMitClassTimestamp(b));
+            // Sort chronological
+            classes.sort((a, b) => getMitClassTimestamp(a) - getMitClassTimestamp(b));
 
-            if (countDisp) countDisp.innerText = filtered.length;
+            if (listCounterLabel) {
+                listCounterLabel.innerHTML = `UPCOMING SESSIONS · <span id="mitUpcomingCount">${classes.length}</span>`;
+            }
 
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 25px; color:#888; font-size: 16px;">No MIT classes match the current filters.</td></tr>`;
+            // Auto-select first session if none selected
+            if (classes.length > 0) {
+                const isSelectedPresent = classes.some(c => c.id === window.currentSelectedMitClassId);
+                if (!window.currentSelectedMitClassId || !isSelectedPresent) {
+                    // Pick the first upcoming session, or first session
+                    const upcomingFirst = classes.find(c => {
+                        const info = formatMitDateDisplay(c.classDate);
+                        return !info.isPast || info.isToday;
+                    }) || classes[0];
+                    window.currentSelectedMitClassId = upcomingFirst.id;
+                }
+            } else {
+                window.currentSelectedMitClassId = null;
+            }
+
+            listContainer.innerHTML = '';
+            if (classes.length === 0) {
+                listContainer.innerHTML = '<div style="text-align:center; padding: 25px; color: var(--crust-deep); font-size: 15px;">No MIT sessions match current filters.</div>';
                 return;
             }
 
-            const u = localStorage.getItem('onb_user') || '';
-            const headerCityText = document.getElementById('headerCity') ? document.getElementById('headerCity').innerText : '';
-            const isCurrentDenver = (window.currentCity || '').toLowerCase() === 'denver' ||
-                                    getCityFromUser(u).toLowerCase() === 'denver' ||
-                                    headerCityText.toLowerCase().includes('denver');
+            classes.forEach(c => {
+                const dateInfo = formatMitDateDisplay(c.classDate);
+                const isSelected = c.id === window.currentSelectedMitClassId;
+                const card = document.createElement('div');
+                card.className = `mit-session-card ${isSelected ? 'selected' : ''}`;
 
-            tbody.innerHTML = '';
-            filtered.forEach(c => {
-                const row = document.createElement('tr');
-                row.style.borderBottom = '1px solid var(--crust-med)';
-
-                let levelBadgeBg = 'var(--dark-blue)';
-                let levelBadgeColor = '#ffffff';
-                if (c.level === 2) {
-                    levelBadgeBg = 'var(--crust-med)';
-                    levelBadgeColor = 'var(--crust-burnt)';
+                // Color accent according to mockup: Level 3 is dark-blue (#005c91), Level 1/2 is tan (#c0a588), Denver is brand-blue (#0077bd)
+                if (isDenver) {
+                    card.style.borderLeftColor = 'var(--brand-blue, #0077bd)';
                 } else if (c.level === 3) {
-                    levelBadgeBg = 'var(--brand-red)';
-                    levelBadgeColor = '#ffffff';
+                    card.style.borderLeftColor = 'var(--dark-blue, #005c91)';
+                } else {
+                    card.style.borderLeftColor = 'var(--crust-dark, #c0a588)';
                 }
 
-                const spotsLeft = Math.max(0, (c.spotsTotal || 15) - (c.spotsTaken || 0));
-                const spotsBadgeBg = spotsLeft === 0 ? 'var(--brand-red)' : 'var(--crust-light)';
-                const spotsBadgeColor = spotsLeft === 0 ? '#ffffff' : 'var(--dark-blue)';
-                const spotsBadgeBorder = spotsLeft === 0 ? 'none' : '1px solid var(--dark-blue)';
+                const dateSubText = dateInfo.isToday ? `${dateInfo.formattedDate} · TODAY` : dateInfo.formattedDate;
+                
+                // CRITICAL DENVER EXCEPTION: Denver does NOT do levels for their classes!
+                let levelPillHtml = '';
+                if (!isDenver) {
+                    const lvlNum = c.level || 1;
+                    levelPillHtml = `<span class="mit-lv-pill mit-lv-${lvlNum}">Level ${lvlNum}</span>`;
+                }
 
-                const isClassDenver = isCurrentDenver || (c.market || '').toLowerCase() === 'denver';
-                const levelBadgeHTML = isClassDenver ? '' : `
-                    <br>
-                    <span class="mit-badge-level" style="background: ${levelBadgeBg}; color: ${levelBadgeColor};">
-                        Level ${c.level}
+                const spotsTaken = c.spotsTaken || (c.attendees ? c.attendees.length : 0);
+                const spotsTotal = c.spotsTotal || 15;
+                const timeStr = c.startTime ? c.startTime.replace(/:\d\d\s*/, ' ') : '';
+
+                card.innerHTML = `
+                    <span class="mit-card-sub" style="font-size: 13.5px;">
+                        <span>${dateSubText}</span>
+                        ${levelPillHtml}
+                    </span>
+                    <span class="mit-card-title">${c.name}</span>
+                    <span class="mit-card-sub" style="font-weight: 500; font-size: 14px;">
+                        <span>${c.location} · ${timeStr || c.startTime || '11 AM'} · ${c.trainer || 'Trainer'}</span>
+                        <b style="color: var(--dark-blue, #005c91);">${spotsTaken}/${spotsTotal}</b>
                     </span>
                 `;
 
-                row.innerHTML = `
-                    <td style="font-weight: bold; color: var(--dark-blue); font-size: 16px;">
-                        ${c.classDate} <br>
-                        <span style="font-size: 12px; color: var(--crust-deep); font-weight: normal; font-family: monospace;">${c.id}</span>
-                    </td>
-                    <td style="font-size: 16px;">
-                        <strong>${c.name}</strong>${levelBadgeHTML}
-                    </td>
-                    <td style="text-align: center; font-size: 15px;">
-                        <strong>📍 ${c.location}</strong><br>
-                        <span style="color: var(--dark-blue);">${c.startTime} - ${c.endTime}</span>
-                    </td>
-                    <td style="text-align: center; font-size: 15px;">
-                        ${c.trainer || 'Unassigned'}
-                    </td>
-                    <td style="text-align: center;">
-                        <span class="mit-badge-seats" style="background: ${spotsBadgeBg}; color: ${spotsBadgeColor}; border: ${spotsBadgeBorder};">
-                            ${c.spotsTaken || 0} / ${c.spotsTotal || 15}
-                        </span>
-                    </td>
-                    <td style="text-align: center;">
-                        <div style="display: flex; gap: 6px; justify-content: center;">
-                            <button type="button" onclick="openMitRosterModal('${c.id}', '${(c.name || '').replace(/'/g, "\\'")}', '${c.classDate}', '${c.startTime}')"
-                                class="mit-btn-action" style="background: var(--dark-blue); color: white;" title="View Candidate Roster">
-                                👥 Roster (${(c.attendees || []).length})
-                            </button>
-                            <button type="button" onclick="openMitClassModal('${c.id}')"
-                                class="mit-btn-action" style="background: var(--crust-light); color: var(--dark-blue); border: 1px solid var(--dark-blue);" title="Edit Session">
-                                ✏️
-                            </button>
-                            <button type="button" onclick="deleteMitClassSession('${c.id}', '${c.classDate}', '${(c.name || '').replace(/'/g, "\\'")}')"
-                                class="mit-btn-action" style="background: var(--brand-red); color: white;" title="Cancel Session">
-                                🗑️
-                            </button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(row);
+                card.onclick = () => selectMitSession(c.id);
+                listContainer.appendChild(card);
             });
+        }
+
+        function selectMitSession(classId) {
+            window.currentSelectedMitClassId = classId;
+            const cards = document.querySelectorAll('.mit-session-card');
+            cards.forEach(card => card.classList.remove('selected'));
+            renderMitSidebar();
+            renderMitClassView(classId);
+        }
+
+        async function renderMitClassView(classId = null) {
+            const resolvedId = classId || window.currentSelectedMitClassId;
+            const headerDate = document.getElementById('mitHeaderDateText');
+            const heroCourse = document.getElementById('mitHeroCourseName');
+            const heroLevel = document.getElementById('mitHeroLevelPill');
+            const heroStatus = document.getElementById('mitHeroStatusChip');
+            const heroId = document.getElementById('mitHeroSessionId');
+            const heroCenter = document.getElementById('mitHeroCenter');
+            const heroTime = document.getElementById('mitHeroTime');
+            const heroTrainer = document.getElementById('mitHeroTrainer');
+            const heroSeats = document.getElementById('mitHeroSeatsText');
+            const heroProgress = document.getElementById('mitHeroProgressBar');
+            const rosterHeader = document.getElementById('mitRosterCountHeader');
+            const rosterList = document.getElementById('mitRosterList');
+            const emptyBanner = document.getElementById('mitOpenSeatsBanner');
+
+            if (!heroCourse) return;
+
+            const isDenver = isDenverActive();
+
+            if (!resolvedId || !window.mitCalendarClassesCache || window.mitCalendarClassesCache.length === 0) {
+                if (headerDate) headerDate.innerText = "MIT Session";
+                heroCourse.innerText = "No Session Selected";
+                if (heroLevel) heroLevel.style.display = 'none';
+                if (heroStatus) heroStatus.innerText = "—";
+                if (heroId) heroId.innerText = "—";
+                if (heroCenter) heroCenter.innerText = "—";
+                if (heroTime) heroTime.innerText = "—";
+                if (heroTrainer) heroTrainer.innerText = "—";
+                if (heroSeats) heroSeats.innerText = "0 of 15";
+                if (heroProgress) heroProgress.style.width = "0%";
+                if (rosterHeader) rosterHeader.innerText = "Roster · 0 of 15";
+                if (rosterList) rosterList.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--crust-deep); font-size: 16px;">Schedule or select an MIT session to view attendee roster.</div>';
+                if (emptyBanner) emptyBanner.innerText = "No active session";
+                return;
+            }
+
+            const cls = window.mitCalendarClassesCache.find(c => c.id === resolvedId);
+            if (!cls) return;
+
+            const dateInfo = formatMitDateDisplay(cls.classDate);
+            if (headerDate) {
+                headerDate.innerText = `MIT Session · ${dateInfo.formattedDate || cls.classDate}`;
+            }
+
+            heroCourse.innerText = cls.name || "Operations Assessment";
+            heroId.innerText = cls.id || "—";
+            heroCenter.innerText = cls.location || "McKinney";
+            heroTime.innerText = `${cls.startTime || '11:00 AM'} – ${cls.endTime || '1:00 PM'}`;
+            heroTrainer.innerText = cls.trainer || "Unassigned";
+
+            // CRITICAL DENVER EXCEPTION: Denver does NOT do levels for their classes!
+            if (heroLevel) {
+                if (isDenver) {
+                    heroLevel.style.display = 'none';
+                } else {
+                    heroLevel.style.display = 'inline-flex';
+                    const lvlNum = cls.level || 1;
+                    heroLevel.className = `mit-lv-pill mit-lv-${lvlNum}`;
+                    heroLevel.innerText = `Level ${lvlNum} · every ${lvlNum === 1 ? '4' : lvlNum === 2 ? '8' : '12'} wks`;
+                }
+            }
+
+            if (heroStatus) {
+                if (dateInfo.isToday) {
+                    heroStatus.innerText = "Today";
+                    heroStatus.style.background = "var(--dark-blue, #005c91)";
+                } else if (dateInfo.isPast) {
+                    heroStatus.innerText = "Past";
+                    heroStatus.style.background = "var(--crust-dark, #c0a588)";
+                } else {
+                    heroStatus.innerText = "Upcoming";
+                    heroStatus.style.background = "var(--brand-blue, #0077bd)";
+                }
+            }
+
+            // Fetch Attendee Roster
+            if (rosterList) {
+                rosterList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--crust-deep); font-size: 15px;">Loading session attendee roster...</div>';
+            }
+
+            try {
+                const res = await fetch(`/api/staffing?action=getMitRoster&classId=${encodeURIComponent(resolvedId)}`);
+                const data = await res.json();
+                const roster = (data.success && data.roster) ? data.roster : [];
+                window.currentMitRosterCache = roster;
+
+                const spotsTotal = cls.spotsTotal || 15;
+                const spotsTaken = roster.length;
+                cls.spotsTaken = spotsTaken;
+
+                // Update Hero facts
+                if (heroSeats) heroSeats.innerText = `${spotsTaken} of ${spotsTotal}`;
+                if (heroProgress) {
+                    const pct = Math.min(100, Math.round((spotsTaken / spotsTotal) * 100));
+                    heroProgress.style.width = `${pct}%`;
+                    heroProgress.style.background = pct >= 100 ? 'var(--brand-red, #ff0000)' : 'var(--brand-blue, #0077bd)';
+                }
+
+                if (rosterHeader) {
+                    rosterHeader.innerText = `Roster · ${spotsTaken} of ${spotsTotal}`;
+                }
+
+                if (rosterList) {
+                    if (roster.length === 0) {
+                        rosterList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--crust-deep); font-size: 15.5px;">No trainees currently enrolled in this session.</div>';
+                    } else {
+                        rosterList.innerHTML = '';
+                        roster.forEach(r => {
+                            const row = document.createElement('div');
+                            row.className = 'mit-roster-item-row';
+                            const candidateDo = r.do_name || (contacts && contacts.find(c => String(c.store).trim() === String(r.store_num).trim())?.doName) || '';
+                            const doText = candidateDo ? ` · DO ${candidateDo}` : '';
+
+                            const st = (r.status || 'Enrolled').trim();
+                            const isEnrolled = st === 'Enrolled' || st === 'Confirmed' || !st;
+                            const isAttended = st === 'Attended';
+                            const isNoShow = st === 'No Show' || st === 'Absent';
+                            const isCanceled = st === 'Canceled';
+                            const isCompleted = st === 'Completed';
+
+                            row.innerHTML = `
+                                <span style="display: flex; flex-direction: column; gap: 2px;">
+                                    <span style="font-family: 'Subhead1', 'Oswald', sans-serif; font-weight: 600; font-size: 18px; color: var(--dark-blue, #005c91); line-height: 1.2;">
+                                        ${r.candidate_name}
+                                    </span>
+                                    <span style="font-size: 14.5px; color: var(--crust-deep, #603913); font-weight: 500;">
+                                        Store #${r.store_num}${doText}
+                                    </span>
+                                </span>
+                                <select class="field mit-roster-status-select" data-reg-id="${r.id}"
+                                    style="height: 38px; font-size: 15px; border-radius: 8px; border: 1.5px solid var(--crust-dark); background: white; color: var(--crust-burnt); padding: 0 10px; font-family: 'Condensed', sans-serif;">
+                                    <option value="Enrolled" ${isEnrolled ? 'selected' : ''}>Enrolled</option>
+                                    <option value="Attended" ${isAttended ? 'selected' : ''}>Attended</option>
+                                    <option value="Completed" ${isCompleted ? 'selected' : ''}>Completed</option>
+                                    <option value="No Show" ${isNoShow ? 'selected' : ''}>No Show</option>
+                                    <option value="Canceled" ${isCanceled ? 'selected' : ''}>Canceled</option>
+                                </select>
+                                <a href="javascript:void(0)" onclick="removeMitAttendeeFromSession('${r.id}', '${(r.candidate_name || '').replace(/'/g, "\\'")}')"
+                                    style="font-weight: 600; color: var(--crust-deep, #603913); font-size: 15px; text-decoration: none; text-align: right; cursor: pointer;">
+                                    Remove
+                                </a>
+                            `;
+                            rosterList.appendChild(row);
+                        });
+                    }
+                }
+
+                // Open seats pattern banner
+                if (emptyBanner) {
+                    const openSeats = Math.max(0, spotsTotal - spotsTaken);
+                    if (openSeats > 0) {
+                        emptyBanner.innerText = `${openSeats} open seat${openSeats === 1 ? '' : 's'}`;
+                        emptyBanner.className = 'mit-empty-seats-pattern';
+                    } else {
+                        emptyBanner.innerText = 'Session is full (0 open seats)';
+                        emptyBanner.className = 'mit-empty-seats-pattern';
+                        emptyBanner.style.background = '#faf2e9';
+                    }
+                }
+
+            } catch (err) {
+                if (rosterList) {
+                    rosterList.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--brand-red); font-size: 15px;">Error loading roster: ${err.message}</div>`;
+                }
+            }
+        }
+
+        async function saveCurrentMitRoster() {
+            const selects = document.querySelectorAll('.mit-roster-status-select');
+            if (selects.length === 0) {
+                showBrandAlert("No candidates in this session roster to save.", "Roster Empty");
+                return;
+            }
+
+            const registrations = [];
+            selects.forEach(sel => {
+                const regId = sel.dataset.regId;
+                if (regId) {
+                    registrations.push({ id: regId, status: sel.value });
+                }
+            });
+
+            showLoader(true, "Saving MIT roster attendance...");
+            try {
+                const res = await fetch('/api/staffing', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'saveMitAttendance', registrations })
+                });
+                const data = await res.json();
+                showLoader(false);
+
+                if (data.success) {
+                    showBrandAlert("Session roster saved successfully!", "Roster Updated");
+                    renderMitClassView(window.currentSelectedMitClassId);
+                    updateMitAuditMetrics();
+                } else {
+                    showBrandAlert(data.error || "Failed to save roster.", "Error");
+                }
+            } catch (err) {
+                showLoader(false);
+                showBrandAlert("Error saving roster: " + err.message, "System Error");
+            }
+        }
+
+        function editCurrentMitSession() {
+            if (!window.currentSelectedMitClassId) {
+                showBrandAlert("Please select an MIT session to edit.", "No Session Selected");
+                return;
+            }
+            openMitClassModal(window.currentSelectedMitClassId);
+        }
+
+        async function cancelCurrentMitSession() {
+            if (!window.currentSelectedMitClassId) {
+                showBrandAlert("Please select an MIT session to cancel.", "No Session Selected");
+                return;
+            }
+            const cls = (window.mitCalendarClassesCache || []).find(c => c.id === window.currentSelectedMitClassId);
+            const courseName = cls ? cls.name : "this MIT session";
+            const classDate = cls ? cls.classDate : "";
+            await deleteMitClassSession(window.currentSelectedMitClassId, classDate, courseName);
+        }
+
+        async function removeMitAttendeeFromSession(regId, candidateName) {
+            const confirmed = await showBrandConfirm(`Remove ${candidateName} from this MIT session? This will free up a seat.`, "Remove Trainee");
+            if (!confirmed) return;
+
+            showLoader(true, "Removing attendee...");
+            try {
+                const res = await fetch('/api/staffing', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'removeMitAttendee',
+                        registrationId: regId,
+                        classId: window.currentSelectedMitClassId
+                    })
+                });
+                const data = await res.json();
+                showLoader(false);
+
+                if (data.success) {
+                    showBrandAlert(`${candidateName} has been removed from the session.`, "Attendee Removed");
+                    fetchMitSchedulerClasses();
+                } else {
+                    showBrandAlert(data.error || "Failed to remove attendee.", "Error");
+                }
+            } catch (err) {
+                showLoader(false);
+                showBrandAlert("Error removing attendee: " + err.message, "System Error");
+            }
+        }
+
+        function updateMitAuditMetrics() {
+            const classes = window.mitCalendarClassesCache || [];
+            const upcomingCountEl = document.getElementById('mitAuditUpcomingCount');
+            const seatsFilledEl = document.getElementById('mitAuditSeatsFilled');
+            const mitsInProgressEl = document.getElementById('mitAuditMitsInProgress');
+            const under3SeatsEl = document.getElementById('mitAuditUnder3Seats');
+
+            const now = new Date();
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+            const in30Days = todayStart + (30 * 24 * 60 * 60 * 1000);
+
+            let upcomingCount = 0;
+            let seatsTaken30 = 0;
+            let seatsTotal30 = 0;
+            let under3Count = 0;
+
+            classes.forEach(c => {
+                const ts = getMitClassTimestamp(c);
+                if (ts >= todayStart) {
+                    upcomingCount++;
+                    const taken = c.spotsTaken || 0;
+                    const total = c.spotsTotal || 15;
+                    if (taken < 3) under3Count++;
+                    if (ts <= in30Days) {
+                        seatsTaken30 += taken;
+                        seatsTotal30 += total;
+                    }
+                }
+            });
+
+            // Count MITs in progress from candidates roster
+            let mitsInProgress = 0;
+            if (Array.isArray(candidates)) {
+                mitsInProgress = candidates.filter(c => {
+                    const pos = String(c.position || '').toUpperCase();
+                    const isMit = pos.includes('MIT') || pos.includes('MANAGER IN TRAINING') || String(c.status || '').toUpperCase().includes('MIT');
+                    const isActive = !c.hired && !c.ineligible && !c.inactive && !c.withdrawn;
+                    return isMit && isActive;
+                }).length;
+            }
+
+            if (upcomingCountEl) upcomingCountEl.innerText = upcomingCount;
+            if (seatsFilledEl) seatsFilledEl.innerText = `${seatsTaken30} / ${seatsTotal30}`;
+            if (mitsInProgressEl) mitsInProgressEl.innerText = mitsInProgress;
+            if (under3SeatsEl) under3SeatsEl.innerText = under3Count;
+        }
+
+        function openMitEnrollModal() {
+            if (!window.currentSelectedMitClassId) {
+                showBrandAlert("Please select an MIT session to enroll candidates.", "No Session Selected");
+                return;
+            }
+            const cls = (window.mitCalendarClassesCache || []).find(c => c.id === window.currentSelectedMitClassId);
+            if (!cls) return;
+
+            const modal = document.getElementById('mitEnrollModal');
+            if (!modal) return;
+
+            document.getElementById('mitEnrollModalSubtitle').innerText = `${cls.name} · ${cls.classDate} @ ${cls.startTime} (${cls.location})`;
+            
+            // Populate quick-select dropdown
+            const selectEl = document.getElementById('mitEnrollCandidateSelect');
+            if (selectEl) {
+                selectEl.innerHTML = '<option value="">-- Choose from active candidates or enter below --</option>';
+                const activeOnb = (candidates || []).filter(c => !c.hired && !c.ineligible && !c.inactive);
+                activeOnb.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.innerText = `${c.name} (Store #${c.store || '—'} · ${c.position || 'Onboarding'})`;
+                    selectEl.appendChild(opt);
+                });
+            }
+
+            document.getElementById('mitEnrollName').value = '';
+            document.getElementById('mitEnrollStore').value = '';
+            document.getElementById('mitEnrollPosition').value = isDenverActive() ? 'MIT' : 'MIT 1';
+            document.getElementById('mitEnrollPhone').value = '';
+            document.getElementById('mitEnrollEmail').value = '';
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeMitEnrollModal() {
+            const modal = document.getElementById('mitEnrollModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function onMitEnrollCandidateSelected() {
+            const selectEl = document.getElementById('mitEnrollCandidateSelect');
+            const candidateId = selectEl ? selectEl.value : '';
+            if (!candidateId) return;
+
+            const cand = (candidates || []).find(c => c.id === candidateId);
+            if (!cand) return;
+
+            document.getElementById('mitEnrollName').value = cand.name || '';
+            document.getElementById('mitEnrollStore').value = cand.store || '';
+            document.getElementById('mitEnrollPosition').value = cand.position || (isDenverActive() ? 'MIT' : 'MIT 1');
+            document.getElementById('mitEnrollPhone').value = cand.phone || '';
+            document.getElementById('mitEnrollEmail').value = cand.email || '';
+        }
+
+        async function submitMitCandidateEnrollment() {
+            const classId = window.currentSelectedMitClassId;
+            const name = document.getElementById('mitEnrollName').value.trim();
+            const storeNum = document.getElementById('mitEnrollStore').value.trim();
+            const position = document.getElementById('mitEnrollPosition').value.trim() || 'MIT';
+            const phone = document.getElementById('mitEnrollPhone').value.trim();
+            const email = document.getElementById('mitEnrollEmail').value.trim();
+            const candidateId = document.getElementById('mitEnrollCandidateSelect').value || '';
+
+            if (!classId || !name || !storeNum) {
+                showBrandAlert("Please enter both trainee name and store number.", "Missing Details");
+                return;
+            }
+
+            showLoader(true, "Enrolling MIT trainee...");
+            try {
+                const res = await fetch('/api/staffing', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'registerMitClass',
+                        classId: classId,
+                        name: name,
+                        storeNum: storeNum,
+                        position: position,
+                        phone: phone,
+                        email: email,
+                        candidateId: candidateId
+                    })
+                });
+                const data = await res.json();
+                showLoader(false);
+
+                if (data.success) {
+                    closeMitEnrollModal();
+                    showBrandAlert(`${name} enrolled into MIT session successfully!`, "Enrolled");
+                    fetchMitSchedulerClasses();
+                } else {
+                    showBrandAlert(data.error || "Failed to enroll candidate.", "Enrollment Error");
+                }
+            } catch (err) {
+                showLoader(false);
+                showBrandAlert("Error enrolling candidate: " + err.message, "System Error");
+            }
+        }
+
+        function openMitScheduleSummaryModal() {
+            const modal = document.getElementById('mitScheduleSummaryModal');
+            if (!modal) return;
+
+            const isDenver = isDenverActive();
+            const thLevel = document.getElementById('mitModalThLevel');
+            if (thLevel) {
+                thLevel.innerText = isDenver ? 'Course' : 'Course & Level';
+            }
+
+            const tbody = document.getElementById('mitScheduleSummaryTableBody');
+            if (tbody) {
+                const classes = (window.mitCalendarClassesCache || []).slice();
+                classes.sort((a, b) => getMitClassTimestamp(a) - getMitClassTimestamp(b));
+
+                if (classes.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 25px; color: var(--crust-deep);">No scheduled classes found.</td></tr>';
+                } else {
+                    tbody.innerHTML = '';
+                    classes.forEach(c => {
+                        const row = document.createElement('tr');
+                        row.style.borderBottom = '1px solid var(--crust-med)';
+
+                        let levelPill = '';
+                        if (!isDenver) {
+                            levelPill = `<span class="mit-lv-pill mit-lv-${c.level || 1}" style="margin-left: 6px;">L${c.level || 1}</span>`;
+                        }
+
+                        const spotsTaken = c.spotsTaken || 0;
+                        const spotsTotal = c.spotsTotal || 15;
+
+                        row.innerHTML = `
+                            <td style="padding: 10px 12px; font-weight: bold; color: var(--dark-blue); font-size: 15px;">
+                                ${c.classDate} <br>
+                                <span style="font-size: 11.5px; color: var(--crust-deep); font-family: monospace;">${c.id}</span>
+                            </td>
+                            <td style="padding: 10px 12px; font-size: 15.5px; font-weight: 600;">
+                                ${c.name} ${levelPill}
+                            </td>
+                            <td style="padding: 10px 12px; text-align: center; font-size: 14.5px;">
+                                <strong>${c.location}</strong><br>
+                                <span style="color: var(--dark-blue);">${c.startTime} - ${c.endTime}</span>
+                            </td>
+                            <td style="padding: 10px 12px; text-align: center; font-size: 14.5px;">
+                                ${c.trainer || 'Unassigned'}
+                            </td>
+                            <td style="padding: 10px 12px; text-align: center; font-weight: bold; color: var(--dark-blue);">
+                                ${spotsTaken} / ${spotsTotal}
+                            </td>
+                            <td style="padding: 10px 12px; text-align: center;">
+                                <button type="button" onclick="closeMitScheduleSummaryModal(); selectMitSession('${c.id}');" class="btn p"
+                                    style="padding: 5px 12px; font-size: 13.5px; cursor: pointer;">
+                                    View
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeMitScheduleSummaryModal() {
+            const modal = document.getElementById('mitScheduleSummaryModal');
+            if (modal) modal.classList.add('hidden');
         }
 
         function openMitClassModal(editClassId = null) {
             const modal = document.getElementById('mitClassModal');
             if (!modal) return;
+
+            const isDenver = isDenverActive();
+            const levelGroup = document.getElementById('mitModalLevelGroup');
+            if (levelGroup) {
+                levelGroup.style.display = isDenver ? 'none' : '';
+            }
 
             document.getElementById('mitModalTitle').innerText = editClassId ? "✏️ Edit MIT Class Session" : "➕ Schedule New MIT Class Session";
             document.getElementById('mitEditClassId').value = editClassId || "";
@@ -10741,10 +11379,10 @@
                         const d = parts[1].padStart(2, '0');
                         document.getElementById('mitModalDate').value = `${y}-${m}-${d}`;
                     }
-                    document.getElementById('mitModalCourse').value = cls.name || "Operations Assessment";
+                    document.getElementById('mitModalCourse').value = cls.name || (isDenver ? "Creating a Schedule/Labor Class" : "Operations Assessment");
                     document.getElementById('mitModalLevel').value = cls.level || "1";
-                    document.getElementById('mitModalLocation').value = cls.location || "McKinney";
-                    document.getElementById('mitModalTrainer').value = cls.trainer || "Rebecca";
+                    document.getElementById('mitModalLocation').value = cls.location || (isDenver ? "Academy" : "McKinney");
+                    document.getElementById('mitModalTrainer').value = cls.trainer || (isDenver ? "Nick" : "Rebecca");
                     document.getElementById('mitModalStart').value = cls.startTime || "11:00 AM";
                     document.getElementById('mitModalEnd').value = cls.endTime || "1:00 PM";
                     document.getElementById('mitModalCapacity').value = cls.spotsTotal || 15;
@@ -10753,17 +11391,12 @@
             } else {
                 const tomorrow = new Date();
                 tomorrow.setDate(tomorrow.getDate() + 1);
-                const u = localStorage.getItem('onb_user') || '';
-                const headerCityText = document.getElementById('headerCity') ? document.getElementById('headerCity').innerText : '';
-                const isDenverModal = (window.currentCity || '').toLowerCase() === 'denver' ||
-                                      getCityFromUser(u).toLowerCase() === 'denver' ||
-                                      headerCityText.toLowerCase().includes('denver');
 
                 document.getElementById('mitModalDate').value = tomorrow.toISOString().split('T')[0];
-                document.getElementById('mitModalCourse').value = isDenverModal ? "Creating a Schedule/Labor Class" : "Operations Assessment";
+                document.getElementById('mitModalCourse').value = isDenver ? "Creating a Schedule/Labor Class" : "Operations Assessment";
                 document.getElementById('mitModalLevel').value = "1";
-                document.getElementById('mitModalLocation').value = isDenverModal ? "Academy" : "McKinney";
-                document.getElementById('mitModalTrainer').value = isDenverModal ? "Nick" : "Rebecca";
+                document.getElementById('mitModalLocation').value = isDenver ? "Academy" : "McKinney";
+                document.getElementById('mitModalTrainer').value = isDenver ? "Nick" : "Rebecca";
                 document.getElementById('mitModalStart').value = "11:00 AM";
                 document.getElementById('mitModalEnd').value = "1:00 PM";
                 document.getElementById('mitModalCapacity').value = 15;
@@ -10779,6 +11412,7 @@
         }
 
         function onMitCourseChange() {
+            if (isDenverActive()) return; // Denver has no levels
             const course = document.getElementById('mitModalCourse').value;
             const lvlSelect = document.getElementById('mitModalLevel');
             if (course === 'Customer Experience' || course === 'Operations Assessment' || course === 'Product Quality') {
@@ -10832,7 +11466,7 @@
                     classId: classId || undefined,
                     classDate: formattedDateStr,
                     name: name,
-                    level: parseInt(level, 10),
+                    level: isDenverActive() ? 1 : parseInt(level, 10),
                     location: location,
                     trainer: trainer,
                     startTime: startTime,
@@ -10853,6 +11487,7 @@
                 if (data.success) {
                     closeMitClassModal();
                     showBrandAlert(classId ? "MIT class updated successfully!" : "New MIT class session added!", "Success");
+                    if (data.id) window.currentSelectedMitClassId = data.id;
                     fetchMitSchedulerClasses();
                 } else {
                     showBrandAlert(data.error || "Failed to save session.", "Error");
@@ -10864,7 +11499,7 @@
         }
 
         async function deleteMitClassSession(classId, classDate, courseName) {
-            const confirmed = await showBrandConfirm(`Cancel session for ${courseName} on ${classDate}? This will deactivate it from signups.`, "Deactivate Session");
+            const confirmed = await showBrandConfirm(`Cancel session for ${courseName || 'this class'} on ${classDate || ''}? This will deactivate it from signups.`, "Deactivate Session");
             if (!confirmed) return;
 
             showLoader(true, "Deactivating session...");
@@ -10878,6 +11513,7 @@
                 showLoader(false);
                 if (data.success) {
                     showBrandAlert("Session canceled and removed.", "Deactivated");
+                    window.currentSelectedMitClassId = null;
                     fetchMitSchedulerClasses();
                 } else {
                     showBrandAlert(data.error || "Failed to cancel session.", "Error");
@@ -11793,6 +12429,140 @@
                     <button type="button" onclick="closeMitRosterModal()" class="secondary"
                         style="padding: 8px 18px; font-size: 14px; font-family: 'Subhead2'; cursor: pointer;">
                         Close Roster
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MIT ENROLL TRAINEE MODAL -->
+    <div id="mitEnrollModal" class="brand-modal-overlay hidden" style="z-index: 1000005;">
+        <div class="brand-modal-card" style="max-width: 580px; width: 95%;">
+            <div class="brand-modal-brand-stripe"></div>
+            <div class="brand-modal-content" style="padding: 20px; text-align: left;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--crust-med); padding-bottom: 8px; margin-bottom: 14px;">
+                    <div>
+                        <h3 id="mitEnrollModalTitle" style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 19px; text-transform: uppercase;">
+                            ➕ Add MIT Trainee to Session
+                        </h3>
+                        <div id="mitEnrollModalSubtitle" style="font-family: 'Compact', sans-serif; font-size: 13.5px; color: var(--crust-deep); margin-top: 2px;">
+                            Session Details
+                        </div>
+                    </div>
+                    <button type="button" onclick="closeMitEnrollModal()"
+                        style="background: var(--crust-med); color: var(--crust-burnt); border: none; font-size: 13px; padding: 5px 12px; border-radius: 6px; cursor: pointer;">
+                        ✕ Close
+                    </button>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label style="font-family: 'Subhead2'; font-size: 13px; color: var(--dark-blue); display: block; margin-bottom: 4px; text-transform: uppercase;">
+                        Quick Select Candidate / Employee:
+                    </label>
+                    <select id="mitEnrollCandidateSelect" onchange="onMitEnrollCandidateSelected()"
+                        style="width: 100%; padding: 8px 10px; font-size: 15px; border-radius: 6px; border: 1.5px solid var(--crust-dark); font-family: 'Condensed', sans-serif;">
+                        <option value="">-- Choose from active candidates or enter below --</option>
+                    </select>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                    <div>
+                        <label style="font-family: 'Subhead2'; font-size: 13px; color: var(--dark-blue); display: block; margin-bottom: 4px; text-transform: uppercase;">
+                            Trainee Name *:
+                        </label>
+                        <input type="text" id="mitEnrollName" placeholder="Full Name"
+                            style="width: 100%; padding: 8px 10px; font-size: 15px; border-radius: 6px; border: 1.5px solid var(--crust-dark); font-family: 'Condensed', sans-serif; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="font-family: 'Subhead2'; font-size: 13px; color: var(--dark-blue); display: block; margin-bottom: 4px; text-transform: uppercase;">
+                            Store Number *:
+                        </label>
+                        <input type="text" id="mitEnrollStore" placeholder="e.g. 101"
+                            style="width: 100%; padding: 8px 10px; font-size: 15px; border-radius: 6px; border: 1.5px solid var(--crust-dark); font-family: 'Condensed', sans-serif; box-sizing: border-box;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                    <div>
+                        <label style="font-family: 'Subhead2'; font-size: 13px; color: var(--dark-blue); display: block; margin-bottom: 4px; text-transform: uppercase;">
+                            Position / Role:
+                        </label>
+                        <input type="text" id="mitEnrollPosition" placeholder="e.g. MIT 1 or MIT"
+                            style="width: 100%; padding: 8px 10px; font-size: 15px; border-radius: 6px; border: 1.5px solid var(--crust-dark); font-family: 'Condensed', sans-serif; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="font-family: 'Subhead2'; font-size: 13px; color: var(--dark-blue); display: block; margin-bottom: 4px; text-transform: uppercase;">
+                            Phone Number:
+                        </label>
+                        <input type="tel" id="mitEnrollPhone" placeholder="(555) 000-0000"
+                            style="width: 100%; padding: 8px 10px; font-size: 15px; border-radius: 6px; border: 1.5px solid var(--crust-dark); font-family: 'Condensed', sans-serif; box-sizing: border-box;">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="font-family: 'Subhead2'; font-size: 13px; color: var(--dark-blue); display: block; margin-bottom: 4px; text-transform: uppercase;">
+                        Email Address:
+                    </label>
+                    <input type="email" id="mitEnrollEmail" placeholder="candidate@email.com"
+                        style="width: 100%; padding: 8px 10px; font-size: 15px; border-radius: 6px; border: 1.5px solid var(--crust-dark); font-family: 'Condensed', sans-serif; box-sizing: border-box;">
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1.5px solid var(--crust-med); padding-top: 14px;">
+                    <button type="button" onclick="closeMitEnrollModal()" class="secondary"
+                        style="padding: 8px 18px; font-size: 14.5px; font-family: 'Subhead2'; cursor: pointer;">
+                        Cancel
+                    </button>
+                    <button type="button" onclick="submitMitCandidateEnrollment()" class="btn p"
+                        style="padding: 8px 22px; font-size: 15px; cursor: pointer;">
+                        Enroll Candidate
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FULL MIT SCHEDULE OVERVIEW MODAL -->
+    <div id="mitScheduleSummaryModal" class="brand-modal-overlay hidden" style="z-index: 1000005;">
+        <div class="brand-modal-card" style="max-width: 900px; width: 95%;">
+            <div class="brand-modal-brand-stripe"></div>
+            <div class="brand-modal-content" style="padding: 20px; text-align: left;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--crust-med); padding-bottom: 8px; margin-bottom: 14px;">
+                    <div>
+                        <h3 style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 20px; text-transform: uppercase;">
+                            📅 Full MIT Class Schedule
+                        </h3>
+                        <div style="font-family: 'Compact', sans-serif; font-size: 13.5px; color: var(--crust-deep); margin-top: 2px;">
+                            Overview of all active sessions and attendee capacity
+                        </div>
+                    </div>
+                    <button type="button" onclick="closeMitScheduleSummaryModal()"
+                        style="background: var(--crust-med); color: var(--crust-burnt); border: none; font-size: 13px; padding: 5px 12px; border-radius: 6px; cursor: pointer;">
+                        ✕ Close
+                    </button>
+                </div>
+
+                <div style="max-height: 480px; overflow-y: auto; border: 1.5px solid var(--crust-dark); border-radius: 8px;">
+                    <table style="width: 100%; border-collapse: collapse; font-family: 'Condensed', sans-serif; font-size: 15px; text-align: left;">
+                        <thead>
+                            <tr style="background: var(--dark-blue); color: white; position: sticky; top: 0; font-family: 'Subhead2'; font-size: 13px; text-transform: uppercase;">
+                                <th style="padding: 10px 12px;">Date & Session</th>
+                                <th style="padding: 10px 12px;" id="mitModalThLevel">Course</th>
+                                <th style="padding: 10px 12px; text-align: center;">Location & Time</th>
+                                <th style="padding: 10px 12px; text-align: center;">Trainer</th>
+                                <th style="padding: 10px 12px; text-align: center;">Seats</th>
+                                <th style="padding: 10px 12px; text-align: center;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mitScheduleSummaryTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; margin-top: 14px;">
+                    <button type="button" onclick="closeMitScheduleSummaryModal()" class="secondary"
+                        style="padding: 8px 18px; font-size: 14px; font-family: 'Subhead2'; cursor: pointer;">
+                        Close
                     </button>
                 </div>
             </div>
