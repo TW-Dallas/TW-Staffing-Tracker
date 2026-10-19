@@ -589,13 +589,19 @@
            8. FORMS, INPUTS & CHECKBOX GRID
            ========================================================================== */
         .form-group { margin-bottom: 8px; }
-        .form-group label { 
+        .form-group > label { 
             display: block; 
             font-family: 'Subhead2', sans-serif; 
             font-size: 14.5px; 
             color: var(--crust-burnt); 
             text-transform: uppercase; 
             margin-bottom: 2px; 
+        }
+        .form-group label:has(input[type="checkbox"]),
+        .form-group label:has(input[type="radio"]),
+        #payCardCheckLabel,
+        .checkbox-item {
+            text-transform: none !important;
         }
         .form-row { display: flex; gap: 12px; }
         .form-row .form-group { flex: 1; }
