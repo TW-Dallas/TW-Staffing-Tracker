@@ -8183,7 +8183,11 @@
                 const isConcluded = (entry.calClass && (entry.calClass.concluded || entry.calClass.status === 'Concluded')) || allFinalized;
 
                 if (entry.isPast) {
-                    if (isConcluded) {
+                    if (!hasTrainees) {
+                        entry.status = 'closed';
+                        entry.badgeText = 'Closed';
+                        entry.subMeta = 'No trainees enrolled';
+                    } else if (isConcluded) {
                         entry.status = 'closed';
                         entry.badgeText = 'Closed';
                         entry.subMeta = 'Concluded & sent';
@@ -8285,7 +8289,7 @@
                 }
 
                 const traineeCount = entry.trainees.length;
-                const countLabel = entry.status === 'closed'
+                const countLabel = (entry.status === 'closed' && traineeCount > 0)
                     ? `${traineeCount} attended`
                     : `${traineeCount} ${traineeCount === 1 ? 'trainee' : 'trainees'}`;
 
