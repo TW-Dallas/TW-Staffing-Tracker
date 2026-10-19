@@ -12,7 +12,7 @@
     <title>Onboarder Portal</title>
     <link class="favicon" rel="icon" type="image/png" href="images/staffing_icon.png">
     <link rel="apple-touch-icon" href="images/staffing_icon.png">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=20261019_0243">
 </head>
 
 <body>
@@ -312,7 +312,7 @@
                                                 <img class="pos-trigger-icon" src="" alt="icon" style="width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; display: none;">
                                                 <span class="pos-trigger-label" style="white-space: nowrap;">Position</span>
                                             </div>
-                                            <span style="font-size: 11px; color: var(--crust-burnt); margin-left: 4px;">▾</span>
+                                            <span class="pos-dropdown-arrow"></span>
                                         </button>
                                         <div id="fieldPositionMenu" class="pos-dropdown-menu hidden">
                                             <div class="pos-menu-option" data-val="CSR" onclick="selectCustomPosition('fieldPosition', 'CSR')">
@@ -473,7 +473,7 @@
                                                 <img class="pos-trigger-icon" src="" alt="icon" style="width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; display: none;">
                                                 <span class="pos-trigger-label" style="white-space: nowrap;">Position</span>
                                             </div>
-                                            <span style="font-size: 11px; color: var(--crust-burnt); margin-left: 4px;">▾</span>
+                                            <span class="pos-dropdown-arrow"></span>
                                         </button>
                                         <div id="intPositionMenu" class="pos-dropdown-menu hidden">
                                             <div class="pos-menu-option" data-val="DE" onclick="selectCustomPosition('intPosition', 'DE')">
@@ -647,23 +647,17 @@
                             </div>
 
                             <!-- HRAlliance Style Employment Periods Card (Top Position) -->
-                            <div id="stfEmploymentPeriodsContainer" style="margin-top: 10px; margin-bottom: 14px;">
+                            <div id="stfEmploymentPeriodsContainer" style="margin-top: 6px; margin-bottom: 8px;">
                             </div>
 
-                            <!-- Collapsible Active Stint Editor -->
-                            <div id="stfActiveEditorWrapper"
-                                style="background: white; border: 1.5px solid #d0c0a8; border-radius: 8px; overflow: hidden; margin-bottom: 14px;">
-                                <div onclick="toggleActiveStintEditor()"
-                                    style="background: #f7f1e6; padding: 10px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0d0ba;">
-                                    <strong id="stfActiveEditorTitle"
-                                        style="color: #472b10; font-family: 'Subhead1', sans-serif; font-size: 16px;">
-                                        ✏️ Active Record / Stint Details
-                                    </strong>
-                                    <span id="stfActiveEditorChevron"
-                                        style="font-size: 13.5px; color: #1f4e79; font-weight: bold; font-family: 'Subhead1', sans-serif;">▼
-                                        Collapse / Expand</span>
+                            <!-- Active Record / Stint Form -->
+                            <div id="stfActiveEditorWrapper" style="margin-bottom: 8px;">
+                                <div class="int-section-header" style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px; margin-bottom: 8px;">
+                                    <span id="stfActiveEditorTitle">Active Record / Stint</span>
+                                    <span id="stfActiveEditorChevron" onclick="toggleActiveStintEditor()"
+                                        style="font-size: 12.5px; color: var(--brand-blue); cursor: pointer; font-family: 'Subhead2', sans-serif; text-transform: none; letter-spacing: normal; font-weight: normal;">Collapse ▴</span>
                                 </div>
-                                <div id="stfActiveEditorBody" style="padding: 14px;">
+                                <div id="stfActiveEditorBody">
                                     <div class="form-row flex-three">
                                         <div class="form-group">
                                             <label>Position</label>
@@ -673,7 +667,7 @@
                                                         <img class="pos-trigger-icon" src="" alt="icon" style="width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; display: none;">
                                                         <span class="pos-trigger-label" style="white-space: nowrap;">Select Position</span>
                                                     </div>
-                                                    <span style="font-size: 11px; color: var(--crust-burnt); margin-left: 4px;">▾</span>
+                                                    <span class="pos-dropdown-arrow"></span>
                                                 </button>
                                                 <div id="stfPositionMenu" class="pos-dropdown-menu hidden">
                                                     <div class="pos-menu-option" data-val="CSR" onclick="selectCustomPosition('stfPosition', 'CSR'); refreshActiveStintPreview();">
@@ -706,7 +700,7 @@
                                             <label>Store #</label>
                                             <input type="text" id="stfStore" oninput="refreshActiveStintPreview()">
                                         </div>
-                                        <div class="form-group">
+                                        <div class="form-group" style="flex: 1.5;">
                                             <label>DO Name</label>
                                             <input type="text" id="stfDo" oninput="refreshActiveStintPreview()">
                                         </div>
@@ -736,8 +730,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="section-header" style="margin-top: 10px;">Termination & Bonus
-                                        Eligibility Audit</div>
+                                    <div class="int-section-header" style="margin-top: 8px; margin-bottom: 8px;">Termination &amp; Bonus Eligibility</div>
 
                                     <div class="form-row flex-three">
                                         <div class="form-group">
@@ -780,13 +773,13 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group">
+                                    <div class="form-group" style="margin-bottom: 6px;">
                                         <label>General Staffing Notes / Explain Reason in Detail</label>
                                         <textarea id="stfNotes" oninput="refreshActiveStintPreview()"
-                                            placeholder="Enter detailed explanation here..."></textarea>
+                                            placeholder="Enter detailed explanation here..." style="height: 48px; font-family: 'Condensed', sans-serif; font-size: 14.5px; line-height: 1.35; resize: none;"></textarea>
                                     </div>
 
-                                    <div class="form-group">
+                                    <div class="form-group" style="margin-bottom: 0;">
                                         <label>Submitted by:</label>
                                         <input type="text" id="stfGmName" oninput="refreshActiveStintPreview()" placeholder="Manager who completed form">
                                     </div>
@@ -795,25 +788,25 @@
 
                             <!-- Additional / Prior Employment Stints Sub-Form -->
                             <div id="stfPriorStintsWrapper"
-                                style="margin-top: 14px; background: #faf5ed; border: 1.5px dashed #c29d62; border-radius: 8px; padding: 14px;">
+                                style="margin-top: 10px; background: var(--crust-light); border: 1.5px dashed var(--crust-dark); border-radius: 10px; padding: 12px 14px;">
                                 <div
-                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                                     <div
-                                        style="font-family: 'Subhead1', sans-serif; font-size: 15px; color: #472b10; font-weight: bold;">
-                                        🔁 Add Historical / Past Stint to File
+                                        style="font-family: 'Subhead1', sans-serif; font-size: 14px; color: var(--crust-burnt); text-transform: uppercase; letter-spacing: 0.05em; font-weight: bold;">
+                                        Add Historical / Past Stint to File
                                     </div>
                                     <button type="button" onclick="addPriorStintCard()"
-                                        style="background: var(--brand-blue); color: white; border: none; border-radius: 6px; padding: 6px 12px; font-family: 'Subhead1', sans-serif; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                                        <span>➕ Add Prior Stint</span>
+                                        style="background: var(--brand-blue); color: white; border: none; border-radius: 6px; padding: 5px 12px; font-family: 'Subhead1', sans-serif; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                        <span>+ Add Prior Stint</span>
                                     </button>
                                 </div>
                                 <div
-                                    style="font-size: 13px; color: #795548; margin-bottom: 10px; font-family: 'Condensed', sans-serif;">
+                                    style="font-size: 13px; color: var(--crust-deep); margin-bottom: 8px; font-family: 'Condensed', sans-serif;">
                                     Enter any previous employment terms for this rehire. Each stint will be recorded
                                     with its own dates, store, reasons, and detailed notes.
                                 </div>
                                 <div id="priorStintsContainer"
-                                    style="display: flex; flex-direction: column; gap: 12px;"></div>
+                                    style="display: flex; flex-direction: column; gap: 10px;"></div>
                             </div>
                         </div>
 
@@ -833,7 +826,7 @@
                                                 <img class="pos-trigger-icon" src="" alt="icon" style="width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; display: none;">
                                                 <span class="pos-trigger-label" style="white-space: nowrap;">Select Position</span>
                                             </div>
-                                            <span style="font-size: 11px; color: var(--crust-burnt); margin-left: 4px;">▾</span>
+                                            <span class="pos-dropdown-arrow"></span>
                                         </button>
                                         <div id="payPositionMenu" class="pos-dropdown-menu hidden">
                                             <div class="pos-menu-option" data-val="CSR" onclick="selectCustomPosition('payPosition', 'CSR')">
@@ -5527,7 +5520,7 @@
             if (priorStCont) priorStCont.innerHTML = '';
             if (typeof toggleActiveStintEditor === 'function') toggleActiveStintEditor(true);
             const activeTitle = document.getElementById('stfActiveEditorTitle');
-            if (activeTitle) activeTitle.innerText = '✏️ Active Record / Stint Details';
+            if (activeTitle) activeTitle.innerText = 'Active Record / Stint';
 
             if (currentView === 'paycards') {
                 document.getElementById('formTitle').innerText = "Pay Card & Payroll Details";
@@ -7556,7 +7549,7 @@
             const show = (forceState !== undefined) ? forceState : isCurrentlyHidden;
             body.style.display = show ? 'block' : 'none';
             if (chevron) {
-                chevron.innerText = show ? '▲ Collapse Form' : '▼ Expand Form';
+                chevron.innerText = show ? 'Collapse ▴' : 'Expand ▾';
             }
         }
 
@@ -7579,7 +7572,7 @@
         function renderEmploymentPeriodsCard(containerEl, name, email, id) {
             if (!containerEl) return;
             const periods = getEmploymentPeriods(name, email, id);
-            if (periods.length === 0) {
+            if (periods.length <= 1) {
                 containerEl.innerHTML = '';
                 toggleActiveStintEditor(true);
                 return;
@@ -7587,59 +7580,59 @@
 
             window.currentCandidateEmploymentPeriods = periods;
             const isRehire = periods.length > 1;
-            const rehireBadge = isRehire ? `<span style="background: #e8f0fe; color: #1a73e8; font-size: 13.5px; font-weight: bold; padding: 3px 8px; border-radius: 4px; margin-left: 8px; border: 1px solid #cce0ff;">🔁 Re-Hire (${periods.length} Stints)</span>` : '';
+            const rehireBadge = isRehire ? `<span style="padding: 2px 10px; border-radius: 6px; border: 1.5px solid var(--brand-blue); background: #ffffff; color: var(--brand-blue); font-family: 'Subhead2', sans-serif; font-weight: 700; font-size: 13px;">Re-hire · ${periods.length} stints</span>` : '';
 
             // Update title without auto-collapsing the form under user's hands
             const titleEl = document.getElementById('stfActiveEditorTitle');
             if (titleEl) {
-                titleEl.innerText = isRehire ? `✏️ Edit Stint / Staffing Record Form` : `✏️ Active Record / Stint Details`;
+                titleEl.innerText = isRehire ? `Editing Stint · Active` : `Active Record / Stint`;
             }
 
             let rowsHtml = periods.map((p, idx) => {
                 const beginDisplay = p.beginDate ? formatDisplayDate(p.beginDate) : 'Unknown';
-                const endDisplay = p.endDate ? formatDisplayDate(p.endDate) : '<span style="color: #137333; font-weight: bold;">Active</span>';
+                const endDisplay = p.endDate ? formatDisplayDate(p.endDate) : '<span style="color: var(--brand-blue); font-weight: bold;">Active</span>';
                 const duration = calculateTenureDuration(p.beginDate, p.endDate);
                 const reason = [p.causeOfAction, p.reasonOfAction].filter(Boolean).join(' - ') || (p.notes ? p.notes.substring(0, 35) : '—');
 
                 let rehireBadgeStint = '';
                 if (p.rehireEligible === 'No') {
-                    rehireBadgeStint = '<span style="color: #c5221f; font-weight: bold; font-size: 13px;">🚫 Ineligible</span>';
+                    rehireBadgeStint = '<span style="color: var(--brand-red); font-weight: bold; font-size: 13px;">🚫 Ineligible</span>';
                 } else if (p.rehireEligible === 'Review Required') {
-                    rehireBadgeStint = '<span style="color: #b06000; font-weight: bold; font-size: 13px;">⚠️ Review</span>';
+                    rehireBadgeStint = '<span style="color: var(--crust-burnt); font-weight: bold; font-size: 13px;">⚠️ Review</span>';
                 } else {
-                    rehireBadgeStint = '<span style="color: #137333; font-weight: bold; font-size: 13px;">✅ Eligible</span>';
+                    rehireBadgeStint = '<span style="color: var(--brand-blue); font-weight: 600; font-size: 13px;">✓ Eligible</span>';
                 }
 
-                const rowBg = idx % 2 === 0 ? '#ffffff' : '#f8f9fa';
+                const rowBg = idx === 0 ? '#ffffff' : 'rgba(255, 255, 255, 0.5)';
 
                 return `
-                    <tr style="background: ${rowBg}; border-bottom: 1px solid #e0e0e0; font-size: 14px;">
-                        <td style="padding: 8px 6px; font-weight: bold; color: #1f4e79; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                            ${p.id ? `<a href="javascript:void(0)" onclick="loadSpecificStintIntoForm('${escapeText(p.id)}')" style="color: #005c91; text-decoration: underline; cursor: pointer;" title="Click to edit Stint #${idx + 1}">Stint ${idx + 1}</a>` : `Stint ${idx + 1}`}
+                    <tr style="background: ${rowBg}; border-bottom: 1px solid var(--crust-med); font-size: 14px;">
+                        <td style="padding: 7px 8px; font-weight: bold; color: var(--dark-blue); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            ${p.id ? `<a href="javascript:void(0)" onclick="loadSpecificStintIntoForm('${escapeText(p.id)}')" style="color: var(--brand-blue); font-weight: 700; text-decoration: none; cursor: pointer;" title="Click to edit Stint #${idx + 1}">Stint ${idx + 1}</a>` : `Stint ${idx + 1}`}
                         </td>
-                        <td style="padding: 8px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${beginDisplay}</td>
-                        <td style="padding: 8px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${endDisplay}</td>
-                        <td style="padding: 8px 6px; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${duration}</td>
-                        <td style="padding: 8px 6px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">#${p.store || '—'}</td>
-                        <td style="padding: 8px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.position || 'CSR'}</td>
-                        <td style="padding: 8px 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeText(reason)}">${escapeText(reason)}</td>
-                        <td style="padding: 8px 6px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${rehireBadgeStint}</td>
-                        <td style="padding: 6px 4px; text-align: center; white-space: nowrap;">
+                        <td style="padding: 7px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${beginDisplay}</td>
+                        <td style="padding: 7px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${endDisplay}</td>
+                        <td style="padding: 7px 8px; color: var(--crust-deep); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${duration}</td>
+                        <td style="padding: 7px 8px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">#${p.store || '—'}</td>
+                        <td style="padding: 7px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.position || 'CSR'}</td>
+                        <td style="padding: 7px 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeText(reason)}">${escapeText(reason)}</td>
+                        <td style="padding: 7px 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${rehireBadgeStint}</td>
+                        <td style="padding: 5px 6px; text-align: center; white-space: nowrap;">
                             <button type="button" onclick="toggleStintDetailRow(${idx})"
-                                style="background: #eef3f8; border: 1.5px solid #b8d2eb; color: #1f4e79; border-radius: 5px; padding: 3px 6px; font-size: 12px; cursor: pointer; font-family: 'Subhead1', sans-serif; font-weight: bold; white-space: nowrap;">
-                                📝 Notes
+                                style="background: #ffffff; border: 1.5px solid var(--crust-med); color: var(--dark-blue); border-radius: 4px; padding: 2px 7px; font-size: 11.5px; cursor: pointer; font-family: 'Subhead1', sans-serif; font-weight: bold; white-space: nowrap;">
+                                Notes
                             </button>
                         </td>
                     </tr>
-                    <tr id="stint-detail-row-${idx}" class="stint-detail-drawer" style="display: none; background: #fffcf5; border-bottom: 2px solid #c29d62;">
-                        <td colspan="9" style="padding: 14px 16px;">
-                            <div style="background: white; border: 1.5px solid #dfcfb8; border-radius: 8px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; border-bottom: 1.5px solid #f0e6d6; padding-bottom: 8px; gap: 14px; flex-wrap: wrap;">
+                    <tr id="stint-detail-row-${idx}" class="stint-detail-drawer" style="display: none; background: #fffcf5; border-bottom: 2px solid var(--crust-dark);">
+                        <td colspan="9" style="padding: 12px 14px;">
+                            <div style="background: white; border: 1.5px solid var(--crust-dark); border-radius: 8px; padding: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; border-bottom: 1.5px solid var(--crust-med); padding-bottom: 6px; gap: 12px; flex-wrap: wrap;">
                                     <div>
-                                        <div style="color: #1f4e79; font-size: 17px; font-family: 'Subhead1', sans-serif; font-weight: bold;">
-                                            📋 Stint #${idx + 1} (${p.beginDate ? formatDisplayDate(p.beginDate) : 'Unknown'} – ${p.endDate ? formatDisplayDate(p.endDate) : 'Active'}) — Store #${p.store || '—'} (${p.position || 'CSR'})
+                                        <div style="color: var(--dark-blue); font-size: 15px; font-family: 'Subhead1', sans-serif; font-weight: bold;">
+                                            Stint #${idx + 1} (${p.beginDate ? formatDisplayDate(p.beginDate) : 'Unknown'} – ${p.endDate ? formatDisplayDate(p.endDate) : 'Active'}) — Store #${p.store || '—'} (${p.position || 'CSR'})
                                         </div>
-                                        <div style="font-size: 15px; color: #5d4037; margin-top: 5px; display: flex; gap: 14px; flex-wrap: wrap; font-family: 'Condensed', sans-serif;">
+                                        <div style="font-size: 14px; color: var(--crust-deep); margin-top: 4px; display: flex; gap: 12px; flex-wrap: wrap; font-family: 'Condensed', sans-serif;">
                                             ${p.causeOfAction ? `<span><strong>Cause:</strong> ${escapeText(p.causeOfAction)}</span>` : ''}
                                             ${p.reasonOfAction ? `<span><strong>Reason:</strong> ${escapeText(p.reasonOfAction)}</span>` : ''}
                                             ${p.gmName ? `<span><strong>Submitted by (GM):</strong> ${escapeText(p.gmName)}</span>` : ''}
@@ -7648,14 +7641,14 @@
                                     </div>
                                     ${p.id ? `
                                         <button type="button" onclick="loadSpecificStintIntoForm('${escapeText(p.id)}')"
-                                            style="background: var(--brand-blue); color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 13.5px; font-family: 'Subhead1', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                                            ✏️ Edit This Stint in Form
+                                            style="background: var(--brand-blue); color: white; border: none; border-radius: 6px; padding: 5px 10px; font-size: 12.5px; font-family: 'Subhead1', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                            ✏️ Edit This Stint
                                         </button>
                                     ` : ''}
                                 </div>
                                 <div>
-                                    <div style="font-size: 15px; font-weight: bold; color: #472b10; margin-bottom: 6px; font-family: 'Subhead1', sans-serif;">📝 Full Termination & Staffing Notes:</div>
-                                    <div style="font-size: 16px; color: #222; background: #faf5ed; border: 1px solid #e2d5c1; border-radius: 6px; padding: 10px 14px; font-family: 'Condensed', sans-serif; white-space: pre-wrap; line-height: 1.5;">${escapeText(p.notes || 'No specific notes recorded for this stint.')}</div>
+                                    <div style="font-size: 13.5px; font-weight: bold; color: var(--crust-burnt); margin-bottom: 4px; font-family: 'Subhead1', sans-serif;">Full Termination &amp; Staffing Notes:</div>
+                                    <div style="font-size: 14.5px; color: #222; background: var(--crust-light); border: 1px solid var(--crust-med); border-radius: 6px; padding: 8px 12px; font-family: 'Condensed', sans-serif; white-space: pre-wrap; line-height: 1.4;">${escapeText(p.notes || 'No specific notes recorded for this stint.')}</div>
                                 </div>
                             </div>
                         </td>
@@ -7664,35 +7657,37 @@
             }).join('');
 
             containerEl.innerHTML = `
-                <div style="background: white; border: 1.5px solid #1f4e79; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
-                    <div style="background: #1f4e79; color: white; padding: 8px 14px; font-family: 'Subhead1', sans-serif; font-size: 17px; display: flex; align-items: center; justify-content: space-between;">
-                        <span>📋 Employment Periods (HRAlliance History)</span>
+                <div style="background: var(--crust-light); border: 1.5px solid var(--crust-med); border-radius: 12px; overflow: hidden; margin-top: 6px; margin-bottom: 10px;">
+                    <div style="padding: 9px 14px; border-bottom: 1.5px solid var(--crust-med); display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-family: 'Subhead1', sans-serif; font-size: 15px; color: var(--dark-blue); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+                            Employment History <span style="font-family: 'Barlow Semi Condensed', sans-serif; font-size: 13px; color: var(--crust-burnt); text-transform: none; letter-spacing: normal; font-weight: normal;">· HRAlliance</span>
+                        </span>
                         ${rehireBadge}
                     </div>
                     <div style="overflow: hidden; width: 100%;">
                         <table style="width: 100%; table-layout: fixed; border-collapse: collapse; text-align: left; font-family: 'Condensed', sans-serif;">
                             <colgroup>
+                                <col style="width: 10%;">
+                                <col style="width: 13%;">
+                                <col style="width: 13%;">
+                                <col style="width: 10%;">
                                 <col style="width: 9%;">
-                                <col style="width: 12%;">
-                                <col style="width: 12%;">
-                                <col style="width: 9%;">
-                                <col style="width: 9%;">
+                                <col style="width: 8%;">
+                                <col style="width: 20%;">
+                                <col style="width: 10%;">
                                 <col style="width: 7%;">
-                                <col style="width: 22%;">
-                                <col style="width: 11%;">
-                                <col style="width: 9%;">
                             </colgroup>
                             <thead>
-                                <tr style="background: #2b5b84; color: white; font-size: 14px; font-weight: 600;">
-                                    <th style="padding: 7px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Stint</th>
-                                    <th style="padding: 7px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Start</th>
-                                    <th style="padding: 7px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">End</th>
-                                    <th style="padding: 7px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Tenure</th>
-                                    <th style="padding: 7px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Store</th>
-                                    <th style="padding: 7px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Pos</th>
-                                    <th style="padding: 7px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Reason</th>
-                                    <th style="padding: 7px 6px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Rehire</th>
-                                    <th style="padding: 7px 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Notes</th>
+                                <tr style="background: var(--crust-med); color: var(--crust-burnt); font-family: 'Subhead1', sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700;">
+                                    <th style="padding: 6px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Stint</th>
+                                    <th style="padding: 6px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Start</th>
+                                    <th style="padding: 6px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">End</th>
+                                    <th style="padding: 6px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Tenure</th>
+                                    <th style="padding: 6px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Store</th>
+                                    <th style="padding: 6px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Pos</th>
+                                    <th style="padding: 6px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Reason</th>
+                                    <th style="padding: 6px 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Rehire</th>
+                                    <th style="padding: 6px 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></th>
                                 </tr>
                             </thead>
                             <tbody>
