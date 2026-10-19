@@ -11765,7 +11765,7 @@
                             </div>
                             <div id="regStoreCol">
                                 <label style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Store # *</label>
-                                <input type="text" id="regStoreNum" placeholder="e.g. 6824" inputmode="numeric" style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 14.5px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                                <input type="text" id="regStoreNum" placeholder="e.g. 6386" inputmode="numeric" style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 14.5px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
                             </div>
                             <div id="regAboveRoleCol" class="hidden">
                                 <label style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Role *</label>
@@ -11942,9 +11942,14 @@
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 10px; border-top: 1.5px solid var(--crust-med); padding-top: 12px;">
-                    <button type="button" onclick="sendCredentialsEmailFromModal()" style="background: white; border: 1.5px solid var(--brand-blue); color: var(--dark-blue); border-radius: 9999px; padding: 7px 16px; font-family: 'Subhead1', sans-serif; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
-                        ✉️ Email Credentials to User
-                    </button>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" onclick="deleteCredentialFromModal()" style="background: #fff1f1; border: 1.5px solid var(--brand-red); color: var(--dark-red); border-radius: 9999px; padding: 7px 14px; font-family: 'Subhead1', sans-serif; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                            🗑️ Delete Profile
+                        </button>
+                        <button type="button" onclick="sendCredentialsEmailFromModal()" style="background: white; border: 1.5px solid var(--brand-blue); color: var(--dark-blue); border-radius: 9999px; padding: 7px 14px; font-family: 'Subhead1', sans-serif; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                            ✉️ Email Credentials
+                        </button>
+                    </div>
                     <div style="display: flex; gap: 8px;">
                         <button type="button" onclick="closeEditCredentialModal()" style="background: transparent; border: 1.5px solid var(--crust-dark); color: var(--crust-burnt); border-radius: 9999px; padding: 7px 18px; font-family: 'Subhead1', sans-serif; font-size: 13.5px; cursor: pointer;">
                             Cancel
@@ -12033,6 +12038,103 @@
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#039;');
         }
+
+        const CANONICAL_TEAM_WOW_STORES = {
+            // Dallas (29 stores)
+            '6579': { market: 'Dallas', do_name: 'Bobby' },
+            '6814': { market: 'Dallas', do_name: 'Bobby' },
+            '6910': { market: 'Dallas', do_name: 'Kevin' },
+            '6974': { market: 'Dallas', do_name: 'Kevin' },
+            '6977': { market: 'Dallas', do_name: 'Kevin' },
+            '6984': { market: 'Dallas', do_name: 'Kevin' },
+            '8071': { market: 'Dallas', do_name: 'Kevin' },
+            '6386': { market: 'Dallas', do_name: 'Paul' },
+            '6806': { market: 'Dallas', do_name: 'Paul' },
+            '6876': { market: 'Dallas', do_name: 'Paul' },
+            '6923': { market: 'Dallas', do_name: 'Paul' },
+            '6928': { market: 'Dallas', do_name: 'Paul' },
+            '6987': { market: 'Dallas', do_name: 'Paul' },
+            '8791': { market: 'Dallas', do_name: 'Paul' },
+            '9290': { market: 'Dallas', do_name: 'Paul' },
+            '6816': { market: 'Dallas', do_name: 'Stephanie' },
+            '6819': { market: 'Dallas', do_name: 'Stephanie' },
+            '6988': { market: 'Dallas', do_name: 'Stephanie' },
+            '8068': { market: 'Dallas', do_name: 'Stephanie' },
+            '8078': { market: 'Dallas', do_name: 'Stephanie' },
+            '8149': { market: 'Dallas', do_name: 'Stephanie' },
+            '6836': { market: 'Dallas', do_name: 'Vicente' },
+            '6900': { market: 'Dallas', do_name: 'Vicente' },
+            '6913': { market: 'Dallas', do_name: 'Vicente' },
+            '6916': { market: 'Dallas', do_name: 'Vicente' },
+            '6917': { market: 'Dallas', do_name: 'Vicente' },
+            '6994': { market: 'Dallas', do_name: 'Vicente' },
+            '8023': { market: 'Dallas', do_name: 'Vicente' },
+            '9442': { market: 'Dallas', do_name: 'Vicente' },
+            // Denver (40 stores)
+            '6200': { market: 'Denver', do_name: 'Aaron' },
+            '6201': { market: 'Denver', do_name: 'Aaron' },
+            '6206': { market: 'Denver', do_name: 'Aaron' },
+            '6209': { market: 'Denver', do_name: 'Aaron' },
+            '6243': { market: 'Denver', do_name: 'Aaron' },
+            '6248': { market: 'Denver', do_name: 'Aaron' },
+            '6354': { market: 'Denver', do_name: 'Aaron' },
+            '6195': { market: 'Denver', do_name: 'Jake' },
+            '6239': { market: 'Denver', do_name: 'Jake' },
+            '6240': { market: 'Denver', do_name: 'Jake' },
+            '6349': { market: 'Denver', do_name: 'Jake' },
+            '6357': { market: 'Denver', do_name: 'Jake' },
+            '8667': { market: 'Denver', do_name: 'Jake' },
+            '6210': { market: 'Denver', do_name: 'Jeff' },
+            '6227': { market: 'Denver', do_name: 'Jeff' },
+            '6233': { market: 'Denver', do_name: 'Jeff' },
+            '6268': { market: 'Denver', do_name: 'Jeff' },
+            '6292': { market: 'Denver', do_name: 'Jeff' },
+            '6356': { market: 'Denver', do_name: 'Jeff' },
+            '6367': { market: 'Denver', do_name: 'Jeff' },
+            '8655': { market: 'Denver', do_name: 'Jeff' },
+            '6208': { market: 'Denver', do_name: 'Jeremy' },
+            '6228': { market: 'Denver', do_name: 'Jeremy' },
+            '6245': { market: 'Denver', do_name: 'Jeremy' },
+            '6281': { market: 'Denver', do_name: 'Jeremy' },
+            '6297': { market: 'Denver', do_name: 'Jeremy' },
+            '6342': { market: 'Denver', do_name: 'Jeremy' },
+            '8661': { market: 'Denver', do_name: 'Jeremy' },
+            '6231': { market: 'Denver', do_name: 'Nick' },
+            '6232': { market: 'Denver', do_name: 'Nick' },
+            '6241': { market: 'Denver', do_name: 'Nick' },
+            '6242': { market: 'Denver', do_name: 'Nick' },
+            '6247': { market: 'Denver', do_name: 'Nick' },
+            '6286': { market: 'Denver', do_name: 'Nick' },
+            '6371': { market: 'Denver', do_name: 'Nick' },
+            '6202': { market: 'Denver', do_name: 'Nolan' },
+            '6204': { market: 'Denver', do_name: 'Nolan' },
+            '6207': { market: 'Denver', do_name: 'Nolan' },
+            '6236': { market: 'Denver', do_name: 'Nolan' },
+            '6299': { market: 'Denver', do_name: 'Nolan' },
+            // El Paso (12 stores)
+            '6880': { market: 'El Paso', do_name: 'Claudia' },
+            '6884': { market: 'El Paso', do_name: 'Claudia' },
+            '6886': { market: 'El Paso', do_name: 'Claudia' },
+            '6887': { market: 'El Paso', do_name: 'Claudia' },
+            '6888': { market: 'El Paso', do_name: 'Claudia' },
+            '6889': { market: 'El Paso', do_name: 'Claudia' },
+            '6890': { market: 'El Paso', do_name: 'Claudia' },
+            '6892': { market: 'El Paso', do_name: 'Claudia' },
+            '9240': { market: 'El Paso', do_name: 'Claudia' },
+            '9247': { market: 'El Paso', do_name: 'Claudia' },
+            '9342': { market: 'El Paso', do_name: 'Claudia' },
+            '9343': { market: 'El Paso', do_name: 'Claudia' },
+            // LA (9 stores)
+            '7809': { market: 'LA', do_name: 'Victor' },
+            '8109': { market: 'LA', do_name: 'Victor' },
+            '8112': { market: 'LA', do_name: 'Victor' },
+            '8129': { market: 'LA', do_name: 'Victor' },
+            '8227': { market: 'LA', do_name: 'Victor' },
+            '8282': { market: 'LA', do_name: 'Victor' },
+            '8303': { market: 'LA', do_name: 'Victor' },
+            '8370': { market: 'LA', do_name: 'Victor' },
+            '8385': { market: 'LA', do_name: 'Victor' }
+        };
 
         let credentialsList = [];
         let pendingResetsList = [];
@@ -12592,9 +12694,15 @@
                                     <!-- Flexible Spacer -->
                                     <div style="flex: 1;"></div>
 
-                                    <!-- Danger: Revoke Access (pushed to far right) -->
+                                    <!-- Danger Actions (pushed to far right) -->
+                                    <button type="button" onclick="executeDeleteCredential('${escapeHtml(t.trainer_id)}', '${escapeHtml(t.trainer_name)}')"
+                                        style="background: #fff1f1; border: 2px solid var(--brand-red); color: var(--dark-red); border-radius: 9999px; height: 44px; padding: 0 16px; font-family: 'Subhead1', sans-serif; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;"
+                                        title="Permanently remove profile from database">
+                                        🗑️ Delete Profile
+                                    </button>
+
                                     <button type="button" onclick="openRevokeConfirmModal('${escapeHtml(t.trainer_id)}', '${escapeHtml(t.trainer_name)}')"
-                                        style="background: white; border: 2px solid var(--brand-red); color: var(--dark-red); border-radius: 9999px; height: 44px; padding: 0 20px; font-family: 'Subhead1', sans-serif; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                                        style="background: white; border: 2px solid var(--brand-red); color: var(--dark-red); border-radius: 9999px; height: 44px; padding: 0 18px; font-family: 'Subhead1', sans-serif; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
                                         <span style="color: var(--brand-red);">🔒</span> Revoke Access
                                     </button>
                                 </div>
@@ -13330,6 +13438,18 @@
                 return;
             }
 
+            const isAbove = store.toLowerCase().includes('above') || store.toLowerCase() === 'exec' || store.toLowerCase() === 'do';
+            if (!isAbove && store) {
+                const cleanStore = store.replace(/\D/g, '');
+                if (!CANONICAL_TEAM_WOW_STORES[cleanStore]) {
+                    if (errEl) {
+                        errEl.innerText = `Store #${cleanStore} is not a valid Team Wow store. Recognized stores belong to Dallas, Denver, El Paso, or LA.`;
+                        errEl.classList.remove('hidden');
+                    }
+                    return;
+                }
+            }
+
             if (saveBtn) {
                 saveBtn.disabled = true;
                 saveBtn.innerText = 'Saving...';
@@ -13382,12 +13502,41 @@
             }
         }
 
+        function deleteCredentialFromModal() {
+            const trainerId = document.getElementById('editCredOriginalId')?.value || document.getElementById('editCredId')?.value;
+            const name = document.getElementById('editCredName')?.value || trainerId;
+            if (trainerId) {
+                executeDeleteCredential(trainerId, name);
+            }
+        }
+
+        async function executeDeleteCredential(trainerId, trainerName) {
+            if (!confirm(`Are you sure you want to PERMANENTLY DELETE credentials for ${trainerName || trainerId} (${trainerId})?\n\nThis will remove their profile and all assigned permissions completely.`)) {
+                return;
+            }
+            try {
+                const res = await fetch('/api/staffing?action=deleteTrainerCredential', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ trainerId: trainerId })
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    throw new Error(data.error || 'Failed to delete profile.');
+                }
+                closeEditCredentialModal();
+                fetchCredentialsList();
+            } catch (err) {
+                alert('Error deleting profile: ' + err.message);
+            }
+        }
+
         // Periodically poll pending actions badge every 60s
         setInterval(checkPendingCredentialsBadge, 60000);
         setTimeout(checkPendingCredentialsBadge, 2500);
     </script>
     <!-- MIT Leadership Class Tracker Module -->
-    <script src="mit_tracker.js?v=20261019_1220"></script>
+    <script src="mit_tracker.js?v=20261019_1226"></script>
 </body>
 
 </html>

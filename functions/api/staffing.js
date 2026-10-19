@@ -4536,6 +4536,124 @@ export async function onRequestPost(context) {
                 }
             }
 
+            // CANONICAL TEAM WOW ROSTER (Dallas: 29 stores, Denver: 40 stores, El Paso: 12 stores, LA: 9 stores)
+            const CANONICAL_TEAM_WOW_STORES = {
+                // Dallas
+                '6579': { market: 'Dallas', do_name: 'Bobby' },
+                '6814': { market: 'Dallas', do_name: 'Bobby' },
+                '6910': { market: 'Dallas', do_name: 'Kevin' },
+                '6974': { market: 'Dallas', do_name: 'Kevin' },
+                '6977': { market: 'Dallas', do_name: 'Kevin' },
+                '6984': { market: 'Dallas', do_name: 'Kevin' },
+                '8071': { market: 'Dallas', do_name: 'Kevin' },
+                '6386': { market: 'Dallas', do_name: 'Paul' },
+                '6806': { market: 'Dallas', do_name: 'Paul' },
+                '6876': { market: 'Dallas', do_name: 'Paul' },
+                '6923': { market: 'Dallas', do_name: 'Paul' },
+                '6928': { market: 'Dallas', do_name: 'Paul' },
+                '6987': { market: 'Dallas', do_name: 'Paul' },
+                '8791': { market: 'Dallas', do_name: 'Paul' },
+                '9290': { market: 'Dallas', do_name: 'Paul' },
+                '6816': { market: 'Dallas', do_name: 'Stephanie' },
+                '6819': { market: 'Dallas', do_name: 'Stephanie' },
+                '6988': { market: 'Dallas', do_name: 'Stephanie' },
+                '8068': { market: 'Dallas', do_name: 'Stephanie' },
+                '8078': { market: 'Dallas', do_name: 'Stephanie' },
+                '8149': { market: 'Dallas', do_name: 'Stephanie' },
+                '6836': { market: 'Dallas', do_name: 'Vicente' },
+                '6900': { market: 'Dallas', do_name: 'Vicente' },
+                '6913': { market: 'Dallas', do_name: 'Vicente' },
+                '6916': { market: 'Dallas', do_name: 'Vicente' },
+                '6917': { market: 'Dallas', do_name: 'Vicente' },
+                '6994': { market: 'Dallas', do_name: 'Vicente' },
+                '8023': { market: 'Dallas', do_name: 'Vicente' },
+                '9442': { market: 'Dallas', do_name: 'Vicente' },
+                // Denver
+                '6200': { market: 'Denver', do_name: 'Aaron' },
+                '6201': { market: 'Denver', do_name: 'Aaron' },
+                '6206': { market: 'Denver', do_name: 'Aaron' },
+                '6209': { market: 'Denver', do_name: 'Aaron' },
+                '6243': { market: 'Denver', do_name: 'Aaron' },
+                '6248': { market: 'Denver', do_name: 'Aaron' },
+                '6354': { market: 'Denver', do_name: 'Aaron' },
+                '6195': { market: 'Denver', do_name: 'Jake' },
+                '6239': { market: 'Denver', do_name: 'Jake' },
+                '6240': { market: 'Denver', do_name: 'Jake' },
+                '6349': { market: 'Denver', do_name: 'Jake' },
+                '6357': { market: 'Denver', do_name: 'Jake' },
+                '8667': { market: 'Denver', do_name: 'Jake' },
+                '6210': { market: 'Denver', do_name: 'Jeff' },
+                '6227': { market: 'Denver', do_name: 'Jeff' },
+                '6233': { market: 'Denver', do_name: 'Jeff' },
+                '6268': { market: 'Denver', do_name: 'Jeff' },
+                '6292': { market: 'Denver', do_name: 'Jeff' },
+                '6356': { market: 'Denver', do_name: 'Jeff' },
+                '6367': { market: 'Denver', do_name: 'Jeff' },
+                '8655': { market: 'Denver', do_name: 'Jeff' },
+                '6208': { market: 'Denver', do_name: 'Jeremy' },
+                '6228': { market: 'Denver', do_name: 'Jeremy' },
+                '6245': { market: 'Denver', do_name: 'Jeremy' },
+                '6281': { market: 'Denver', do_name: 'Jeremy' },
+                '6297': { market: 'Denver', do_name: 'Jeremy' },
+                '6342': { market: 'Denver', do_name: 'Jeremy' },
+                '8661': { market: 'Denver', do_name: 'Jeremy' },
+                '6231': { market: 'Denver', do_name: 'Nick' },
+                '6232': { market: 'Denver', do_name: 'Nick' },
+                '6241': { market: 'Denver', do_name: 'Nick' },
+                '6242': { market: 'Denver', do_name: 'Nick' },
+                '6247': { market: 'Denver', do_name: 'Nick' },
+                '6286': { market: 'Denver', do_name: 'Nick' },
+                '6371': { market: 'Denver', do_name: 'Nick' },
+                '6202': { market: 'Denver', do_name: 'Nolan' },
+                '6204': { market: 'Denver', do_name: 'Nolan' },
+                '6207': { market: 'Denver', do_name: 'Nolan' },
+                '6236': { market: 'Denver', do_name: 'Nolan' },
+                '6299': { market: 'Denver', do_name: 'Nolan' },
+                // El Paso
+                '6880': { market: 'El Paso', do_name: 'Claudia' },
+                '6884': { market: 'El Paso', do_name: 'Claudia' },
+                '6886': { market: 'El Paso', do_name: 'Claudia' },
+                '6887': { market: 'El Paso', do_name: 'Claudia' },
+                '6888': { market: 'El Paso', do_name: 'Claudia' },
+                '6889': { market: 'El Paso', do_name: 'Claudia' },
+                '6890': { market: 'El Paso', do_name: 'Claudia' },
+                '6892': { market: 'El Paso', do_name: 'Claudia' },
+                '9240': { market: 'El Paso', do_name: 'Claudia' },
+                '9247': { market: 'El Paso', do_name: 'Claudia' },
+                '9342': { market: 'El Paso', do_name: 'Claudia' },
+                '9343': { market: 'El Paso', do_name: 'Claudia' },
+                // LA
+                '7809': { market: 'LA', do_name: 'Victor' },
+                '8109': { market: 'LA', do_name: 'Victor' },
+                '8112': { market: 'LA', do_name: 'Victor' },
+                '8129': { market: 'LA', do_name: 'Victor' },
+                '8227': { market: 'LA', do_name: 'Victor' },
+                '8282': { market: 'LA', do_name: 'Victor' },
+                '8303': { market: 'LA', do_name: 'Victor' },
+                '8370': { market: 'LA', do_name: 'Victor' },
+                '8385': { market: 'LA', do_name: 'Victor' }
+            };
+
+            // Validate store number if provided
+            if (payload.store_num !== undefined) {
+                const sVal = String(payload.store_num).trim();
+                const isAbove = sVal.toLowerCase().includes('above') || sVal.toLowerCase() === 'exec' || sVal.toLowerCase() === 'do';
+                if (!isAbove && sVal) {
+                    const cleanNum = sVal.replace(/\D/g, '');
+                    const matchedStore = CANONICAL_TEAM_WOW_STORES[cleanNum];
+                    if (!matchedStore) {
+                        return new Response(JSON.stringify({ 
+                            success: false, 
+                            error: `Store #${cleanNum} is not a valid Team Wow store. Please select a recognized store from the company roster.` 
+                        }), { status: 400, headers: corsHeaders() });
+                    }
+                    payload.store_num = cleanNum;
+                    if (!payload.market) {
+                        payload.market = matchedStore.market;
+                    }
+                }
+            }
+
             // If PIN is being updated, verify it is not claimed by another user
             if (payload.trainer_pin) {
                 const cleanPin = String(payload.trainer_pin).replace(/\D/g, '').trim();
@@ -4655,6 +4773,23 @@ export async function onRequestPost(context) {
             } catch (_) {}
 
             return new Response(JSON.stringify({ success: true, trainer_id: newPulseId, message: "Pulse ID updated successfully." }), { status: 200, headers: corsHeaders() });
+        }
+
+        // 9c. Delete Trainer Credential Profile
+        if (action === "deleteTrainerCredential") {
+            const trainerId = String(payload.trainerId || payload.trainer_id || url.searchParams.get("trainerId") || "").trim();
+            if (!trainerId) {
+                return new Response(JSON.stringify({ success: false, error: "Trainer ID required." }), { status: 400, headers: corsHeaders() });
+            }
+            await db.prepare("DELETE FROM trainer_credentials WHERE LOWER(trainer_id) = LOWER(?)").bind(trainerId).run();
+            try {
+                await db.prepare("DELETE FROM credential_reset_requests WHERE LOWER(trainer_id) = LOWER(?)").bind(trainerId).run();
+                await db.prepare(`
+                    INSERT INTO credential_usage_logs (trainer_id, trainer_name, store_num, portal, action, metadata, created_at)
+                    VALUES (?, ?, '', 'Admin Hub', 'Profile Deleted', ?, CURRENT_TIMESTAMP)
+                `).bind(trainerId, trainerId, JSON.stringify({ deletedBy: 'Admin Hub' })).run();
+            } catch (_) {}
+            return new Response(JSON.stringify({ success: true, message: `Profile ${trainerId} successfully deleted.` }), { status: 200, headers: corsHeaders() });
         }
 
         // 10. Decide / Resolve PIN Reset Request
