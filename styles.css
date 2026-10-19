@@ -250,8 +250,8 @@
         }
         .form-actions button {
             flex: 1;
-            font-size: 16.5px;
-            padding: 9px 16px;
+            font-size: 17.5px;
+            padding: 10px 18px;
         }
 
         /* Right Panel */
@@ -419,15 +419,15 @@
             border: 1.5px solid var(--crust-dark);
             border-radius: 7px;
             color: var(--crust-burnt);
-            padding: 6px 12px;
+            padding: 7px 14px;
             font-family: 'Subhead2', sans-serif;
-            font-size: 15px;
+            font-size: 16px;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            min-height: 38px;
+            min-height: 40px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.04);
             transition: all 0.15s ease;
             white-space: nowrap;
@@ -481,11 +481,11 @@
 
         .cand-status-btn {
             flex: 1;
-            padding: 6px 8px;
+            padding: 7px 10px;
             border-radius: 6px;
             border: none;
             font-family: 'Subhead1', sans-serif;
-            font-size: 14.5px;
+            font-size: 15.5px;
             cursor: pointer;
             background: transparent;
             color: var(--crust-burnt);
@@ -497,7 +497,7 @@
 
         .int-section-header {
             font-family: 'Subhead1', sans-serif;
-            font-size: 13.5px;
+            font-size: 15px;
             letter-spacing: 0.08em;
             text-transform: uppercase;
             color: var(--dark-blue);
@@ -509,7 +509,7 @@
             padding: 2px 8px;
             border-radius: 6px;
             font-family: 'Subhead2', sans-serif;
-            font-size: 12.5px;
+            font-size: 13.5px;
             font-weight: 700;
             white-space: nowrap;
             display: inline-block;
@@ -519,9 +519,9 @@
         .form-scroll-area input[type="password"], 
         .form-scroll-area input[type="date"],
         .form-scroll-area select {
-            padding: 6px 10px;
-            font-size: 16px;
-            height: 36px;
+            padding: 7px 11px;
+            font-size: 17px;
+            height: 38px;
         }
 
         /* Consistent SVG chevron arrow across all selects */
@@ -598,14 +598,14 @@
 
         .nto-roster-row {
             display: grid;
-            grid-template-columns: 24px minmax(0, 1fr) 195px 95px;
+            grid-template-columns: 26px minmax(0, 1fr) 210px 105px;
             gap: 14px;
             align-items: center;
-            padding: 11px 16px;
-            margin-bottom: 7px;
+            padding: 13px 18px;
+            margin-bottom: 8px;
             background: #ffffff;
             border: 1px solid var(--crust-med);
-            border-radius: 9px;
+            border-radius: 10px;
             box-shadow: 0 1px 3px rgba(71, 43, 16, 0.04);
             box-sizing: border-box;
             transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
@@ -626,10 +626,10 @@
         .form-group > label { 
             display: block; 
             font-family: 'Subhead2', sans-serif; 
-            font-size: 14.5px; 
+            font-size: 15.5px; 
             color: var(--crust-burnt); 
             text-transform: uppercase; 
-            margin-bottom: 2px; 
+            margin-bottom: 3px; 
         }
         .form-group label:has(input[type="checkbox"]),
         .form-group label:has(input[type="radio"]),
@@ -646,13 +646,13 @@
 
         input[type="text"], input[type="password"], input[type="date"], select { 
             width: 100%; 
-            height: 36px;
-            padding: 6px 10px; 
+            height: 38px;
+            padding: 7px 11px; 
             border-radius: 8px; 
             border: 1.5px solid var(--crust-dark); 
             font-family: 'Condensed', sans-serif; 
             box-sizing: border-box; 
-            font-size: 16px; 
+            font-size: 17px; 
             color: var(--crust-burnt);
             line-height: normal;
         }
@@ -661,7 +661,7 @@
         input[type="date"]::-webkit-datetime-edit-fields-wrapper,
         input[type="date"]::-webkit-date-and-time-value {
             font-family: 'Condensed', sans-serif;
-            font-size: 16px;
+            font-size: 17px;
             color: var(--crust-burnt);
             line-height: normal;
         }
@@ -969,7 +969,7 @@
             margin-top: 0;
             margin-bottom: 12px;
             font-family: 'Subhead1', sans-serif;
-            font-size: 20px;
+            font-size: 23px;
             color: var(--dark-blue);
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -978,7 +978,7 @@
             margin-top: 0;
             margin-bottom: 16px;
             font-family: 'Condensed', sans-serif;
-            font-size: 18px;
+            font-size: 19px;
             color: var(--crust-burnt);
             line-height: 1.45;
         }
@@ -996,15 +996,19 @@
             justify-content: flex-end;
             gap: 12px;
         }
-        .brand-modal-actions button { min-width: 100px; }
+        .brand-modal-actions button {
+            min-width: 105px;
+            font-size: 17px;
+            padding: 9px 18px;
+        }
         
         #brandModalReminderForm input {
             width: 100%;
-            padding: 8px 10px;
+            padding: 8px 12px;
             border-radius: 6px;
             border: 1px solid var(--crust-dark);
             font-family: 'Condensed', sans-serif;
-            font-size: 16px;
+            font-size: 17px;
             box-sizing: border-box;
             margin-top: 4px;
         }
@@ -1012,9 +1016,9 @@
         .rate-chip {
             background: #ffffff;
             border: 1px solid var(--crust-dark);
-            border-radius: 4px;
-            padding: 2px 6px;
-            font-size: 11px;
+            border-radius: 6px;
+            padding: 4px 9px;
+            font-size: 13.5px;
             font-family: 'Subhead2', sans-serif;
             color: var(--dark-blue);
             font-weight: normal;
