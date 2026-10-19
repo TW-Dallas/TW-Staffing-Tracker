@@ -648,6 +648,57 @@
             padding: 12px 14px; 
             border-radius: 8px; 
         }
+
+        /* Pay Cards: Stages & Notes Side-by-Side */
+        .paycard-stages-container {
+            display: grid;
+            grid-template-columns: 1fr 1.05fr;
+            gap: 18px;
+            margin-top: 8px;
+            background: var(--crust-light);
+            padding: 12px 14px;
+            border-radius: 8px;
+            align-items: stretch;
+        }
+        .paycard-stages-list {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .paycard-notes-col {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .paycard-notes-col label {
+            display: block;
+            font-family: 'Subhead2', sans-serif;
+            font-size: 14.5px;
+            color: var(--crust-burnt);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .paycard-notes-col textarea {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            min-height: 90px;
+            box-sizing: border-box;
+            background: white;
+            border: 1.5px solid var(--crust-dark);
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-family: 'Condensed', sans-serif;
+            font-size: 15.5px;
+            color: var(--crust-burnt);
+            resize: none;
+        }
+        .paycard-notes-col textarea:focus {
+            outline: none;
+            border-color: var(--brand-blue);
+            box-shadow: 0 0 0 2px rgba(13, 71, 161, 0.12);
+        }
         .stage-collapsible-wrapper {
             background: white;
             border: 1px solid var(--crust-dark);
@@ -984,9 +1035,10 @@
 
             /* Checkbox & Flags Grids */
             .checkbox-grid,
-            .checkbox-subgrid { 
+            .checkbox-subgrid,
+            .paycard-stages-container { 
                 grid-template-columns: 1fr !important;
-                gap: 8px;
+                gap: 10px;
             }
             .checkbox-subgrid.three-col {
                 grid-template-columns: 1fr !important;
