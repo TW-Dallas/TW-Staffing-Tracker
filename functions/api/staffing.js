@@ -688,8 +688,8 @@ export async function onRequestGet(context) {
             const notes = (c.notes || '').toLowerCase();
             const isExplicitlyRevoked = notes.includes('revoked') || notes.includes('terminated') || notes.includes('duplicate');
             if (isExplicitlyRevoked) return false;
-            if (notes.includes('approved') && !notes.includes('pending')) return false;
-            const isUnapprovedAboveStore = (notes.includes('above-store') || c.role === 'Director of Ops' || c.store_num === 'Above-Store') && (!c.is_do && !c.is_exec && !c.is_admin);
+            // Only flag as pending if notes indicate a pending registration request or account is inactive
+            const isUnapprovedAboveStore = notes.includes('pending') && (!c.is_do && !c.is_exec && !c.is_admin);
             return (c.is_active === 0 || notes.includes('pending') || notes.includes('awaiting') || isUnapprovedAboveStore);
         });
 

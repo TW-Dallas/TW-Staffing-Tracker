@@ -4075,6 +4075,7 @@
                 } else {
                     updateMitAuditMetrics();
                 }
+                return;
 
             } else if (view === 'credentials') {
                 if (btnCred) {
@@ -4105,9 +4106,22 @@
                     auditRange.innerHTML = '<span style="color: var(--med-blue); font-size: 13px;">● Live</span>';
                 }
 
+                renderCredentialsSidebar();
                 fetchCredentialsList();
+                return;
 
             } else {
+                // Restore standard candidate sidebar controls for candidate views
+                const sortDropdown = document.getElementById('customSortDropdown');
+                if (sortDropdown) sortDropdown.classList.remove('hidden');
+                const counterLabel = document.getElementById('listCounterLabel');
+                if (counterLabel) counterLabel.innerText = 'CANDIDATES';
+                const searchControl = document.getElementById('searchControl');
+                if (searchControl) {
+                    searchControl.placeholder = 'Search candidate, phone, email...';
+                    searchControl.oninput = null;
+                }
+
                 btnOnb.style.background = 'var(--dark-blue)';
                 btnOnb.style.color = 'white';
                 btnAddMain.innerText = "+ Add Candidate";
@@ -12025,6 +12039,90 @@
         let expandedAuditTrainers = new Set();
         let activeResetRequestId = null;
         let currentRegType = 'store';
+        let activeCredentialRoleFilter = 'ALL';
+
+        function renderCredentialsSidebar() {
+            const listContainer = document.getElementById('candidateList');
+            if (!listContainer) return;
+
+            const sortDropdown = document.getElementById('customSortDropdown');
+            if (sortDropdown) sortDropdown.classList.add('hidden');
+
+            const counterLabel = document.getElementById('listCounterLabel');
+            if (counterLabel) counterLabel.innerText = 'ROLES';
+
+            const searchControl = document.getElementById('searchControl');
+            if (searchControl) {
+                searchControl.placeholder = 'Search name, Pulse ID, email...';
+                searchControl.oninput = function () {
+                    const credSearch = document.getElementById('credSearchInput');
+                    if (credSearch) credSearch.value = this.value;
+                    renderCredentialsView();
+                };
+            }
+
+            const total = credentialsList.length;
+            const execs = credentialsList.filter(c => c.is_exec || (c.role && c.role.toLowerCase().includes('exec'))).length;
+            const dos = credentialsList.filter(c => c.is_do || (c.role && (c.role.toLowerCase().includes('director') || c.role.toLowerCase().includes('do')))).length;
+            const gms = credentialsList.filter(c => c.is_gm || (c.role && c.role.toLowerCase().includes('general manager'))).length;
+            const ams = credentialsList.filter(c => c.role && c.role.toLowerCase().includes('assistant')).length;
+            const trainers = credentialsList.filter(c => c.is_wow_way_trainer || c.is_mit_trainer || (c.role && c.role.toLowerCase().includes('trainer'))).length;
+            const pending = credentialsList.filter(c => {
+                const notes = (c.notes || '').toLowerCase();
+                const isActive = (c.is_active !== 0 && c.is_active !== '0');
+                const isExplicitlyRevoked = !isActive && (notes.includes('revoked') || notes.includes('terminated'));
+                return !isExplicitlyRevoked && (!isActive || notes.includes('pending') || notes.includes('awaiting'));
+            }).length;
+
+            const roles = [
+                { id: 'ALL', label: 'All Personnel', count: total, color: 'var(--brand-blue)' },
+                { id: 'Executive', label: 'Executives', count: execs, color: 'var(--dark-blue)' },
+                { id: 'Director of Ops', label: 'Directors of Ops', count: dos, color: 'var(--dark-blue)' },
+                { id: 'General Manager', label: 'General Managers', count: gms, color: 'var(--med-blue)' },
+                { id: 'Assistant Manager', label: 'Assistant Managers', count: ams, color: 'var(--med-blue)' },
+                { id: 'Trainer', label: 'Trainers', count: trainers, color: 'var(--crust-burnt)' },
+                { id: 'PENDING_FILTER', label: 'Pending Approvals', count: pending, color: 'var(--brand-red)' }
+            ];
+
+            let html = '<div style="display: flex; flex-direction: column; gap: 8px; padding-top: 4px;">';
+            roles.forEach(r => {
+                const isSel = (r.id === activeCredentialRoleFilter);
+                const bg = isSel ? 'var(--crust-light)' : '#ffffff';
+                const border = isSel ? '2px solid var(--med-blue)' : '1.5px solid var(--crust-med)';
+                const countColor = isSel ? 'var(--med-blue)' : (r.id === 'PENDING_FILTER' && r.count > 0 ? 'var(--dark-red)' : 'var(--dark-blue)');
+
+                html += `
+                    <div onclick="selectCredentialRoleFilter('${r.id}')"
+                        style="background: ${bg}; border: ${border}; border-left: 5px solid ${r.color}; border-radius: 12px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.03);"
+                        onmouseover="this.style.borderColor='var(--med-blue)'" onmouseout="this.style.borderColor='${isSel ? 'var(--med-blue)' : 'var(--crust-med)'}'">
+                        <span style="font-family: 'Subhead1', sans-serif; font-size: 15px; color: var(--crust-burnt);">
+                            ${escapeHtml(r.label)}
+                        </span>
+                        <span style="font-family: 'ExtraBold', sans-serif; font-size: 16px; color: ${countColor};">
+                            ${r.count}
+                        </span>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            listContainer.innerHTML = html;
+        }
+
+        function selectCredentialRoleFilter(roleId) {
+            activeCredentialRoleFilter = roleId;
+            const roleSelect = document.getElementById('credRoleFilter');
+            const statusSelect = document.getElementById('credStatusFilter');
+            if (roleId === 'PENDING_FILTER') {
+                if (statusSelect) statusSelect.value = 'pending';
+                if (roleSelect) roleSelect.value = 'ALL';
+            } else {
+                if (statusSelect && statusSelect.value === 'pending') statusSelect.value = 'ALL';
+                if (roleSelect) roleSelect.value = roleId;
+            }
+            renderCredentialsView();
+            renderCredentialsSidebar();
+        }
 
         async function fetchCredentialsList() {
             const container = document.getElementById('credentialsGridContainer');
@@ -12042,6 +12140,7 @@
                     updateCredGlowBadge(data.totalPending, data.pendingResetCount, data.pendingApprovalCount);
                     populateCredentialDoDropdown();
                     renderCredentialsView();
+                    renderCredentialsSidebar();
                 }
             } catch (err) {
                 console.error("Error fetching credentials:", err);
@@ -12151,7 +12250,7 @@
             const clickHandler = (trainerId && field)
                 ? `onclick="event.stopPropagation(); toggleCredentialPermission('${escapeHtml(trainerId)}', '${field}', ${isGranted ? 1 : 0})"`
                 : `onclick="event.stopPropagation()"`;
-            return `<button type="button" ${clickHandler} style="${style}" title="${code}: ${isGranted ? 'Authorized / Granted' : 'Not Granted'} (${actionText})" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">${code}</button>`;
+            return `<span role="button" tabindex="0" ${clickHandler} style="${style}" title="${code}: ${isGranted ? 'Authorized / Granted' : 'Not Granted'} (${actionText})" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">${code}</span>`;
         }
 
         function toggleCredentialAccordion(trainerId) {
@@ -12264,7 +12363,7 @@
                 const isExplicitlyRevoked = !isActive && (notesLower.includes('revoked') || notesLower.includes('terminated') || notesLower.includes('duplicate'));
                 const isApproved = notesLower.includes('approved') && !notesLower.includes('pending');
                 const hasPendingReset = pendingResetsList.some(r => r.trainer_id.toLowerCase() === item.trainer_id.toLowerCase() || (item.email && r.email && r.email.toLowerCase() === item.email.toLowerCase()));
-                const isUnapprovedAboveStore = !isApproved && (notesLower.includes('above-store') || item.role === 'Director of Ops' || item.store_num === 'Above-Store') && (!item.is_do && !item.is_exec && !item.is_admin);
+                const isUnapprovedAboveStore = notesLower.includes('pending') && (!item.is_do && !item.is_exec && !item.is_admin);
                 const isPending = !isExplicitlyRevoked && !isApproved && (!isActive || notesLower.includes('pending') || notesLower.includes('awaiting') || hasPendingReset || isUnapprovedAboveStore);
 
                 if (statusFilter === 'active' && !isActive) return false;
@@ -12331,7 +12430,7 @@
                 const isExplicitlyRevoked = !isActive && (notesLower.includes('revoked') || notesLower.includes('terminated') || notesLower.includes('duplicate'));
                 const isApproved = notesLower.includes('approved') && !notesLower.includes('pending');
                 const pendingReset = pendingResetsList.find(r => r.trainer_id.toLowerCase() === t.trainer_id.toLowerCase() || (t.email && r.email && r.email.toLowerCase() === t.email.toLowerCase()));
-                const isUnapprovedAboveStore = !isApproved && (notesLower.includes('above-store') || t.role === 'Director of Ops' || t.store_num === 'Above-Store') && (!t.is_do && !t.is_exec && !t.is_admin);
+                const isUnapprovedAboveStore = notesLower.includes('pending') && (!t.is_do && !t.is_exec && !t.is_admin);
                 const isPendingApproval = !isExplicitlyRevoked && !isApproved && (!isActive || notesLower.includes('pending') || notesLower.includes('awaiting') || isUnapprovedAboveStore);
 
                 // Scope line construction
@@ -12356,8 +12455,8 @@
 
                 html += `
                     <div style="background: var(--crust-light); border: ${borderStyle}; border-radius: 16px; transition: border 0.15s ease; overflow: hidden;" id="credRow_${escapeHtml(t.trainer_id)}">
-                        <!-- Accordion Header Button (3-Column Grid) -->
-                        <button type="button" aria-expanded="${isOpen ? 'true' : 'false'}" onclick="toggleCredentialAccordion('${escapeHtml(t.trainer_id)}')"
+                        <!-- Accordion Header Row (3-Column Grid) -->
+                        <div role="button" tabindex="0" aria-expanded="${isOpen ? 'true' : 'false'}" onclick="toggleCredentialAccordion('${escapeHtml(t.trainer_id)}')"
                             style="width: 100%; border: none; background: transparent; padding: 12px 18px; display: grid; grid-template-columns: minmax(0, 1fr) 280px 36px; align-items: center; gap: 12px; cursor: pointer; text-align: left; box-sizing: border-box;">
                             
                             <!-- Col 1: Personnel Info & Scope -->
@@ -12404,7 +12503,7 @@
                                     <polyline points="6 9 12 15 18 9"></polyline>
                                 </svg>
                             </div>
-                        </button>
+                        </div>
 
                         <!-- Expanded Drawer Panel -->
                         ${isOpen ? `
@@ -13278,7 +13377,7 @@
         setTimeout(checkPendingCredentialsBadge, 2500);
     </script>
     <!-- MIT Leadership Class Tracker Module -->
-    <script src="mit_tracker.js?v=20261019_1205"></script>
+    <script src="mit_tracker.js?v=20261019_1215"></script>
 </body>
 
 </html>
