@@ -161,40 +161,44 @@ function renderMitSidebar() {
         const dateInfo = formatMitDateDisplay(c.classDate);
         const isSelected = c.id === window.currentSelectedMitClassId;
         const card = document.createElement('div');
-        card.className = `mit-session-card ${isSelected ? 'selected' : ''}`;
-
-        // Color accent according to mockup: Level 3 is dark-blue (#005c91), Level 1/2 is tan (#c0a588), Denver is brand-blue (#0077bd)
+        card.className = `candidate-card ${isSelected ? 'selected' : ''}`;
+        card.style.borderLeftWidth = '6px';
         if (isDenver) {
             card.style.borderLeftColor = 'var(--brand-blue, #0077bd)';
         } else if (c.level === 3) {
             card.style.borderLeftColor = 'var(--dark-blue, #005c91)';
         } else {
-            card.style.borderLeftColor = 'var(--crust-dark, #c0a588)';
-        }
-
-        const dateSubText = dateInfo.isToday ? `${dateInfo.formattedDate} · TODAY` : dateInfo.formattedDate;
-        
-        // CRITICAL DENVER EXCEPTION: Denver does NOT do levels for their classes!
-        let levelPillHtml = '';
-        if (!isDenver) {
-            const lvlNum = c.level || 1;
-            levelPillHtml = `<span class="mit-lv-pill mit-lv-${lvlNum}">Level ${lvlNum}</span>`;
+            card.style.borderLeftColor = 'var(--brand-blue, #0077bd)';
         }
 
         const spotsTaken = c.spotsTaken || (c.attendees ? c.attendees.length : 0);
         const spotsTotal = c.spotsTotal || 15;
         const timeStr = c.startTime ? c.startTime.replace(/:\d\d\s*/, ' ') : '';
 
+        // Status badge: Today, Level, or Scheduled
+        let badgeHtml = '';
+        if (dateInfo.isToday) {
+            badgeHtml = `<span style="font-family: 'Subhead2', sans-serif; font-size: 11.5px; background: #e3f2fd; color: var(--dark-blue); border: 1px solid #bbdefb; padding: 2px 7px; border-radius: 6px; font-weight: 700;">Today</span>`;
+        } else if (!isDenver && c.level) {
+            badgeHtml = `<span class="mit-lv-pill mit-lv-${c.level}">Level ${c.level}</span>`;
+        } else {
+            badgeHtml = `<span style="font-family: 'Subhead2', sans-serif; font-size: 11.5px; background: var(--crust-light); color: var(--crust-burnt); border: 1px solid var(--crust-med); padding: 2px 7px; border-radius: 6px; font-weight: 600;">Scheduled</span>`;
+        }
+
         card.innerHTML = `
-            <span class="mit-card-sub" style="font-size: 13.5px;">
-                <span>${dateSubText}</span>
-                ${levelPillHtml}
-            </span>
-            <span class="mit-card-title">${c.name}</span>
-            <span class="mit-card-sub" style="font-weight: 500; font-size: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                <span style="font-family: 'Subhead2', sans-serif; font-size: 16px; font-weight: 700; color: var(--crust-burnt);">
+                    ${dateInfo.dayOfWeek ? `${dateInfo.dayOfWeek} ` : ''}${c.classDate}
+                </span>
+                ${badgeHtml}
+            </div>
+            <div style="font-family: 'Subhead1', 'Oswald', sans-serif; font-weight: 600; font-size: 17.5px; color: var(--dark-blue); line-height: 1.25; margin-bottom: 4px;">
+                ${c.name}
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-family: 'Condensed', sans-serif; font-size: 14px; color: var(--crust-deep); font-weight: 600;">
                 <span>${c.location} · ${timeStr || c.startTime || '11 AM'} · ${c.trainer || 'Trainer'}</span>
-                <b style="color: var(--dark-blue, #005c91);">${spotsTaken}/${spotsTotal}</b>
-            </span>
+                <b style="color: var(--dark-blue); font-size: 14.5px;">${spotsTaken}/${spotsTotal}</b>
+            </div>
         `;
 
         card.onclick = () => selectMitSession(c.id);
@@ -214,34 +218,26 @@ async function renderMitClassView(classId = null) {
     const resolvedId = classId || window.currentSelectedMitClassId;
     const heroCourse = document.getElementById('mitHeroCourseName');
     const heroLevel = document.getElementById('mitHeroLevelPill');
-    const heroStatus = document.getElementById('mitHeroStatusChip');
-    const heroId = document.getElementById('mitHeroSessionId');
-    const heroCenter = document.getElementById('mitHeroCenter');
-    const heroTime = document.getElementById('mitHeroTime');
-    const heroTrainer = document.getElementById('mitHeroTrainer');
+    const heroDateTime = document.getElementById('mitHeroDateTime');
+    const heroLocationTrainer = document.getElementById('mitHeroLocationTrainer');
     const heroSeats = document.getElementById('mitHeroSeatsText');
-    const heroProgress = document.getElementById('mitHeroProgressBar');
     const rosterHeader = document.getElementById('mitRosterCountHeader');
     const rosterList = document.getElementById('mitRosterList');
-    const emptyBanner = document.getElementById('mitOpenSeatsBanner');
+    const mainTitle = document.getElementById('formTitle');
 
     if (!heroCourse) return;
 
     const isDenver = isDenverActive();
 
     if (!resolvedId || !window.mitCalendarClassesCache || window.mitCalendarClassesCache.length === 0) {
+        if (mainTitle) mainTitle.innerText = "MIT CLASS";
         heroCourse.innerText = "No Session Selected";
         if (heroLevel) heroLevel.style.display = 'none';
-        if (heroStatus) heroStatus.innerText = "—";
-        if (heroId) heroId.innerText = "—";
-        if (heroCenter) heroCenter.innerText = "—";
-        if (heroTime) heroTime.innerText = "—";
-        if (heroTrainer) heroTrainer.innerText = "—";
+        if (heroDateTime) heroDateTime.innerText = "—";
+        if (heroLocationTrainer) heroLocationTrainer.innerText = "—";
         if (heroSeats) heroSeats.innerText = "0 of 15";
-        if (heroProgress) heroProgress.style.width = "0%";
-        if (rosterHeader) rosterHeader.innerText = "Roster · 0 of 15";
-        if (rosterList) rosterList.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--crust-deep); font-size: 16px;">Schedule or select an MIT session to view attendee roster.</div>';
-        if (emptyBanner) emptyBanner.innerText = "No active session";
+        if (rosterHeader) rosterHeader.innerText = "0";
+        if (rosterList) rosterList.innerHTML = '<div style="padding: 35px 20px; text-align: center; color: var(--crust-burnt); font-size: 15px; font-family: \'Subhead2\', sans-serif;">Select an MIT session from the sidebar or click <strong>+ Schedule MIT Session</strong>.</div>';
         return;
     }
 
@@ -249,12 +245,19 @@ async function renderMitClassView(classId = null) {
     if (!cls) return;
 
     const dateInfo = formatMitDateDisplay(cls.classDate);
+    const dateParts = (cls.classDate || '').split('/');
+    if (mainTitle) {
+        const shortDate = (dateParts.length === 3) ? `${dateParts[0]}/${dateParts[1]}` : cls.classDate;
+        mainTitle.innerText = `MIT CLASS · ${dateInfo.dayOfWeek} ${shortDate}`;
+    }
 
     heroCourse.innerText = cls.name || "Operations Assessment";
-    heroId.innerText = cls.id || "—";
-    heroCenter.innerText = cls.location || "McKinney";
-    heroTime.innerText = `${cls.startTime || '11:00 AM'} – ${cls.endTime || '1:00 PM'}`;
-    heroTrainer.innerText = cls.trainer || "Unassigned";
+    if (heroDateTime) {
+        heroDateTime.innerText = `${cls.classDate} · ${cls.startTime || '11:00 AM'} – ${cls.endTime || '1:00 PM'}`;
+    }
+    if (heroLocationTrainer) {
+        heroLocationTrainer.innerText = `${cls.location || 'McKinney'} · ${cls.trainer || 'Unassigned'}`;
+    }
 
     // CRITICAL DENVER EXCEPTION: Denver does NOT do levels for their classes!
     if (heroLevel) {
@@ -264,27 +267,13 @@ async function renderMitClassView(classId = null) {
             heroLevel.style.display = 'inline-flex';
             const lvlNum = cls.level || 1;
             heroLevel.className = `mit-lv-pill mit-lv-${lvlNum}`;
-            heroLevel.innerText = `Level ${lvlNum} · every ${lvlNum === 1 ? '4' : lvlNum === 2 ? '8' : '12'} wks`;
-        }
-    }
-
-    if (heroStatus) {
-        const dateText = dateInfo.formattedDate || cls.classDate || '';
-        if (dateInfo.isToday) {
-            heroStatus.innerText = dateText ? `${dateText} · TODAY` : "TODAY";
-            heroStatus.style.background = "var(--dark-blue, #005c91)";
-        } else if (dateInfo.isPast) {
-            heroStatus.innerText = dateText || "PAST";
-            heroStatus.style.background = "var(--crust-dark, #c0a588)";
-        } else {
-            heroStatus.innerText = dateText || "UPCOMING";
-            heroStatus.style.background = "var(--brand-blue, #0077bd)";
+            heroLevel.innerText = `Level ${lvlNum}`;
         }
     }
 
     // Fetch Attendee Roster
     if (rosterList) {
-        rosterList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--crust-deep); font-size: 15px;">Loading session attendee roster...</div>';
+        rosterList.innerHTML = '<div style="padding: 25px; text-align: center; color: var(--crust-burnt); font-size: 15px; font-family: \'Subhead2\', sans-serif;">Loading session attendee roster...</div>';
     }
 
     try {
@@ -297,29 +286,26 @@ async function renderMitClassView(classId = null) {
         const spotsTaken = roster.length;
         cls.spotsTaken = spotsTaken;
 
-        // Update Hero facts
-        if (heroSeats) heroSeats.innerText = `${spotsTaken} of ${spotsTotal}`;
-        if (heroProgress) {
-            const pct = Math.min(100, Math.round((spotsTaken / spotsTotal) * 100));
-            heroProgress.style.width = `${pct}%`;
-            heroProgress.style.background = pct >= 100 ? 'var(--brand-red, #ff0000)' : 'var(--brand-blue, #0077bd)';
-        }
-
-        if (rosterHeader) {
-            rosterHeader.innerText = `Roster · ${spotsTaken} of ${spotsTotal}`;
-        }
+        if (heroSeats) heroSeats.innerText = `${spotsTaken} of ${spotsTotal} Enrolled`;
+        if (rosterHeader) rosterHeader.innerText = spotsTaken;
 
         if (rosterList) {
             if (roster.length === 0) {
-                rosterList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--crust-deep); font-size: 15.5px;">No trainees currently enrolled in this session.</div>';
+                rosterList.innerHTML = `
+                    <div style="text-align: center; padding: 35px 20px; color: var(--crust-burnt); font-size: 14.5px; font-family: 'Subhead2', sans-serif;">
+                        No trainees currently enrolled for ${cls.classDate}.<br>
+                        <span style="font-size: 13px; color: var(--crust-dark); margin-top: 6px; display: inline-block;">Click <strong>+ Add MIT to session</strong> above to register an active candidate.</span>
+                    </div>
+                `;
             } else {
                 rosterList.innerHTML = '';
                 roster.forEach(r => {
                     const row = document.createElement('div');
-                    row.className = 'mit-roster-item-row';
-                    const candidateDo = r.do_name || (typeof contacts !== 'undefined' && contacts.find(c => String(c.store).trim() === String(r.store_num).trim())?.doName) || '';
-                    const doText = candidateDo ? ` · DO ${candidateDo}` : '';
+                    row.className = 'nto-roster-row';
+                    row.style.gridTemplateColumns = 'minmax(0, 1fr) 210px 90px';
+                    row.style.marginBottom = '8px';
 
+                    const candidateDo = r.do_name || (typeof contacts !== 'undefined' && contacts.find(c => String(c.store).trim() === String(r.store_num).trim())?.doName) || '';
                     const st = (r.status || 'Enrolled').trim();
                     const isEnrolled = st === 'Enrolled' || st === 'Confirmed' || !st;
                     const isAttended = st === 'Attended';
@@ -328,16 +314,20 @@ async function renderMitClassView(classId = null) {
                     const isCompleted = st === 'Completed';
 
                     row.innerHTML = `
-                        <span style="display: flex; flex-direction: column; gap: 2px;">
-                            <span style="font-family: 'Subhead1', 'Oswald', sans-serif; font-weight: 600; font-size: 18px; color: var(--dark-blue, #005c91); line-height: 1.2;">
-                                ${r.candidate_name}
-                            </span>
-                            <span style="font-size: 14.5px; color: var(--crust-deep, #603913); font-weight: 500;">
-                                Store #${r.store_num}${doText}
-                            </span>
-                        </span>
+                        <div style="display: flex; flex-direction: column; min-width: 0;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-family: 'Subhead2', sans-serif; font-size: 19.5px; font-weight: 700; color: var(--dark-blue); letter-spacing: -0.01em;">
+                                    ${r.candidate_name}
+                                </span>
+                            </div>
+                            <div style="font-family: 'Condensed', sans-serif; font-size: 15.5px; color: var(--crust-burnt); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 7px;">
+                                <span style="background: var(--crust-light); border: 1px solid var(--crust-med); border-radius: 4px; padding: 1.5px 7px; font-weight: 700; color: var(--crust-burnt); font-size: 14px;">#${r.store_num}</span>
+                                ${candidateDo ? `<span>DO ${candidateDo}</span> <span>·</span>` : ''}
+                                <span style="font-weight: 600;">${r.position || 'MIT'}</span>
+                            </div>
+                        </div>
                         <select class="field mit-roster-status-select" data-reg-id="${r.id}"
-                            style="height: 38px; font-size: 15px; border-radius: 8px; border: 1.5px solid var(--crust-dark); background: white; color: var(--crust-burnt); padding: 0 10px; font-family: 'Condensed', sans-serif;">
+                            style="width: 100%; height: 38px; padding: 2px 28px 2px 10px; font-size: 15.5px; font-family: 'Condensed', sans-serif; font-weight: 600; border-radius: 6px; border: 1.5px solid var(--crust-dark); background-color: #ffffff; cursor: pointer;">
                             <option value="Enrolled" ${isEnrolled ? 'selected' : ''}>Enrolled</option>
                             <option value="Attended" ${isAttended ? 'selected' : ''}>Attended</option>
                             <option value="Completed" ${isCompleted ? 'selected' : ''}>Completed</option>
@@ -345,7 +335,8 @@ async function renderMitClassView(classId = null) {
                             <option value="Canceled" ${isCanceled ? 'selected' : ''}>Canceled</option>
                         </select>
                         <a href="javascript:void(0)" onclick="removeMitAttendeeFromSession('${r.id}', '${(r.candidate_name || '').replace(/'/g, "\\'")}')"
-                            style="font-weight: 600; color: var(--crust-deep, #603913); font-size: 15px; text-decoration: none; text-align: right; cursor: pointer;">
+                            style="font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 15px; color: var(--brand-blue); text-decoration: none; text-align: right; white-space: nowrap;"
+                            onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
                             Remove
                         </a>
                     `;
@@ -353,20 +344,6 @@ async function renderMitClassView(classId = null) {
                 });
             }
         }
-
-        // Open seats pattern banner
-        if (emptyBanner) {
-            const openSeats = Math.max(0, spotsTotal - spotsTaken);
-            if (openSeats > 0) {
-                emptyBanner.innerText = `${openSeats} open seat${openSeats === 1 ? '' : 's'}`;
-                emptyBanner.className = 'mit-empty-seats-pattern';
-            } else {
-                emptyBanner.innerText = 'Session is full (0 open seats)';
-                emptyBanner.className = 'mit-empty-seats-pattern';
-                emptyBanner.style.background = '#faf2e9';
-            }
-        }
-
     } catch (err) {
         if (rosterList) {
             rosterList.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--brand-red); font-size: 15px;">Error loading roster: ${err.message}</div>`;

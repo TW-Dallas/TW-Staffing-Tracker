@@ -1129,79 +1129,65 @@
                             </div>
                         </div>
 
-                        <!-- 7. MIT CLASS SCHEDULER & ROSTER (3-Column Harmonized Layout) -->
-                        <div id="mitFormFields" class="hidden" style="display: flex; flex-direction: column; height: 100%; box-sizing: border-box; overflow-y: auto; gap: 14px; padding-right: 2px;">
-                            <!-- Hero Card -->
-                            <div class="mit-hero-box" id="mitHeroBox">
-                                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                                    <span id="mitHeroCourseName" style="font-family: 'Subhead1', 'Oswald', sans-serif; font-weight: 700; font-size: 26px; color: var(--dark-blue, #005c91);">
-                                        Select a Session
-                                    </span>
-                                    <span id="mitHeroLevelPill" class="mit-lv-pill mit-lv-1" style="display: none;">
-                                        Level 1 · every 4 wks
-                                    </span>
-                                    <span id="mitHeroStatusChip" class="mit-chip-status" style="background: var(--dark-blue, #005c91); color: #ffffff;">
-                                        Upcoming
-                                    </span>
-                                    <span style="flex: 1;"></span>
-                                    <span id="mitHeroSessionId" style="font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 600; color: var(--crust-deep, #603913);">
-                                        —
-                                    </span>
-                                </div>
-                                <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
-                                    <span class="mit-fact-item">
-                                        <small>Center</small>
-                                        <span id="mitHeroCenter">—</span>
-                                    </span>
-                                    <span class="mit-fact-item">
-                                        <small>Time</small>
-                                        <span id="mitHeroTime">—</span>
-                                    </span>
-                                    <span class="mit-fact-item">
-                                        <small>Trainer</small>
-                                        <span id="mitHeroTrainer">—</span>
-                                    </span>
-                                    <span class="mit-fact-item">
-                                        <small>Seats</small>
-                                        <span id="mitHeroSeatsText">0 of 15</span>
-                                        <span style="height: 6px; border-radius: 3px; background: var(--crust-med, #f0decc); margin-top: 4px; display: block; overflow: hidden;">
-                                            <span id="mitHeroProgressBar" style="display: block; width: 0%; height: 6px; border-radius: 3px; background: var(--brand-blue, #0077bd); transition: width 0.25s ease;"></span>
-                                        </span>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Roster Section -->
-                            <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 2px 2px 0; font-family: 'Subhead1', 'Oswald', sans-serif; font-weight: 700; font-size: 14.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--crust-deep, #603913);">
-                                <span id="mitRosterCountHeader">Roster · 0 of 15</span>
-                                <button type="button" onclick="openMitEnrollModal()" style="color: var(--brand-blue, #0077bd); background: none; border: none; font-weight: 700; font-size: 15px; cursor: pointer; font-family: 'Subhead1', sans-serif; text-transform: none;">
-                                    + Add MIT to session
-                                </button>
-                            </div>
-
-                            <div class="mit-roster-container">
-                                <div id="mitRosterList">
-                                    <div style="padding: 24px; text-align: center; color: var(--crust-deep); font-size: 16px;">
-                                        Select a session from the list to view attendee roster.
+                        <!-- 7. MIT CLASS SCHEDULER & ROSTER (Harmonized with NTO Architecture) -->
+                        <div id="mitFormFields" class="hidden" style="display: flex; flex-direction: column; height: 100%; box-sizing: border-box; overflow: hidden;">
+                            <!-- Compact Metadata Card Bar (identical structure to NTO) -->
+                            <div style="background: var(--crust-light); border: 1.5px solid var(--crust-med); border-radius: 10px; padding: 12px 16px; margin-bottom: 10px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; flex-shrink: 0; box-shadow: 0 1px 3px rgba(71, 43, 16, 0.04);">
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="font-family: 'Subhead1', sans-serif; font-size: 14px; letter-spacing: 0.06em; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 4px; display: block; font-weight: 700;">Course</label>
+                                    <div style="height: 40px; display: flex; align-items: center; gap: 8px;">
+                                        <span id="mitHeroCourseName" style="font-family: 'Subhead2', sans-serif; font-size: 16.5px; font-weight: 700; color: var(--dark-blue); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Select a Session</span>
+                                        <span id="mitHeroLevelPill" class="mit-lv-pill mit-lv-1" style="display: none;">L1</span>
                                     </div>
                                 </div>
-                                <div id="mitEmptySeatsBanner" class="mit-empty-seats-pattern">
-                                    15 open seats
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="font-family: 'Subhead1', sans-serif; font-size: 14px; letter-spacing: 0.06em; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 4px; display: block; font-weight: 700;">Date &amp; Time</label>
+                                    <div style="height: 40px; display: flex; align-items: center;">
+                                        <span id="mitHeroDateTime" style="font-family: 'Subhead2', sans-serif; font-size: 15.5px; color: var(--crust-burnt); font-weight: 600;">—</span>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="font-family: 'Subhead1', sans-serif; font-size: 14px; letter-spacing: 0.06em; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 4px; display: block; font-weight: 700;">Location &amp; Trainer</label>
+                                    <div style="height: 40px; display: flex; align-items: center;">
+                                        <span id="mitHeroLocationTrainer" style="font-family: 'Subhead2', sans-serif; font-size: 15.5px; color: var(--crust-burnt); font-weight: 600;">—</span>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="font-family: 'Subhead1', sans-serif; font-size: 14px; letter-spacing: 0.06em; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 4px; display: block; font-weight: 700;">Enrolled</label>
+                                    <div style="height: 40px; display: flex; align-items: center;">
+                                        <span id="mitHeroSeatsText" style="font-family: 'Subhead2', sans-serif; font-size: 15.5px; color: var(--dark-blue); font-weight: 700;">0 of 15</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div style="flex: 1; min-height: 8px;"></div>
+                            <!-- Subheader Bar: Roster Count + Add MIT link (identical to NTO) -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-shrink: 0; padding: 0 2px;">
+                                <span style="font-family: 'Subhead1', sans-serif; font-size: 15px; font-weight: 700; color: var(--dark-blue); text-transform: uppercase; letter-spacing: 0.07em;">
+                                    Roster &amp; Attendance · <span id="mitRosterCountHeader">0</span>
+                                </span>
+                                <div style="display: flex; align-items: center; gap: 14px;">
+                                    <span onclick="openMitEnrollModal()" style="color: var(--brand-blue); font-family: 'Subhead1', sans-serif; font-size: 14.5px; font-weight: 700; cursor: pointer; text-decoration: underline;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                                        + Add MIT to session
+                                    </span>
+                                </div>
+                            </div>
 
-                            <!-- Fixed Bottom Action Bar -->
-                            <div style="display: flex; gap: 12px; padding-top: 14px; border-top: 1.5px solid var(--crust-med, #f0decc); margin-top: auto;">
-                                <button type="button" id="btnSaveMitRoster" onclick="saveCurrentMitRoster()" class="btn p" style="flex: 1.2;">
+                            <!-- Flexible Roster Container (identical to NTO's warm crust container) -->
+                            <div id="mitRosterListContainer" style="flex: 1 1 0; min-height: 0; overflow-y: auto; border: 1.5px solid var(--crust-med); border-radius: 10px; background: #faf6f0; padding: 10px; box-sizing: border-box;">
+                                <div id="mitRosterList">
+                                    <p style="text-align: center; color: var(--crust-burnt); font-size: 16px; padding: 20px; font-family: 'Subhead2', sans-serif;">Select a session to view attendee roster.</p>
+                                </div>
+                            </div>
+
+                            <!-- Bottom Action Buttons Row (identical height and style to NTO) -->
+                            <div style="display: flex; gap: 12px; padding-top: 12px; border-top: 1.5px solid var(--crust-med); margin-top: 8px; flex-shrink: 0;">
+                                <button type="button" id="btnSaveMitRoster" onclick="saveCurrentMitRoster()" style="flex: 1; height: 42px; background: var(--brand-blue); color: white; border: none; border-radius: 8px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 15.5px; cursor: pointer; transition: background 0.15s ease;" title="Save current class roster attendance">
                                     Save Roster
                                 </button>
-                                <button type="button" id="btnEditMitSession" onclick="editCurrentMitSession()" class="btn s">
+                                <button type="button" id="btnEditMitSession" onclick="editCurrentMitSession()" style="height: 42px; padding: 0 20px; background: white; color: var(--dark-blue); border: 1.5px solid var(--brand-blue); border-radius: 8px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 15.5px; cursor: pointer; white-space: nowrap;">
                                     Edit Session
                                 </button>
-                                <span style="flex: 1;"></span>
-                                <button type="button" id="btnCancelMitSession" onclick="cancelCurrentMitSession()" class="btn d">
+                                <button type="button" id="btnCancelMitSession" onclick="cancelCurrentMitSession()" style="height: 42px; padding: 0 20px; background: white; color: var(--brand-red); border: 1.5px solid var(--brand-red); border-radius: 8px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 15.5px; cursor: pointer; white-space: nowrap;">
                                     Cancel Session
                                 </button>
                             </div>
@@ -13190,7 +13176,7 @@
         setTimeout(checkPendingCredentialsBadge, 2500);
     </script>
     <!-- MIT Leadership Class Tracker Module -->
-    <script src="mit_tracker.js?v=20261019_1115"></script>
+    <script src="mit_tracker.js?v=20261019_1130"></script>
 </body>
 
 </html>
