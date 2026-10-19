@@ -12,7 +12,7 @@
     <title>Onboarder Portal</title>
     <link class="favicon" rel="icon" type="image/png" href="images/staffing_icon.png">
     <link rel="apple-touch-icon" href="images/staffing_icon.png">
-    <link rel="stylesheet" href="styles.css?v=20261019_0635">
+    <link rel="stylesheet" href="styles.css?v=20261019_0638">
 </head>
 
 <body>
@@ -3791,7 +3791,7 @@
                 else if (view === 'interviews') searchInput.placeholder = "Search interviews...";
                 else if (view === 'staffing') searchInput.placeholder = "Search employee files...";
                 else if (view === 'paycards') searchInput.placeholder = "Search pay cards...";
-                else if (view === 'nto') searchInput.placeholder = "Search NTO attendees...";
+                else if (view === 'nto') searchInput.placeholder = "Search trainees...";
                 else if (view === 'mit') searchInput.placeholder = "Search MIT roster...";
                 else if (view === 'credentials') searchInput.placeholder = "Search credentials...";
                 else if (view === 'contacts') searchInput.placeholder = "Search directory...";
@@ -3933,6 +3933,10 @@
                     scrollArea.style.paddingRight = '0';
                     scrollArea.style.marginBottom = '0';
                 }
+                if (auditWeekly) auditWeekly.classList.add('hidden');
+                if (auditPeriod) auditPeriod.classList.remove('hidden');
+                if (auditTitle) auditTitle.innerText = "Period Staffing Audit";
+
                 renderNtoSidebar();
                 renderNtoClassView();
                 if (!window.ntoCalendarClassesCache || window.ntoCalendarClassesCache.length === 0) {
@@ -9890,11 +9894,11 @@
             if (!btn) return;
             const checked = document.querySelectorAll('.nto-trainee-check:checked');
             if (checked.length === 0) {
-                btn.innerHTML = `✉️ Send Meet Links`;
+                btn.innerHTML = `Send Meet Links`;
             } else if (checked.length === 1) {
-                btn.innerHTML = `✉️ Send Meet Link (1)`;
+                btn.innerHTML = `Send Meet Link (1)`;
             } else {
-                btn.innerHTML = `✉️ Send Meet Links (${checked.length} selected)`;
+                btn.innerHTML = `Send Meet Links (${checked.length} selected)`;
             }
         }
 
