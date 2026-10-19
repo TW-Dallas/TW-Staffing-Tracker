@@ -12,7 +12,7 @@
     <title>Onboarder Portal</title>
     <link class="favicon" rel="icon" type="image/png" href="images/staffing_icon.png">
     <link rel="apple-touch-icon" href="images/staffing_icon.png">
-    <link rel="stylesheet" href="styles.css?v=20261019_0638">
+    <link rel="stylesheet" href="styles.css?v=20261019_0645">
 </head>
 
 <body>
@@ -323,27 +323,27 @@
                                 <div class="form-group" style="margin-bottom: 0;">
                                     <label style="font-family: 'Subhead2', sans-serif; font-size: 14.5px; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 2px;">Position</label>
                                     <div class="custom-pos-dropdown-container" id="fieldPositionDropdown">
-                                        <button type="button" class="pos-dropdown-trigger" id="btnFieldPositionTrigger" onclick="togglePositionDropdown('fieldPositionMenu', event)" tabindex="0">
+                                        <button type="button" class="pos-dropdown-trigger" id="btnFieldPositionTrigger" onclick="togglePositionDropdown('fieldPositionMenu', event)" tabindex="0" aria-haspopup="listbox" aria-expanded="false">
                                             <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
                                                 <img class="pos-trigger-icon" src="" alt="icon" style="width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; display: none;">
                                                 <span class="pos-trigger-label" style="white-space: nowrap;">Position</span>
                                             </div>
                                             <span class="pos-dropdown-arrow"></span>
                                         </button>
-                                        <div id="fieldPositionMenu" class="pos-dropdown-menu hidden">
-                                            <div class="pos-menu-option" data-val="CSR" onclick="selectCustomPosition('fieldPosition', 'CSR')">
+                                        <div id="fieldPositionMenu" class="pos-dropdown-menu hidden" role="listbox">
+                                            <div class="pos-menu-option" data-val="CSR" onclick="selectCustomPosition('fieldPosition', 'CSR')" tabindex="-1" role="option">
                                                 <img src="image/custom-emojis/apron.png" class="pos-menu-icon" alt="CSR">
                                                 <span>CSR</span>
                                             </div>
-                                            <div class="pos-menu-option" data-val="DE" onclick="selectCustomPosition('fieldPosition', 'DE')">
+                                            <div class="pos-menu-option" data-val="DE" onclick="selectCustomPosition('fieldPosition', 'DE')" tabindex="-1" role="option">
                                                 <img src="image/custom-emojis/cartop_3d_left.png" class="pos-menu-icon" alt="DE">
                                                 <span>Driver (DE)</span>
                                             </div>
-                                            <div class="pos-menu-option" data-val="BIKE" onclick="selectCustomPosition('fieldPosition', 'BIKE')">
+                                            <div class="pos-menu-option" data-val="BIKE" onclick="selectCustomPosition('fieldPosition', 'BIKE')" tabindex="-1" role="option">
                                                 <img src="image/custom-emojis/helmet.png" class="pos-menu-icon" alt="BIKE">
                                                 <span>Biker (BIKE)</span>
                                             </div>
-                                            <div class="pos-menu-option" data-val="MIT" onclick="selectCustomPosition('fieldPosition', 'MIT')">
+                                            <div class="pos-menu-option" data-val="MIT" onclick="selectCustomPosition('fieldPosition', 'MIT')" tabindex="-1" role="option">
                                                 <img src="image/custom-emojis/mit.png" class="pos-menu-icon" alt="MIT">
                                                 <span>MIT</span>
                                             </div>
@@ -484,27 +484,27 @@
                                 <div class="form-group" style="margin-bottom: 0;">
                                     <label>Position</label>
                                     <div class="custom-pos-dropdown-container" id="intPositionDropdown">
-                                        <button type="button" class="pos-dropdown-trigger" id="btnIntPositionTrigger" onclick="togglePositionDropdown('intPositionMenu', event)" tabindex="0">
+                                        <button type="button" class="pos-dropdown-trigger" id="btnIntPositionTrigger" onclick="togglePositionDropdown('intPositionMenu', event)" tabindex="0" aria-haspopup="listbox" aria-expanded="false">
                                             <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
                                                 <img class="pos-trigger-icon" src="" alt="icon" style="width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; display: none;">
                                                 <span class="pos-trigger-label" style="white-space: nowrap;">Position</span>
                                             </div>
                                             <span class="pos-dropdown-arrow"></span>
                                         </button>
-                                        <div id="intPositionMenu" class="pos-dropdown-menu hidden">
-                                            <div class="pos-menu-option" data-val="DE" onclick="selectCustomPosition('intPosition', 'DE')">
+                                        <div id="intPositionMenu" class="pos-dropdown-menu hidden" role="listbox">
+                                            <div class="pos-menu-option" data-val="DE" onclick="selectCustomPosition('intPosition', 'DE')" tabindex="-1" role="option">
                                                 <img src="image/custom-emojis/cartop_3d_left.png" class="pos-menu-icon" alt="DE">
                                                 <span>Driver (DE)</span>
                                             </div>
-                                            <div class="pos-menu-option" data-val="CSR" onclick="selectCustomPosition('intPosition', 'CSR')">
+                                            <div class="pos-menu-option" data-val="CSR" onclick="selectCustomPosition('intPosition', 'CSR')" tabindex="-1" role="option">
                                                 <img src="image/custom-emojis/apron.png" class="pos-menu-icon" alt="CSR">
                                                 <span>CSR</span>
                                             </div>
-                                            <div class="pos-menu-option" data-val="BIKE" onclick="selectCustomPosition('intPosition', 'BIKE')">
+                                            <div class="pos-menu-option" data-val="BIKE" onclick="selectCustomPosition('intPosition', 'BIKE')" tabindex="-1" role="option">
                                                 <img src="image/custom-emojis/helmet.png" class="pos-menu-icon" alt="BIKE">
                                                 <span>Biker (BIKE)</span>
                                             </div>
-                                            <div class="pos-menu-option" data-val="MIT" onclick="selectCustomPosition('intPosition', 'MIT')">
+                                            <div class="pos-menu-option" data-val="MIT" onclick="selectCustomPosition('intPosition', 'MIT')" tabindex="-1" role="option">
                                                 <img src="image/custom-emojis/mit.png" class="pos-menu-icon" alt="MIT">
                                                 <span>MIT</span>
                                             </div>
@@ -678,27 +678,27 @@
                                         <div class="form-group">
                                             <label>Position</label>
                                             <div class="custom-pos-dropdown-container" id="stfPositionDropdown">
-                                                <button type="button" class="pos-dropdown-trigger" id="btnStfPositionTrigger" onclick="togglePositionDropdown('stfPositionMenu', event)" tabindex="0">
+                                                <button type="button" class="pos-dropdown-trigger" id="btnStfPositionTrigger" onclick="togglePositionDropdown('stfPositionMenu', event)" tabindex="0" aria-haspopup="listbox" aria-expanded="false">
                                                     <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
                                                         <img class="pos-trigger-icon" src="" alt="icon" style="width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; display: none;">
                                                         <span class="pos-trigger-label" style="white-space: nowrap;">Select Position</span>
                                                     </div>
                                                     <span class="pos-dropdown-arrow"></span>
                                                 </button>
-                                                <div id="stfPositionMenu" class="pos-dropdown-menu hidden">
-                                                    <div class="pos-menu-option" data-val="CSR" onclick="selectCustomPosition('stfPosition', 'CSR'); refreshActiveStintPreview();">
+                                                <div id="stfPositionMenu" class="pos-dropdown-menu hidden" role="listbox">
+                                                    <div class="pos-menu-option" data-val="CSR" onclick="selectCustomPosition('stfPosition', 'CSR'); refreshActiveStintPreview();" tabindex="-1" role="option">
                                                         <img src="image/custom-emojis/apron.png" class="pos-menu-icon" alt="CSR">
                                                         <span>CSR</span>
                                                     </div>
-                                                    <div class="pos-menu-option" data-val="DE" onclick="selectCustomPosition('stfPosition', 'DE'); refreshActiveStintPreview();">
+                                                    <div class="pos-menu-option" data-val="DE" onclick="selectCustomPosition('stfPosition', 'DE'); refreshActiveStintPreview();" tabindex="-1" role="option">
                                                         <img src="image/custom-emojis/cartop_3d_left.png" class="pos-menu-icon" alt="DE">
                                                         <span>Driver (DE)</span>
                                                     </div>
-                                                    <div class="pos-menu-option" data-val="BIKE" onclick="selectCustomPosition('stfPosition', 'BIKE'); refreshActiveStintPreview();">
+                                                    <div class="pos-menu-option" data-val="BIKE" onclick="selectCustomPosition('stfPosition', 'BIKE'); refreshActiveStintPreview();" tabindex="-1" role="option">
                                                         <img src="image/custom-emojis/helmet.png" class="pos-menu-icon" alt="BIKE">
                                                         <span>Biker (BIKE)</span>
                                                     </div>
-                                                    <div class="pos-menu-option" data-val="MIT" onclick="selectCustomPosition('stfPosition', 'MIT'); refreshActiveStintPreview();">
+                                                    <div class="pos-menu-option" data-val="MIT" onclick="selectCustomPosition('stfPosition', 'MIT'); refreshActiveStintPreview();" tabindex="-1" role="option">
                                                         <img src="image/custom-emojis/mit.png" class="pos-menu-icon" alt="MIT">
                                                         <span>MIT</span>
                                                     </div>
@@ -837,27 +837,27 @@
                                 <div class="form-group">
                                     <label>Position</label>
                                     <div class="custom-pos-dropdown-container" id="payPositionDropdown">
-                                        <button type="button" class="pos-dropdown-trigger" id="btnPayPositionTrigger" onclick="togglePositionDropdown('payPositionMenu', event)" tabindex="0">
+                                        <button type="button" class="pos-dropdown-trigger" id="btnPayPositionTrigger" onclick="togglePositionDropdown('payPositionMenu', event)" tabindex="0" aria-haspopup="listbox" aria-expanded="false">
                                             <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
                                                 <img class="pos-trigger-icon" src="" alt="icon" style="width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; display: none;">
                                                 <span class="pos-trigger-label" style="white-space: nowrap;">Select Position</span>
                                             </div>
                                             <span class="pos-dropdown-arrow"></span>
                                         </button>
-                                        <div id="payPositionMenu" class="pos-dropdown-menu hidden">
-                                            <div class="pos-menu-option" data-val="CSR" onclick="selectCustomPosition('payPosition', 'CSR')">
+                                        <div id="payPositionMenu" class="pos-dropdown-menu hidden" role="listbox">
+                                            <div class="pos-menu-option" data-val="CSR" onclick="selectCustomPosition('payPosition', 'CSR')" tabindex="-1" role="option">
                                                 <img src="image/custom-emojis/apron.png" class="pos-menu-icon" alt="CSR">
                                                 <span>CSR</span>
                                             </div>
-                                            <div class="pos-menu-option" data-val="DE" onclick="selectCustomPosition('payPosition', 'DE')">
+                                            <div class="pos-menu-option" data-val="DE" onclick="selectCustomPosition('payPosition', 'DE')" tabindex="-1" role="option">
                                                 <img src="image/custom-emojis/cartop_3d_left.png" class="pos-menu-icon" alt="DE">
                                                 <span>Driver (DE)</span>
                                             </div>
-                                            <div class="pos-menu-option" data-val="BIKE" onclick="selectCustomPosition('payPosition', 'BIKE')">
+                                            <div class="pos-menu-option" data-val="BIKE" onclick="selectCustomPosition('payPosition', 'BIKE')" tabindex="-1" role="option">
                                                 <img src="image/custom-emojis/helmet.png" class="pos-menu-icon" alt="BIKE">
                                                 <span>Biker (BIKE)</span>
                                             </div>
-                                            <div class="pos-menu-option" data-val="MIT" onclick="selectCustomPosition('payPosition', 'MIT')">
+                                            <div class="pos-menu-option" data-val="MIT" onclick="selectCustomPosition('payPosition', 'MIT')" tabindex="-1" role="option">
                                                 <img src="image/custom-emojis/mit.png" class="pos-menu-icon" alt="MIT">
                                                 <span>MIT</span>
                                             </div>
@@ -6047,11 +6047,17 @@
             closeAllPositionMenus();
             if (targetMenu && isCurrentlyHidden) {
                 targetMenu.classList.remove('hidden');
+                const trigger = targetMenu.parentElement ? targetMenu.parentElement.querySelector('.pos-dropdown-trigger') : null;
+                if (trigger) trigger.setAttribute('aria-expanded', 'true');
             }
         }
 
         function closeAllPositionMenus() {
-            document.querySelectorAll('.pos-dropdown-menu').forEach(m => m.classList.add('hidden'));
+            document.querySelectorAll('.pos-dropdown-menu').forEach(m => {
+                m.classList.add('hidden');
+                const trigger = m.parentElement ? m.parentElement.querySelector('.pos-dropdown-trigger') : null;
+                if (trigger) trigger.setAttribute('aria-expanded', 'false');
+            });
         }
 
         function selectCustomPosition(fieldId, value) {
@@ -6094,6 +6100,123 @@
                 });
             }
         }
+
+        // Global Keyboard navigation for custom position dropdowns
+        document.addEventListener('keydown', function (e) {
+            const trigger = e.target && e.target.closest ? e.target.closest('.pos-dropdown-trigger') : null;
+            const option = e.target && e.target.closest ? e.target.closest('.pos-menu-option') : null;
+
+            if (trigger) {
+                const container = trigger.closest('.custom-pos-dropdown-container');
+                if (!container) return;
+                const menu = container.querySelector('.pos-dropdown-menu');
+                if (!menu) return;
+
+                const isOpen = !menu.classList.contains('hidden');
+                const options = Array.from(menu.querySelectorAll('.pos-menu-option'));
+
+                if (e.key === 'ArrowDown' || e.key === 'Down') {
+                    e.preventDefault();
+                    if (!isOpen) {
+                        closeAllPositionMenus();
+                        menu.classList.remove('hidden');
+                        trigger.setAttribute('aria-expanded', 'true');
+                    }
+                    const selectedOpt = options.find(opt => opt.classList.contains('selected')) || options[0];
+                    if (selectedOpt) {
+                        selectedOpt.setAttribute('tabindex', '-1');
+                        selectedOpt.focus();
+                    }
+                } else if (e.key === 'ArrowUp' || e.key === 'Up') {
+                    e.preventDefault();
+                    if (!isOpen) {
+                        closeAllPositionMenus();
+                        menu.classList.remove('hidden');
+                        trigger.setAttribute('aria-expanded', 'true');
+                    }
+                    const selectedOpt = options.find(opt => opt.classList.contains('selected')) || options[options.length - 1];
+                    if (selectedOpt) {
+                        selectedOpt.setAttribute('tabindex', '-1');
+                        selectedOpt.focus();
+                    }
+                } else if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+                    e.preventDefault();
+                    if (isOpen) {
+                        closeAllPositionMenus();
+                    } else {
+                        closeAllPositionMenus();
+                        menu.classList.remove('hidden');
+                        trigger.setAttribute('aria-expanded', 'true');
+                        const selectedOpt = options.find(opt => opt.classList.contains('selected')) || options[0];
+                        if (selectedOpt) {
+                            selectedOpt.setAttribute('tabindex', '-1');
+                            selectedOpt.focus();
+                        }
+                    }
+                } else if (e.key === 'Escape') {
+                    if (isOpen) {
+                        e.preventDefault();
+                        closeAllPositionMenus();
+                    }
+                } else if (e.key && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                    const char = e.key.toUpperCase();
+                    const matched = options.find(opt => {
+                        const val = (opt.getAttribute('data-val') || '').toUpperCase();
+                        const text = (opt.innerText || '').trim().toUpperCase();
+                        return val.startsWith(char) || text.startsWith(char);
+                    });
+                    if (matched) {
+                        e.preventDefault();
+                        matched.click();
+                    }
+                }
+                return;
+            }
+
+            if (option) {
+                const menu = option.closest('.pos-dropdown-menu');
+                const container = option.closest('.custom-pos-dropdown-container');
+                const triggerBtn = container ? container.querySelector('.pos-dropdown-trigger') : null;
+                if (!menu) return;
+
+                const options = Array.from(menu.querySelectorAll('.pos-menu-option'));
+                const currentIndex = options.indexOf(option);
+
+                if (e.key === 'ArrowDown' || e.key === 'Down') {
+                    e.preventDefault();
+                    const nextIndex = (currentIndex + 1) % options.length;
+                    options[nextIndex].setAttribute('tabindex', '-1');
+                    options[nextIndex].focus();
+                } else if (e.key === 'ArrowUp' || e.key === 'Up') {
+                    e.preventDefault();
+                    const prevIndex = (currentIndex - 1 + options.length) % options.length;
+                    options[prevIndex].setAttribute('tabindex', '-1');
+                    options[prevIndex].focus();
+                } else if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+                    e.preventDefault();
+                    option.click();
+                    if (triggerBtn) triggerBtn.focus();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeAllPositionMenus();
+                    if (triggerBtn) triggerBtn.focus();
+                } else if (e.key === 'Tab') {
+                    closeAllPositionMenus();
+                } else if (e.key && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                    const char = e.key.toUpperCase();
+                    const matched = options.find(o => {
+                        const val = (o.getAttribute('data-val') || '').toUpperCase();
+                        const text = (o.innerText || '').trim().toUpperCase();
+                        return val.startsWith(char) || text.startsWith(char);
+                    });
+                    if (matched) {
+                        e.preventDefault();
+                        matched.setAttribute('tabindex', '-1');
+                        matched.focus();
+                    }
+                }
+            }
+        });
 
         function cleanEmailInput(val) {
             if (!val) return '';

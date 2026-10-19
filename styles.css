@@ -1355,15 +1355,26 @@
     transition: all 0.12s ease;
 }
 
-.pos-menu-option:hover {
+.pos-menu-option:hover,
+.pos-menu-option:focus,
+.pos-menu-option:focus-visible {
     background: var(--crust-light);
     color: var(--dark-blue);
+    outline: none;
 }
 
 .pos-menu-option.selected {
     background: #eef7fc;
     color: var(--dark-blue);
     font-weight: bold;
+}
+
+.pos-menu-option.selected:focus,
+.pos-menu-option.selected:focus-visible {
+    background: #e0f0fa;
+    color: var(--dark-blue);
+    font-weight: bold;
+    outline: none;
 }
 
 .pos-menu-icon {
