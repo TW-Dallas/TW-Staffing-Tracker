@@ -1,8 +1,9 @@
-const CACHE_NAME = 'staffing-cache-v5';
+const CACHE_NAME = 'staffing-cache-v11';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './tile_blue.png',
+  './staffing_icon.png',
+  './images/staffing_icon.png',
   './New_Logo_v2.png'
 ];
 

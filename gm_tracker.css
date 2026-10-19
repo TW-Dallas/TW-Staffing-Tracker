@@ -17,12 +17,18 @@
     justify-content: flex-start;
 }
 
+select, select option {
+    font-family: 'Subhead2', sans-serif;
+    font-weight: normal !important;
+}
+
 select {
     padding: 8px 12px;
     border-radius: 8px;
     border: 1px solid var(--crust-dark);
     background: var(--crust-light);
     font-family: 'Subhead2', sans-serif;
+    font-weight: normal !important;
     font-size: 16px;
     color: var(--crust-burnt);
     width: 250px;
@@ -184,6 +190,7 @@ body {
     display: flex;
     justify-content: space-between;
     font-family: 'Condensed', sans-serif;
+    font-weight: normal !important;
     font-size: 15px;
     color: var(--crust-deep);
     margin-bottom: 6px;
@@ -338,23 +345,26 @@ body {
 }
 
 .chip {
-    font-size: 15px;
+    font-size: 13.5px;
     background: #f0f4f8;
-    padding: 6px 12px;
+    padding: 5px 11px;
     border-radius: 6px;
     border: 1px solid #dde1e6;
-    color: #444444;
-    display: flex;
+    color: var(--crust-burnt, #472b10);
+    display: inline-flex;
     align-items: center;
-    gap: 4px;
-    font-family: 'Condensed', sans-serif;
+    gap: 5px;
+    font-family: 'Subhead2', sans-serif;
+    font-weight: normal !important;
+    letter-spacing: 0.3px;
 }
 
 .chip-nto {
     background: #e3f2fd;
-    color: #0d47a1;
+    color: var(--dark-blue, #005c91);
     border-color: #bbdefb;
-    font-weight: bold;
+    font-family: 'Subhead1', sans-serif;
+    font-weight: normal !important;
 }
 
 /* --- NUDGE & ACTION BUTTONS --- */
@@ -425,6 +435,8 @@ body {
 
 /* --- NOTES --- */
 .notes-section {
+    font-family: 'Condensed', sans-serif;
+    font-weight: normal !important;
     font-size: 16px;
     margin-top: 12px;
     color: var(--crust-deep);
@@ -558,6 +570,7 @@ body {
 
 .nto-pill-day {
     font-family: 'Subhead2', sans-serif;
+    font-weight: normal !important;
     font-size: 14px;
     color: var(--dark-blue);
 }
@@ -565,13 +578,14 @@ body {
 .nto-pill-time {
     font-size: 13.5px;
     color: #333333;
-    font-weight: 500;
+    font-weight: normal !important;
     font-family: 'Condensed', sans-serif;
 }
 
 .nto-pill-trainer {
     font-size: 12.5px;
     color: #777777;
+    font-weight: normal !important;
     font-family: 'Condensed', sans-serif;
 }
 
@@ -591,12 +605,18 @@ body {
     }
     .nto-pill-day {
         font-size: 13.5px;
+        font-family: 'Subhead2', sans-serif;
+        font-weight: normal !important;
     }
     .nto-pill-time {
         font-size: 12.5px;
+        font-family: 'Condensed', sans-serif;
+        font-weight: normal !important;
     }
     .nto-pill-trainer {
         font-size: 11.5px;
+        font-family: 'Condensed', sans-serif;
+        font-weight: normal !important;
     }
 }
 
@@ -830,6 +850,7 @@ body {
 }
 .auth-pin-display {
     font-family: 'ExtraBold', monospace, sans-serif;
+    font-weight: normal !important;
     font-size: 28px;
     letter-spacing: 12px;
     text-align: center;
@@ -870,7 +891,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Header2', sans-serif;
+    font-family: 'ExtraBold', 'Header2', 'Subhead1', sans-serif;
+    font-weight: normal !important;
     font-size: 21px;
     color: var(--dark-blue);
     cursor: pointer;
@@ -891,6 +913,7 @@ body {
 .pin-key-btn.pin-fn-btn {
     font-size: 18px;
     font-family: 'Subhead1', sans-serif;
+    font-weight: normal !important;
 }
 .auth-error-banner {
     background: #ffebee;
@@ -919,6 +942,7 @@ body {
     border: none;
     border-radius: 25px;
     font-family: 'Subhead1', sans-serif;
+    font-weight: normal !important;
     font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
