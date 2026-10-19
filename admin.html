@@ -12,7 +12,7 @@
     <title>Onboarder Portal</title>
     <link class="favicon" rel="icon" type="image/png" href="images/staffing_icon.png">
     <link rel="apple-touch-icon" href="images/staffing_icon.png">
-    <link rel="stylesheet" href="styles.css?v=20261019_1015">
+    <link rel="stylesheet" href="styles.css?v=20261019_1045">
 </head>
 
 <body>
@@ -300,6 +300,11 @@
                                 </a>
                                 <button type="button" onclick="openClassCalendarModal()" style="display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px; border-radius: 6px; border: none; background: var(--brand-blue); color: white; font-family: 'Subhead1', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; box-shadow: var(--shadow-sm);">
                                     + Schedule Class
+                                </button>
+                            </div>
+                            <div id="mitHeaderActions" class="hidden" style="display: flex; gap: 8px; align-items: center;">
+                                <button type="button" class="btn-add" id="btnScheduleMitMain" onclick="openMitClassModal()">
+                                    + Schedule MIT Session
                                 </button>
                             </div>
                         </div>
@@ -1126,16 +1131,6 @@
 
                         <!-- 7. MIT CLASS SCHEDULER & ROSTER (3-Column Harmonized Layout) -->
                         <div id="mitFormFields" class="hidden" style="display: flex; flex-direction: column; height: 100%; box-sizing: border-box; overflow-y: auto; gap: 14px; padding-right: 2px;">
-                            <!-- Panel Header -->
-                            <div style="display: flex; justify-content: space-between; align-items: center; min-height: 44px;">
-                                <h2 id="mitHeaderDateText" style="margin: 0; font-family: 'Subhead1', 'Oswald', sans-serif; font-weight: 700; font-size: 26px; text-transform: uppercase; color: var(--dark-blue, #005c91);">
-                                    MIT Session
-                                </h2>
-                                <button type="button" onclick="openMitClassModal()" class="btn p" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
-                                    + Schedule MIT Session
-                                </button>
-                            </div>
-
                             <!-- Hero Card -->
                             <div class="mit-hero-box" id="mitHeroBox">
                                 <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
@@ -3911,6 +3906,8 @@
             if (credHeaderActions) credHeaderActions.classList.add('hidden');
             const ntoHeaderActions = document.getElementById('ntoHeaderActions');
             if (ntoHeaderActions) ntoHeaderActions.classList.add('hidden');
+            const mitHeaderActions = document.getElementById('mitHeaderActions');
+            if (mitHeaderActions) mitHeaderActions.classList.add('hidden');
             const ntoSidebarActions = document.getElementById('ntoSidebarActions');
             if (ntoSidebarActions) ntoSidebarActions.classList.add('hidden');
             const formLastUpdated = document.getElementById('formLastUpdated');
@@ -4049,6 +4046,8 @@
                 if (btnAddMain) btnAddMain.classList.add('hidden');
                 if (formActions) formActions.classList.add('hidden');
                 if (mitFormFields) mitFormFields.classList.remove('hidden');
+                const mitHeaderActions = document.getElementById('mitHeaderActions');
+                if (mitHeaderActions) mitHeaderActions.classList.remove('hidden');
                 if (mitSidebarFilters) mitSidebarFilters.classList.remove('hidden');
                 if (mitSidebarActions) mitSidebarActions.classList.remove('hidden');
                 if (customSortDropdown) customSortDropdown.classList.add('hidden');
@@ -5557,8 +5556,8 @@
                 document.getElementById('formTitle').innerText = "🎓 NTO Attendance & Class Closure";
             } else if (currentView === 'credentials') {
                 document.getElementById('formTitle').innerHTML = '<img src="image/custom-emojis/key.png" alt="Key" style="width: 22px; height: 22px; vertical-align: -3px; object-fit: contain; margin-right: 8px;">Credential Governance &amp; Access Control';
-            } else if (currentView === 'mitScheduler') {
-                document.getElementById('formTitle').innerText = "🎓 MIT Leadership Class Scheduler";
+            } else if (currentView === 'mit' || currentView === 'mitScheduler') {
+                document.getElementById('formTitle').innerText = "MIT Leadership Class";
             } else {
                 document.getElementById('formTitle').innerText = "Candidate details";
             }
@@ -10886,7 +10885,6 @@
 
         async function renderMitClassView(classId = null) {
             const resolvedId = classId || window.currentSelectedMitClassId;
-            const headerDate = document.getElementById('mitHeaderDateText');
             const heroCourse = document.getElementById('mitHeroCourseName');
             const heroLevel = document.getElementById('mitHeroLevelPill');
             const heroStatus = document.getElementById('mitHeroStatusChip');
@@ -10905,7 +10903,6 @@
             const isDenver = isDenverActive();
 
             if (!resolvedId || !window.mitCalendarClassesCache || window.mitCalendarClassesCache.length === 0) {
-                if (headerDate) headerDate.innerText = "MIT Session";
                 heroCourse.innerText = "No Session Selected";
                 if (heroLevel) heroLevel.style.display = 'none';
                 if (heroStatus) heroStatus.innerText = "—";
@@ -10925,9 +10922,6 @@
             if (!cls) return;
 
             const dateInfo = formatMitDateDisplay(cls.classDate);
-            if (headerDate) {
-                headerDate.innerText = `MIT Session · ${dateInfo.formattedDate || cls.classDate}`;
-            }
 
             heroCourse.innerText = cls.name || "Operations Assessment";
             heroId.innerText = cls.id || "—";
@@ -10948,14 +10942,15 @@
             }
 
             if (heroStatus) {
+                const dateText = dateInfo.formattedDate || cls.classDate || '';
                 if (dateInfo.isToday) {
-                    heroStatus.innerText = "Today";
+                    heroStatus.innerText = dateText ? `${dateText} · Today` : "Today";
                     heroStatus.style.background = "var(--dark-blue, #005c91)";
                 } else if (dateInfo.isPast) {
-                    heroStatus.innerText = "Past";
+                    heroStatus.innerText = dateText ? `${dateText} · Past` : "Past";
                     heroStatus.style.background = "var(--crust-dark, #c0a588)";
                 } else {
-                    heroStatus.innerText = "Upcoming";
+                    heroStatus.innerText = dateText ? `${dateText} · Upcoming` : "Upcoming";
                     heroStatus.style.background = "var(--brand-blue, #0077bd)";
                 }
             }
