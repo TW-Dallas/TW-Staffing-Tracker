@@ -6255,45 +6255,106 @@
             }
         }
 
-        // Global Keyboard navigation for candidateForm & custom position dropdowns
-        document.addEventListener('keydown', function (e) {
-            const target = e.target;
-            const form = document.getElementById('candidateForm');
+        function isAnyModalOpen() {
+            const modals = document.querySelectorAll('.modal, .brand-modal-overlay, [id$="Modal"], [id$="modal"]');
+            for (const m of modals) {
+                if (!m.classList.contains('hidden') && m.style.display !== 'none' && (m.offsetWidth > 0 || m.offsetHeight > 0)) {
+                    return true;
+                }
+            }
+            return false;
+        }
 
-            // 1. Universal Ctrl+Enter / Cmd+Enter shortcut: Save candidate form from ANY field (including textarea)
-            if ((e.ctrlKey || e.metaKey) && (e.key === 'Enter' || e.keyCode === 13)) {
-                if (form && form.contains(target)) {
-                    e.preventDefault();
-                    if (target && typeof target.blur === 'function') target.blur();
+        function triggerActiveViewSave() {
+            const form = document.getElementById('candidateForm');
+            if (currentView === 'onboarding' || currentView === 'interviews' || currentView === 'staffing' || currentView === 'paycards') {
+                if (form) {
+                    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+                        document.activeElement.blur();
+                    }
                     if (typeof form.requestSubmit === 'function') {
                         form.requestSubmit();
                     } else {
                         saveCandidate({ preventDefault: () => {} });
                     }
+                }
+            } else if (currentView === 'nto') {
+                if (typeof saveNtoAttendanceOnly === 'function') {
+                    saveNtoAttendanceOnly();
+                }
+            } else if (currentView === 'mit' || currentView === 'mitScheduler') {
+                if (typeof saveCurrentMitRoster === 'function') {
+                    saveCurrentMitRoster();
+                }
+            }
+        }
+
+        // Global Keyboard navigation for candidateForm & custom position dropdowns
+        document.addEventListener('keydown', function (e) {
+            const target = e.target;
+            const form = document.getElementById('candidateForm');
+
+            const isModal = isAnyModalOpen();
+            const isSearchOrScratch = target && (
+                target.id === 'searchControl' || 
+                target.id === 'credSearchInput' || 
+                target.id === 'scratchpad' || 
+                target.id === 'newChecklistItem' ||
+                (typeof target.closest === 'function' && target.closest('#scratchpadContainer'))
+            );
+
+            // 1. Universal Ctrl+Enter / Cmd+Enter shortcut: Save from ANY field, textarea, tab, or background
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'Enter' || e.keyCode === 13)) {
+                if (!isModal && (!isSearchOrScratch || target.id !== 'scratchpad')) {
+                    e.preventDefault();
+                    triggerActiveViewSave();
                     return;
                 }
             }
 
-            // 2. Enter on <select> dropdowns (Shirt size, Hat style, Interview status, etc.) or checkboxes inside candidateForm
-            // Standard browsers do not submit forms when Enter is pressed on <select> or checkboxes.
-            // This allows users to press Enter directly on Shirt size, Hat style, Paycard, etc. to save without tabbing back to a text input.
+            // 2. Enter on non-text fields, when switching tabs, or when no field is selected:
+            // - Allows saving with plain Enter from tabs, candidate cards, checkboxes, select dropdowns, or page body
             if ((e.key === 'Enter' || e.keyCode === 13) && !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey) {
-                if (form && form.contains(target)) {
-                    const tag = (target.tagName || '').toUpperCase();
-                    const isSelect = tag === 'SELECT';
-                    const isCheckbox = tag === 'INPUT' && (target.type === 'checkbox' || target.type === 'radio');
-                    const isCustomCheck = target.classList && (target.classList.contains('custom-chk') || target.classList.contains('flag-pill') || target.classList.contains('cand-status-btn'));
+                if (!isModal && !isSearchOrScratch) {
+                    const tag = (target && target.tagName ? target.tagName : '').toUpperCase();
+                    const isTextarea = tag === 'TEXTAREA';
+                    const isTextInput = tag === 'INPUT' && !['checkbox', 'radio', 'button', 'submit', 'reset'].includes((target.type || '').toLowerCase());
+                    const isDestructiveOrSpecialBtn = target && (target.id === 'btnDelete' || target.id === 'btnCancel' || target.id === 'btnAddMain');
+                    const isCustomMenu = target && typeof target.closest === 'function' && (
+                        target.closest('.pos-dropdown-trigger') || 
+                        target.closest('.pos-menu-option') ||
+                        target.closest('.sort-option')
+                    );
 
-                    if (isSelect || isCheckbox || isCustomCheck) {
-                        e.preventDefault();
-                        if (typeof target.blur === 'function') target.blur();
-                        if (typeof form.requestSubmit === 'function') {
-                            form.requestSubmit();
-                        } else {
-                            saveCandidate({ preventDefault: () => {} });
-                        }
+                    // If actively typing in a textarea, preserve native Enter for newlines
+                    if (isTextarea) {
                         return;
                     }
+
+                    // If in a regular text input inside candidateForm, let standard browser submit happen
+                    if (isTextInput && form && form.contains(target)) {
+                        return;
+                    }
+
+                    // If in a search or non-form text input, do not submit
+                    if (isTextInput) {
+                        return;
+                    }
+
+                    // If focused on an open dropdown option or trigger, let Enter select the option
+                    if (isCustomMenu) {
+                        return;
+                    }
+
+                    // If focused on a destructive or special button, let Enter click that button
+                    if (isDestructiveOrSpecialBtn) {
+                        return;
+                    }
+
+                    // In all other cases (tabs, cards, body, select dropdowns, checkboxes, pills, no field selected):
+                    e.preventDefault();
+                    triggerActiveViewSave();
+                    return;
                 }
             }
 
