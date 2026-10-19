@@ -4536,11 +4536,12 @@ export async function onRequestPost(context) {
                 }
             }
 
-            // CANONICAL TEAM WOW ROSTER (Dallas: 29 stores, Denver: 40 stores, El Paso: 12 stores, LA: 9 stores)
+            // CANONICAL TEAM WOW ROSTER (Dallas: 30 stores, Denver: 40 stores, El Paso: 12 stores, LA: 9 stores)
             const CANONICAL_TEAM_WOW_STORES = {
-                // Dallas
+                // Dallas (30 stores)
                 '6579': { market: 'Dallas', do_name: 'Bobby' },
                 '6814': { market: 'Dallas', do_name: 'Bobby' },
+                '6914': { market: 'Dallas', do_name: 'Bobby' },
                 '6910': { market: 'Dallas', do_name: 'Kevin' },
                 '6974': { market: 'Dallas', do_name: 'Kevin' },
                 '6977': { market: 'Dallas', do_name: 'Kevin' },
