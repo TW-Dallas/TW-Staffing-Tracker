@@ -12,7 +12,7 @@
     <title>Onboarder Portal</title>
     <link class="favicon" rel="icon" type="image/png" href="images/staffing_icon.png">
     <link rel="apple-touch-icon" href="images/staffing_icon.png">
-    <link rel="stylesheet" href="styles.css?v=20261019_0722">
+    <link rel="stylesheet" href="styles.css?v=20261019_0730">
 </head>
 
 <body>
@@ -923,31 +923,31 @@
                             <!-- Compact Date & Times Card Bar -->
                             <div style="background: var(--crust-light); border: 1.5px solid var(--crust-med); border-radius: 10px; padding: 10px 14px; margin-bottom: 10px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; flex-shrink: 0; box-shadow: 0 1px 3px rgba(71, 43, 16, 0.04);">
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="font-family: 'Subhead1', sans-serif; font-size: 12px; letter-spacing: 0.06em; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 3px; display: block; font-weight: 700;">Class Date</label>
-                                    <input type="date" id="ntoClassDate" onchange="renderNtoClassView(); renderNtoSidebar();" style="width: 100%; box-sizing: border-box; height: 36px; padding: 4px 10px; font-size: 14.5px; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white;">
+                                    <label style="font-family: 'Subhead1', sans-serif; font-size: 12.5px; letter-spacing: 0.06em; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 3px; display: block; font-weight: 700;">Class Date</label>
+                                    <input type="date" id="ntoClassDate" onchange="renderNtoClassView(); renderNtoSidebar();" style="width: 100%; box-sizing: border-box; height: 38px; padding: 6px 12px; font-size: 15px; border-radius: 7px; border: 1.5px solid var(--crust-dark); background: white;">
                                 </div>
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="font-family: 'Subhead1', sans-serif; font-size: 12px; letter-spacing: 0.06em; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 3px; display: block; font-weight: 700;">Start Time</label>
+                                    <label style="font-family: 'Subhead1', sans-serif; font-size: 12.5px; letter-spacing: 0.06em; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 3px; display: block; font-weight: 700;">Start Time</label>
                                     <input type="text" id="ntoStartTime" list="time15MinList"
-                                        placeholder="e.g., 6:00 PM" onblur="autoFormatTimeInput(this)" style="width: 100%; box-sizing: border-box; height: 36px; padding: 4px 10px; font-size: 14.5px; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white;">
+                                        placeholder="e.g., 6:00 PM" onblur="autoFormatTimeInput(this)" style="width: 100%; box-sizing: border-box; height: 38px; padding: 6px 12px; font-size: 15px; border-radius: 7px; border: 1.5px solid var(--crust-dark); background: white;">
                                 </div>
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="font-family: 'Subhead1', sans-serif; font-size: 12px; letter-spacing: 0.06em; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: center; font-weight: 700;">
-                                        <span>End Time <span style="font-size: 11.5px; color: var(--brand-blue); text-transform: none; font-weight: 600;">· auto</span></span>
-                                        <small id="ntoEndTimeHint" style="display: none; font-size: 11px; color: var(--brand-blue); font-weight: 700; cursor: default;"></small>
+                                    <label style="font-family: 'Subhead1', sans-serif; font-size: 12.5px; letter-spacing: 0.06em; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: center; font-weight: 700;">
+                                        <span>End Time <span style="font-size: 12px; color: var(--brand-blue); text-transform: none; font-weight: 600;">· auto</span></span>
+                                        <small id="ntoEndTimeHint" style="display: none; font-size: 11.5px; color: var(--brand-blue); font-weight: 700; cursor: default;"></small>
                                     </label>
                                     <input type="text" id="ntoEndTime" list="time15MinList" placeholder="e.g., 7:15 PM"
-                                        onblur="autoFormatTimeInput(this)" style="width: 100%; box-sizing: border-box; height: 36px; padding: 4px 10px; font-size: 14.5px; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white;">
+                                        onblur="autoFormatTimeInput(this)" style="width: 100%; box-sizing: border-box; height: 38px; padding: 6px 12px; font-size: 15px; border-radius: 7px; border: 1.5px solid var(--crust-dark); background: white;">
                                 </div>
                             </div>
 
                             <!-- Subheader Bar: Roster & Attendance Count + Mark all present -->
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-shrink: 0; padding: 0 2px;">
-                                <span style="font-family: 'Subhead1', sans-serif; font-size: 13px; font-weight: 700; color: var(--dark-blue); text-transform: uppercase; letter-spacing: 0.07em;">
+                                <span style="font-family: 'Subhead1', sans-serif; font-size: 13.5px; font-weight: 700; color: var(--dark-blue); text-transform: uppercase; letter-spacing: 0.07em;">
                                     Roster &amp; Attendance · <span id="ntoRosterCountNum">0</span>
                                 </span>
                                 <div style="display: flex; align-items: center; gap: 14px;">
-                                    <span id="btnNtoMarkAllPresent" onclick="markAllNtoPresent()" style="color: var(--brand-blue); font-family: 'Subhead1', sans-serif; font-size: 12.5px; font-weight: 700; cursor: pointer; text-decoration: underline;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                                    <span id="btnNtoMarkAllPresent" onclick="markAllNtoPresent()" style="color: var(--brand-blue); font-family: 'Subhead1', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: underline;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
                                         Mark all present
                                     </span>
                                 </div>
@@ -961,16 +961,16 @@
 
                             <!-- Bottom NTO Action Buttons Row -->
                             <div style="display: flex; gap: 10px; padding-top: 10px; border-top: 1.5px solid var(--crust-med); margin-top: 8px; flex-shrink: 0;">
-                                <button type="button" onclick="saveNtoAttendanceOnly()" style="flex: 1; height: 38px; background: var(--brand-blue); color: white; border: none; border-radius: 6px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; transition: background 0.15s ease;" title="Save current class attendance marks">
+                                <button type="button" onclick="saveNtoAttendanceOnly()" style="flex: 1; height: 40px; background: var(--brand-blue); color: white; border: none; border-radius: 7px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 14.5px; cursor: pointer; transition: background 0.15s ease;" title="Save current class attendance marks">
                                     Save Attendance
                                 </button>
-                                <button type="button" id="btnNtoSendMeetLinks" onclick="triggerSendNtoMeetLinks()" style="height: 38px; padding: 0 16px; background: white; color: var(--dark-blue); border: 1.5px solid var(--brand-blue); border-radius: 6px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap;" title="Send Google Meet class link emails to checked trainees">
+                                <button type="button" id="btnNtoSendMeetLinks" onclick="triggerSendNtoMeetLinks()" style="height: 40px; padding: 0 18px; background: white; color: var(--dark-blue); border: 1.5px solid var(--brand-blue); border-radius: 7px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 14.5px; cursor: pointer; white-space: nowrap;" title="Send Google Meet class link emails to checked trainees">
                                     Send Meet Links
                                 </button>
-                                <button type="button" onclick="openResendBonnieModal()" style="height: 38px; padding: 0 16px; background: white; color: var(--dark-blue); border: 1.5px solid var(--brand-blue); border-radius: 6px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap;" title="Resend the Training Hours report exclusively to Bonnie (HR) with updated SSNs">
+                                <button type="button" onclick="openResendBonnieModal()" style="height: 40px; padding: 0 18px; background: white; color: var(--dark-blue); border: 1.5px solid var(--brand-blue); border-radius: 7px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 14.5px; cursor: pointer; white-space: nowrap;" title="Resend the Training Hours report exclusively to Bonnie (HR) with updated SSNs">
                                     Bonnie Only
                                 </button>
-                                <button type="button" onclick="concludeNtoClass()" style="height: 38px; padding: 0 18px; background: var(--brand-red); color: white; border: none; border-radius: 6px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap;" title="Wrap up class, lock attendance, and dispatch rosters to Bonnie & Store GMs">
+                                <button type="button" onclick="concludeNtoClass()" style="height: 40px; padding: 0 20px; background: var(--brand-red); color: white; border: none; border-radius: 7px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 14.5px; cursor: pointer; white-space: nowrap;" title="Wrap up class, lock attendance, and dispatch rosters to Bonnie & Store GMs">
                                     Conclude &amp; Send
                                 </button>
                             </div>
@@ -6114,8 +6114,48 @@
             }
         }
 
-        // Global Keyboard navigation for custom position dropdowns
+        // Global Keyboard navigation for candidateForm & custom position dropdowns
         document.addEventListener('keydown', function (e) {
+            const target = e.target;
+            const form = document.getElementById('candidateForm');
+
+            // 1. Universal Ctrl+Enter / Cmd+Enter shortcut: Save candidate form from ANY field (including textarea)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'Enter' || e.keyCode === 13)) {
+                if (form && form.contains(target)) {
+                    e.preventDefault();
+                    if (target && typeof target.blur === 'function') target.blur();
+                    if (typeof form.requestSubmit === 'function') {
+                        form.requestSubmit();
+                    } else {
+                        saveCandidate({ preventDefault: () => {} });
+                    }
+                    return;
+                }
+            }
+
+            // 2. Enter on <select> dropdowns (Shirt size, Hat style, Interview status, etc.) or checkboxes inside candidateForm
+            // Standard browsers do not submit forms when Enter is pressed on <select> or checkboxes.
+            // This allows users to press Enter directly on Shirt size, Hat style, Paycard, etc. to save without tabbing back to a text input.
+            if ((e.key === 'Enter' || e.keyCode === 13) && !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey) {
+                if (form && form.contains(target)) {
+                    const tag = (target.tagName || '').toUpperCase();
+                    const isSelect = tag === 'SELECT';
+                    const isCheckbox = tag === 'INPUT' && (target.type === 'checkbox' || target.type === 'radio');
+                    const isCustomCheck = target.classList && (target.classList.contains('custom-chk') || target.classList.contains('flag-pill') || target.classList.contains('cand-status-btn'));
+
+                    if (isSelect || isCheckbox || isCustomCheck) {
+                        e.preventDefault();
+                        if (typeof target.blur === 'function') target.blur();
+                        if (typeof form.requestSubmit === 'function') {
+                            form.requestSubmit();
+                        } else {
+                            saveCandidate({ preventDefault: () => {} });
+                        }
+                        return;
+                    }
+                }
+            }
+
             const trigger = e.target && e.target.closest ? e.target.closest('.pos-dropdown-trigger') : null;
             const option = e.target && e.target.closest ? e.target.closest('.pos-menu-option') : null;
 
@@ -8293,26 +8333,26 @@
                 const candDo = item.doName || item.do || (contacts && contacts.find(c => String(c.store).trim() === String(item.store).trim())?.doName) || '';
 
                 row.innerHTML = `
-                    <input type="checkbox" class="nto-trainee-check" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" onchange="updateNtoSendMeetLinksButtonText()" style="width: 17px; height: 17px; accent-color: var(--brand-blue); cursor: pointer;" title="Select for Google Meet link">
+                    <input type="checkbox" class="nto-trainee-check" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" onchange="updateNtoSendMeetLinksButtonText()" style="width: 18px; height: 18px; accent-color: var(--brand-blue); cursor: pointer;" title="Select for Google Meet link">
                     <div style="display: flex; flex-direction: column; min-width: 0;">
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                            <span class="nto-trainee-name-click" data-name="${escapeText(item.name || '')}" onclick="copyNtoTraineeName(event, this)" style="font-family: 'Subhead2', sans-serif; font-size: 15.5px; font-weight: 700; color: var(--dark-blue); cursor: pointer; letter-spacing: -0.01em;" title="Click to copy name">${escapeText(item.name)}</span>
+                        <div style="display: flex; align-items: center; gap: 7px;">
+                            <span class="nto-trainee-name-click" data-name="${escapeText(item.name || '')}" onclick="copyNtoTraineeName(event, this)" style="font-family: 'Subhead2', sans-serif; font-size: 17.5px; font-weight: 700; color: var(--dark-blue); cursor: pointer; letter-spacing: -0.01em;" title="Click to copy name">${escapeText(item.name)}</span>
                             ${scoreBadge}
                         </div>
-                        <div style="font-family: 'Condensed', sans-serif; font-size: 13px; color: var(--crust-burnt); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px;">
-                            <span style="background: var(--crust-light); border: 1px solid var(--crust-med); border-radius: 4px; padding: 0 5px; font-weight: 700; color: var(--crust-burnt); font-size: 12px;">#${item.store}</span>
+                        <div style="font-family: 'Condensed', sans-serif; font-size: 14px; color: var(--crust-burnt); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px;">
+                            <span style="background: var(--crust-light); border: 1px solid var(--crust-med); border-radius: 4px; padding: 1px 6px; font-weight: 700; color: var(--crust-burnt); font-size: 13px;">#${item.store}</span>
                             ${candDo ? `<span>${escapeText(candDo)}</span> <span>·</span>` : ''}
                             <span style="font-weight: 600;">${escapeText(item.position || 'CSR')}</span>
                         </div>
                     </div>
-                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" data-lastupdated="${escapeText(lastUpdatedVal)}" data-ntocompletedat="${escapeText(ntoCompletedAtVal)}" data-ssnlast4="${escapeText(ssnLast4Val)}" onchange="handleNtoAttendanceChange(this)" style="width: 100%; height: 32px; padding: 2px 26px 2px 8px; font-size: 13.5px; font-family: 'Condensed', sans-serif; font-weight: 600; border-radius: 6px; border: 1.5px solid var(--crust-dark); background-color: #ffffff; cursor: pointer;">
+                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" data-lastupdated="${escapeText(lastUpdatedVal)}" data-ntocompletedat="${escapeText(ntoCompletedAtVal)}" data-ssnlast4="${escapeText(ssnLast4Val)}" onchange="handleNtoAttendanceChange(this)" style="width: 100%; height: 35px; padding: 2px 28px 2px 10px; font-size: 14.5px; font-family: 'Condensed', sans-serif; font-weight: 600; border-radius: 6px; border: 1.5px solid var(--crust-dark); background-color: #ffffff; cursor: pointer;">
                         <option value="" ${!savedStatus ? 'selected' : ''}>Select status…</option>
                         <option value="In Class" ${savedStatus === 'In Class' ? 'selected' : ''}>📖 In Class</option>
                         <option value="Not in NTO" ${savedStatus === 'Not in NTO' ? 'selected' : ''}>❌ Not in NTO (Absent)</option>
                         <option value="Left Early" ${savedStatus === 'Left Early' ? 'selected' : ''}>⚠️ Left Early</option>
                         <option value="NTO Complete" ${savedStatus === 'NTO Complete' ? 'selected' : ''}>🎓 NTO Complete</option>
                     </select>
-                    <a href="javascript:void(0)" onclick="openRescheduleNtoModal('${escapeText(candId)}', '${escapeText(item.name || '')}', '${escapeText(item.email || '')}', '${escapeText(ntoDateVal || '')}')" style="font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 12.5px; color: var(--brand-blue); text-decoration: none; text-align: right; white-space: nowrap;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Change date</a>
+                    <a href="javascript:void(0)" onclick="openRescheduleNtoModal('${escapeText(candId)}', '${escapeText(item.name || '')}', '${escapeText(item.email || '')}', '${escapeText(ntoDateVal || '')}')" style="font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 13.5px; color: var(--brand-blue); text-decoration: none; text-align: right; white-space: nowrap;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Change date</a>
                 `;
                 container.appendChild(row);
             });

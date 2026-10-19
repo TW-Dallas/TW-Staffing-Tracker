@@ -598,14 +598,14 @@
 
         .nto-roster-row {
             display: grid;
-            grid-template-columns: 22px minmax(0, 1fr) 185px 85px;
-            gap: 12px;
+            grid-template-columns: 24px minmax(0, 1fr) 195px 95px;
+            gap: 14px;
             align-items: center;
-            padding: 8px 14px;
-            margin-bottom: 6px;
+            padding: 11px 16px;
+            margin-bottom: 7px;
             background: #ffffff;
             border: 1px solid var(--crust-med);
-            border-radius: 8px;
+            border-radius: 9px;
             box-shadow: 0 1px 3px rgba(71, 43, 16, 0.04);
             box-sizing: border-box;
             transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
