@@ -12,7 +12,7 @@
     <title>Onboarder Portal</title>
     <link class="favicon" rel="icon" type="image/png" href="images/staffing_icon.png">
     <link rel="apple-touch-icon" href="images/staffing_icon.png">
-    <link rel="stylesheet" href="styles.css?v=20261019_0615">
+    <link rel="stylesheet" href="styles.css?v=20261019_0635">
 </head>
 
 <body>
@@ -159,6 +159,13 @@
                 <div class="list-meta-bar" style="display: flex; justify-content: space-between; align-items: center; padding: 4px 4px 8px; font-family: 'Subhead1', sans-serif; font-size: 13px; letter-spacing: 0.07em; text-transform: uppercase;">
                     <span id="listCounterLabel" style="color: var(--crust-burnt); font-weight: bold;">CANDIDATES · <span id="listCountNum">0</span></span>
                     
+                    <div id="ntoSidebarActions" class="hidden" style="display: flex; align-items: center;">
+                        <label style="cursor: pointer; display: inline-flex; align-items: center; gap: 5px; color: var(--brand-blue); font-family: 'Subhead1', sans-serif; font-size: 13px; font-weight: 700; text-transform: none; margin: 0;">
+                            <input type="checkbox" id="ntoShowPastClasses" onchange="renderNtoSidebar()" style="accent-color: var(--brand-blue); cursor: pointer; width: 15px; height: 15px;">
+                            <span>Show past</span>
+                        </label>
+                    </div>
+
                     <div class="custom-sort-dropdown" id="customSortDropdown" style="position: relative;">
                         <input type="hidden" id="sortControl" value="status">
                         <button type="button" id="sortDropdownTrigger" onclick="toggleCustomSortMenu(event)">
@@ -256,6 +263,15 @@
                                 </button>
                                 <button type="button" onclick="openPinRegistrationModal()" style="background: var(--med-blue); color: white; padding: 0 18px; height: 38px; font-size: 13.5px; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; border: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; box-shadow: var(--shadow-sm);">
                                     + Add PIN
+                                </button>
+                            </div>
+                            <div id="ntoHeaderActions" class="hidden" style="display: flex; gap: 8px; align-items: center;">
+                                <a id="btnNtoJoinMeet" href="https://meet.google.com/zwc-afuu-hgh" target="_blank" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px; border-radius: 6px; border: 1.5px solid var(--brand-blue); color: var(--dark-blue); font-family: 'Subhead1', sans-serif; font-size: 14px; font-weight: 700; background: white; cursor: pointer; white-space: nowrap; box-shadow: var(--shadow-sm);">
+                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"></rect><path d="m16 10 6-3v10l-6-3"></path></svg>
+                                    <span>Join Class Meet</span>
+                                </a>
+                                <button type="button" onclick="openClassCalendarModal()" style="display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px; border-radius: 6px; border: none; background: var(--brand-blue); color: white; font-family: 'Subhead1', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; box-shadow: var(--shadow-sm);">
+                                    + Schedule Class
                                 </button>
                             </div>
                         </div>
@@ -904,74 +920,59 @@
 
                         <!-- 5. NTO CLASS ATTENDANCE FORM TEMPLATE -->
                         <div id="ntoFormFields" class="hidden" style="display: flex; flex-direction: column; height: 100%; box-sizing: border-box; overflow: hidden;">
-                            <!-- Top Dedicated NTO Action Button Row (All 4 in 1 Row) -->
-                            <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-shrink: 0;">
-                                <button type="button" onclick="openClassCalendarModal()"
-                                    style="flex: 1; background: var(--dark-blue); color: white; padding: 9px 6px; font-size: 14.5px; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; border: none; white-space: nowrap; text-align: center; display: flex; align-items: center; justify-content: center; gap: 5px;" title="Manage scheduled orientation class dates">
-                                    <img src="image/custom-emojis/points_calendar.png" style="width: 17px; height: 17px; object-fit: contain;"> Schedule
-                                </button>
-                                <button type="button" onclick="saveNtoAttendanceOnly()"
-                                    style="flex: 1.1; background: var(--brand-blue); color: white; padding: 9px 6px; font-size: 14.5px; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; border: none; white-space: nowrap; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px;" title="Save current class attendance marks">
-                                    💾 Save Attendance
-                                </button>
-                                <button type="button" id="btnNtoSendMeetLinks" onclick="triggerSendNtoMeetLinks()"
-                                    style="flex: 1.2; background: var(--crust-burnt); color: white; padding: 9px 6px; font-size: 14.5px; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; border: none; white-space: nowrap; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px;" title="Send Google Meet class link emails to checked trainees">
-                                    ✉️ Send Meet Links
-                                </button>
-                                <button type="button" onclick="concludeNtoClass()"
-                                    style="flex: 1.3; background: var(--brand-red); color: white; padding: 9px 6px; font-size: 14.5px; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; border: none; white-space: nowrap; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px;" title="Wrap up class, lock attendance, and dispatch rosters to Bonnie & Store GMs">
-                                    🚀 Conclude & Send
-                                </button>
-                                <button type="button" onclick="openResendBonnieModal()"
-                                    style="flex: 1.1; background: var(--dark-blue); color: white; padding: 9px 6px; font-size: 14px; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; border: none; white-space: nowrap; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px;" title="Resend the Training Hours report exclusively to Bonnie (HR) with updated SSNs">
-                                    📋 Bonnie Only
-                                </button>
-                            </div>
-
                             <!-- Compact Date & Times Row (Equal Heights & Horizontal Alignment) -->
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; flex-shrink: 0;">
+                            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 12px; flex-shrink: 0;">
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="height: 22px; line-height: 22px; margin-bottom: 4px; display: block; white-space: nowrap; overflow: hidden;">Class Date</label>
-                                    <input type="date" id="ntoClassDate" onchange="renderNtoClassView()" style="padding: 7px 10px; font-size: 16px;">
+                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 14.5px; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 4px; display: block;">Class Date</label>
+                                    <input type="date" id="ntoClassDate" onchange="renderNtoClassView(); renderNtoSidebar();" style="width: 100%; box-sizing: border-box; padding: 8px 12px; font-size: 16px; border-radius: 8px; border: 1.5px solid var(--crust-dark); background: white;">
                                 </div>
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="height: 22px; line-height: 22px; margin-bottom: 4px; display: block; white-space: nowrap; overflow: hidden;">Class Start Time</label>
+                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 14.5px; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 4px; display: block;">Start Time</label>
                                     <input type="text" id="ntoStartTime" list="time15MinList"
-                                        placeholder="e.g., 6:00 PM" onblur="autoFormatTimeInput(this)" style="padding: 7px 10px; font-size: 16px;">
+                                        placeholder="e.g., 6:00 PM" onblur="autoFormatTimeInput(this)" style="width: 100%; box-sizing: border-box; padding: 8px 12px; font-size: 16px; border-radius: 8px; border: 1.5px solid var(--crust-dark); background: white;">
                                 </div>
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="height: 22px; line-height: 22px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; white-space: nowrap; overflow: hidden;">
-                                        <span>Class End Time</span>
+                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 14.5px; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+                                        <span>End Time <span style="font-size: 13px; color: var(--brand-blue); text-transform: none; font-weight: bold;">· auto</span></span>
                                         <small id="ntoEndTimeHint" style="display: none; font-size: 11.5px; color: var(--brand-blue); font-weight: bold; cursor: default;"></small>
                                     </label>
-                                    <input type="text" id="ntoEndTime" list="time15MinList" placeholder="e.g., 7:30 PM"
-                                        onblur="autoFormatTimeInput(this)" style="padding: 7px 10px; font-size: 16px;">
+                                    <input type="text" id="ntoEndTime" list="time15MinList" placeholder="e.g., 7:15 PM"
+                                        onblur="autoFormatTimeInput(this)" style="width: 100%; box-sizing: border-box; padding: 8px 12px; font-size: 16px; border-radius: 8px; border: 1.5px solid var(--crust-dark); background: white;">
                                 </div>
                             </div>
 
-                            <!-- Header + Both Checkboxes on Left + Search Aligned Under Column 3 (Per Mockup) -->
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 6px; flex-shrink: 0; gap: 10px;">
-                                <div style="display: flex; align-items: center; gap: 18px;">
-                                    <label style="font-size: 14.5px; display: flex; align-items: center; gap: 6px; cursor: pointer; font-family: 'Subhead1', sans-serif; color: var(--dark-blue); margin: 0; text-transform: uppercase; letter-spacing: 0.3px;" title="Select or deselect all trainees">
-                                        <input type="checkbox" id="ntoSelectAllTrainees" onchange="toggleSelectAllNtoTrainees(this)" style="width: 17px; height: 17px; accent-color: var(--brand-blue); cursor: pointer;">
-                                        <span>Class Trainee Roster & Attendance</span>
-                                    </label>
-                                    <label style="font-size: 14.5px; display: flex; align-items: center; gap: 6px; cursor: pointer; font-family: 'Subhead1', sans-serif; color: var(--dark-blue); margin: 0; text-transform: uppercase; letter-spacing: 0.3px;" title="Show trainees across all class dates">
-                                        <input type="checkbox" id="ntoShowAllDates" onchange="renderNtoClassView()" style="width: 17px; height: 17px; accent-color: var(--brand-blue); cursor: pointer;">
-                                        <span>Show All Dates</span>
-                                    </label>
-                                </div>
-                                <div style="width: calc((100% - 20px) / 3); box-sizing: border-box;">
-                                    <input type="text" id="ntoRosterSearch" placeholder="🔍 Search trainee..."
-                                        oninput="renderNtoClassView()" style="width: 100%; box-sizing: border-box; padding: 7px 10px; font-size: 16px; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white;">
+                            <!-- Subheader Bar: Roster & Attendance Count + Mark all present -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-shrink: 0; padding: 0 2px;">
+                                <span style="font-family: 'Subhead1', sans-serif; font-size: 15px; font-weight: 700; color: var(--dark-blue); text-transform: uppercase; letter-spacing: 0.05em;">
+                                    Roster &amp; Attendance · <span id="ntoRosterCountNum">0</span>
+                                </span>
+                                <div style="display: flex; align-items: center; gap: 14px;">
+                                    <span id="btnNtoMarkAllPresent" onclick="markAllNtoPresent()" style="color: var(--brand-blue); font-family: 'Subhead1', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: underline;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                                        Mark all present
+                                    </span>
                                 </div>
                             </div>
 
                             <!-- Flexible Roster Container (fills remaining height, inner scroll only) -->
                             <div id="ntoRosterListContainer"
-                                style="flex: 1 1 0; min-height: 0; overflow-y: auto; border: 1.5px solid var(--crust-dark); border-radius: 8px; background: white; padding: 10px; box-sizing: border-box;">
-                                <p style="text-align: center; color: var(--brand-grey); font-size: 17px;">Loading class
-                                    roster...</p>
+                                style="flex: 1 1 0; min-height: 0; overflow-y: auto; border: 1.5px solid var(--crust-med); border-radius: 12px; background: white; box-sizing: border-box;">
+                                <p style="text-align: center; color: var(--brand-grey); font-size: 17px; padding: 20px;">Loading class roster...</p>
+                            </div>
+
+                            <!-- Bottom NTO Action Buttons Row (Matching Mockup 06-NTO-Class.html) -->
+                            <div style="display: flex; gap: 12px; padding-top: 14px; border-top: 1.5px solid var(--crust-med); margin-top: 10px; flex-shrink: 0;">
+                                <button type="button" onclick="saveNtoAttendanceOnly()" style="flex: 1; height: 44px; background: var(--brand-blue); color: white; border: none; border-radius: 8px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 16px; cursor: pointer; transition: background 0.15s ease;" title="Save current class attendance marks">
+                                    Save Attendance
+                                </button>
+                                <button type="button" id="btnNtoSendMeetLinks" onclick="triggerSendNtoMeetLinks()" style="height: 44px; padding: 0 18px; background: white; color: var(--dark-blue); border: 1.5px solid var(--brand-blue); border-radius: 8px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 16px; cursor: pointer; white-space: nowrap;" title="Send Google Meet class link emails to checked trainees">
+                                    Send Meet Links
+                                </button>
+                                <button type="button" onclick="openResendBonnieModal()" style="height: 44px; padding: 0 18px; background: white; color: var(--dark-blue); border: 1.5px solid var(--brand-blue); border-radius: 8px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 16px; cursor: pointer; white-space: nowrap;" title="Resend the Training Hours report exclusively to Bonnie (HR) with updated SSNs">
+                                    Bonnie Only
+                                </button>
+                                <button type="button" onclick="concludeNtoClass()" style="height: 44px; padding: 0 20px; background: var(--brand-red); color: white; border: none; border-radius: 8px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 16px; cursor: pointer; white-space: nowrap;" title="Wrap up class, lock attendance, and dispatch rosters to Bonnie & Store GMs">
+                                    Conclude &amp; Send
+                                </button>
                             </div>
                         </div>
 
@@ -3543,6 +3544,7 @@
                 renderList();
                 updateAuditMetrics();
                 if (currentView === 'nto') {
+                    renderNtoSidebar();
                     renderNtoClassView();
                 }
             } catch (err) {
@@ -3809,6 +3811,10 @@
 
             const credHeaderActions = document.getElementById('credHeaderActions');
             if (credHeaderActions) credHeaderActions.classList.add('hidden');
+            const ntoHeaderActions = document.getElementById('ntoHeaderActions');
+            if (ntoHeaderActions) ntoHeaderActions.classList.add('hidden');
+            const ntoSidebarActions = document.getElementById('ntoSidebarActions');
+            if (ntoSidebarActions) ntoSidebarActions.classList.add('hidden');
             const formLastUpdated = document.getElementById('formLastUpdated');
             if (formLastUpdated) formLastUpdated.classList.remove('hidden');
 
@@ -3914,6 +3920,11 @@
                 if (btnAddMain) btnAddMain.classList.add('hidden');
                 if (formActions) formActions.classList.add('hidden');
                 if (ntoFormFields) ntoFormFields.classList.remove('hidden');
+                const ntoHeaderActions = document.getElementById('ntoHeaderActions');
+                if (ntoHeaderActions) ntoHeaderActions.classList.remove('hidden');
+                const ntoSidebarActions = document.getElementById('ntoSidebarActions');
+                if (ntoSidebarActions) ntoSidebarActions.classList.remove('hidden');
+                if (customSortDropdown) customSortDropdown.classList.add('hidden');
                 if (scrollArea) {
                     scrollArea.style.overflowY = 'hidden';
                     scrollArea.style.display = 'flex';
@@ -3922,7 +3933,7 @@
                     scrollArea.style.paddingRight = '0';
                     scrollArea.style.marginBottom = '0';
                 }
-                document.getElementById('formTitle').innerText = "🎓 NTO Attendance & Class Closure";
+                renderNtoSidebar();
                 renderNtoClassView();
                 if (!window.ntoCalendarClassesCache || window.ntoCalendarClassesCache.length === 0) {
                     fetchNtoCalendarClasses();
@@ -4664,133 +4675,8 @@
                 return;
 
             } else if (currentView === 'nto') {
-                let filteredNto = candidates.filter(item => {
-                    if (!matchesSearchQuery(item, searchQuery)) return false;
-
-                    // If user is searching, allow lookup of all NTO candidates
-                    if (searchQuery) return true;
-
-                    // Only show candidates related to NTO (NTO date, scheduled, link sent, or missed NTO)
-                    const hasNtoContext = item.ntoDate || item.ntoScheduled || item.ntoSignupLinkSent || item.missedNto;
-                    if (!hasNtoContext) return false;
-
-                    // 10-day filter: Drop NTO classes older than 10 days ago from immediate view
-                    const rawDate = item.ntoDate || item.hireDate || item.lastUpdated;
-                    const itemDate = parseCandidateDate(rawDate);
-                    if (itemDate && itemDate.getTime() < tenDaysAgo.getTime()) {
-                        return false;
-                    }
-                    return true;
-                });
-
-                const todayStart = new Date();
-                todayStart.setHours(0, 0, 0, 0);
-
-                function getNtoBucketPriority(item) {
-                    const dateObj = parseCandidateDate(item.ntoDate);
-                    if (dateObj) {
-                        const checkDate = new Date(dateObj);
-                        checkDate.setHours(0, 0, 0, 0);
-                        if (checkDate.getTime() >= todayStart.getTime()) {
-                            return 1; // Upcoming or Today (Top Priority)
-                        }
-                        return 3; // Past NTO Date (Sinks to Bottom)
-                    }
-                    if (item.ntoSignupLinkSent || item.ntoScheduled) {
-                        return 2; // Pending Scheduling (Middle Priority)
-                    }
-                    return 3;
-                }
-
-                // Sort NTO candidates: Upcoming (soonest first) -> Pending -> Past (most recent first)
-                filteredNto.sort((a, b) => {
-                    const priorityA = getNtoBucketPriority(a);
-                    const priorityB = getNtoBucketPriority(b);
-
-                    if (priorityA !== priorityB) {
-                        return priorityA - priorityB;
-                    }
-
-                    const dateA = parseCandidateDate(a.ntoDate);
-                    const dateB = parseCandidateDate(b.ntoDate);
-                    const timeA = dateA ? dateA.getTime() : 0;
-                    const timeB = dateB ? dateB.getTime() : 0;
-
-                    if (priorityA === 1) {
-                        if (timeA !== timeB) return timeA - timeB; // Upcoming ascending
-                    } else if (priorityA === 3) {
-                        if (timeA !== timeB) return timeB - timeA; // Past descending
-                    }
-
-                    return (a.name || '').localeCompare(b.name || '');
-                });
-
-                updateListCounter(filteredNto.length, 'Attendees');
-
-                if (filteredNto.length === 0) {
-                    listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">No NTO candidates found.</div>';
-                    return;
-                }
-
-                filteredNto.forEach(item => {
-                    const card = document.createElement('div');
-                    card.className = 'candidate-card';
-                    if (item.id === currentSelectedId) card.classList.add('selected');
-
-                    let ntoStatusColor = 'var(--brand-blue)';
-                    let ntoLabel = '';
-
-                    const isCompleted = item.ntoStatus === 'NTO Complete' || 
-                                        item.ntoAttendance === 'NTO Complete' || 
-                                        item.ntoAttendance === 'Hired' || 
-                                        item.ntoAttendance === 'Complete' || 
-                                        (item.hired && item.ntoAttendance && item.ntoAttendance !== 'Not in NTO' && item.ntoAttendance !== 'Left Early');
-                    const isInClass = item.ntoStatus === 'In Class' || item.ntoAttendance === 'In Class';
-                    const isMissed = item.missedNto || item.ntoStatus === 'Not in NTO' || item.ntoStatus === 'Left Early' || item.ntoAttendance === 'Not in NTO' || item.ntoAttendance === 'Left Early';
-
-                    if (isMissed) {
-                        card.classList.add('status-red');
-                        ntoStatusColor = 'var(--brand-red)';
-                        ntoLabel = '⚠️ Missed NTO';
-                    } else if (isCompleted) {
-                        card.classList.add('status-blue');
-                        ntoStatusColor = 'var(--dark-blue)';
-                        ntoLabel = item.ntoDate ? `🎓 NTO: ${item.ntoDate}` : '🎓 NTO Complete';
-                    } else if (isInClass) {
-                        card.classList.add('status-blue');
-                        ntoStatusColor = '#d97706';
-                        ntoLabel = item.ntoDate ? `📖 In Class: ${item.ntoDate}` : '📖 In Class';
-                    } else if (item.ntoDate) {
-                        card.classList.add('status-blue');
-                        ntoStatusColor = 'var(--dark-blue)';
-                        ntoLabel = `🎓 NTO: ${item.ntoDate}`;
-                    } else if (item.ntoScheduled) {
-                        card.classList.add('status-blue');
-                        ntoStatusColor = 'var(--dark-blue)';
-                        ntoLabel = '<img src="image/custom-emojis/points_calendar.png" class="cal-emoji-icon" alt="📅">NTO Scheduled';
-                    } else if (item.ntoSignupLinkSent) {
-                        card.classList.add('status-blue');
-                        ntoStatusColor = 'var(--dark-blue)';
-                        ntoLabel = '📨 Link Sent';
-                    } else {
-                        card.classList.add('status-blue');
-                        ntoLabel = '<img src="image/custom-emojis/points_calendar.png" class="cal-emoji-icon" alt="📅">NTO Scheduled';
-                    }
-
-                    const dayStr = item.ntoDate ? getDayOfWeekFromDateString(item.ntoDate) : '';
-
-                    card.innerHTML = `
-                    <div class="card-name">${item.name}</div>
-                    <div class="card-sub">
-                        <span>Store #${item.store} (${item.position || 'CSR'})</span>
-                        <span style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: ${ntoStatusColor};">${ntoLabel}</span>
-                    </div>
-                    ${item.ntoDate ? `<div class="card-sub" style="margin-top: 3px; color: var(--dark-blue); font-weight: 600; font-size: 13px;"><span><img src="image/custom-emojis/points_calendar.png" class="cal-emoji-icon" alt="📅">${dayStr ? dayStr + ' ' : ''}${item.ntoDate}</span></div>` : ''}
-                    ${item.lastUpdated ? `<div class="card-sub" style="font-size: 11.5px; color: var(--text-light); margin-top: 2px;"><span>🕒 Updated: ${formatDisplayDateTime(item.lastUpdated)}</span></div>` : ''}
-                `;
-                    card.onclick = () => selectCandidate(item);
-                    listContainer.appendChild(card);
-                });
+                renderNtoSidebar();
+                return;
 
             } else {
                 let filteredCandidates = candidates.filter(item => {
@@ -7854,6 +7740,22 @@
             todayStart.setHours(0, 0, 0, 0);
 
             const upcomingDates = [];
+            if (window.ntoCalendarClassesCache && Array.isArray(window.ntoCalendarClassesCache)) {
+                window.ntoCalendarClassesCache.forEach(cal => {
+                    const dt = parseCandidateDate(cal.classDate || cal.date);
+                    if (dt) {
+                        const checkDt = new Date(dt);
+                        checkDt.setHours(0, 0, 0, 0);
+                        if (checkDt.getTime() >= todayStart.getTime()) {
+                            const formatted = formatDateForInput(cal.classDate || cal.date);
+                            if (formatted) {
+                                upcomingDates.push({ dateObj: checkDt, isoDate: formatted });
+                            }
+                        }
+                    }
+                });
+            }
+
             candidates.forEach(c => {
                 if (c.ntoDate) {
                     const dt = parseCandidateDate(c.ntoDate);
@@ -7881,32 +7783,263 @@
             return '';
         }
 
-        // Render NTO Class View inside UI with matched 18px/19px site font sizing
+        // Render NTO Class Dates Sidebar (Matching Mockup 06-NTO-Class.html)
+        function renderNtoSidebar() {
+            const listContainer = document.getElementById('candidateList');
+            if (!listContainer) return;
+            listContainer.innerHTML = '';
+
+            const listCounterLabel = document.getElementById('listCounterLabel');
+            if (listCounterLabel) {
+                listCounterLabel.innerHTML = 'CLASS DATES';
+            }
+
+            const sortDropdown = document.getElementById('customSortDropdown');
+            if (sortDropdown) sortDropdown.classList.add('hidden');
+
+            const ntoSidebarActions = document.getElementById('ntoSidebarActions');
+            if (ntoSidebarActions) ntoSidebarActions.classList.remove('hidden');
+
+            const searchQuery = (document.getElementById('searchControl')?.value || '').toLowerCase().trim();
+            const showPastCheckbox = document.getElementById('ntoShowPastClasses');
+            const showPast = showPastCheckbox ? showPastCheckbox.checked : false;
+
+            // 1. Group trainees and calendar classes by Class Date
+            const dateMap = {};
+
+            if (window.ntoCalendarClassesCache && Array.isArray(window.ntoCalendarClassesCache)) {
+                window.ntoCalendarClassesCache.forEach(cal => {
+                    const dStr = formatDateForInput(cal.classDate || cal.date);
+                    if (!dStr) return;
+                    if (!dateMap[dStr]) {
+                        dateMap[dStr] = { dateStr: dStr, trainees: [], calClass: cal };
+                    } else {
+                        dateMap[dStr].calClass = cal;
+                    }
+                });
+            }
+
+            candidates.forEach(c => {
+                const isScheduled = c.ntoScheduled || c.hired || c.ntoDate;
+                if (!isScheduled) return;
+                const dStr = formatDateForInput(c.ntoDate);
+                if (!dStr) return;
+                if (!dateMap[dStr]) {
+                    dateMap[dStr] = { dateStr: dStr, trainees: [c], calClass: null };
+                } else {
+                    dateMap[dStr].trainees.push(c);
+                }
+            });
+
+            const todayStart = new Date();
+            todayStart.setHours(0, 0, 0, 0);
+
+            let dateEntries = Object.values(dateMap);
+
+            dateEntries.forEach(entry => {
+                const p = entry.dateStr.split('-').map(Number);
+                const dt = new Date(p[0], p[1] - 1, p[2]);
+                dt.setHours(0, 0, 0, 0);
+                entry.dateObj = dt;
+                entry.isPast = dt.getTime() < todayStart.getTime();
+
+                // Compute DO list
+                const dos = Array.from(new Set(entry.trainees.map(t => {
+                    return t.doName || t.do || (contacts && contacts.find(c => String(c.store).trim() === String(t.store).trim())?.doName) || '';
+                }).filter(Boolean)));
+
+                // Compute time range
+                const timeStr = (entry.calClass && entry.calClass.startTime)
+                    ? (formatTimeDisplayFrontEnd(entry.calClass.startTime) + (entry.calClass.endTime ? ` – ${formatTimeDisplayFrontEnd(entry.calClass.endTime)}` : ''))
+                    : '6:00 – 7:15 PM';
+
+                // Check finalization
+                const hasTrainees = entry.trainees.length > 0;
+                const allFinalized = hasTrainees && entry.trainees.every(t => {
+                    const att = (t.ntoAttendance || t.ntoStatus || '').trim();
+                    return att === 'NTO Complete' || att === 'Not in NTO' || att === 'Left Early';
+                });
+                const isConcluded = (entry.calClass && (entry.calClass.concluded || entry.calClass.status === 'Concluded')) || allFinalized;
+
+                if (entry.isPast) {
+                    if (isConcluded) {
+                        entry.status = 'closed';
+                        entry.badgeText = 'Closed';
+                        entry.subMeta = 'Concluded & sent';
+                    } else {
+                        entry.status = 'not_concluded';
+                        entry.badgeText = 'Not concluded';
+                        entry.subMeta = 'Attendance saved · results not sent';
+                    }
+                } else {
+                    entry.status = 'scheduled';
+                    entry.badgeText = 'Scheduled';
+                    entry.subMeta = dos.length > 0 ? `${timeStr} · ${dos.join(', ')}` : timeStr;
+                }
+            });
+
+            // Find earliest upcoming date >= today
+            const upcomingEntries = dateEntries.filter(e => !e.isPast).sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
+            if (upcomingEntries.length > 0) {
+                upcomingEntries[0].badgeText = 'Next class';
+                upcomingEntries[0].isNext = true;
+            }
+
+            // Search filter
+            if (searchQuery) {
+                dateEntries = dateEntries.filter(e => {
+                    if (e.dateStr.includes(searchQuery)) return true;
+                    const formatted = e.dateObj.toLocaleDateString('en-US', { weekday: 'long', month: '2-digit', day: '2-digit', year: 'numeric' }).toLowerCase();
+                    if (formatted.includes(searchQuery)) return true;
+                    return e.trainees.some(t => matchesSearchQuery(t, searchQuery));
+                });
+            }
+
+            // Show past filter
+            if (!showPast && !searchQuery) {
+                dateEntries = dateEntries.filter(e => !e.isPast || e.status === 'not_concluded');
+            }
+
+            // Sort: upcoming dates ascending, past dates descending
+            dateEntries.sort((a, b) => {
+                if (!a.isPast && !b.isPast) return a.dateObj.getTime() - b.dateObj.getTime();
+                if (a.isPast && b.isPast) return b.dateObj.getTime() - a.dateObj.getTime();
+                return a.isPast ? 1 : -1;
+            });
+
+            const dateInput = document.getElementById('ntoClassDate');
+            let currentSelectedDate = dateInput ? dateInput.value : '';
+            if (!currentSelectedDate && dateEntries.length > 0) {
+                const nextOne = upcomingEntries[0] || dateEntries[0];
+                currentSelectedDate = nextOne.dateStr;
+                if (dateInput) dateInput.value = currentSelectedDate;
+            }
+
+            if (dateEntries.length === 0) {
+                listContainer.innerHTML = `
+                    <div style="text-align: center; padding: 30px 14px; color: var(--brand-grey); font-size: 15px; font-family: 'Subhead2', sans-serif;">
+                        No class dates found.<br>
+                        <span style="font-size: 13.5px; color: var(--crust-deep); margin-top: 6px; display: inline-block;">Check <strong>Show past</strong> or schedule a new class.</span>
+                    </div>
+                `;
+                return;
+            }
+
+            dateEntries.forEach(entry => {
+                const isSel = entry.dateStr === currentSelectedDate;
+                const card = document.createElement('div');
+                card.className = 'candidate-card' + (isSel ? ' selected' : '');
+
+                if (entry.status === 'not_concluded') {
+                    card.style.borderLeftColor = 'var(--brand-red)';
+                    if (isSel) {
+                        card.style.borderColor = 'var(--brand-red)';
+                        card.style.borderLeftColor = 'var(--brand-red)';
+                    }
+                } else if (entry.status === 'closed') {
+                    card.style.borderLeftColor = 'var(--crust-dark)';
+                    if (isSel) {
+                        card.style.borderColor = 'var(--crust-dark)';
+                        card.style.borderLeftColor = 'var(--crust-dark)';
+                    }
+                } else {
+                    card.style.borderLeftColor = 'var(--brand-blue)';
+                    if (isSel) {
+                        card.style.borderColor = 'var(--brand-blue)';
+                        card.style.borderLeftColor = 'var(--brand-blue)';
+                    }
+                }
+
+                const weekday = entry.dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+                const mm = String(entry.dateObj.getMonth() + 1).padStart(2, '0');
+                const dd = String(entry.dateObj.getDate()).padStart(2, '0');
+                const yyyy = entry.dateObj.getFullYear();
+                const cardTitle = `${weekday} ${mm}/${dd}/${yyyy}`;
+
+                let chipBg = 'var(--crust-med)';
+                let chipColor = 'var(--crust-deep)';
+                if (entry.status === 'not_concluded') {
+                    chipBg = '#fff1f1';
+                    chipColor = 'var(--dark-red)';
+                }
+
+                const traineeCount = entry.trainees.length;
+                const countLabel = entry.status === 'closed'
+                    ? `${traineeCount} attended`
+                    : `${traineeCount} ${traineeCount === 1 ? 'trainee' : 'trainees'}`;
+
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                        <span class="card-name" style="color: ${entry.status === 'closed' ? 'var(--crust-burnt)' : 'var(--crust-deep)'}; font-weight: 600;">${cardTitle}</span>
+                    </div>
+                    <div class="card-sub" style="margin-top: 4px;">
+                        <span style="font-size: 15px; font-weight: 600; color: var(--crust-burnt);">${countLabel}</span>
+                        <span class="chip" style="background: ${chipBg}; color: ${chipColor};">${entry.badgeText}</span>
+                    </div>
+                    <div style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-burnt); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        ${escapeText(entry.subMeta)}
+                    </div>
+                `;
+
+                card.onclick = () => {
+                    selectNtoClassDate(entry.dateStr);
+                };
+
+                listContainer.appendChild(card);
+            });
+        }
+
+        function selectNtoClassDate(dateStr) {
+            const dateInput = document.getElementById('ntoClassDate');
+            if (dateInput) dateInput.value = dateStr;
+            renderNtoSidebar();
+            renderNtoClassView();
+        }
+
+        function markAllNtoPresent() {
+            const selects = document.querySelectorAll('.nto-attendance-select');
+            if (selects.length === 0) return;
+            selects.forEach(sel => {
+                sel.value = 'In Class';
+                handleNtoAttendanceChange(sel);
+            });
+        }
+
+        // Render NTO Class View inside UI matching Mockup 06-NTO-Class.html
         function renderNtoClassView() {
             const dateInput = document.getElementById('ntoClassDate');
+            if (!dateInput) return;
 
-            // Auto-select the next upcoming class date if date field is empty or if today has 0 trainees
             if (!dateInput.value) {
                 const nextClassDate = getNextUpcomingNtoClassDate();
                 dateInput.value = nextClassDate || new Date().toISOString().split('T')[0];
-            } else {
-                const todayYyyyMmDd = new Date().toISOString().split('T')[0];
-                if (dateInput.value === todayYyyyMmDd) {
-                    const todayTrainees = candidates.filter(c => (c.ntoScheduled || c.hired || c.ntoDate) && formatDateForInput(c.ntoDate) === todayYyyyMmDd);
-                    if (todayTrainees.length === 0) {
-                        const nextClassDate = getNextUpcomingNtoClassDate();
-                        if (nextClassDate) {
-                            dateInput.value = nextClassDate;
-                        }
-                    }
-                }
             }
 
             const selectedDate = dateInput.value;
-            const searchQuery = (document.getElementById('ntoRosterSearch')?.value || '').toLowerCase().trim();
-            const showAllDates = document.getElementById('ntoShowAllDates')?.checked || false;
+            const searchQuery = (document.getElementById('searchControl')?.value || '').toLowerCase().trim();
+
+            // Update Header Title (e.g., NTO Class · Tue 10/20)
+            if (selectedDate) {
+                const p = selectedDate.split('-').map(Number);
+                if (p.length === 3 && !isNaN(p[0])) {
+                    const dObj = new Date(p[0], p[1] - 1, p[2]);
+                    const shortDay = dObj.toLocaleDateString('en-US', { weekday: 'short' });
+                    const m = dObj.getMonth() + 1;
+                    const d = dObj.getDate();
+                    const formTitle = document.getElementById('formTitle');
+                    if (formTitle) formTitle.innerText = `NTO Class · ${shortDay} ${m}/${d}`;
+                }
+            }
+
+            // Update Join Class Meet URL
+            const userKey = localStorage.getItem('onb_user') || '';
+            const isDenver = userKey.toLowerCase().startsWith('denver');
+            const meetLink = isDenver ? "https://meet.google.com/haf-izyt-gws" : "https://meet.google.com/zwc-afuu-hgh";
+            const joinMeetBtn = document.getElementById('btnNtoJoinMeet');
+            if (joinMeetBtn) joinMeetBtn.href = meetLink;
 
             const container = document.getElementById('ntoRosterListContainer');
+            if (!container) return;
             container.innerHTML = '';
 
             const activeClassList = candidates.filter(c => {
@@ -7917,22 +8050,20 @@
                     return false;
                 }
 
-                if (showAllDates || searchQuery) {
-                    return true;
-                }
-
                 const candidateFormattedDate = formatDateForInput(c.ntoDate);
                 return candidateFormattedDate === selectedDate;
             }).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
-            // Auto-populate Start Time from Calendar Schedule or scheduled candidates on this date
+            const countNum = document.getElementById('ntoRosterCountNum');
+            if (countNum) countNum.innerText = activeClassList.length;
+
+            // Auto-populate Start Time from Calendar Schedule or candidates on this date
             const startInput = document.getElementById('ntoStartTime');
             const endInput = document.getElementById('ntoEndTime');
             if (startInput) {
                 let detectedStart = '';
                 let detectedEnd = '';
 
-                // 1. Check Calendar Schedule Cache for this exact date
                 if (window.ntoCalendarClassesCache && window.ntoCalendarClassesCache.length > 0) {
                     const calMatch = window.ntoCalendarClassesCache.find(c => {
                         const cDate = formatDateForInput(c.classDate);
@@ -7944,7 +8075,6 @@
                     }
                 }
 
-                // 2. Check Candidate roster times
                 if (!detectedStart) {
                     for (const cand of activeClassList) {
                         const rawT = cand.time || cand.startTime || cand.ntoTime || cand['Time'] || cand['Start Time'];
@@ -7955,7 +8085,6 @@
                     }
                 }
 
-                // 3. Standard fallback if nothing set
                 if (!detectedStart && activeClassList.length > 0) {
                     detectedStart = '6:00 PM';
                 }
@@ -7967,7 +8096,6 @@
                     endInput.placeholder = detectedEnd;
                 }
 
-                // 4. Auto-detect suggested end time based on completed forms in this class (rounded up to nearest 5 min)
                 const suggestedEnd = calculateSuggestedNtoEndTime(activeClassList);
                 const endHint = document.getElementById('ntoEndTimeHint');
                 if (suggestedEnd) {
@@ -7977,35 +8105,28 @@
                     if (endHint) {
                         endHint.style.display = 'inline-block';
                         endHint.title = `Last form submitted at ${suggestedEnd.rawTime}`;
-                        endHint.innerHTML = `💡 Auto: <strong>${suggestedEnd.roundedTime}</strong>`;
+                        endHint.innerHTML = `Auto: <strong>${suggestedEnd.roundedTime}</strong>`;
                     }
                 } else if (endHint) {
                     endHint.style.display = 'none';
                 }
             }
 
-            const masterCheck = document.getElementById('ntoSelectAllTrainees');
-            if (masterCheck) masterCheck.checked = false;
-
             if (activeClassList.length === 0) {
-                const dateDisplay = showAllDates ? "across all dates" : `scheduled for ${selectedDate}`;
                 container.innerHTML = `
-                <div style="text-align:center; padding: 20px; color: var(--brand-grey); font-size: 17px;">
-                    No trainees found ${dateDisplay}.<br>
-                    <span style="font-size: 15px; color: var(--crust-deep);">Try searching a name or check <strong>"Show All Dates"</strong> to view the full roster.</span>
-                </div>
-            `;
+                    <div style="text-align: center; padding: 35px 20px; color: var(--brand-grey); font-size: 16px; font-family: 'Subhead2', sans-serif;">
+                        No trainees scheduled for ${selectedDate}.<br>
+                        <span style="font-size: 14px; color: var(--crust-deep); margin-top: 6px; display: inline-block;">Select another class date from the sidebar or click <strong>+ Schedule Class</strong>.</span>
+                    </div>
+                `;
                 updateNtoSendMeetLinksButtonText();
                 return;
             }
 
-            const userKey = localStorage.getItem('onb_user') || '';
-            const isDenver = userKey.toLowerCase().startsWith('denver');
-
             activeClassList.forEach((item) => {
                 const row = document.createElement('div');
                 row.className = 'nto-roster-row';
-                row.style.cssText = "display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--crust-med); gap: 12px;";
+                row.style.cssText = "display: grid; grid-template-columns: 28px minmax(0, 1fr) 210px 110px; gap: 14px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--crust-med); box-sizing: border-box;";
 
                 const rawSaved = (item.ntoAttendance || item.ntoStatus || '').trim();
                 const isCompleteStatus = rawSaved === 'NTO Complete' || rawSaved === 'Hired' || rawSaved === 'Complete' || (item.hired && rawSaved !== 'Not in NTO' && rawSaved !== 'Left Early');
@@ -8019,43 +8140,35 @@
                 const ntoCompletedAtVal = item.ntoCompletedAt || item.nto_completed_at || '';
                 const ssnLast4Val = item.ssnLast4 || item.ssn_last_4 || item['SSN (Last 4)'] || '';
 
-                const changeDateBtn = `
-                    <button type="button" onclick="openRescheduleNtoModal('${escapeText(candId)}', '${escapeText(item.name || '')}', '${escapeText(item.email || '')}', '${escapeText(ntoDateVal || '')}')" style="background: var(--dark-blue); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 15px; font-family: 'Subhead2', sans-serif; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;" title="Change orientation class date for this trainee">
-                        <img src="image/custom-emojis/points_calendar.png" style="width: 16px; height: 16px; object-fit: contain;"> Change Date
-                    </button>
-                `;
-
                 const scoreBadge = item.quizScore ? `
-                    <span style="display: inline-flex; align-items: center; gap: 4px; font-family: 'Subhead1', sans-serif; font-size: 13px; background: #e3f2fd; color: var(--dark-blue); border: 1px solid #bbdefb; padding: 2px 9px; border-radius: 12px; font-weight: bold; margin-left: 8px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0, 92, 145, 0.08);" title="Orientation Quiz Score">
-                        🎯 ${escapeText(item.quizScore)}
+                    <span style="display: inline-flex; align-items: center; gap: 4px; font-family: 'Subhead1', sans-serif; font-size: 12px; background: #e3f2fd; color: var(--dark-blue); border: 1px solid #bbdefb; padding: 1px 7px; border-radius: 10px; font-weight: bold; margin-left: 6px;" title="Orientation Quiz Score">
+                        ${escapeText(item.quizScore)}
                     </span>
                 ` : '';
 
                 const candDo = item.doName || item.do || (contacts && contacts.find(c => String(c.store).trim() === String(item.store).trim())?.doName) || '';
-                const candDoDisplay = candDo ? ` • ${escapeText(candDo)}` : '';
+                const candDoDisplay = candDo ? ` · ${escapeText(candDo)}` : '';
 
                 row.innerHTML = `
-                <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; flex: 1.6; margin: 0;" title="Check to send Google Meet link">
-                    <input type="checkbox" class="nto-trainee-check" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" onchange="updateNtoSendMeetLinksButtonText()" style="width: 19px; height: 19px; accent-color: var(--brand-blue); cursor: pointer; flex-shrink: 0;">
-                    <div>
-                        <div style="font-family: 'Subhead2', sans-serif; font-size: 19px; color: var(--dark-blue); display: flex; align-items: center; flex-wrap: wrap;">
-                            <span class="nto-trainee-name-click" data-name="${escapeText(item.name || '')}" onclick="copyNtoTraineeName(event, this)" title="Click to copy name">${item.name}</span>
+                    <input type="checkbox" class="nto-trainee-check" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" onchange="updateNtoSendMeetLinksButtonText()" style="width: 18px; height: 18px; accent-color: var(--brand-blue); cursor: pointer;" title="Select for Google Meet link">
+                    <div style="display: flex; flex-direction: column; min-width: 0;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span class="nto-trainee-name-click" data-name="${escapeText(item.name || '')}" onclick="copyNtoTraineeName(event, this)" style="font-family: 'Subhead2', sans-serif; font-size: 19px; font-weight: 600; color: var(--dark-blue); cursor: pointer;" title="Click to copy name">${escapeText(item.name)}</span>
                             ${scoreBadge}
                         </div>
-                        <div style="font-family: 'Condensed', sans-serif; font-size: 16px; color: var(--text-dark); margin-top: 2px;">Store #${item.store}${candDoDisplay} • ${item.position || 'CSR'} • Date: ${ntoDateVal || 'N/A'}</div>
+                        <div style="font-family: 'Condensed', sans-serif; font-size: 15px; color: var(--crust-burnt); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            Store #${item.store}${candDoDisplay} · ${escapeText(item.position || 'CSR')}
+                        </div>
                     </div>
-                </label>
-                <div style="flex: 1.4; display: flex; gap: 8px; align-items: center; justify-content: flex-end;">
-                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" data-lastupdated="${escapeText(lastUpdatedVal)}" data-ntocompletedat="${escapeText(ntoCompletedAtVal)}" data-ssnlast4="${escapeText(ssnLast4Val)}" onchange="handleNtoAttendanceChange(this)" style="width: 215px; min-width: 195px; padding: 8px 10px; font-size: 18px; font-family: 'Condensed', sans-serif; border-radius: 8px; border: 1.5px solid var(--crust-dark); background: white; cursor: pointer;">
-                        <option value="" ${!savedStatus ? 'selected' : ''}>Select Status...</option>
-                        <option value="In Class" ${savedStatus === 'In Class' ? 'selected' : ''}>📖 In Class</option>                        
+                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" data-lastupdated="${escapeText(lastUpdatedVal)}" data-ntocompletedat="${escapeText(ntoCompletedAtVal)}" data-ssnlast4="${escapeText(ssnLast4Val)}" onchange="handleNtoAttendanceChange(this)" style="width: 100%; height: 38px; padding: 4px 10px; font-size: 15.5px; font-family: 'Condensed', sans-serif; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white; cursor: pointer;">
+                        <option value="" ${!savedStatus ? 'selected' : ''}>Select status…</option>
+                        <option value="In Class" ${savedStatus === 'In Class' ? 'selected' : ''}>📖 In Class</option>
                         <option value="Not in NTO" ${savedStatus === 'Not in NTO' ? 'selected' : ''}>❌ Not in NTO (Absent)</option>
                         <option value="Left Early" ${savedStatus === 'Left Early' ? 'selected' : ''}>⚠️ Left Early</option>
                         <option value="NTO Complete" ${savedStatus === 'NTO Complete' ? 'selected' : ''}>🎓 NTO Complete</option>
                     </select>
-                    ${changeDateBtn}
-                </div>
-            `;
+                    <a href="javascript:void(0)" onclick="openRescheduleNtoModal('${escapeText(candId)}', '${escapeText(item.name || '')}', '${escapeText(item.email || '')}', '${escapeText(ntoDateVal || '')}')" style="font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 14.5px; color: var(--brand-blue); text-decoration: none; text-align: right; white-space: nowrap;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Change date</a>
+                `;
                 container.appendChild(row);
             });
 

@@ -585,6 +585,24 @@
         .badge-review { background: #e3f2fd; color: var(--dark-blue); font-size: 12px; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #bbdefb; animation: pulse 2s infinite; }
         .badge-incorrect { background: #ffebee; color: var(--brand-red); font-size: 11px; padding: 2px 7px; border-radius: 4px; font-weight: bold; border: 1px solid #ffcdd2; white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; line-height: 1.3; }
 
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 12.5px;
+            font-weight: 700;
+            font-family: 'Subhead1', sans-serif;
+            white-space: nowrap;
+        }
+
+        .nto-roster-row {
+            transition: background-color 0.15s ease;
+        }
+        .nto-roster-row:hover {
+            background-color: var(--crust-light);
+        }
+
         /* ==========================================================================
            8. FORMS, INPUTS & CHECKBOX GRID
            ========================================================================== */
