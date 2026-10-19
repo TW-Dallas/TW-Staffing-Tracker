@@ -12,7 +12,7 @@
     <title>Onboarder Portal</title>
     <link class="favicon" rel="icon" type="image/png" href="images/staffing_icon.png">
     <link rel="apple-touch-icon" href="images/staffing_icon.png">
-    <link rel="stylesheet" href="styles.css?v=20261019_0920">
+    <link rel="stylesheet" href="styles.css?v=20261019_0950">
 </head>
 
 <body>
@@ -287,8 +287,7 @@
                         <!-- 1. ONBOARDING FORM TEMPLATE -->
                         <div id="onboardingFormFields">
 
-                            <!-- Sleek Read-Only Pipeline Journey -->
-                            <div id="onboardingPipelineBar" style="display: flex; align-items: center; justify-content: space-between; background: var(--crust-light); border: 1.5px solid var(--crust-med); border-radius: 8px; padding: 8px 16px; margin-bottom: 8px; font-family: 'Subhead2', sans-serif; font-size: 14.5px; color: var(--crust-burnt);">
+                            <div id="onboardingPipelineBar" class="onboarding-pipeline-bar">
                                 <span id="pipeIntake" style="display: inline-flex; align-items: center; gap: 4px; color: var(--crust-dark);"><span class="pipe-dot">○</span> Intake Rec'd</span>
                                 <span style="color: var(--crust-dark);">➔</span>
                                 <span id="pipeLink" style="display: inline-flex; align-items: center; gap: 4px; color: var(--crust-dark);"><span class="pipe-dot">○</span> Onboarding Sent</span>
@@ -1100,36 +1099,34 @@
                         <!-- 7. MIT CLASS SCHEDULER & ROSTER TEMPLATE -->
                         <div id="mitFormFields" class="hidden" style="display: flex; flex-direction: column; height: 100%; box-sizing: border-box; overflow: hidden;">
                             <!-- Action & Filter Bar -->
-                            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; flex-shrink: 0; align-items: center; justify-content: space-between;">
+                            <div class="mit-filter-bar">
                                 <div style="display: flex; gap: 8px;">
-                                    <button type="button" onclick="openMitClassModal()"
-                                        style="background: var(--dark-blue); color: white; padding: 8px 14px; font-size: 14.5px; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; border: none; display: flex; align-items: center; gap: 6px;">
+                                    <button type="button" onclick="openMitClassModal()" class="mit-btn-schedule">
                                         ➕ Schedule MIT Session
                                     </button>
-                                    <button type="button" onclick="fetchMitSchedulerClasses()"
-                                        style="background: var(--crust-light); color: var(--crust-burnt); padding: 8px 12px; font-size: 14.5px; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; border: 1.5px solid var(--crust-dark); display: flex; align-items: center; gap: 6px;">
+                                    <button type="button" onclick="fetchMitSchedulerClasses()" class="mit-btn-refresh">
                                         🔄 Refresh
                                     </button>
                                 </div>
                                 <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
-                                    <select id="mitFilterLocation" onchange="renderMitSchedulerTable()" style="padding: 6px 8px; font-size: 14px; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white;">
+                                    <select id="mitFilterLocation" onchange="renderMitSchedulerTable()" class="mit-select-filter">
                                         <option value="ALL">All Centers</option>
                                         <option value="McKinney">McKinney Center</option>
                                         <option value="Mesquite">Mesquite Center</option>
                                         <option value="Virtual">Virtual</option>
                                     </select>
-                                    <select id="mitFilterLevel" onchange="renderMitSchedulerTable()" style="padding: 6px 8px; font-size: 14px; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white;">
+                                    <select id="mitFilterLevel" onchange="renderMitSchedulerTable()" class="mit-select-filter">
                                         <option value="ALL">All Levels</option>
                                         <option value="1">Level 1</option>
                                         <option value="2">Level 2</option>
                                         <option value="3">Level 3</option>
                                     </select>
-                                    <input type="text" id="mitSearchInput" placeholder="🔍 Search course, trainer..." oninput="renderMitSchedulerTable()" style="padding: 6px 10px; font-size: 14px; border-radius: 6px; border: 1.5px solid var(--crust-dark); width: 170px;">
+                                    <input type="text" id="mitSearchInput" placeholder="🔍 Search course, trainer..." oninput="renderMitSchedulerTable()" class="mit-search-filter">
                                 </div>
                             </div>
 
                             <!-- Sessions Count / Summary Badge Bar -->
-                            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--crust-light); border: 1px solid var(--crust-med); border-radius: 6px; padding: 6px 12px; margin-bottom: 8px; flex-shrink: 0; font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-burnt);">
+                            <div class="mit-summary-bar">
                                 <div>Showing: <strong id="mitSessionCountDisp">0</strong> Upcoming Sessions</div>
                                 <div id="mitLevelLegendBar" style="display: flex; gap: 12px; font-size: 12px;">
                                     <span style="color: var(--dark-blue);">● Level 1: Every 4 Wks</span>
@@ -1139,16 +1136,16 @@
                             </div>
 
                             <!-- Table Container -->
-                            <div style="flex: 1; overflow-y: auto; border: 1.5px solid var(--crust-dark); border-radius: 8px; background: white;">
-                                <table style="width: 100%; border-collapse: collapse; font-family: 'Condensed', sans-serif; font-size: 16px; text-align: left;">
+                            <div class="mit-table-wrapper">
+                                <table class="mit-table">
                                     <thead>
-                                        <tr style="background: var(--dark-blue); color: white; position: sticky; top: 0; font-family: 'Subhead2'; font-size: 13.5px; text-transform: uppercase; z-index: 10;">
-                                            <th style="padding: 9px 12px;">Date & ID</th>
-                                            <th id="mitThCourse" style="padding: 9px 12px;">Course & Level</th>
-                                            <th style="padding: 9px 12px; text-align: center;">Center / Time</th>
-                                            <th style="padding: 9px 12px; text-align: center;">Trainer</th>
-                                            <th style="padding: 9px 12px; text-align: center;">Seats</th>
-                                            <th style="padding: 9px 12px; text-align: center;">Actions</th>
+                                        <tr>
+                                            <th>Date & ID</th>
+                                            <th id="mitThCourse">Course & Level</th>
+                                            <th style="text-align: center;">Center / Time</th>
+                                            <th style="text-align: center;">Trainer</th>
+                                            <th style="text-align: center;">Seats</th>
+                                            <th style="text-align: center;">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="mitSchedulerTableBody">
@@ -1161,15 +1158,14 @@
 
                     <!-- Fixed Footer Action Buttons -->
                     <div class="form-actions" style="display: flex; gap: 8px; margin-top: 4px; padding-top: 10px; border-top: 1.5px solid var(--crust-med);">
-                        <button type="submit" id="btnSaveMain" style="flex: 1.2; background: var(--brand-blue); color: #ffffff; border: none; border-radius: 8px; font-family: 'Subhead1', sans-serif; font-size: 16px; padding: 10px 16px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(0, 144, 226, 0.25);">Save Details</button>
+                        <button type="submit" id="btnSaveMain" class="form-action-btn form-action-btn-primary" style="flex: 1.2;">Save Details</button>
                         
                         <!-- Interview-specific action buttons -->
-                        <button type="button" id="btnSendStoreInvite" onclick="triggerGmInterviewEmail()" class="hidden" style="flex: 1; background: #ffffff; color: var(--brand-blue); border: 2px solid var(--brand-blue); border-radius: 8px; font-family: 'Subhead1', sans-serif; font-size: 15px; padding: 10px 12px; cursor: pointer; transition: all 0.15s ease; white-space: nowrap;">✉️ Send Store Invite</button>
-                        <button type="button" id="btnPortToOnboarding" onclick="portCandidateToOnboarding()" class="hidden" style="flex: 1; background: #ffffff; color: var(--dark-blue); border: 2px solid var(--dark-blue); border-radius: 8px; font-family: 'Subhead1', sans-serif; font-size: 15px; padding: 10px 12px; cursor: pointer; transition: all 0.15s ease; white-space: nowrap;">🚀 Port to Onboarding</button>
+                        <button type="button" id="btnSendStoreInvite" onclick="triggerGmInterviewEmail()" class="hidden form-action-btn form-action-btn-secondary" style="flex: 1; white-space: nowrap;">✉️ Send Store Invite</button>
+                        <button type="button" id="btnPortToOnboarding" onclick="portCandidateToOnboarding()" class="hidden form-action-btn form-action-btn-secondary" style="flex: 1; white-space: nowrap;">🚀 Port to Onboarding</button>
 
-                        <button type="button" id="btnCancel" onclick="clearForm()" style="flex: 1; background: #ffffff; color: var(--brand-blue); border: 2px solid var(--brand-blue); border-radius: 8px; font-family: 'Subhead1', sans-serif; font-size: 16px; padding: 10px 16px; cursor: pointer; transition: all 0.15s ease;">Clear / Deselect</button>
-                        <button type="button" id="btnDelete" onclick="deleteCurrentCandidate()" class="hidden"
-                            style="background: var(--brand-red); color: white; padding: 0 16px; border-radius: 8px; border: none; font-family: 'Subhead1', sans-serif; font-size: 15px;">🗑️ Delete</button>
+                        <button type="button" id="btnCancel" onclick="clearForm()" class="form-action-btn form-action-btn-secondary" style="flex: 1;">Clear / Deselect</button>
+                        <button type="button" id="btnDelete" onclick="deleteCurrentCandidate()" class="hidden form-action-btn form-action-btn-danger">🗑️ Delete</button>
                     </div>
                 </form>
             </div> <!-- Middle Panel Closes Here -->
@@ -10682,43 +10678,43 @@
                 const isClassDenver = isCurrentDenver || (c.market || '').toLowerCase() === 'denver';
                 const levelBadgeHTML = isClassDenver ? '' : `
                     <br>
-                    <span style="display: inline-block; background: ${levelBadgeBg}; color: ${levelBadgeColor}; font-size: 11px; padding: 2px 7px; border-radius: 4px; font-family: 'Subhead2'; text-transform: uppercase; margin-top: 2px;">
+                    <span class="mit-badge-level" style="background: ${levelBadgeBg}; color: ${levelBadgeColor};">
                         Level ${c.level}
                     </span>
                 `;
 
                 row.innerHTML = `
-                    <td style="padding: 10px 12px; font-weight: bold; color: var(--dark-blue); font-size: 16px;">
+                    <td style="font-weight: bold; color: var(--dark-blue); font-size: 16px;">
                         ${c.classDate} <br>
                         <span style="font-size: 12px; color: var(--crust-deep); font-weight: normal; font-family: monospace;">${c.id}</span>
                     </td>
-                    <td style="padding: 10px 12px; font-size: 16px;">
+                    <td style="font-size: 16px;">
                         <strong>${c.name}</strong>${levelBadgeHTML}
                     </td>
-                    <td style="padding: 10px 12px; text-align: center; font-size: 15px;">
+                    <td style="text-align: center; font-size: 15px;">
                         <strong>📍 ${c.location}</strong><br>
                         <span style="color: var(--dark-blue);">${c.startTime} - ${c.endTime}</span>
                     </td>
-                    <td style="padding: 10px 12px; text-align: center; font-size: 15px;">
+                    <td style="text-align: center; font-size: 15px;">
                         ${c.trainer || 'Unassigned'}
                     </td>
-                    <td style="padding: 10px 12px; text-align: center;">
-                        <span style="display: inline-block; padding: 3px 8px; border-radius: 12px; font-family: 'Subhead2'; font-size: 13px; background: ${spotsBadgeBg}; color: ${spotsBadgeColor}; border: ${spotsBadgeBorder};">
+                    <td style="text-align: center;">
+                        <span class="mit-badge-seats" style="background: ${spotsBadgeBg}; color: ${spotsBadgeColor}; border: ${spotsBadgeBorder};">
                             ${c.spotsTaken || 0} / ${c.spotsTotal || 15}
                         </span>
                     </td>
-                    <td style="padding: 10px 12px; text-align: center;">
+                    <td style="text-align: center;">
                         <div style="display: flex; gap: 6px; justify-content: center;">
                             <button type="button" onclick="openMitRosterModal('${c.id}', '${(c.name || '').replace(/'/g, "\\'")}', '${c.classDate}', '${c.startTime}')"
-                                style="background: var(--dark-blue); color: white; border: none; padding: 5px 10px; font-size: 13px; border-radius: 4px; cursor: pointer; font-family: 'Subhead2';" title="View Candidate Roster">
+                                class="mit-btn-action" style="background: var(--dark-blue); color: white;" title="View Candidate Roster">
                                 👥 Roster (${(c.attendees || []).length})
                             </button>
                             <button type="button" onclick="openMitClassModal('${c.id}')"
-                                style="background: var(--crust-light); color: var(--dark-blue); border: 1px solid var(--dark-blue); padding: 5px 8px; font-size: 13px; border-radius: 4px; cursor: pointer; font-family: 'Subhead2';" title="Edit Session">
+                                class="mit-btn-action" style="background: var(--crust-light); color: var(--dark-blue); border: 1px solid var(--dark-blue);" title="Edit Session">
                                 ✏️
                             </button>
                             <button type="button" onclick="deleteMitClassSession('${c.id}', '${c.classDate}', '${(c.name || '').replace(/'/g, "\\'")}')"
-                                style="background: var(--brand-red); color: white; border: none; padding: 5px 8px; font-size: 13px; border-radius: 4px; cursor: pointer; font-family: 'Subhead2';" title="Cancel Session">
+                                class="mit-btn-action" style="background: var(--brand-red); color: white;" title="Cancel Session">
                                 🗑️
                             </button>
                         </div>
