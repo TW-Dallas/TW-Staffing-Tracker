@@ -430,18 +430,15 @@
                         </div>
 
                         <!-- 2. INTERVIEWS FORM TEMPLATE -->
-                        <div id="interviewFormFields" class="hidden">
-                            <button type="button" id="btnPortToOnboarding" onclick="portCandidateToOnboarding()"
-                                style="background: var(--dark-blue); width: 100%; margin-bottom: 12px; font-size: 19px; padding: 11px 18px;">
-                                🚀 Port Candidate to Onboarding
-                            </button>
+                        <div id="interviewFormFields" class="hidden" style="display: flex; flex-direction: column; gap: 8px;">
 
-                            <div class="form-row" style="display: flex; gap: 8px;">
-                                <div class="form-group" style="flex: 2.2;">
+                            <!-- Candidate Info: 4-Column Balanced Grid -->
+                            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 8px;">
+                                <div class="form-group" style="margin-bottom: 0;">
                                     <label>Candidate Name</label>
-                                    <input type="text" id="intName">
+                                    <input type="text" id="intName" placeholder="Candidate full name">
                                 </div>
-                                <div class="form-group" style="flex: 1;">
+                                <div class="form-group" style="margin-bottom: 0;">
                                     <label>Position</label>
                                     <select id="intPosition">
                                         <option value="DE">🚗 DE</option>
@@ -450,31 +447,33 @@
                                         <option value="MIT">🎓 MIT</option>
                                     </select>
                                 </div>
-                                <div class="form-group" style="flex: 0.8;">
+                                <div class="form-group" style="margin-bottom: 0;">
                                     <label>Store #</label>
                                     <input type="text" id="intStore" placeholder="####">
                                 </div>
                             </div>
 
-                            <div class="form-row">
-                                <div class="form-group">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="form-group" style="margin-bottom: 0;">
                                     <label>Phone Number</label>
                                     <input type="text" id="intPhone" placeholder="(xxx) xxx-xxxx">
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" style="margin-bottom: 0;">
                                     <label>Email Address</label>
-                                    <input type="text" id="intEmail" onblur="this.value = cleanEmailInput(this.value)">
+                                    <input type="text" id="intEmail" placeholder="candidate@email.com" onblur="this.value = cleanEmailInput(this.value)">
                                 </div>
                             </div>
 
-                            <div class="section-header">Phone Interview Progression</div>
-                            <div class="form-row flex-three">
-                                <div class="form-group">
+                            <!-- Section 1: Phone Interview Progression -->
+                            <div class="int-section-header">
+                                Phone Interview Progression
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1.1fr 1fr 1fr 1.3fr; gap: 8px;">
+                                <div class="form-group" style="margin-bottom: 0;">
                                     <label>Interview Date</label>
-                                    <input type="date" id="intDate" placeholder="MM/DD/YYYY"
-                                        oninput="autoCalculateDayOfWeek()">
+                                    <input type="date" id="intDate" placeholder="MM/DD/YYYY" oninput="autoCalculateDayOfWeek()">
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" style="margin-bottom: 0;">
                                     <label>Day of Week</label>
                                     <select id="intDay">
                                         <option value="">Select Day</option>
@@ -487,16 +486,11 @@
                                         <option value="Sunday">Sunday</option>
                                     </select>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" style="margin-bottom: 0;">
                                     <label>Time</label>
                                     <input type="text" id="intTime" list="time15MinList" placeholder="e.g., 10:00 AM">
                                 </div>
-                            </div>
-
-                            <div class="section-header">Store Interview & Final Progression</div>
-                            <div class="form-row" style="display: flex; gap: 8px; align-items: flex-end;">
-                                <!-- Column 1: Interview Status -->
-                                <div class="form-group" style="flex: 1.6;">
+                                <div class="form-group" style="margin-bottom: 0;">
                                     <label>Interview Status</label>
                                     <select id="intStatus">
                                         <option value="Phone Interview">📞 Phone Interview</option>
@@ -510,16 +504,18 @@
                                         <option value="Hold">⏸ Hold</option>
                                     </select>
                                 </div>
+                            </div>
 
-                                <!-- Column 2: Store Date -->
-                                <div class="form-group" style="flex: 1;">
+                            <!-- Section 2: Store Interview & Final Progression -->
+                            <div class="int-section-header">
+                                Store Interview &amp; Final
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1.1fr 1fr 1fr 1.3fr; gap: 8px;">
+                                <div class="form-group" style="margin-bottom: 0;">
                                     <label>Store Int Date</label>
-                                    <input type="date" id="intGmDate" placeholder="MM/DD/YYYY"
-                                        oninput="autoCalculateGmDayOfWeek()">
+                                    <input type="date" id="intGmDate" placeholder="MM/DD/YYYY" oninput="autoCalculateGmDayOfWeek()">
                                 </div>
-
-                                <!-- Column 3: Store Day of Week -->
-                                <div class="form-group" style="flex: 1;">
+                                <div class="form-group" style="margin-bottom: 0;">
                                     <label>Store Int Day</label>
                                     <select id="intGmDay">
                                         <option value="">Select Day</option>
@@ -532,77 +528,61 @@
                                         <option value="Sunday">Sunday</option>
                                     </select>
                                 </div>
-
-                                <!-- Column 4: Store Time -->
-                                <div class="form-group" style="flex: 1;">
+                                <div class="form-group" style="margin-bottom: 0;">
                                     <label>Store Int Time</label>
                                     <input type="text" id="intGmTime" list="time15MinList" placeholder="e.g., 2:00 PM">
                                 </div>
-
-                                <!-- Column 4: Send Button -->
-                                <div class="form-group" style="flex: 0.9;">
-                                    <label style="visibility: hidden;">Action</label>
-                                    <button type="button" onclick="triggerGmInterviewEmail()"
-                                        style="background: var(--brand-blue); color: white; width: 100%; height: 38px; font-size: 15px; padding: 0 6px; border: none; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; white-space: nowrap;">
-                                        ✉️ Send Store Invite
-                                    </button>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label>GM Text Template</label>
+                                    <select id="smsTemplateSelect" onchange="updateSmsPreview()">
+                                        <option value="gm_confirmed">🏪 Store Int. Confirmed</option>
+                                        <option value="gm_noshow_check">❓ Attendance / No Show</option>
+                                        <option value="phone_confirmed">📞 Phone Int. Confirmed</option>
+                                    </select>
                                 </div>
                             </div>
 
-                            <div class="form-row" style="display: flex; gap: 12px; margin-top: 6px;">
-                                <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                                    <label>Availability</label>
-                                    <textarea id="intAvailability" placeholder="Enter availability details here..."
-                                        style="height: 80px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4;"></textarea>
-                                </div>
-                                <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                                        <label style="margin-bottom: 0;">Feedback & Notes</label>
-                                        <span id="intAutoSaveStatus" style="font-size: 11.5px; font-family: 'Subhead2', sans-serif; font-weight: normal; color: var(--success-green); display: none; transition: opacity 0.3s ease;"></span>
+                            <!-- Section 3: Dual Column Notes & Communications -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 1px;">
+                                <!-- Column 1: Availability & Status Updates -->
+                                <div style="display: flex; flex-direction: column; gap: 5px;">
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <label>Availability</label>
+                                        <textarea id="intAvailability" placeholder="Enter candidate availability details..." style="height: 50px; font-family: 'Condensed', sans-serif; font-size: 14.5px; line-height: 1.3; resize: none;"></textarea>
                                     </div>
-                                    <textarea id="intNotes" placeholder="Write any specific interview notes here..."
-                                        style="height: 80px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4;"></textarea>
-                                </div>
-                            </div>
-                            <div class="form-row"
-                                style="display: flex; gap: 12px; margin-top: 6px; align-items: flex-start;">
-                                <div class="form-group" style="flex: 1; display: flex; flex-direction: column;">
-                                    <div style="display: flex; align-items: center; height: 28px; margin-bottom: 3px;">
-                                        <label style="margin-bottom: 0;">Status Updates</label>
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <label>Status Updates</label>
+                                        <textarea id="intStatusUpdates" placeholder="Recent updates on interview progression..." style="height: 50px; font-family: 'Condensed', sans-serif; font-size: 14.5px; line-height: 1.3; resize: none;"></textarea>
                                     </div>
-                                    <textarea id="intStatusUpdates"
-                                        placeholder="Recent updates on interview progression..."
-                                        style="height: 105px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4; resize: none; box-sizing: border-box;"></textarea>
                                 </div>
-                                <div class="form-group" style="flex: 1.25; display: flex; flex-direction: column;">
-                                    <div
-                                        style="display: flex; justify-content: space-between; align-items: center; height: 28px; margin-bottom: 3px;">
-                                        <label style="margin-bottom: 0;">GM Text Template</label>
-                                        <select id="smsTemplateSelect" onchange="updateSmsPreview()"
-                                            style="font-size: 13.5px; padding: 1px 8px; height: 28px; font-family: 'Subhead1', sans-serif; border-radius: 6px; border: 1px solid var(--crust-dark); background: white; cursor: pointer; width: auto; max-width: 250px; box-sizing: border-box;">
-                                            <option value="gm_confirmed">🏪 Store Interview Confirmed</option>
-                                            <option value="gm_noshow_check">❓ Attendance / No Show Check</option>
-                                            <option value="phone_confirmed">📞 Phone Interview Confirmed</option>
-                                        </select>
+
+                                <!-- Column 2: Feedback & Notes + GM Text Preview -->
+                                <div style="display: flex; flex-direction: column; gap: 5px;">
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                                            <label style="margin-bottom: 0;">Feedback &amp; Notes</label>
+                                            <span id="intAutoSaveStatus" style="font-size: 11.5px; font-family: 'Subhead2', sans-serif; font-weight: normal; color: var(--success-green); display: none; transition: opacity 0.3s ease;"></span>
+                                        </div>
+                                        <textarea id="intNotes" placeholder="Write specific interview notes here..." style="height: 50px; font-family: 'Condensed', sans-serif; font-size: 14.5px; line-height: 1.3; resize: none;"></textarea>
                                     </div>
-                                    <textarea id="smsPreviewBox"
-                                        placeholder="Select or fill candidate details to generate text message..."
-                                        style="height: 105px; font-family: 'Condensed', sans-serif; font-size: 16px; line-height: 1.4; resize: none; background: white; border: 1px solid var(--crust-dark); border-radius: 8px; padding: 8px 11px; box-sizing: border-box;"></textarea>
-                                    <div style="display: flex; gap: 8px; margin-top: 6px;">
-                                        <button type="button" id="btnCopySms" onclick="copySmsToClipboard()"
-                                            style="flex: 1; background: var(--brand-blue); color: white; height: 36px; font-size: 15px; border: none; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s;">
-                                            <span>📋 Copy GM Text</span>
-                                        </button>
-                                        <button type="button" onclick="openGoogleMessages()"
-                                            title="Open Google Messages Web in new tab"
-                                            style="background: white; border: 1px solid var(--crust-dark); color: var(--dark-blue); height: 36px; padding: 0 14px; font-size: 14px; font-family: 'Subhead1', sans-serif; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; white-space: nowrap;"
-                                            onmouseover="this.style.background='var(--crust-light)'"
-                                            onmouseout="this.style.background='white'">
-                                            💬 Messages Web
-                                        </button>
+
+                                    <div class="form-group" style="margin-bottom: 0; display: flex; flex-direction: column;">
+                                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;">
+                                            <label style="margin-bottom: 0;">GM Text Message Preview</label>
+                                            <div style="display: flex; gap: 4px;">
+                                                <button type="button" id="btnCopySms" onclick="copySmsToClipboard()" style="background: var(--brand-blue); color: white; padding: 2px 7px; font-size: 11.5px; border: none; border-radius: 4px; font-family: 'Subhead1', sans-serif; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;">
+                                                    📋 Copy
+                                                </button>
+                                                <button type="button" onclick="openGoogleMessages()" style="background: white; border: 1px solid var(--crust-dark); color: var(--dark-blue); padding: 2px 7px; font-size: 11.5px; font-family: 'Subhead1', sans-serif; border-radius: 4px; cursor: pointer;">
+                                                    💬 Web
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <textarea id="smsPreviewBox" placeholder="GM text preview will populate here..." style="height: 50px; font-family: 'Condensed', sans-serif; font-size: 13px; line-height: 1.25; resize: none; background: white; border: 1px solid var(--crust-dark); border-radius: 8px; padding: 5px 8px; box-sizing: border-box;"></textarea>
                                     </div>
                                 </div>
                             </div>
+
                         </div> <!-- Closes #interviewFormFields -->
 
                         <!-- 3. HIRES & TERMINATIONS FORM TEMPLATE -->
@@ -1089,9 +1069,14 @@
                     </div> <!-- Scrollable area closes here -->
 
                     <!-- Fixed Footer Action Buttons -->
-                    <div class="form-actions" style="display: flex; gap: 12px; margin-top: 4px; padding-top: 10px; border-top: 1.5px solid var(--crust-med);">
-                        <button type="submit" id="btnSaveMain" style="flex: 1; background: var(--brand-blue); color: #ffffff; border: none; border-radius: 8px; font-family: 'Subhead1', sans-serif; font-size: 16.5px; padding: 11px 18px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(0, 144, 226, 0.25);">Save Details</button>
-                        <button type="button" id="btnCancel" onclick="clearForm()" style="flex: 1; background: #ffffff; color: var(--brand-blue); border: 2px solid var(--brand-blue); border-radius: 8px; font-family: 'Subhead1', sans-serif; font-size: 16.5px; padding: 11px 18px; cursor: pointer; transition: all 0.15s ease;">Clear / Deselect</button>
+                    <div class="form-actions" style="display: flex; gap: 8px; margin-top: 4px; padding-top: 10px; border-top: 1.5px solid var(--crust-med);">
+                        <button type="submit" id="btnSaveMain" style="flex: 1.2; background: var(--brand-blue); color: #ffffff; border: none; border-radius: 8px; font-family: 'Subhead1', sans-serif; font-size: 16px; padding: 10px 16px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(0, 144, 226, 0.25);">Save Details</button>
+                        
+                        <!-- Interview-specific action buttons -->
+                        <button type="button" id="btnSendStoreInvite" onclick="triggerGmInterviewEmail()" class="hidden" style="flex: 1; background: #ffffff; color: var(--brand-blue); border: 2px solid var(--brand-blue); border-radius: 8px; font-family: 'Subhead1', sans-serif; font-size: 15px; padding: 10px 12px; cursor: pointer; transition: all 0.15s ease; white-space: nowrap;">✉️ Send Store Invite</button>
+                        <button type="button" id="btnPortToOnboarding" onclick="portCandidateToOnboarding()" class="hidden" style="flex: 1; background: #ffffff; color: var(--dark-blue); border: 2px solid var(--dark-blue); border-radius: 8px; font-family: 'Subhead1', sans-serif; font-size: 15px; padding: 10px 12px; cursor: pointer; transition: all 0.15s ease; white-space: nowrap;">🚀 Port to Onboarding</button>
+
+                        <button type="button" id="btnCancel" onclick="clearForm()" style="flex: 1; background: #ffffff; color: var(--brand-blue); border: 2px solid var(--brand-blue); border-radius: 8px; font-family: 'Subhead1', sans-serif; font-size: 16px; padding: 10px 16px; cursor: pointer; transition: all 0.15s ease;">Clear / Deselect</button>
                         <button type="button" id="btnDelete" onclick="deleteCurrentCandidate()" class="hidden"
                             style="background: var(--brand-red); color: white; padding: 0 16px; border-radius: 8px; border: none; font-family: 'Subhead1', sans-serif; font-size: 15px;">🗑️ Delete</button>
                     </div>
@@ -3740,6 +3725,12 @@
             }
             if (formActions) formActions.classList.remove('hidden');
 
+            // Interview footer action buttons visibility
+            const btnSendStoreInvite = document.getElementById('btnSendStoreInvite');
+            const btnPortToOnb = document.getElementById('btnPortToOnboarding');
+            if (btnSendStoreInvite) btnSendStoreInvite.classList.add('hidden');
+            if (btnPortToOnb) btnPortToOnb.classList.add('hidden');
+
             // Update Sort option label
             const sortNtoSpan = document.querySelector('#sortOptNto span');
             if (sortNtoSpan) {
@@ -3809,6 +3800,9 @@
                 btnAddMain.innerText = "👥 Add New Interview";
                 if (intFormFields) intFormFields.classList.remove('hidden');
                 document.getElementById('formTitle').innerText = "Interview details";
+
+                if (btnSendStoreInvite) btnSendStoreInvite.classList.remove('hidden');
+                if (btnPortToOnb) btnPortToOnb.classList.remove('hidden');
 
                 if (auditWeekly) auditWeekly.classList.remove('hidden');
                 if (auditPeriod) auditPeriod.classList.add('hidden');
@@ -4523,33 +4517,44 @@
                     if (item.id === currentSelectedId) card.classList.add('selected');
 
                     let intStatusColor = 'var(--brand-blue)';
+                    let chipBg = 'var(--crust-med)';
+                    let chipColor = 'var(--crust-burnt)';
                     if (item.status === 'No Show' || item.status === 'Declined' || item.status === 'Candidate Cancelled') {
                         card.classList.add('status-red');
-                        intStatusColor = 'var(--brand-red)';
+                        chipBg = '#ffebee';
+                        chipColor = 'var(--brand-red)';
                     } else if (item.status === 'Hired' || item.status === 'Completed') {
                         card.classList.add('status-green');
-                        intStatusColor = 'var(--success-green)';
+                        chipBg = '#e8f5e9';
+                        chipColor = 'var(--success-green)';
+                    } else if (item.status === 'Position Offered') {
+                        card.classList.add('status-blue');
+                        chipBg = 'var(--dark-blue)';
+                        chipColor = '#ffffff';
                     } else if (item.status === 'To Be Determined' || item.status === 'Hold') {
                         card.classList.add('status-tbd');
-                        intStatusColor = 'var(--crust-burnt)';
+                        chipBg = 'var(--crust-light)';
+                        chipColor = 'var(--crust-burnt)';
                     } else if (item.status === 'GM Interview') {
                         card.classList.add('status-gminterview');
-                        intStatusColor = 'var(--dark-blue)';
+                        chipBg = '#e1f5fe';
+                        chipColor = 'var(--dark-blue)';
                     } else {
                         card.classList.add('status-blue');
+                        chipBg = 'var(--crust-med)';
+                        chipColor = 'var(--crust-burnt)';
                     }
 
                     const dateTimeDisplay = getInterviewDateTimeDisplay(item);
-
-                    const statusDisplay = item.status === 'GM Interview' ? 'Store Interview' : (item.status || 'Phone Interview');
+                    const statusDisplay = item.status === 'GM Interview' ? 'Store interview' : (item.status || 'Phone interview');
 
                     card.innerHTML = `
                     <div class="card-name">${item.name}</div>
-                    <div class="card-sub">
+                    <div class="card-sub" style="display: flex; justify-content: space-between; align-items: center; gap: 6px;">
                         <span>Store #${item.store} (${item.position})</span>
-                        <span style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: ${intStatusColor};">${statusDisplay}</span>
+                        <span class="int-chip" style="background: ${chipBg}; color: ${chipColor};">${statusDisplay}</span>
                     </div>
-                    ${dateTimeDisplay ? `<div class="card-sub" style="margin-top: 3px; color: var(--dark-blue); font-weight: 600; font-size: 13px;"><span>${dateTimeDisplay}</span></div>` : ''}
+                    ${dateTimeDisplay ? `<div class="card-sub" style="margin-top: 4px; color: var(--dark-blue); font-weight: 600; font-size: 13.5px;"><span>${dateTimeDisplay}</span></div>` : ''}
                     ${item.lastUpdated ? `<div class="card-sub" style="font-size: 11.5px; color: var(--text-light); margin-top: 2px;"><span>🕒 Updated: ${formatDisplayDateTime(item.lastUpdated)}</span></div>` : ''}
                 `;
                     card.onclick = () => selectCandidate(item);
