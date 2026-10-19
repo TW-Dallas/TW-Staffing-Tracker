@@ -1306,4 +1306,79 @@
     flex-shrink: 0;
 }
 
+/* ==========================================================================
+   14. CONTACTS DIRECTORY: DO SIDEBAR & STORE CARDS
+   ========================================================================== */
+.do-card {
+    background: white;
+    padding: 11px 14px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    border: 1.5px solid var(--crust-med);
+    border-left: 5px solid var(--brand-blue);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    user-select: none;
+    margin-bottom: 6px;
+}
+.do-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+.do-card.selected {
+    background: var(--crust-light);
+    border: 1.5px solid var(--brand-blue);
+    border-left-width: 6px;
+    border-left-color: var(--brand-blue);
+    box-shadow: 0 4px 12px rgba(0, 144, 226, 0.15);
+}
+
+.do-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+.do-card-name {
+    font-family: 'Subhead1', sans-serif;
+    font-size: 17px;
+    color: var(--crust-burnt);
+    font-weight: 700;
+}
+.do-store-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 2px;
+}
+.do-store-chip {
+    background: var(--crust-med);
+    color: var(--crust-burnt);
+    font-family: 'Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+.store-directory-card {
+    background: white;
+    border: 1.5px solid var(--crust-med);
+    border-left: 6px solid var(--brand-blue);
+    border-radius: 12px;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 2px 6px rgba(71,43,16,0.05);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.store-directory-card:hover {
+    box-shadow: 0 4px 12px rgba(71,43,16,0.08);
+}
+
+
 

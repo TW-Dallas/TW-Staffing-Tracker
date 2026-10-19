@@ -12,7 +12,7 @@
     <title>Onboarder Portal</title>
     <link class="favicon" rel="icon" type="image/png" href="images/staffing_icon.png">
     <link rel="apple-touch-icon" href="images/staffing_icon.png">
-    <link rel="stylesheet" href="styles.css?v=20261019_0243">
+    <link rel="stylesheet" href="styles.css?v=20261019_0341">
 </head>
 
 <body>
@@ -978,42 +978,32 @@
 
                         <!-- 6. CONTACTS DIRECTORY TEMPLATE -->
                         <div id="contactsFormFields" class="hidden" style="display: flex; flex-direction: column; height: 100%; box-sizing: border-box; overflow: hidden;">
-                            <!-- Controls Row: Filter by DO & Quick Search -->
-                            <div
-                                style="display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: flex-end; flex-shrink: 0;">
-                                <div style="flex: 2; min-width: 200px;">
-                                    <label
-                                        style="font-family: 'Subhead2'; font-size: 14px; color: var(--text-dark);">Search
-                                        Store / GM / IP / Address:</label>
-                                    <input type="text" id="contactSearchInput"
-                                        placeholder="🔍 Type Store #, GM Name, IP, Address..."
-                                        oninput="renderContactsView()"
-                                        style="padding: 7px 10px; font-size: 16px; border-radius: 6px; border: 1.5px solid var(--crust-dark); width: 100%; box-sizing: border-box; background: white; margin-top: 4px;">
+                            <!-- Hidden sync element to preserve compatibility -->
+                            <select id="contactDoFilter" style="display: none;" onchange="renderContactsView()">
+                                <option value="ALL">All DOs</option>
+                            </select>
+
+                            <!-- Subheader Bar: Active DO & Count + Sort Selector -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 2px 10px 2px; border-bottom: 1.5px solid var(--crust-med); margin-bottom: 12px; flex-shrink: 0;">
+                                <div style="display: flex; align-items: baseline; gap: 8px;">
+                                    <span id="contactDirectorySubhead" style="font-family: 'Subhead1', sans-serif; font-size: 15px; color: var(--dark-blue); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">
+                                        All Stores · <span id="contactStoreCount">0</span>
+                                    </span>
+                                    <span id="contactActiveDoSubtitle" style="font-family: 'Condensed', sans-serif; font-size: 14.5px; color: var(--text-light); font-weight: 600;"></span>
                                 </div>
-                                <div style="flex: 1; min-width: 140px;">
-                                    <label
-                                        style="font-family: 'Subhead2'; font-size: 14px; color: var(--text-dark);">Filter
-                                        by DO:</label>
-                                    <select id="contactDoFilter" onchange="renderContactsView()"
-                                        style="padding: 7px; font-size: 16px; width: 100%; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white; margin-top: 4px;">
-                                        <option value="ALL">All DOs</option>
-                                    </select>
-                                </div>
-                                <div style="flex: 1; min-width: 140px;">
-                                    <label
-                                        style="font-family: 'Subhead2'; font-size: 14px; color: var(--text-dark);">Sort
-                                        Directory By:</label>
-                                    <select id="contactSortFilter" onchange="renderContactsView()"
-                                        style="padding: 7px; font-size: 16px; width: 100%; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white; margin-top: 4px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-burnt); text-transform: uppercase; margin: 0;">Sort Directory By:</label>
+                                    <select id="contactSortFilter" onchange="renderContactsView()" style="width: auto; height: 32px; padding: 4px 28px 4px 10px; font-size: 14px; border-radius: 6px; border: 1.5px solid var(--crust-dark); background-color: white;">
                                         <option value="store_asc">🏬 Store # (Numerical)</option>
                                         <option value="do_asc">👤 DO Name (Alphabetical)</option>
+                                        <option value="gm_asc">👨‍💼 GM Name (Alphabetical)</option>
                                     </select>
                                 </div>
                             </div>
 
                             <!-- Contact List Grid Container -->
                             <div id="contactsGridContainer"
-                                style="display: flex; flex-direction: column; gap: 10px; flex: 1 1 0; min-height: 0; overflow-y: auto; padding-right: 4px;">
+                                style="display: flex; flex-direction: column; gap: 12px; flex: 1 1 0; min-height: 0; overflow-y: auto; padding-right: 6px;">
                                 <!-- Rows dynamically injected here -->
                             </div>
                         </div>
@@ -3859,11 +3849,15 @@
                 scrollArea.style.marginBottom = '';
             }
 
+            const customSortDropdown = document.getElementById('customSortDropdown');
+            if (customSortDropdown) customSortDropdown.classList.remove('hidden');
+
             if (view === 'contacts') {
                 if (btnCnt) { btnCnt.style.background = 'var(--dark-blue)'; btnCnt.style.color = 'white'; }
                 if (btnAddMain) btnAddMain.classList.add('hidden');
                 if (formActions) formActions.classList.add('hidden');
                 if (cntFormFields) cntFormFields.classList.remove('hidden');
+                if (customSortDropdown) customSortDropdown.classList.add('hidden');
                 if (scrollArea) {
                     scrollArea.style.overflowY = 'hidden';
                     scrollArea.style.display = 'flex';
@@ -3872,8 +3866,8 @@
                     scrollArea.style.paddingRight = '0';
                     scrollArea.style.marginBottom = '0';
                 }
-                document.getElementById('formTitle').innerText = "📞 GM & DO Store Directory";
-                populateContactDoDropdown();
+                document.getElementById('formTitle').innerText = "GM & DO Store Directory";
+                renderContactsSidebar();
                 renderContactsView();
 
             } else if (view === 'paycards') {
@@ -4665,6 +4659,10 @@
                     card.onclick = () => selectCandidate(item);
                     listContainer.appendChild(card);
                 });
+
+            } else if (currentView === 'contacts') {
+                renderContactsSidebar();
+                return;
 
             } else if (currentView === 'nto') {
                 let filteredNto = candidates.filter(item => {
@@ -9003,15 +9001,147 @@
             return String(val).trim();
         }
 
+        let selectedContactDo = 'ALL';
+
+        function selectContactDo(doName) {
+            selectedContactDo = doName;
+            const hiddenDoFilter = document.getElementById('contactDoFilter');
+            if (hiddenDoFilter) hiddenDoFilter.value = doName;
+            renderContactsSidebar();
+            renderContactsView();
+        }
+
+        function copyStoreAllInfo(storeNum, btnEl) {
+            const contact = contacts.find(c => String(c.store) === String(storeNum));
+            if (!contact) return;
+            const lines = [
+                `STORE #${contact.store}`,
+                `DO: ${contact.doName || 'Unassigned'}`,
+                `General Manager: ${contact.manager || 'N/A'}`,
+                `GM Phone: ${formatPhoneNumber(contact.gmPhone) || 'N/A'}`,
+                `Store Phone: ${formatPhoneNumber(contact.storePhone) || 'N/A'}`,
+                `Store Email: ${contact.storeEmail || 'N/A'}`,
+                `Address: ${contact.address || 'N/A'}`,
+                `Network IP: ${contact.ipAddress || 'Not Assigned'}`
+            ];
+            copyToClipboard(lines.join('\n'), btnEl);
+        }
+
+        function renderContactsSidebar() {
+            const listContainer = document.getElementById('candidateList');
+            if (!listContainer) return;
+            listContainer.innerHTML = '';
+
+            const listCounterLabel = document.getElementById('listCounterLabel');
+            if (listCounterLabel) {
+                listCounterLabel.innerHTML = 'DIRECTORS OF OPS';
+            }
+
+            const sortDropdown = document.getElementById('customSortDropdown');
+            if (sortDropdown) sortDropdown.classList.add('hidden');
+
+            const searchQuery = (document.getElementById('searchControl')?.value || '').toLowerCase().trim();
+            const searchDigits = searchQuery.replace(/\D/g, '');
+
+            // 1. Group stores under each DO
+            const doMap = {};
+            contacts.forEach(c => {
+                const name = (c.doName || '').trim();
+                if (!name) return;
+                if (!doMap[name]) {
+                    doMap[name] = {
+                        doName: name,
+                        doEmail: (c.doEmail || '').trim(),
+                        doCell: (c.doCell || '').trim(),
+                        stores: []
+                    };
+                }
+                if (c.store && !doMap[name].stores.includes(c.store)) {
+                    doMap[name].stores.push(c.store);
+                }
+            });
+
+            const doList = Object.values(doMap).sort((a, b) => a.doName.localeCompare(b.doName));
+            doList.forEach(d => {
+                d.stores.sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+            });
+
+            // Filter DOs if search is active
+            const filteredDos = doList.filter(d => {
+                if (!searchQuery) return true;
+                const matchesName = d.doName.toLowerCase().includes(searchQuery);
+                const matchesEmail = d.doEmail.toLowerCase().includes(searchQuery);
+                const matchesCell = String(d.doCell || '').includes(searchQuery) ||
+                    (searchDigits.length >= 4 && String(d.doCell || '').replace(/\D/g, '').includes(searchDigits));
+                const matchesStore = d.stores.some(s => String(s).toLowerCase().includes(searchQuery));
+                const matchesGm = contacts.some(c => c.doName === d.doName && (
+                    String(c.manager || '').toLowerCase().includes(searchQuery) ||
+                    String(c.address || '').toLowerCase().includes(searchQuery) ||
+                    String(c.ipAddress || '').toLowerCase().includes(searchQuery)
+                ));
+                return matchesName || matchesEmail || matchesCell || matchesStore || matchesGm;
+            });
+
+            // 2. "All Stores" Card
+            const totalStores = contacts.length;
+            const allCard = document.createElement('div');
+            allCard.className = 'do-card' + (selectedContactDo === 'ALL' ? ' selected' : '');
+            allCard.innerHTML = `
+                <div class="do-card-meta">
+                    <span class="do-card-name">All Stores</span>
+                    <span class="badge-review" style="background: var(--crust-light); color: var(--dark-blue); font-size: 12px; font-weight: bold; border: 1px solid var(--crust-med);">
+                        ${totalStores} Stores
+                    </span>
+                </div>
+                <div class="card-sub" style="font-size: 13px; color: var(--text-light); margin-top: 2px;">
+                    <span>Complete territory directory</span>
+                </div>
+            `;
+            allCard.onclick = () => selectContactDo('ALL');
+            listContainer.appendChild(allCard);
+
+            // 3. Individual DO Cards
+            filteredDos.forEach(d => {
+                const card = document.createElement('div');
+                card.className = 'do-card' + (selectedContactDo === d.doName ? ' selected' : '');
+
+                const chipSlice = d.stores.slice(0, 4);
+                const remainingCount = d.stores.length - chipSlice.length;
+                const chipsHtml = chipSlice.map(s => `<span class="do-store-chip">#${s}</span>`).join('') +
+                    (remainingCount > 0 ? `<span class="do-store-chip" style="background: none; border: 1px dashed var(--crust-dark); color: var(--text-light);">+${remainingCount}</span>` : '');
+
+                card.innerHTML = `
+                    <div class="do-card-meta">
+                        <span class="do-card-name">${escapeText(d.doName)}</span>
+                        <span class="badge-review" style="background: var(--crust-light); color: var(--dark-blue); font-size: 12px; font-weight: bold; border: 1px solid var(--crust-med);">
+                            ${d.stores.length} Stores
+                        </span>
+                    </div>
+                    <div class="do-store-chips">
+                        ${chipsHtml}
+                    </div>
+                `;
+                card.onclick = () => selectContactDo(d.doName);
+                listContainer.appendChild(card);
+            });
+
+            if (filteredDos.length === 0 && searchQuery) {
+                const noMatch = document.createElement('div');
+                noMatch.style.cssText = 'text-align: center; padding: 20px 10px; color: var(--crust-burnt); font-size: 13.5px; font-family: "Subhead2";';
+                noMatch.innerText = 'No DOs matched search query.';
+                listContainer.appendChild(noMatch);
+            }
+        }
+
         // Render Contact Rows with SVG Copy Buttons and Quick Edit
         function renderContactsView() {
             const container = document.getElementById('contactsGridContainer');
             if (!container) return;
             container.innerHTML = '';
 
-            const doFilter = document.getElementById('contactDoFilter')?.value || 'ALL';
+            const doFilter = selectedContactDo || document.getElementById('contactDoFilter')?.value || 'ALL';
             const sortBy = document.getElementById('contactSortFilter')?.value || 'store_asc';
-            const searchQuery = (document.getElementById('contactSearchInput')?.value || document.getElementById('searchControl')?.value || '').toLowerCase().trim();
+            const searchQuery = (document.getElementById('searchControl')?.value || '').toLowerCase().trim();
             const searchDigits = searchQuery.replace(/\D/g, '');
 
             let filtered = contacts.filter(item => {
@@ -9036,44 +9166,8 @@
                 return true;
             });
 
-            function getContactRelevanceTier(item, q) {
-                if (!q) return 0;
-                const storeStr = String(item.store || '').toLowerCase().trim();
-                const gmStr = String(item.manager || '').toLowerCase().trim();
-                const doStr = String(item.doName || '').toLowerCase().trim();
-                const addrStr = String(item.address || '').toLowerCase().trim();
-                const ipStr = String(item.ipAddress || '').toLowerCase().trim();
-                const emailStr = (String(item.storeEmail || '') + ' ' + String(item.doEmail || '')).toLowerCase();
-
-                // 1. Exact store number match
-                if (storeStr === q) return 0;
-                // 2. Store number starts with search query
-                if (storeStr.startsWith(q)) return 1;
-                // 3. Store number contains search query
-                if (storeStr.includes(q)) return 2;
-
-                // 4. GM or DO name starts with query
-                if (gmStr.startsWith(q) || doStr.startsWith(q)) return 3;
-                // 5. GM or DO name contains query
-                if (gmStr.includes(q) || doStr.includes(q)) return 4;
-
-                // 6. Address, Email, or IP match
-                if (addrStr.includes(q) || ipStr.includes(q) || emailStr.includes(q)) return 5;
-
-                // 7. Phone numbers and other fields
-                return 6;
-            }
-
-            // Sorting: Relevance first if a search is active, then by selected sort option
+            // Sorting logic
             filtered.sort((a, b) => {
-                if (searchQuery) {
-                    const tierA = getContactRelevanceTier(a, searchQuery);
-                    const tierB = getContactRelevanceTier(b, searchQuery);
-                    if (tierA !== tierB) {
-                        return tierA - tierB;
-                    }
-                }
-
                 if (sortBy === 'store_asc') {
                     const numA = parseInt(a.store, 10);
                     const numB = parseInt(b.store, 10);
@@ -9081,54 +9175,26 @@
                     return String(a.store).localeCompare(String(b.store));
                 }
                 if (sortBy === 'do_asc') {
-                    const doComp = String(a.doName).localeCompare(String(b.doName));
+                    const doComp = String(a.doName || '').localeCompare(String(b.doName || ''));
                     if (doComp !== 0) return doComp;
+                    return parseInt(a.store, 10) - parseInt(b.store, 10);
+                }
+                if (sortBy === 'gm_asc') {
+                    const gmComp = String(a.manager || '').localeCompare(String(b.manager || ''));
+                    if (gmComp !== 0) return gmComp;
                     return parseInt(a.store, 10) - parseInt(b.store, 10);
                 }
                 return 0;
             });
 
-            // 1. Extract and group unique Directors of Operations (DOs)
-            const doMap = {};
-            contacts.forEach(c => {
-                const name = (c.doName || '').trim();
-                if (!name) return;
-                if (!doMap[name]) {
-                    doMap[name] = {
-                        doName: name,
-                        doEmail: (c.doEmail || '').trim(),
-                        doCell: (c.doCell || '').trim(),
-                        stores: []
-                    };
+            // Update subhead text
+            const subheadEl = document.getElementById('contactDirectorySubhead');
+            if (subheadEl) {
+                if (doFilter === 'ALL') {
+                    subheadEl.innerHTML = `All Stores · <span id="contactStoreCount">${filtered.length} Store${filtered.length === 1 ? '' : 's'}</span>`;
+                } else {
+                    subheadEl.innerHTML = `DO: ${escapeText(doFilter)} · <span id="contactStoreCount">${filtered.length} Store${filtered.length === 1 ? '' : 's'}</span>`;
                 }
-                if (c.store && !doMap[name].stores.includes(c.store)) {
-                    doMap[name].stores.push(c.store);
-                }
-                if (!doMap[name].doEmail && c.doEmail) doMap[name].doEmail = c.doEmail.trim();
-                if (!doMap[name].doCell && c.doCell) doMap[name].doCell = c.doCell.trim();
-            });
-
-            const doList = Object.values(doMap).sort((a, b) => a.doName.localeCompare(b.doName));
-            doList.forEach(d => {
-                d.stores.sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
-            });
-
-            const filteredDos = doList.filter(d => {
-                if (doFilter !== 'ALL' && d.doName !== doFilter) return false;
-                if (searchQuery) {
-                    const matchesName = d.doName.toLowerCase().includes(searchQuery);
-                    const matchesEmail = d.doEmail.toLowerCase().includes(searchQuery);
-                    const matchesCell = String(d.doCell || '').includes(searchQuery) ||
-                        (searchDigits.length >= 4 && String(d.doCell || '').replace(/\D/g, '').includes(searchDigits));
-                    const matchesStore = d.stores.some(s => String(s).toLowerCase().includes(searchQuery));
-                    return matchesName || matchesEmail || matchesCell || matchesStore;
-                }
-                return true;
-            });
-
-            if (filtered.length === 0 && filteredDos.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding: 30px; color: var(--brand-grey); font-size: 18px; font-family: 'Subhead2';">🔍 No store or DO contacts matched "${escapeText(searchQuery)}".</div>`;
-                return;
             }
 
             const copySvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
@@ -9143,207 +9209,180 @@
                 return s;
             }
 
-            // 1. Render Store Cards First
-            if (filtered.length > 0) {
-                filtered.forEach(item => {
-                    const card = document.createElement('div');
-                    card.style.cssText = `
-                    background: var(--crust-base);
+            // If a specific DO is selected, render a sleek DO Leader Card at the top
+            if (doFilter !== 'ALL') {
+                const sample = contacts.find(c => c.doName === doFilter) || {};
+                const formattedDoCell = formatPhoneNumber(sample.doCell);
+                const doCard = document.createElement('div');
+                doCard.style.cssText = `
+                    background: var(--crust-light);
                     border: 1.5px solid var(--crust-dark);
-                    border-left: 6px solid var(--brand-blue);
-                    border-radius: 8px;
-                    padding: 12px 14px;
+                    border-left: 6px solid var(--dark-blue);
+                    border-radius: 12px;
+                    padding: 12px 16px;
                     display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-                    box-shadow: 0 2px 5px rgba(71,43,16,0.06);
-                    margin-bottom: 12px;
+                    justify-content: space-between;
+                    align-items: center;
+                    box-shadow: 0 2px 6px rgba(71,43,16,0.06);
+                    margin-bottom: 2px;
                 `;
-
-                    // Check if store has pay rates
-                    const hasCsrRates = !!(item.csrStart || item.csrMid || item.csrTop);
-                    const hasDeRates = !!(item.deBase || item.deOtr || item.deCloserBase || item.deCloserOtr);
-                    const hasAnyRates = hasCsrRates || hasDeRates;
-
-                    let payRatesHtml = '';
-                    if (hasAnyRates) {
-                        payRatesHtml = `
-                        <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; margin-top: 4px;">
-                            <div style="font-family: 'Subhead1'; font-size: 14px; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
-                                <span>💰 Store Pay Rates</span>
-                            </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
-                                <!-- CSR Column -->
-                                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 7px 10px;">
-                                    <div style="font-family: 'Subhead2'; font-weight: bold; color: var(--crust-burnt); border-bottom: 1px solid #edf2f7; padding-bottom: 3px; margin-bottom: 5px; font-size: 14px; display: flex; align-items: center; gap: 5px;">
-                                        <img src="image/custom-emojis/apron.png" style="width: 18px; height: 18px; object-fit: contain;"> CSR / Inside
-                                    </div>
-                                    <div style="display: flex; flex-direction: column; gap: 3px; font-size: 13.5px; font-family: 'Condensed', sans-serif;">
-                                        <div style="display: flex; justify-content: space-between;">
-                                            <span style="color: #4a5568;">Start (P/T, No Exp):</span>
-                                            <strong style="color: #1a202c;">${formatPayRate(item.csrStart) || '—'}</strong>
-                                        </div>
-                                        <div style="display: flex; justify-content: space-between;">
-                                            <span style="color: #4a5568;">Mid (P/T Exp / F/T No Exp):</span>
-                                            <strong style="color: #1a202c;">${formatPayRate(item.csrMid) || '—'}</strong>
-                                        </div>
-                                        <div style="display: flex; justify-content: space-between;">
-                                            <span style="color: #4a5568;">Top (F/T w/ Exp):</span>
-                                            <strong style="color: #1a202c;">${formatPayRate(item.csrTop) || '—'}</strong>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Driver Column -->
-                                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 7px 10px;">
-                                    <div style="font-family: 'Subhead2'; font-weight: bold; color: var(--crust-burnt); border-bottom: 1px solid #edf2f7; padding-bottom: 3px; margin-bottom: 5px; font-size: 14px; display: flex; align-items: center; gap: 5px;">
-                                        <img src="image/custom-emojis/cartop_3d_left.png" style="width: 18px; height: 18px; object-fit: contain;"> Driver (DE)
-                                    </div>
-                                    <div style="display: flex; flex-direction: column; gap: 3px; font-size: 13.5px; font-family: 'Condensed', sans-serif;">
-                                        <div style="display: flex; justify-content: space-between;">
-                                            <span style="color: #4a5568;">Standard In-Store:</span>
-                                            <strong style="color: #1a202c;">${formatPayRate(item.deBase) || '—'}</strong>
-                                        </div>
-                                        <div style="display: flex; justify-content: space-between;">
-                                            <span style="color: #4a5568;">Standard On-the-Road (OTR):</span>
-                                            <strong style="color: #1a202c;">${formatPayRate(item.deOtr) || '—'}</strong>
-                                        </div>
-                                        <div style="display: flex; justify-content: space-between;">
-                                            <span style="color: #4a5568;">Closer In-Store:</span>
-                                            <strong style="color: #1a202c;">${formatPayRate(item.deCloserBase) || 'Standard'}</strong>
-                                        </div>
-                                        <div style="display: flex; justify-content: space-between;">
-                                            <span style="color: #4a5568;">Closer OTR:</span>
-                                            <strong style="color: #1a202c;">${formatPayRate(item.deCloserOtr) || (item.deOtr ? `${formatPayRate(item.deOtr)} (Std)` : '—')}</strong>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        `;
-                    } else {
-                        payRatesHtml = `
-                        <div style="background: #fafafa; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 6px 10px; margin-top: 3px; display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 13px; color: var(--text-light); font-family: 'Subhead2';">💰 Pay Rates not configured</span>
-                            <button type="button" onclick="openEditContactModal('${escapeText(item.store)}')" style="background: none; border: none; color: var(--brand-blue); font-size: 12.5px; font-weight: bold; cursor: pointer; text-decoration: underline; font-family: 'Subhead2';">+ Set Rates</button>
-                        </div>
-                        `;
-                    }
-
-                    const formattedGmPhone = formatPhoneNumber(item.gmPhone);
-                    const formattedStorePhone = formatPhoneNumber(item.storePhone);
-
-                    card.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid var(--crust-med); padding-bottom: 8px;">
+                doCard.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 26px;">👔</span>
                         <div>
-                            <span style="font-family: 'ExtraBold'; font-size: 21px; color: var(--dark-blue);">Store #${item.store}</span>
-                            <span style="font-family: 'Subhead2'; font-size: 16px; color: var(--text-light); margin-left: 10px;">DO: <strong>${item.doName}</strong></span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                            <button type="button" onclick="openEditContactModal('${escapeText(item.store)}')" title="Edit Store & GM Details" style="background: var(--brand-blue); color: white; border: none; padding: 5px 12px; font-size: 13px; font-family: 'Subhead2'; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
-                                ✏️ Edit Info
-                            </button>
-                            <button type="button" onclick="copyToClipboard('${escapeText(item.store + ' - ' + (item.manager || '') + ' - ' + (formattedGmPhone || formattedStorePhone || ''))}', this)" title="Copy summary" style="background: var(--crust-med); color: var(--crust-burnt); padding: 5px 10px; font-size: 13px; font-family: 'Subhead2'; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                                ${copySvg} <span style="font-size: 12px;">Copy</span>
-                            </button>
+                            <div style="font-family: 'Subhead1', sans-serif; font-size: 18px; color: var(--dark-blue); font-weight: 700; text-transform: uppercase;">
+                                Director of Operations: ${escapeText(doFilter)}
+                            </div>
+                            <div style="display: flex; gap: 14px; font-family: 'Condensed', sans-serif; font-size: 14.5px; color: var(--crust-burnt); margin-top: 2px;">
+                                <span>📱 Cell: <strong>${formattedDoCell || 'N/A'}</strong></span>
+                                <span>✉️ Email: <strong>${escapeText(sample.doEmail) || 'N/A'}</strong></span>
+                                <span>🏬 Stores Supervised: <strong>${filtered.length}</strong></span>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 16px; margin-top: 4px;">
-                        <div>
-                            <strong>General Manager:</strong> ${item.manager || 'N/A'}
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button type="button" onclick="openEditDoModal('${escapeText(doFilter)}')" style="height: 32px; padding: 0 12px; font-size: 13px; font-family: 'Subhead1', sans-serif; border-radius: 6px; border: 1.5px solid var(--brand-blue); color: var(--dark-blue); background: white; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                            ✏️ Edit DO
+                        </button>
+                        <button type="button" onclick="copyToClipboard('${escapeText(doFilter + ' (DO) - ' + (sample.doEmail || '') + ' - ' + (formattedDoCell || ''))}', this)" style="height: 32px; padding: 0 12px; font-size: 13px; font-family: 'Subhead1', sans-serif; border-radius: 6px; border: 1.5px solid var(--crust-dark); color: var(--crust-burnt); background: white; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                            ${copySvg} Copy
+                        </button>
+                    </div>
+                `;
+                container.appendChild(doCard);
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML += `<div style="text-align:center; padding: 30px; color: var(--brand-grey); font-size: 17px; font-family: 'Subhead2';">🔍 No stores found matching "${escapeText(searchQuery)}".</div>`;
+                return;
+            }
+
+            // Render Store Cards
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'store-directory-card';
+
+                const formattedGmPhone = formatPhoneNumber(item.gmPhone);
+                const formattedStorePhone = formatPhoneNumber(item.storePhone);
+
+                const hasCsrRates = !!(item.csrStart || item.csrMid || item.csrTop);
+                const hasDeRates = !!(item.deBase || item.deOtr || item.deCloserBase || item.deCloserOtr);
+                const hasAnyRates = hasCsrRates || hasDeRates;
+
+                let payRatesHtml = '';
+                if (hasAnyRates) {
+                    payRatesHtml = `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px;">
+                        <div style="background: var(--crust-light); border: 1px solid var(--crust-med); border-radius: 8px; padding: 8px 12px;">
+                            <div style="font-family: 'Subhead1', sans-serif; font-size: 13.5px; font-weight: 700; color: var(--dark-blue); border-bottom: 1px solid var(--crust-med); padding-bottom: 3px; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                                <img src="image/custom-emojis/apron.png" style="width: 16px; height: 16px; object-fit: contain;"> CSR / Inside
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 3px; font-size: 14px; font-family: 'Condensed', sans-serif;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-dark);">Start (P/T, No Exp):</span>
+                                    <strong>${formatPayRate(item.csrStart) || '—'}</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-dark);">Mid (P/T Exp / F/T No Exp):</span>
+                                    <strong>${formatPayRate(item.csrMid) || '—'}</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-dark);">Top (F/T w/ Exp):</span>
+                                    <strong>${formatPayRate(item.csrTop) || '—'}</strong>
+                                </div>
+                            </div>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                            <strong>GM Phone:</strong> ${formattedGmPhone || 'N/A'}
-                            ${formattedGmPhone ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${formattedGmPhone}', this)" title="Copy GM Phone">${copySvg}</button>` : ''}
-                        </div>
-                        <div>
-                            <strong>Address:</strong> ${item.address || 'N/A'}
-                            ${item.address ? `
-                                <button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.address)}', this)" title="Copy Address">${copySvg}</button>
-                                <button type="button" onclick="openMapLink('${escapeText(item.address)}')" style="background: none; border: none; color: var(--brand-blue); font-size: 13px; font-weight: bold; margin-left: 4px; cursor: pointer; text-decoration: underline;">[Map]</button>
-                            ` : ''}
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                            <strong>Store Phone:</strong> ${formattedStorePhone || 'N/A'}
-                            ${formattedStorePhone ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${formattedStorePhone}', this)" title="Copy Store Phone">${copySvg}</button>` : ''}
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 6px; grid-column: span 2;">
-                            <strong>Store Email:</strong> ${item.storeEmail || 'N/A'}
-                            ${item.storeEmail ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.storeEmail)}', this)" title="Copy Store Email">${copySvg}</button>` : ''}
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 6px; grid-column: span 2; background: #fff8e1; border: 1px solid #ffe082; padding: 6px 10px; border-radius: 6px; margin-top: 2px;">
-                            <strong style="color: #b78103;">🌐 Network IP:</strong> <span style="font-family: monospace; font-weight: bold; color: #472b10;">${item.ipAddress || 'Not Assigned'}</span>
-                            ${item.ipAddress ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.ipAddress)}', this)" title="Copy IP Address">${copySvg}</button>` : ''}
+
+                        <div style="background: var(--crust-light); border: 1px solid var(--crust-med); border-radius: 8px; padding: 8px 12px;">
+                            <div style="font-family: 'Subhead1', sans-serif; font-size: 13.5px; font-weight: 700; color: var(--dark-blue); border-bottom: 1px solid var(--crust-med); padding-bottom: 3px; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                                <img src="image/custom-emojis/cartop_3d_left.png" style="width: 16px; height: 16px; object-fit: contain;"> Driver (DE)
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 3px; font-size: 14px; font-family: 'Condensed', sans-serif;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-dark);">Standard In-Store:</span>
+                                    <strong>${formatPayRate(item.deBase) || '—'}</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-dark);">Standard On-the-Road:</span>
+                                    <strong>${formatPayRate(item.deOtr) || '—'}</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-dark);">Closer In-Store:</span>
+                                    <strong>${formatPayRate(item.deCloserBase) || 'Standard'}</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-dark);">Closer OTR:</span>
+                                    <strong>${formatPayRate(item.deCloserOtr) || (item.deOtr ? `${formatPayRate(item.deOtr)} (Std)` : '—')}</strong>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    `;
+                } else {
+                    payRatesHtml = `
+                    <div style="background: var(--crust-light); border: 1px dashed var(--crust-dark); border-radius: 8px; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
+                        <span style="font-size: 13px; color: var(--text-light); font-family: 'Subhead2', sans-serif;">💰 Pay rates not configured</span>
+                        <button type="button" onclick="openEditContactModal('${escapeText(item.store)}')" style="background: none; border: none; color: var(--brand-blue); font-size: 13px; font-weight: bold; cursor: pointer; text-decoration: underline; font-family: 'Subhead2', sans-serif;">+ Set Rates</button>
+                    </div>
+                    `;
+                }
 
-                    ${payRatesHtml}
+                card.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1.5px solid var(--crust-med); padding-bottom: 8px;">
+                    <div style="display: flex; align-items: baseline; gap: 12px;">
+                        <span style="font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 21px; color: var(--dark-blue); letter-spacing: 0.02em;">STORE #${item.store}</span>
+                        <span style="font-family: 'Subhead2', sans-serif; font-weight: 700; font-size: 15.5px; color: var(--crust-burnt);">DO: <strong style="color: var(--brand-blue);">${item.doName || 'Unassigned'}</strong></span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button type="button" onclick="openEditContactModal('${escapeText(item.store)}')" title="Edit Store & GM Details" style="height: 32px; padding: 0 12px; font-size: 13px; font-family: 'Subhead1', sans-serif; border-radius: 6px; border: 1.5px solid var(--brand-blue); color: var(--dark-blue); background: white; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                            ✏️ Edit Info
+                        </button>
+                        <button type="button" onclick="copyStoreAllInfo('${escapeText(item.store)}', this)" title="Copy summary" style="height: 32px; padding: 0 12px; font-size: 13px; font-family: 'Subhead1', sans-serif; border-radius: 6px; border: 1.5px solid var(--crust-dark); color: var(--crust-burnt); background: var(--crust-light); cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                            ${copySvg} Copy All
+                        </button>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; font-size: 15px; font-family: 'Condensed', sans-serif; color: var(--crust-burnt);">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-deep); text-transform: uppercase;">General Manager:</span>
+                        <strong style="color: var(--crust-burnt);">${item.manager || 'N/A'}</strong>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-deep); text-transform: uppercase;">GM Phone:</span>
+                        <strong style="color: var(--crust-burnt);">${formattedGmPhone || 'N/A'}</strong>
+                        ${formattedGmPhone ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${formattedGmPhone}', this)" title="Copy GM Phone">${copySvg}</button>` : ''}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-deep); text-transform: uppercase;">Address:</span>
+                        <span>${item.address || 'N/A'}</span>
+                        ${item.address ? `
+                            <button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.address)}', this)" title="Copy Address">${copySvg}</button>
+                            <button type="button" onclick="openMapLink('${escapeText(item.address)}')" style="background: none; border: none; color: var(--brand-blue); font-size: 13px; font-weight: bold; cursor: pointer; text-decoration: underline; font-family: 'Subhead2', sans-serif;">[Map]</button>
+                        ` : ''}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-deep); text-transform: uppercase;">Store Phone:</span>
+                        <strong style="color: var(--crust-burnt);">${formattedStorePhone || 'N/A'}</strong>
+                        ${formattedStorePhone ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${formattedStorePhone}', this)" title="Copy Store Phone">${copySvg}</button>` : ''}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-deep); text-transform: uppercase;">Store Email:</span>
+                        <span style="color: var(--brand-blue);">${item.storeEmail || 'N/A'}</span>
+                        ${item.storeEmail ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.storeEmail)}', this)" title="Copy Store Email">${copySvg}</button>` : ''}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-deep); text-transform: uppercase;">Network IP:</span>
+                        <span style="font-family: monospace; font-size: 14px; font-weight: bold; background: #fff8e1; border: 1px solid #ffe082; padding: 2px 7px; border-radius: 4px; color: #7c5800;">${item.ipAddress || 'Not Assigned'}</span>
+                        ${item.ipAddress ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(item.ipAddress)}', this)" title="Copy IP Address">${copySvg}</button>` : ''}
+                    </div>
+                </div>
+
+                ${payRatesHtml}
                 `;
 
-                    container.appendChild(card);
-                });
-            }
-
-            // 2. Render Dedicated DO Cards Below Store Cards
-            if (filteredDos.length > 0) {
-                const doHeader = document.createElement('div');
-                doHeader.style.cssText = `margin-top: 20px; margin-bottom: 8px; font-family: 'Subhead1', sans-serif; font-size: 19px; color: var(--dark-blue); text-transform: uppercase; border-bottom: 2px solid var(--crust-dark); padding-bottom: 4px; display: flex; align-items: center; justify-content: space-between;`;
-                doHeader.innerHTML = `<span>👔 Director of Operations (DO) Directory</span><span style="font-size: 12px; color: var(--brand-grey); font-family: 'Condensed', sans-serif;">${filteredDos.length} DO${filteredDos.length === 1 ? '' : 's'}</span>`;
-                container.appendChild(doHeader);
-
-                filteredDos.forEach(d => {
-                    const doCard = document.createElement('div');
-                    doCard.style.cssText = `
-                        background: var(--crust-base);
-                        border: 1.5px solid var(--crust-dark);
-                        border-left: 6px solid var(--crust-deep);
-                        border-radius: 8px;
-                        padding: 12px 14px;
-                        display: flex;
-                        flex-direction: column;
-                        gap: 8px;
-                        box-shadow: 0 2px 5px rgba(71,43,16,0.06);
-                        margin-bottom: 12px;
-                    `;
-
-                    const formattedCell = formatPhoneNumber(d.doCell);
-
-                    doCard.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid var(--crust-med); padding-bottom: 8px;">
-                            <div>
-                                <span style="font-family: 'ExtraBold'; font-size: 21px; color: var(--dark-blue);">DO: ${d.doName}</span>
-                                <span style="font-family: 'Subhead2'; font-size: 15px; color: var(--text-light); margin-left: 8px;">Director of Operations</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <button type="button" onclick="openEditDoModal('${escapeText(d.doName)}')" title="Edit DO Contact Info" style="background: var(--brand-blue); color: white; padding: 5px 10px; font-size: 13px; font-family: 'Subhead2'; border-radius: 4px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                                    ✏️ <span style="font-size: 12px;">Edit DO</span>
-                                </button>
-                                <button type="button" onclick="copyToClipboard('${escapeText(d.doName + ' (DO) - ' + (d.doEmail || '') + ' - ' + (formattedCell || ''))}', this)" title="Copy DO Contact Summary" style="background: var(--crust-med); color: var(--crust-burnt); padding: 5px 10px; font-size: 13px; font-family: 'Subhead2'; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                                    ${copySvg} <span style="font-size: 12px;">Copy</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 16px; margin-top: 2px;">
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <strong>DO Phone / Cell:</strong> ${formattedCell || 'N/A'}
-                                ${formattedCell ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${formattedCell}', this)" title="Copy DO Phone">${copySvg}</button>` : ''}
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <strong>DO Email:</strong> ${d.doEmail || 'N/A'}
-                                ${d.doEmail ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(d.doEmail)}', this)" title="Copy DO Email">${copySvg}</button>` : ''}
-                            </div>
-                            <div style="grid-column: span 2; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 2px;">
-                                <strong style="color: var(--dark-blue);">Supervised Stores (${d.stores.length}):</strong>
-                                ${d.stores.map(st => `<span style="background: white; border: 1px solid var(--crust-dark); color: var(--crust-burnt); font-family: 'Condensed', sans-serif; font-size: 13.5px; font-weight: bold; padding: 2px 7px; border-radius: 4px;">#${st}</span>`).join(' ')}
-                            </div>
-                        </div>
-                    `;
-
-                    container.appendChild(doCard);
-                });
-            }
+                container.appendChild(card);
+            });
 
             const currentAdminUser = (localStorage.getItem('onb_user') || '').toLowerCase();
             const isDenverAdmin = currentAdminUser.startsWith('denver');
