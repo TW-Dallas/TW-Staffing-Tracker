@@ -12075,32 +12075,42 @@
             }).length;
 
             const roles = [
-                { id: 'ALL', label: 'All Personnel', count: total, color: 'var(--brand-blue)' },
-                { id: 'Executive', label: 'Executives', count: execs, color: 'var(--dark-blue)' },
-                { id: 'Director of Ops', label: 'Directors of Ops', count: dos, color: 'var(--dark-blue)' },
-                { id: 'General Manager', label: 'General Managers', count: gms, color: 'var(--med-blue)' },
-                { id: 'Assistant Manager', label: 'Assistant Managers', count: ams, color: 'var(--med-blue)' },
-                { id: 'Trainer', label: 'Trainers', count: trainers, color: 'var(--crust-burnt)' },
-                { id: 'PENDING_FILTER', label: 'Pending Approvals', count: pending, color: 'var(--brand-red)' }
+                { id: 'ALL', label: 'All Personnel', sub: 'All rostered team members & leadership', count: total, color: 'var(--brand-blue)' },
+                { id: 'Executive', label: 'Executives', sub: 'Above-Store executive leadership', count: execs, color: 'var(--dark-blue)' },
+                { id: 'Director of Ops', label: 'Directors of Ops', sub: 'DO oversight & regional operations', count: dos, color: 'var(--dark-blue)' },
+                { id: 'General Manager', label: 'General Managers', sub: 'Store general managers & unit leads', count: gms, color: 'var(--med-blue)' },
+                { id: 'Assistant Manager', label: 'Assistant Managers', sub: 'Assistant managers & keyholders', count: ams, color: 'var(--med-blue)' },
+                { id: 'Trainer', label: 'Trainers', sub: 'Certified Wow Way & MIT trainers', count: trainers, color: 'var(--crust-burnt)' },
+                { id: 'PENDING_FILTER', label: 'Pending Approvals', sub: 'Awaiting authorization or PIN reset', count: pending, color: 'var(--brand-red)' }
             ];
 
-            let html = '<div style="display: flex; flex-direction: column; gap: 8px; padding-top: 4px;">';
+            let html = '<div style="display: flex; flex-direction: column; gap: 7px;">';
             roles.forEach(r => {
                 const isSel = (r.id === activeCredentialRoleFilter);
-                const bg = isSel ? 'var(--crust-light)' : '#ffffff';
-                const border = isSel ? '2px solid var(--med-blue)' : '1.5px solid var(--crust-med)';
-                const countColor = isSel ? 'var(--med-blue)' : (r.id === 'PENDING_FILTER' && r.count > 0 ? 'var(--dark-red)' : 'var(--dark-blue)');
+                const isPendingAlert = (r.id === 'PENDING_FILTER' && r.count > 0);
+                const bg = isSel ? 'var(--crust-light)' : (isPendingAlert ? '#fff8f8' : '#ffffff');
+                const borderLeftColor = r.color;
+                const borderStyle = isSel ? '2px solid var(--med-blue)' : (isPendingAlert ? '1.5px solid var(--brand-red)' : '1.5px solid var(--crust-med)');
+                const countColor = isSel ? 'var(--med-blue)' : (isPendingAlert ? 'var(--dark-red)' : 'var(--dark-blue)');
 
                 html += `
-                    <div onclick="selectCredentialRoleFilter('${r.id}')"
-                        style="background: ${bg}; border: ${border}; border-left: 5px solid ${r.color}; border-radius: 12px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.03);"
-                        onmouseover="this.style.borderColor='var(--med-blue)'" onmouseout="this.style.borderColor='${isSel ? 'var(--med-blue)' : 'var(--crust-med)'}'">
-                        <span style="font-family: 'Subhead1', sans-serif; font-size: 15px; color: var(--crust-burnt);">
-                            ${escapeHtml(r.label)}
-                        </span>
-                        <span style="font-family: 'ExtraBold', sans-serif; font-size: 16px; color: ${countColor};">
-                            ${r.count}
-                        </span>
+                    <div class="candidate-card ${isSel ? 'selected' : ''}" onclick="selectCredentialRoleFilter('${r.id}')"
+                        style="background: ${bg}; border: ${borderStyle}; border-left: 6px solid ${borderLeftColor}; padding: 12px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; transition: transform 0.15s ease, box-shadow 0.15s ease;"
+                        onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 10px rgba(0,0,0,0.06)'"
+                        onmouseout="this.style.transform='none'; this.style.boxShadow='0 3px 5px rgba(0,0,0,0.02)'">
+                        <div style="min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+                            <span style="font-family: 'Subhead1', sans-serif; font-size: 19.5px; color: ${isSel ? 'var(--dark-blue)' : 'var(--crust-burnt)'}; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                ${escapeHtml(r.label)}
+                            </span>
+                            <span style="font-family: 'Subhead2', sans-serif; font-size: 14px; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                ${escapeHtml(r.sub)}
+                            </span>
+                        </div>
+                        <div style="flex-shrink: 0; display: flex; align-items: center; justify-content: center; min-width: 38px;">
+                            <span style="font-family: 'ExtraBold', sans-serif; font-size: 22px; color: ${countColor}; line-height: 1;">
+                                ${r.count}
+                            </span>
+                        </div>
                     </div>
                 `;
             });
@@ -13377,7 +13387,7 @@
         setTimeout(checkPendingCredentialsBadge, 2500);
     </script>
     <!-- MIT Leadership Class Tracker Module -->
-    <script src="mit_tracker.js?v=20261019_1215"></script>
+    <script src="mit_tracker.js?v=20261019_1220"></script>
 </body>
 
 </html>
