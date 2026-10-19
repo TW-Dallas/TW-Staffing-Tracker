@@ -306,13 +306,40 @@
                             <div class="form-row" style="display: grid; grid-template-columns: 1.15fr 0.95fr 1.15fr 1.15fr auto; gap: 8px; align-items: end; margin-bottom: 8px;">
                                 <div class="form-group" style="margin-bottom: 0;">
                                     <label style="font-family: 'Subhead2', sans-serif; font-size: 14.5px; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 2px;">Position</label>
-                                    <select id="fieldPosition" style="width: 100%; box-sizing: border-box;">
-                                        <option value="">Position</option>
-                                        <option value="CSR">CSR</option>
-                                        <option value="BIKE">BIKE</option>
-                                        <option value="DE">DE</option>
-                                        <option value="MIT">MIT</option>
-                                    </select>
+                                    <div class="custom-pos-dropdown-container" id="fieldPositionDropdown">
+                                        <button type="button" class="pos-dropdown-trigger" id="btnFieldPositionTrigger" onclick="togglePositionDropdown('fieldPositionMenu', event)" tabindex="0">
+                                            <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+                                                <img class="pos-trigger-icon" src="" alt="icon" style="width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; display: none;">
+                                                <span class="pos-trigger-label" style="white-space: nowrap;">Position</span>
+                                            </div>
+                                            <span style="font-size: 11px; color: var(--crust-burnt); margin-left: 4px;">▾</span>
+                                        </button>
+                                        <div id="fieldPositionMenu" class="pos-dropdown-menu hidden">
+                                            <div class="pos-menu-option" data-val="CSR" onclick="selectCustomPosition('fieldPosition', 'CSR')">
+                                                <img src="image/custom-emojis/apron.png" class="pos-menu-icon" alt="CSR">
+                                                <span>CSR</span>
+                                            </div>
+                                            <div class="pos-menu-option" data-val="DE" onclick="selectCustomPosition('fieldPosition', 'DE')">
+                                                <img src="image/custom-emojis/cartop_3d_left.png" class="pos-menu-icon" alt="DE">
+                                                <span>Driver (DE)</span>
+                                            </div>
+                                            <div class="pos-menu-option" data-val="BIKE" onclick="selectCustomPosition('fieldPosition', 'BIKE')">
+                                                <img src="image/custom-emojis/helmet.png" class="pos-menu-icon" alt="BIKE">
+                                                <span>Biker (BIKE)</span>
+                                            </div>
+                                            <div class="pos-menu-option" data-val="MIT" onclick="selectCustomPosition('fieldPosition', 'MIT')">
+                                                <img src="image/custom-emojis/mit.png" class="pos-menu-icon" alt="MIT">
+                                                <span>MIT</span>
+                                            </div>
+                                        </div>
+                                        <select id="fieldPosition" style="display: none;" onchange="updateCustomPositionDropdownUI('fieldPosition')">
+                                            <option value="">Position</option>
+                                            <option value="CSR">CSR</option>
+                                            <option value="BIKE">BIKE</option>
+                                            <option value="DE">DE</option>
+                                            <option value="MIT">MIT</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div class="form-group" style="margin-bottom: 0;">
                                     <label style="font-family: 'Subhead2', sans-serif; font-size: 14.5px; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 2px;">Store #</label>
@@ -440,12 +467,39 @@
                                 </div>
                                 <div class="form-group" style="margin-bottom: 0;">
                                     <label>Position</label>
-                                    <select id="intPosition">
-                                        <option value="DE">🚗 DE</option>
-                                        <option value="CSR">🍕 CSR</option>
-                                        <option value="BIKE">🚲 BIKE</option>
-                                        <option value="MIT">🎓 MIT</option>
-                                    </select>
+                                    <div class="custom-pos-dropdown-container" id="intPositionDropdown">
+                                        <button type="button" class="pos-dropdown-trigger" id="btnIntPositionTrigger" onclick="togglePositionDropdown('intPositionMenu', event)" tabindex="0">
+                                            <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+                                                <img class="pos-trigger-icon" src="" alt="icon" style="width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; display: none;">
+                                                <span class="pos-trigger-label" style="white-space: nowrap;">Position</span>
+                                            </div>
+                                            <span style="font-size: 11px; color: var(--crust-burnt); margin-left: 4px;">▾</span>
+                                        </button>
+                                        <div id="intPositionMenu" class="pos-dropdown-menu hidden">
+                                            <div class="pos-menu-option" data-val="DE" onclick="selectCustomPosition('intPosition', 'DE')">
+                                                <img src="image/custom-emojis/cartop_3d_left.png" class="pos-menu-icon" alt="DE">
+                                                <span>Driver (DE)</span>
+                                            </div>
+                                            <div class="pos-menu-option" data-val="CSR" onclick="selectCustomPosition('intPosition', 'CSR')">
+                                                <img src="image/custom-emojis/apron.png" class="pos-menu-icon" alt="CSR">
+                                                <span>CSR</span>
+                                            </div>
+                                            <div class="pos-menu-option" data-val="BIKE" onclick="selectCustomPosition('intPosition', 'BIKE')">
+                                                <img src="image/custom-emojis/helmet.png" class="pos-menu-icon" alt="BIKE">
+                                                <span>Biker (BIKE)</span>
+                                            </div>
+                                            <div class="pos-menu-option" data-val="MIT" onclick="selectCustomPosition('intPosition', 'MIT')">
+                                                <img src="image/custom-emojis/mit.png" class="pos-menu-icon" alt="MIT">
+                                                <span>MIT</span>
+                                            </div>
+                                        </div>
+                                        <select id="intPosition" style="display: none;" onchange="updateCustomPositionDropdownUI('intPosition'); updateSmsPreview();">
+                                            <option value="DE">DE</option>
+                                            <option value="CSR">CSR</option>
+                                            <option value="BIKE">BIKE</option>
+                                            <option value="MIT">MIT</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div class="form-group" style="margin-bottom: 0;">
                                     <label>Store #</label>
@@ -613,13 +667,40 @@
                                     <div class="form-row flex-three">
                                         <div class="form-group">
                                             <label>Position</label>
-                                            <select id="stfPosition" onchange="refreshActiveStintPreview()">
-                                                <option value="">Select Position</option>
-                                                <option value="CSR">🍕 CSR</option>
-                                                <option value="BIKE">🚲 BIKE</option>
-                                                <option value="DE">🚗 DE</option>
-                                                <option value="MIT">🎓 MIT</option>
-                                            </select>
+                                            <div class="custom-pos-dropdown-container" id="stfPositionDropdown">
+                                                <button type="button" class="pos-dropdown-trigger" id="btnStfPositionTrigger" onclick="togglePositionDropdown('stfPositionMenu', event)" tabindex="0">
+                                                    <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+                                                        <img class="pos-trigger-icon" src="" alt="icon" style="width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; display: none;">
+                                                        <span class="pos-trigger-label" style="white-space: nowrap;">Select Position</span>
+                                                    </div>
+                                                    <span style="font-size: 11px; color: var(--crust-burnt); margin-left: 4px;">▾</span>
+                                                </button>
+                                                <div id="stfPositionMenu" class="pos-dropdown-menu hidden">
+                                                    <div class="pos-menu-option" data-val="CSR" onclick="selectCustomPosition('stfPosition', 'CSR'); refreshActiveStintPreview();">
+                                                        <img src="image/custom-emojis/apron.png" class="pos-menu-icon" alt="CSR">
+                                                        <span>CSR</span>
+                                                    </div>
+                                                    <div class="pos-menu-option" data-val="DE" onclick="selectCustomPosition('stfPosition', 'DE'); refreshActiveStintPreview();">
+                                                        <img src="image/custom-emojis/cartop_3d_left.png" class="pos-menu-icon" alt="DE">
+                                                        <span>Driver (DE)</span>
+                                                    </div>
+                                                    <div class="pos-menu-option" data-val="BIKE" onclick="selectCustomPosition('stfPosition', 'BIKE'); refreshActiveStintPreview();">
+                                                        <img src="image/custom-emojis/helmet.png" class="pos-menu-icon" alt="BIKE">
+                                                        <span>Biker (BIKE)</span>
+                                                    </div>
+                                                    <div class="pos-menu-option" data-val="MIT" onclick="selectCustomPosition('stfPosition', 'MIT'); refreshActiveStintPreview();">
+                                                        <img src="image/custom-emojis/mit.png" class="pos-menu-icon" alt="MIT">
+                                                        <span>MIT</span>
+                                                    </div>
+                                                </div>
+                                                <select id="stfPosition" style="display: none;" onchange="updateCustomPositionDropdownUI('stfPosition'); refreshActiveStintPreview();">
+                                                    <option value="">Select Position</option>
+                                                    <option value="CSR">CSR</option>
+                                                    <option value="BIKE">BIKE</option>
+                                                    <option value="DE">DE</option>
+                                                    <option value="MIT">MIT</option>
+                                                </select>
+                                            </div>
                                         </div>
                                         <div class="form-group">
                                             <label>Store #</label>
@@ -746,13 +827,40 @@
                             <div class="form-row flex-three">
                                 <div class="form-group">
                                     <label>Position</label>
-                                    <select id="payPosition">
-                                        <option value="">Select Position</option>
-                                        <option value="CSR">🍕 CSR</option>
-                                        <option value="BIKE">🚲 BIKE</option>
-                                        <option value="DE">🚗 DE</option>
-                                        <option value="MIT">🎓 MIT</option>
-                                    </select>
+                                    <div class="custom-pos-dropdown-container" id="payPositionDropdown">
+                                        <button type="button" class="pos-dropdown-trigger" id="btnPayPositionTrigger" onclick="togglePositionDropdown('payPositionMenu', event)" tabindex="0">
+                                            <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+                                                <img class="pos-trigger-icon" src="" alt="icon" style="width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; display: none;">
+                                                <span class="pos-trigger-label" style="white-space: nowrap;">Select Position</span>
+                                            </div>
+                                            <span style="font-size: 11px; color: var(--crust-burnt); margin-left: 4px;">▾</span>
+                                        </button>
+                                        <div id="payPositionMenu" class="pos-dropdown-menu hidden">
+                                            <div class="pos-menu-option" data-val="CSR" onclick="selectCustomPosition('payPosition', 'CSR')">
+                                                <img src="image/custom-emojis/apron.png" class="pos-menu-icon" alt="CSR">
+                                                <span>CSR</span>
+                                            </div>
+                                            <div class="pos-menu-option" data-val="DE" onclick="selectCustomPosition('payPosition', 'DE')">
+                                                <img src="image/custom-emojis/cartop_3d_left.png" class="pos-menu-icon" alt="DE">
+                                                <span>Driver (DE)</span>
+                                            </div>
+                                            <div class="pos-menu-option" data-val="BIKE" onclick="selectCustomPosition('payPosition', 'BIKE')">
+                                                <img src="image/custom-emojis/helmet.png" class="pos-menu-icon" alt="BIKE">
+                                                <span>Biker (BIKE)</span>
+                                            </div>
+                                            <div class="pos-menu-option" data-val="MIT" onclick="selectCustomPosition('payPosition', 'MIT')">
+                                                <img src="image/custom-emojis/mit.png" class="pos-menu-icon" alt="MIT">
+                                                <span>MIT</span>
+                                            </div>
+                                        </div>
+                                        <select id="payPosition" style="display: none;" onchange="updateCustomPositionDropdownUI('payPosition')">
+                                            <option value="">Select Position</option>
+                                            <option value="CSR">CSR</option>
+                                            <option value="BIKE">BIKE</option>
+                                            <option value="DE">DE</option>
+                                            <option value="MIT">MIT</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div class="form-group">
                                     <label>Store #</label>
@@ -2321,6 +2429,10 @@
                     if (emailChevron) emailChevron.style.transform = '';
                 }
             }
+
+            if (!e.target.closest('.custom-pos-dropdown-container')) {
+                if (typeof closeAllPositionMenus === 'function') closeAllPositionMenus();
+            }
         });
 
         function updateListCounter(count, label = 'Candidates') {
@@ -2948,7 +3060,7 @@
 
                 let positionLabel = isMit ? 'Manager in Training (MIT)' : (isBike ? 'Bike Driver' : (isDriver ? 'Driver' : (isCsr ? 'CSR' : (position || 'Team Member'))));
 
-                msgEl.innerHTML = `Set offer hourly wage for <strong>${escapeText(name)}</strong> at <strong>Store #${escapeText(store || '—')}</strong> (${escapeText(positionLabel)}):`;
+                msgEl.innerHTML = `Set offer hourly wage for <strong>${escapeText(name)}</strong> at <strong>Store #${escapeText(store || '—')}</strong> (${formatPositionWithEmoji(posCode, 18)} ${escapeText(positionLabel)}):`;
 
                 // Find store contact in global contacts array
                 const storeContact = (contacts || []).find(c => String(c.store).trim() === String(store).trim());
@@ -3025,7 +3137,7 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12.5px; font-family: 'Condensed', sans-serif; font-weight: normal;">
                             <!-- CSR Box -->
                             <div style="background: var(--crust-light, #faf2e9); border: 1px solid var(--crust-med, #f0decc); border-radius: 4px; padding: 6px 8px;">
-                                <div style="font-family: 'Subhead2', sans-serif; font-weight: normal; color: var(--dark-blue); margin-bottom: 4px;">🍕 CSR / Inside Scale</div>
+                                <div style="font-family: 'Subhead2', sans-serif; font-weight: normal; color: var(--dark-blue); margin-bottom: 4px; display: flex; align-items: center; gap: 5px;"><img src="image/custom-emojis/apron.png" style="width: 18px; height: 18px; object-fit: contain;"> CSR / Inside Scale</div>
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
                                     <span style="color: var(--text-light);">Start (P/T, No Exp):</span>
                                     <span style="font-family: 'Subhead2', sans-serif; font-weight: normal; color: var(--crust-burnt);">$${csrStart || '—'}</span>
@@ -3042,7 +3154,7 @@
 
                             <!-- Driver Box -->
                             <div style="background: var(--crust-light, #faf2e9); border: 1px solid var(--crust-med, #f0decc); border-radius: 4px; padding: 6px 8px;">
-                                <div style="font-family: 'Subhead2', sans-serif; font-weight: normal; color: var(--dark-blue); margin-bottom: 4px;">🚗 Driver (DE) Scale</div>
+                                <div style="font-family: 'Subhead2', sans-serif; font-weight: normal; color: var(--dark-blue); margin-bottom: 4px; display: flex; align-items: center; gap: 5px;"><img src="image/custom-emojis/cartop_3d_left.png" style="width: 18px; height: 18px; object-fit: contain;"> Driver (DE) Scale</div>
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
                                     <span style="color: var(--text-light);">Standard In-Store:</span>
                                     <span style="font-family: 'Subhead2', sans-serif; font-weight: normal; color: var(--crust-burnt);">$${deBase || '—'}</span>
@@ -3124,7 +3236,7 @@
                         html = `
                         <div style="background: white; border: 1.5px solid var(--crust-med, #f0decc); border-radius: 6px; padding: 8px 10px;">
                             <div style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: var(--crust-burnt); border-bottom: 1px solid #edf2f7; padding-bottom: 3px; margin-bottom: 6px; font-size: 13px; display: flex; justify-content: space-between; align-items: center;">
-                                <span>🍕 Store #${store} CSR / Inside Wage Scale</span>
+                                <span style="display: inline-flex; align-items: center; gap: 5px;"><img src="image/custom-emojis/apron.png" style="width: 18px; height: 18px; object-fit: contain;"> Store #${store} CSR / Inside Wage Scale</span>
                                 <span style="font-size: 11px; color: var(--brand-grey); font-family: 'Compact', sans-serif;">Click a tier to quick-fill</span>
                             </div>
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; text-align: center;">
@@ -4393,7 +4505,7 @@
                         </span>
                     </div>
                     <div class="card-sub">
-                        <span>Store #${item.store} (${item.position})</span>
+                        <span>Store #${item.store} (${formatPositionWithEmoji(item.position)})</span>
                         <span style="font-weight: bold; color: ${isComplete ? 'var(--success-green)' : 'var(--dark-red)'};">
                             ${item.ntoDate ? 'NTO: ' + item.ntoDate : 'Manual Entry'}
                         </span>
@@ -4481,7 +4593,7 @@
                         <span class="badge-review" style="background:${isTerm ? '#ffebee' : '#e8f5e9'}; color:${isTerm ? 'var(--brand-red)' : 'var(--success-green)'};">${item.period}</span>
                     </div>
                     <div class="card-sub">
-                        <span>Store #${item.store} (${item.position})</span>
+                        <span>Store #${item.store} (${formatPositionWithEmoji(item.position)})</span>
                         <span style="font-weight: bold; color: ${isTerm ? 'var(--brand-red)' : 'var(--success-green)'};">${isTerm ? 'Terminated' : 'Active Hire'}</span>
                     </div>
                     ${item.lastUpdated ? `<div class="card-sub" style="font-size: 11.5px; color: var(--text-light); margin-top: 2px;"><span>🕒 Updated: ${formatDisplayDateTime(item.lastUpdated)}</span></div>` : ''}
@@ -4551,7 +4663,7 @@
                     card.innerHTML = `
                     <div class="card-name">${item.name}</div>
                     <div class="card-sub" style="display: flex; justify-content: space-between; align-items: center; gap: 6px;">
-                        <span>Store #${item.store} (${item.position})</span>
+                        <span>Store #${item.store} (${formatPositionWithEmoji(item.position)})</span>
                         <span class="int-chip" style="background: ${chipBg}; color: ${chipColor};">${statusDisplay}</span>
                     </div>
                     ${dateTimeDisplay ? `<div class="card-sub" style="margin-top: 4px; color: var(--dark-blue); font-weight: 600; font-size: 13.5px;"><span>${dateTimeDisplay}</span></div>` : ''}
@@ -4680,7 +4792,7 @@
                     card.innerHTML = `
                     <div class="card-name">${item.name}</div>
                     <div class="card-sub">
-                        <span>Store #${item.store} (${item.position || 'CSR'})</span>
+                        <span>Store #${item.store} (${formatPositionWithEmoji(item.position || 'CSR')})</span>
                         <span style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: ${ntoStatusColor};">${ntoLabel}</span>
                     </div>
                     ${item.ntoDate ? `<div class="card-sub" style="margin-top: 3px; color: var(--dark-blue); font-weight: 600; font-size: 13px;"><span>📅 ${dayStr ? dayStr + ' ' : ''}${item.ntoDate}</span></div>` : ''}
@@ -4770,7 +4882,7 @@
                         ${flags ? `<div style="display: flex; gap: 4px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end;">${flags}</div>` : ''}
                     </div>
                     <div class="card-sub">
-                        <span>Store #${item.store} (${item.position})</span>
+                        <span>Store #${item.store} (${formatPositionWithEmoji(item.position)})</span>
                         <span style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: ${statusStyleColor};">${activeStatusText}</span>
                     </div>
                     ${item.lastUpdated ? `<div class="card-sub" style="font-size: 11.5px; color: var(--text-light); margin-top: 2px;"><span>🕒 Updated: ${formatDisplayDateTime(item.lastUpdated)}</span></div>` : ''}
@@ -5342,6 +5454,12 @@
                 document.getElementById('emailQuickActions').classList.remove('hidden');
             }
 
+            // Sync custom position dropdown UI
+            updateCustomPositionDropdownUI('fieldPosition');
+            updateCustomPositionDropdownUI('intPosition');
+            updateCustomPositionDropdownUI('stfPosition');
+            updateCustomPositionDropdownUI('payPosition');
+
             // ✅ MOVED TO THE BOTTOM: Reveals Delete Button across ALL views
             document.getElementById('btnDelete').classList.remove('hidden');
         }
@@ -5353,20 +5471,24 @@
 
             if (currentView === 'paycards') {
                 document.getElementById('formTitle').innerText = "Add Pay Card Record";
+                updateCustomPositionDropdownUI('payPosition');
                 document.getElementById('payName').focus();
             } else if (currentView === 'staffing') {
                 document.getElementById('formTitle').innerText = "Add Staffing Entry";
                 autoCalculatePeriodFromDates();
+                updateCustomPositionDropdownUI('stfPosition');
                 document.getElementById('stfName').focus();
             } else if (currentView === 'interviews') {
                 document.getElementById('formTitle').innerText = "Add New Interview";
                 document.getElementById('intPosition').value = 'DE';
+                updateCustomPositionDropdownUI('intPosition');
                 document.getElementById('intName').focus();
                 updateSmsPreview();
             } else {
                 document.getElementById('formTitle').innerText = "Add New Candidate";
                 document.getElementById('checkSubmission').checked = true;
                 updateStageBadges();
+                updateCustomPositionDropdownUI('fieldPosition');
                 document.getElementById('fieldName').focus();
             }
         }
@@ -5387,6 +5509,10 @@
             currentSelectedId = null;
             document.getElementById('btnDelete').classList.add('hidden');
             document.getElementById('candidateForm').reset();
+            updateCustomPositionDropdownUI('fieldPosition');
+            updateCustomPositionDropdownUI('intPosition');
+            updateCustomPositionDropdownUI('stfPosition');
+            updateCustomPositionDropdownUI('payPosition');
             document.getElementById('fieldId').value = '';
             document.getElementById('fieldNto').value = '';
             if (document.getElementById('fieldNotes')) document.getElementById('fieldNotes').value = '';
@@ -6003,6 +6129,89 @@
             } catch (err) {
                 showLoader(false);
                 showBrandAlert("Error sending interview email: " + err.message, "Email Error");
+            }
+        }
+
+        /* ==========================================================================
+           CUSTOM POSITION EMOJI & DROPDOWN CONTROLLERS
+           ========================================================================== */
+        function getPositionEmojiSrc(pos) {
+            if (!pos) return '';
+            const p = pos.toString().toUpperCase().trim();
+            if (p === 'DE' || p.includes('DRIVER') || p.includes('DELIVERY')) {
+                return 'image/custom-emojis/cartop_3d_left.png';
+            }
+            if (p === 'CSR' || p.includes('INSIDE') || p.includes('CUSTOMER')) {
+                return 'image/custom-emojis/apron.png';
+            }
+            if (p === 'BIKE' || p.includes('BIKER') || p.includes('RIDER')) {
+                return 'image/custom-emojis/helmet.png';
+            }
+            if (p === 'MIT' || p.includes('MANAGER')) {
+                return 'image/custom-emojis/mit.png';
+            }
+            return '';
+        }
+
+        function formatPositionWithEmoji(pos, iconSize = 17) {
+            if (!pos) return '';
+            const src = getPositionEmojiSrc(pos);
+            if (!src) return pos;
+            return `<span style="display: inline-flex; align-items: center; gap: 4px; vertical-align: middle;"><img src="${src}" alt="${pos}" class="pos-custom-emoji" style="width: ${iconSize}px; height: ${iconSize}px; object-fit: contain; flex-shrink: 0;"><span>${pos}</span></span>`;
+        }
+
+        function togglePositionDropdown(menuId, event) {
+            if (event) event.stopPropagation();
+            const targetMenu = document.getElementById(menuId);
+            const isCurrentlyHidden = targetMenu ? targetMenu.classList.contains('hidden') : true;
+            closeAllPositionMenus();
+            if (targetMenu && isCurrentlyHidden) {
+                targetMenu.classList.remove('hidden');
+            }
+        }
+
+        function closeAllPositionMenus() {
+            document.querySelectorAll('.pos-dropdown-menu').forEach(m => m.classList.add('hidden'));
+        }
+
+        function selectCustomPosition(fieldId, value) {
+            const sel = document.getElementById(fieldId);
+            if (!sel) return;
+            sel.value = value;
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+            updateCustomPositionDropdownUI(fieldId);
+            closeAllPositionMenus();
+        }
+
+        function updateCustomPositionDropdownUI(fieldId) {
+            const sel = document.getElementById(fieldId);
+            if (!sel) return;
+            const container = sel.closest('.custom-pos-dropdown-container');
+            if (!container) return;
+            const icon = container.querySelector('.pos-trigger-icon');
+            const labelSpan = container.querySelector('.pos-trigger-label');
+            const menu = container.querySelector('.pos-dropdown-menu');
+            const val = (sel.value || '').toUpperCase().trim();
+            const src = getPositionEmojiSrc(val);
+
+            if (src && icon && labelSpan) {
+                icon.src = src;
+                icon.style.display = 'inline-block';
+                labelSpan.innerText = val === 'DE' ? 'Driver (DE)' : (val === 'BIKE' ? 'Biker (BIKE)' : val);
+            } else if (icon && labelSpan) {
+                icon.style.display = 'none';
+                labelSpan.innerText = sel.value || (fieldId === 'fieldPosition' ? 'Position' : 'Select Position');
+            }
+
+            if (menu) {
+                menu.querySelectorAll('.pos-menu-option').forEach(opt => {
+                    const optVal = (opt.getAttribute('data-val') || '').toUpperCase();
+                    if (optVal === val) {
+                        opt.classList.add('selected');
+                    } else {
+                        opt.classList.remove('selected');
+                    }
+                });
             }
         }
 
@@ -8971,8 +9180,8 @@
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
                                 <!-- CSR Column -->
                                 <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 7px 10px;">
-                                    <div style="font-family: 'Subhead2'; font-weight: bold; color: var(--crust-burnt); border-bottom: 1px solid #edf2f7; padding-bottom: 3px; margin-bottom: 5px; font-size: 14px;">
-                                        🍕 CSR / Inside
+                                    <div style="font-family: 'Subhead2'; font-weight: bold; color: var(--crust-burnt); border-bottom: 1px solid #edf2f7; padding-bottom: 3px; margin-bottom: 5px; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+                                        <img src="image/custom-emojis/apron.png" style="width: 18px; height: 18px; object-fit: contain;"> CSR / Inside
                                     </div>
                                     <div style="display: flex; flex-direction: column; gap: 3px; font-size: 13.5px; font-family: 'Condensed', sans-serif;">
                                         <div style="display: flex; justify-content: space-between;">
@@ -8992,8 +9201,8 @@
 
                                 <!-- Driver Column -->
                                 <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 7px 10px;">
-                                    <div style="font-family: 'Subhead2'; font-weight: bold; color: var(--crust-burnt); border-bottom: 1px solid #edf2f7; padding-bottom: 3px; margin-bottom: 5px; font-size: 14px;">
-                                        🚗 Driver (DE)
+                                    <div style="font-family: 'Subhead2'; font-weight: bold; color: var(--crust-burnt); border-bottom: 1px solid #edf2f7; padding-bottom: 3px; margin-bottom: 5px; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+                                        <img src="image/custom-emojis/cartop_3d_left.png" style="width: 18px; height: 18px; object-fit: contain;"> Driver (DE)
                                     </div>
                                     <div style="display: flex; flex-direction: column; gap: 3px; font-size: 13.5px; font-family: 'Condensed', sans-serif;">
                                         <div style="display: flex; justify-content: space-between;">
@@ -10725,8 +10934,8 @@
                         <!-- CSR Sub-grid -->
                         <div style="margin-bottom: 14px;">
                             <div
-                                style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt); margin-bottom: 6px;">
-                                🍕 Customer Service Rep (CSR) Rates:</div>
+                                style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt); margin-bottom: 6px; display: flex; align-items: center; gap: 5px;">
+                                <img src="image/custom-emojis/apron.png" style="width: 18px; height: 18px; object-fit: contain;"> Customer Service Rep (CSR) Rates:</div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
                                 <div>
                                     <label
@@ -10753,8 +10962,8 @@
                         <!-- Driver Sub-grid -->
                         <div>
                             <div
-                                style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt); margin-bottom: 6px;">
-                                🚗 Delivery Expert (DE) Rates:</div>
+                                style="font-family: 'Subhead2'; font-size: 14px; font-weight: bold; color: var(--crust-burnt); margin-bottom: 6px; display: flex; align-items: center; gap: 5px;">
+                                <img src="image/custom-emojis/cartop_3d_left.png" style="width: 18px; height: 18px; object-fit: contain;"> Delivery Expert (DE) Rates:</div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px;">
                                 <div>
                                     <label
