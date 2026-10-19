@@ -12,7 +12,7 @@
     <title>Onboarder Portal</title>
     <link class="favicon" rel="icon" type="image/png" href="images/staffing_icon.png">
     <link rel="apple-touch-icon" href="images/staffing_icon.png">
-    <link rel="stylesheet" href="styles.css?v=20261019_0656">
+    <link rel="stylesheet" href="styles.css?v=20261019_0722">
 </head>
 
 <body>
@@ -920,57 +920,57 @@
 
                         <!-- 5. NTO CLASS ATTENDANCE FORM TEMPLATE -->
                         <div id="ntoFormFields" class="hidden" style="display: flex; flex-direction: column; height: 100%; box-sizing: border-box; overflow: hidden;">
-                            <!-- Compact Date & Times Row (Equal Heights & Horizontal Alignment) -->
-                            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 12px; flex-shrink: 0;">
+                            <!-- Compact Date & Times Card Bar -->
+                            <div style="background: var(--crust-light); border: 1.5px solid var(--crust-med); border-radius: 10px; padding: 10px 14px; margin-bottom: 10px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; flex-shrink: 0; box-shadow: 0 1px 3px rgba(71, 43, 16, 0.04);">
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 14.5px; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 4px; display: block;">Class Date</label>
-                                    <input type="date" id="ntoClassDate" onchange="renderNtoClassView(); renderNtoSidebar();" style="width: 100%; box-sizing: border-box; padding: 8px 12px; font-size: 16px; border-radius: 8px; border: 1.5px solid var(--crust-dark); background: white;">
+                                    <label style="font-family: 'Subhead1', sans-serif; font-size: 12px; letter-spacing: 0.06em; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 3px; display: block; font-weight: 700;">Class Date</label>
+                                    <input type="date" id="ntoClassDate" onchange="renderNtoClassView(); renderNtoSidebar();" style="width: 100%; box-sizing: border-box; height: 36px; padding: 4px 10px; font-size: 14.5px; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white;">
                                 </div>
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 14.5px; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 4px; display: block;">Start Time</label>
+                                    <label style="font-family: 'Subhead1', sans-serif; font-size: 12px; letter-spacing: 0.06em; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 3px; display: block; font-weight: 700;">Start Time</label>
                                     <input type="text" id="ntoStartTime" list="time15MinList"
-                                        placeholder="e.g., 6:00 PM" onblur="autoFormatTimeInput(this)" style="width: 100%; box-sizing: border-box; padding: 8px 12px; font-size: 16px; border-radius: 8px; border: 1.5px solid var(--crust-dark); background: white;">
+                                        placeholder="e.g., 6:00 PM" onblur="autoFormatTimeInput(this)" style="width: 100%; box-sizing: border-box; height: 36px; padding: 4px 10px; font-size: 14.5px; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white;">
                                 </div>
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="font-family: 'Subhead2', sans-serif; font-size: 14.5px; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
-                                        <span>End Time <span style="font-size: 13px; color: var(--brand-blue); text-transform: none; font-weight: bold;">· auto</span></span>
-                                        <small id="ntoEndTimeHint" style="display: none; font-size: 11.5px; color: var(--brand-blue); font-weight: bold; cursor: default;"></small>
+                                    <label style="font-family: 'Subhead1', sans-serif; font-size: 12px; letter-spacing: 0.06em; color: var(--crust-burnt); text-transform: uppercase; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: center; font-weight: 700;">
+                                        <span>End Time <span style="font-size: 11.5px; color: var(--brand-blue); text-transform: none; font-weight: 600;">· auto</span></span>
+                                        <small id="ntoEndTimeHint" style="display: none; font-size: 11px; color: var(--brand-blue); font-weight: 700; cursor: default;"></small>
                                     </label>
                                     <input type="text" id="ntoEndTime" list="time15MinList" placeholder="e.g., 7:15 PM"
-                                        onblur="autoFormatTimeInput(this)" style="width: 100%; box-sizing: border-box; padding: 8px 12px; font-size: 16px; border-radius: 8px; border: 1.5px solid var(--crust-dark); background: white;">
+                                        onblur="autoFormatTimeInput(this)" style="width: 100%; box-sizing: border-box; height: 36px; padding: 4px 10px; font-size: 14.5px; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white;">
                                 </div>
                             </div>
 
                             <!-- Subheader Bar: Roster & Attendance Count + Mark all present -->
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-shrink: 0; padding: 0 2px;">
-                                <span style="font-family: 'Subhead1', sans-serif; font-size: 15px; font-weight: 700; color: var(--dark-blue); text-transform: uppercase; letter-spacing: 0.05em;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-shrink: 0; padding: 0 2px;">
+                                <span style="font-family: 'Subhead1', sans-serif; font-size: 13px; font-weight: 700; color: var(--dark-blue); text-transform: uppercase; letter-spacing: 0.07em;">
                                     Roster &amp; Attendance · <span id="ntoRosterCountNum">0</span>
                                 </span>
                                 <div style="display: flex; align-items: center; gap: 14px;">
-                                    <span id="btnNtoMarkAllPresent" onclick="markAllNtoPresent()" style="color: var(--brand-blue); font-family: 'Subhead1', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: underline;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                                    <span id="btnNtoMarkAllPresent" onclick="markAllNtoPresent()" style="color: var(--brand-blue); font-family: 'Subhead1', sans-serif; font-size: 12.5px; font-weight: 700; cursor: pointer; text-decoration: underline;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
                                         Mark all present
                                     </span>
                                 </div>
                             </div>
 
-                            <!-- Flexible Roster Container (fills remaining height, inner scroll only) -->
+                            <!-- Flexible Roster Container (fills remaining height, warm crust background) -->
                             <div id="ntoRosterListContainer"
-                                style="flex: 1 1 0; min-height: 0; overflow-y: auto; border: 1.5px solid var(--crust-med); border-radius: 12px; background: white; box-sizing: border-box;">
-                                <p style="text-align: center; color: var(--brand-grey); font-size: 17px; padding: 20px;">Loading class roster...</p>
+                                style="flex: 1 1 0; min-height: 0; overflow-y: auto; border: 1.5px solid var(--crust-med); border-radius: 10px; background: #faf6f0; padding: 8px; box-sizing: border-box;">
+                                <p style="text-align: center; color: var(--crust-burnt); font-size: 14.5px; padding: 20px; font-family: 'Subhead2', sans-serif;">Loading class roster...</p>
                             </div>
 
-                            <!-- Bottom NTO Action Buttons Row (Matching Mockup 06-NTO-Class.html) -->
-                            <div style="display: flex; gap: 12px; padding-top: 14px; border-top: 1.5px solid var(--crust-med); margin-top: 10px; flex-shrink: 0;">
-                                <button type="button" onclick="saveNtoAttendanceOnly()" style="flex: 1; height: 44px; background: var(--brand-blue); color: white; border: none; border-radius: 8px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 16px; cursor: pointer; transition: background 0.15s ease;" title="Save current class attendance marks">
+                            <!-- Bottom NTO Action Buttons Row -->
+                            <div style="display: flex; gap: 10px; padding-top: 10px; border-top: 1.5px solid var(--crust-med); margin-top: 8px; flex-shrink: 0;">
+                                <button type="button" onclick="saveNtoAttendanceOnly()" style="flex: 1; height: 38px; background: var(--brand-blue); color: white; border: none; border-radius: 6px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; transition: background 0.15s ease;" title="Save current class attendance marks">
                                     Save Attendance
                                 </button>
-                                <button type="button" id="btnNtoSendMeetLinks" onclick="triggerSendNtoMeetLinks()" style="height: 44px; padding: 0 18px; background: white; color: var(--dark-blue); border: 1.5px solid var(--brand-blue); border-radius: 8px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 16px; cursor: pointer; white-space: nowrap;" title="Send Google Meet class link emails to checked trainees">
+                                <button type="button" id="btnNtoSendMeetLinks" onclick="triggerSendNtoMeetLinks()" style="height: 38px; padding: 0 16px; background: white; color: var(--dark-blue); border: 1.5px solid var(--brand-blue); border-radius: 6px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap;" title="Send Google Meet class link emails to checked trainees">
                                     Send Meet Links
                                 </button>
-                                <button type="button" onclick="openResendBonnieModal()" style="height: 44px; padding: 0 18px; background: white; color: var(--dark-blue); border: 1.5px solid var(--brand-blue); border-radius: 8px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 16px; cursor: pointer; white-space: nowrap;" title="Resend the Training Hours report exclusively to Bonnie (HR) with updated SSNs">
+                                <button type="button" onclick="openResendBonnieModal()" style="height: 38px; padding: 0 16px; background: white; color: var(--dark-blue); border: 1.5px solid var(--brand-blue); border-radius: 6px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap;" title="Resend the Training Hours report exclusively to Bonnie (HR) with updated SSNs">
                                     Bonnie Only
                                 </button>
-                                <button type="button" onclick="concludeNtoClass()" style="height: 44px; padding: 0 20px; background: var(--brand-red); color: white; border: none; border-radius: 8px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 16px; cursor: pointer; white-space: nowrap;" title="Wrap up class, lock attendance, and dispatch rosters to Bonnie & Store GMs">
+                                <button type="button" onclick="concludeNtoClass()" style="height: 38px; padding: 0 18px; background: var(--brand-red); color: white; border: none; border-radius: 6px; font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap;" title="Wrap up class, lock attendance, and dispatch rosters to Bonnie & Store GMs">
                                     Conclude &amp; Send
                                 </button>
                             </div>
@@ -8233,12 +8233,12 @@
                     startInput.value = detectedStart;
                 }
                 if (detectedEnd && endInput && !endInput.value) {
-                    endInput.placeholder = detectedEnd;
+                    endInput.value = detectedEnd;
                 }
 
                 const suggestedEnd = calculateSuggestedNtoEndTime(activeClassList);
                 const endHint = document.getElementById('ntoEndTimeHint');
-                if (suggestedEnd) {
+                if (suggestedEnd && !suggestedEnd.isProjected) {
                     if (endInput && !endInput.value) {
                         endInput.value = suggestedEnd.roundedTime;
                     }
@@ -8247,6 +8247,11 @@
                         endHint.title = `Last form submitted at ${suggestedEnd.rawTime}`;
                         endHint.innerHTML = `Auto: <strong>${suggestedEnd.roundedTime}</strong>`;
                     }
+                } else if (suggestedEnd && suggestedEnd.isProjected) {
+                    if (endInput && !endInput.value) {
+                        endInput.value = suggestedEnd.roundedTime;
+                    }
+                    if (endHint) endHint.style.display = 'none';
                 } else if (endHint) {
                     endHint.style.display = 'none';
                 }
@@ -8254,9 +8259,9 @@
 
             if (activeClassList.length === 0) {
                 container.innerHTML = `
-                    <div style="text-align: center; padding: 35px 20px; color: var(--brand-grey); font-size: 16px; font-family: 'Subhead2', sans-serif;">
+                    <div style="text-align: center; padding: 35px 20px; color: var(--crust-burnt); font-size: 14.5px; font-family: 'Subhead2', sans-serif;">
                         No trainees scheduled for ${selectedDate}.<br>
-                        <span style="font-size: 14px; color: var(--crust-deep); margin-top: 6px; display: inline-block;">Select another class date from the sidebar or click <strong>+ Schedule Class</strong>.</span>
+                        <span style="font-size: 13px; color: var(--crust-dark); margin-top: 6px; display: inline-block;">Select another class date from the sidebar or click <strong>+ Schedule Class</strong>.</span>
                     </div>
                 `;
                 updateNtoSendMeetLinksButtonText();
@@ -8266,7 +8271,6 @@
             activeClassList.forEach((item) => {
                 const row = document.createElement('div');
                 row.className = 'nto-roster-row';
-                row.style.cssText = "display: grid; grid-template-columns: 28px minmax(0, 1fr) 210px 110px; gap: 14px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--crust-med); box-sizing: border-box;";
 
                 const rawSaved = (item.ntoAttendance || item.ntoStatus || '').trim();
                 const isCompleteStatus = rawSaved === 'NTO Complete' || rawSaved === 'Hired' || rawSaved === 'Complete' || (item.hired && rawSaved !== 'Not in NTO' && rawSaved !== 'Left Early');
@@ -8281,33 +8285,34 @@
                 const ssnLast4Val = item.ssnLast4 || item.ssn_last_4 || item['SSN (Last 4)'] || '';
 
                 const scoreBadge = item.quizScore ? `
-                    <span style="display: inline-flex; align-items: center; gap: 4px; font-family: 'Subhead1', sans-serif; font-size: 12px; background: #e3f2fd; color: var(--dark-blue); border: 1px solid #bbdefb; padding: 1px 7px; border-radius: 10px; font-weight: bold; margin-left: 6px;" title="Orientation Quiz Score">
+                    <span style="display: inline-flex; align-items: center; gap: 3px; font-family: 'Subhead1', sans-serif; font-size: 11.5px; background: #e3f2fd; color: var(--dark-blue); border: 1px solid #bbdefb; padding: 1px 6px; border-radius: 8px; font-weight: bold; margin-left: 4px;" title="Orientation Quiz Score">
                         ${escapeText(item.quizScore)}
                     </span>
                 ` : '';
 
                 const candDo = item.doName || item.do || (contacts && contacts.find(c => String(c.store).trim() === String(item.store).trim())?.doName) || '';
-                const candDoDisplay = candDo ? ` · ${escapeText(candDo)}` : '';
 
                 row.innerHTML = `
-                    <input type="checkbox" class="nto-trainee-check" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" onchange="updateNtoSendMeetLinksButtonText()" style="width: 18px; height: 18px; accent-color: var(--brand-blue); cursor: pointer;" title="Select for Google Meet link">
+                    <input type="checkbox" class="nto-trainee-check" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" onchange="updateNtoSendMeetLinksButtonText()" style="width: 17px; height: 17px; accent-color: var(--brand-blue); cursor: pointer;" title="Select for Google Meet link">
                     <div style="display: flex; flex-direction: column; min-width: 0;">
                         <div style="display: flex; align-items: center; gap: 6px;">
-                            <span class="nto-trainee-name-click" data-name="${escapeText(item.name || '')}" onclick="copyNtoTraineeName(event, this)" style="font-family: 'Subhead2', sans-serif; font-size: 19px; font-weight: 600; color: var(--dark-blue); cursor: pointer;" title="Click to copy name">${escapeText(item.name)}</span>
+                            <span class="nto-trainee-name-click" data-name="${escapeText(item.name || '')}" onclick="copyNtoTraineeName(event, this)" style="font-family: 'Subhead2', sans-serif; font-size: 15.5px; font-weight: 700; color: var(--dark-blue); cursor: pointer; letter-spacing: -0.01em;" title="Click to copy name">${escapeText(item.name)}</span>
                             ${scoreBadge}
                         </div>
-                        <div style="font-family: 'Condensed', sans-serif; font-size: 15px; color: var(--crust-burnt); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                            Store #${item.store}${candDoDisplay} · ${escapeText(item.position || 'CSR')}
+                        <div style="font-family: 'Condensed', sans-serif; font-size: 13px; color: var(--crust-burnt); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px;">
+                            <span style="background: var(--crust-light); border: 1px solid var(--crust-med); border-radius: 4px; padding: 0 5px; font-weight: 700; color: var(--crust-burnt); font-size: 12px;">#${item.store}</span>
+                            ${candDo ? `<span>${escapeText(candDo)}</span> <span>·</span>` : ''}
+                            <span style="font-weight: 600;">${escapeText(item.position || 'CSR')}</span>
                         </div>
                     </div>
-                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" data-lastupdated="${escapeText(lastUpdatedVal)}" data-ntocompletedat="${escapeText(ntoCompletedAtVal)}" data-ssnlast4="${escapeText(ssnLast4Val)}" onchange="handleNtoAttendanceChange(this)" style="width: 100%; height: 38px; padding: 4px 10px; font-size: 15.5px; font-family: 'Condensed', sans-serif; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white; cursor: pointer;">
+                    <select class="nto-attendance-select" data-id="${escapeText(candId)}" data-name="${escapeText(item.name || '')}" data-email="${escapeText(item.email || '')}" data-store="${escapeText(item.store || '')}" data-position="${escapeText(item.position || 'CSR')}" data-shirt="${escapeText(shirtVal)}" data-hat="${escapeText(hatVal)}" data-paycard="${escapeText(payCardVal)}" data-ntodate="${escapeText(ntoDateVal)}" data-lastupdated="${escapeText(lastUpdatedVal)}" data-ntocompletedat="${escapeText(ntoCompletedAtVal)}" data-ssnlast4="${escapeText(ssnLast4Val)}" onchange="handleNtoAttendanceChange(this)" style="width: 100%; height: 32px; padding: 2px 26px 2px 8px; font-size: 13.5px; font-family: 'Condensed', sans-serif; font-weight: 600; border-radius: 6px; border: 1.5px solid var(--crust-dark); background-color: #ffffff; cursor: pointer;">
                         <option value="" ${!savedStatus ? 'selected' : ''}>Select status…</option>
                         <option value="In Class" ${savedStatus === 'In Class' ? 'selected' : ''}>📖 In Class</option>
                         <option value="Not in NTO" ${savedStatus === 'Not in NTO' ? 'selected' : ''}>❌ Not in NTO (Absent)</option>
                         <option value="Left Early" ${savedStatus === 'Left Early' ? 'selected' : ''}>⚠️ Left Early</option>
                         <option value="NTO Complete" ${savedStatus === 'NTO Complete' ? 'selected' : ''}>🎓 NTO Complete</option>
                     </select>
-                    <a href="javascript:void(0)" onclick="openRescheduleNtoModal('${escapeText(candId)}', '${escapeText(item.name || '')}', '${escapeText(item.email || '')}', '${escapeText(ntoDateVal || '')}')" style="font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 14.5px; color: var(--brand-blue); text-decoration: none; text-align: right; white-space: nowrap;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Change date</a>
+                    <a href="javascript:void(0)" onclick="openRescheduleNtoModal('${escapeText(candId)}', '${escapeText(item.name || '')}', '${escapeText(item.email || '')}', '${escapeText(ntoDateVal || '')}')" style="font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 12.5px; color: var(--brand-blue); text-decoration: none; text-align: right; white-space: nowrap;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Change date</a>
                 `;
                 container.appendChild(row);
             });
@@ -8965,27 +8970,49 @@
             const timeEntries = [];
 
             candidatesList.forEach(c => {
-                const status = (c.ntoAttendance || c.attendance || c.status || '').toLowerCase();
+                const status = (c.ntoAttendance || c.ntoStatus || c.attendance || c.status || '').toLowerCase();
                 const isComplete = status.includes('complete') || status.includes('attended');
                 
-                // If we have actual quiz completion times, NEVER use lastUpdated (which gets overwritten whenever admin clicks "Save Attendance")
+                // If we have actual quiz completion times, NEVER use lastUpdated
                 const rawTimestamp = hasDedicatedCompletionTimes
                     ? (c.ntoCompletedAt || c.nto_completed_at || '')
-                    : (c.lastUpdated || c.last_updated || '');
+                    : (isComplete ? (c.lastUpdated || c.last_updated || '') : '');
 
-                if (rawTimestamp && (isComplete || candidatesList.length <= 5)) {
+                if (rawTimestamp) {
                     const parsed = parseTimestampToMinutes(rawTimestamp, classStartMin);
                     if (parsed !== null) {
-                        timeEntries.push({
-                            minutes: parsed.totalMinutes,
-                            rawTime: parsed.timeStr,
-                            name: c.name || ''
-                        });
+                        // Crucial sanity check: completion time MUST be at or after class start time!
+                        // If a class starts at 6:00 PM (1080 min), a timestamp from 6:47 AM (407 min) is invalid!
+                        if (classStartMin === null || parsed.totalMinutes >= classStartMin - 15) {
+                            timeEntries.push({
+                                minutes: parsed.totalMinutes,
+                                rawTime: parsed.timeStr,
+                                name: c.name || ''
+                            });
+                        }
                     }
                 }
             });
 
-            if (timeEntries.length === 0) return null;
+            if (timeEntries.length === 0) {
+                // If no actual completion times exist yet, calculate standard 75-minute duration from start time
+                if (classStartMin !== null) {
+                    let defaultEndMin = classStartMin + 75;
+                    let h = Math.floor(defaultEndMin / 60);
+                    let m = defaultEndMin % 60;
+                    const ampm = h >= 12 && h < 24 ? 'PM' : 'AM';
+                    h = h % 12;
+                    if (h === 0) h = 12;
+                    const mStr = m < 10 ? '0' + m : String(m);
+                    return {
+                        roundedTime: `${h}:${mStr} ${ampm}`,
+                        rawTime: `${h}:${mStr} ${ampm}`,
+                        lastTrainee: '',
+                        isProjected: true
+                    };
+                }
+                return null;
+            }
 
             // Sort ascending by submission time
             timeEntries.sort((a, b) => a.minutes - b.minutes);
@@ -9018,7 +9045,8 @@
             return {
                 roundedTime: roundedTime,
                 rawTime: lastEntry.rawTime,
-                lastTrainee: lastEntry.name
+                lastTrainee: lastEntry.name,
+                isProjected: false
             };
         }
 
