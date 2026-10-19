@@ -12,7 +12,7 @@
     <title>Onboarder Portal</title>
     <link class="favicon" rel="icon" type="image/png" href="images/staffing_icon.png">
     <link rel="apple-touch-icon" href="images/staffing_icon.png">
-    <link rel="stylesheet" href="styles.css?v=20261019_0341">
+    <link rel="stylesheet" href="styles.css?v=20261019_0356">
 </head>
 
 <body>
@@ -991,7 +991,7 @@
                                     </span>
                                     <span id="contactActiveDoSubtitle" style="font-family: 'Condensed', sans-serif; font-size: 14.5px; color: var(--text-light); font-weight: 600;"></span>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 8px;">
+                                <div id="contactSortFilterWrapper" style="display: flex; align-items: center; gap: 8px;">
                                     <label style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-burnt); text-transform: uppercase; margin: 0;">Sort Directory By:</label>
                                     <select id="contactSortFilter" onchange="renderContactsView()" style="width: auto; height: 32px; padding: 4px 28px 4px 10px; font-size: 14px; border-radius: 6px; border: 1.5px solid var(--crust-dark); background-color: white;">
                                         <option value="store_asc">🏬 Store # (Numerical)</option>
@@ -9027,6 +9027,129 @@
             copyToClipboard(lines.join('\n'), btnEl);
         }
 
+        function getDisplayAdminContacts() {
+            const currentAdminUser = (localStorage.getItem('onb_user') || '').toLowerCase();
+            const isDenverAdmin = currentAdminUser.startsWith('denver');
+            let list = (adminContacts && adminContacts.length > 0) ? [...adminContacts] : [];
+            if (isDenverAdmin && list.length === 0) {
+                list = [
+                    {
+                        category: "Leadership & Operations",
+                        name: "Steve Jones",
+                        title: "VP of Operations",
+                        phone: "(303) 204-4272",
+                        email: "steve@team-wow.com",
+                        notes: ""
+                    },
+                    {
+                        category: "Training & HR Support",
+                        name: "Janet Thomson",
+                        title: "Assistant to the Trainers",
+                        phone: "(303) 989-8390",
+                        email: "janet@team-wow.com",
+                        notes: "Cell: (303) 885-5840"
+                    },
+                    {
+                        category: "Training & HR Support",
+                        name: "Richard Keske",
+                        title: "Director of Human Resources & Training",
+                        phone: "(720) 989-3629",
+                        email: "richard@team-wow.com",
+                        notes: "Cell: (720) 703-8287"
+                    }
+                ];
+            }
+            return list;
+        }
+
+        function renderAdminContactsSection(adminList, container, copySvg) {
+            const adminCategoryGroups = {};
+            adminList.forEach(ac => {
+                const catKey = ac.category || 'General Support';
+                if (!adminCategoryGroups[catKey]) adminCategoryGroups[catKey] = [];
+                adminCategoryGroups[catKey].push(ac);
+            });
+
+            const getCategoryRank = (name) => {
+                const l = (name || '').toLowerCase();
+                if (l.includes('leader') || l.includes('exec') || l.includes('vp')) return 1;
+                if (l.includes('admin') || l.includes('local')) return 2;
+                if (l.includes('hr') || l.includes('train')) return 3;
+                if (l.includes('it')) return 4;
+                if (l.includes('distrib')) return 5;
+                return 10;
+            };
+
+            const sortedCatNames = Object.keys(adminCategoryGroups).sort((a, b) => {
+                const rankA = getCategoryRank(a);
+                const rankB = getCategoryRank(b);
+                if (rankA !== rankB) return rankA - rankB;
+                return a.localeCompare(b);
+            });
+
+            sortedCatNames.forEach(catName => {
+                const contactsInGroup = adminCategoryGroups[catName];
+                contactsInGroup.sort((a, b) => {
+                    const nameA = (a.name || '').toLowerCase();
+                    const nameB = (b.name || '').toLowerCase();
+                    if (nameA.includes('benjy') || nameA.includes('steve')) return -1;
+                    if (nameB.includes('benjy') || nameB.includes('steve')) return 1;
+                    return 0;
+                });
+
+                const catCard = document.createElement('div');
+                catCard.className = 'store-directory-card';
+                catCard.style.padding = '14px 18px';
+
+                let itemsHtml = `
+                    <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1.5px solid var(--crust-med); padding-bottom: 6px; margin-bottom: 6px;">
+                        <span style="font-family: 'Subhead1', sans-serif; font-weight: 700; font-size: 19px; color: var(--dark-blue); text-transform: uppercase;">
+                            ${escapeText(catName)}
+                        </span>
+                        <span style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-burnt); font-weight: 600;">
+                            ${contactsInGroup.length} Member${contactsInGroup.length === 1 ? '' : 's'}
+                        </span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                `;
+
+                contactsInGroup.forEach((ac, idx) => {
+                    const borderStyle = idx < contactsInGroup.length - 1 ? 'border-bottom: 1px dashed var(--crust-med); padding-bottom: 8px;' : '';
+                    const formattedPhone = formatPhoneNumber(ac.phone);
+                    itemsHtml += `
+                        <div style="display: flex; flex-direction: column; gap: 4px; ${borderStyle}">
+                            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                                <div style="display: flex; align-items: baseline; gap: 8px;">
+                                    <strong style="font-family: 'Subhead1', sans-serif; font-size: 17px; color: var(--dark-blue);">${escapeText(ac.name)}</strong>
+                                    ${ac.title ? `<span style="font-family: 'Subhead2', sans-serif; font-size: 14px; color: var(--crust-burnt); font-weight: 600;">(${escapeText(ac.title)})</span>` : ''}
+                                </div>
+                                <button type="button" onclick="copyToClipboard('${escapeText(ac.name + (ac.title ? ' (' + ac.title + ')' : '') + ' - ' + (formattedPhone || '') + ' - ' + (ac.email || ''))}', this)" style="height: 26px; padding: 0 8px; font-size: 12px; font-family: 'Subhead1', sans-serif; border-radius: 4px; border: 1px solid var(--crust-dark); color: var(--crust-burnt); background: var(--crust-light); cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                    ${copySvg} Copy
+                                </button>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; font-size: 15px; font-family: 'Condensed', sans-serif; color: var(--crust-burnt);">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-deep); text-transform: uppercase;">Phone:</span>
+                                    <strong>${formattedPhone || 'N/A'}</strong>
+                                    ${formattedPhone ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${formattedPhone}', this)" title="Copy Phone">${copySvg}</button>` : ''}
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span style="font-family: 'Subhead2', sans-serif; font-size: 13.5px; color: var(--crust-deep); text-transform: uppercase;">Email:</span>
+                                    <span style="color: var(--brand-blue);">${escapeText(ac.email) || 'N/A'}</span>
+                                    ${ac.email ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(ac.email)}', this)" title="Copy Email">${copySvg}</button>` : ''}
+                                </div>
+                            </div>
+                            ${ac.notes ? `<div style="font-size: 13.5px; font-family: 'Subhead2', sans-serif; color: var(--dark-blue); background: var(--crust-light); border-left: 3px solid var(--brand-blue); padding: 4px 10px; border-radius: 4px; margin-top: 3px;">📌 ${escapeText(ac.notes)}</div>` : ''}
+                        </div>
+                    `;
+                });
+
+                itemsHtml += `</div>`;
+                catCard.innerHTML = itemsHtml;
+                container.appendChild(catCard);
+            });
+        }
+
         function renderContactsSidebar() {
             const listContainer = document.getElementById('candidateList');
             if (!listContainer) return;
@@ -9034,7 +9157,7 @@
 
             const listCounterLabel = document.getElementById('listCounterLabel');
             if (listCounterLabel) {
-                listCounterLabel.innerHTML = 'DIRECTORS OF OPS';
+                listCounterLabel.innerHTML = 'DIRECTORY';
             }
 
             const sortDropdown = document.getElementById('customSortDropdown');
@@ -9100,6 +9223,42 @@
             allCard.onclick = () => selectContactDo('ALL');
             listContainer.appendChild(allCard);
 
+            // 2b. "Admin & Corporate" Card
+            const displayAdminContacts = getDisplayAdminContacts();
+            const matchesAdminSearch = !searchQuery ||
+                'admin corporate leadership office support hr payroll headquarters'
+                    .split(' ')
+                    .some(w => searchQuery.includes(w) || w.includes(searchQuery)) ||
+                displayAdminContacts.some(ac =>
+                    String(ac.name || '').toLowerCase().includes(searchQuery) ||
+                    String(ac.title || '').toLowerCase().includes(searchQuery) ||
+                    String(ac.email || '').toLowerCase().includes(searchQuery) ||
+                    String(ac.category || '').toLowerCase().includes(searchQuery) ||
+                    String(ac.notes || '').toLowerCase().includes(searchQuery) ||
+                    String(ac.phone || '').includes(searchQuery) ||
+                    (searchDigits.length >= 4 && String(ac.phone || '').replace(/\D/g, '').includes(searchDigits))
+                );
+
+            if (matchesAdminSearch) {
+                const adminCard = document.createElement('div');
+                adminCard.className = 'do-card' + (selectedContactDo === 'ADMIN' ? ' selected' : '');
+                adminCard.innerHTML = `
+                    <div class="do-card-meta">
+                        <span class="do-card-name" style="display: flex; align-items: center; gap: 6px;">
+                            🏢 Admin & Corporate
+                        </span>
+                        <span class="badge-review" style="background: var(--crust-light); color: var(--dark-blue); font-size: 12px; font-weight: bold; border: 1px solid var(--crust-med);">
+                            ${displayAdminContacts.length} Contacts
+                        </span>
+                    </div>
+                    <div class="card-sub" style="font-size: 13px; color: var(--text-light); margin-top: 2px;">
+                        <span>Leadership, HR & Support</span>
+                    </div>
+                `;
+                adminCard.onclick = () => selectContactDo('ADMIN');
+                listContainer.appendChild(adminCard);
+            }
+
             // 3. Individual DO Cards
             filteredDos.forEach(d => {
                 const card = document.createElement('div');
@@ -9125,10 +9284,10 @@
                 listContainer.appendChild(card);
             });
 
-            if (filteredDos.length === 0 && searchQuery) {
+            if (filteredDos.length === 0 && !matchesAdminSearch && searchQuery) {
                 const noMatch = document.createElement('div');
                 noMatch.style.cssText = 'text-align: center; padding: 20px 10px; color: var(--crust-burnt); font-size: 13.5px; font-family: "Subhead2";';
-                noMatch.innerText = 'No DOs matched search query.';
+                noMatch.innerText = 'No directory matches found.';
                 listContainer.appendChild(noMatch);
             }
         }
@@ -9143,6 +9302,47 @@
             const sortBy = document.getElementById('contactSortFilter')?.value || 'store_asc';
             const searchQuery = (document.getElementById('searchControl')?.value || '').toLowerCase().trim();
             const searchDigits = searchQuery.replace(/\D/g, '');
+            const formTitleEl = document.getElementById('formTitle');
+            const sortFilterWrapper = document.getElementById('contactSortFilterWrapper');
+
+            const copySvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+
+            // BRANCH 1: Admin & Corporate View
+            if (doFilter === 'ADMIN') {
+                if (formTitleEl) formTitleEl.innerText = "Corporate & Admin Directory";
+                if (sortFilterWrapper) sortFilterWrapper.style.display = 'none';
+
+                const displayAdminContacts = getDisplayAdminContacts();
+                let filteredAdmins = displayAdminContacts;
+                if (searchQuery) {
+                    filteredAdmins = displayAdminContacts.filter(ac =>
+                        String(ac.name || '').toLowerCase().includes(searchQuery) ||
+                        String(ac.title || '').toLowerCase().includes(searchQuery) ||
+                        String(ac.email || '').toLowerCase().includes(searchQuery) ||
+                        String(ac.category || '').toLowerCase().includes(searchQuery) ||
+                        String(ac.notes || '').toLowerCase().includes(searchQuery) ||
+                        String(ac.phone || '').includes(searchQuery) ||
+                        (searchDigits.length >= 4 && String(ac.phone || '').replace(/\D/g, '').includes(searchDigits))
+                    );
+                }
+
+                const subheadEl = document.getElementById('contactDirectorySubhead');
+                if (subheadEl) {
+                    subheadEl.innerHTML = `🏢 Admin & Corporate · <span id="contactStoreCount">${filteredAdmins.length} Contact${filteredAdmins.length === 1 ? '' : 's'}</span>`;
+                }
+
+                if (filteredAdmins.length === 0) {
+                    container.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--brand-grey); font-size: 17px; font-family: 'Subhead2';">🔍 No admin contacts found matching "${escapeText(searchQuery)}".</div>`;
+                    return;
+                }
+
+                renderAdminContactsSection(filteredAdmins, container, copySvg);
+                return;
+            }
+
+            // BRANCH 2: Stores & DO View
+            if (formTitleEl) formTitleEl.innerText = "GM & DO Store Directory";
+            if (sortFilterWrapper) sortFilterWrapper.style.display = 'flex';
 
             let filtered = contacts.filter(item => {
                 if (doFilter !== 'ALL' && item.doName !== doFilter) return false;
@@ -9196,8 +9396,6 @@
                     subheadEl.innerHTML = `DO: ${escapeText(doFilter)} · <span id="contactStoreCount">${filtered.length} Store${filtered.length === 1 ? '' : 's'}</span>`;
                 }
             }
-
-            const copySvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
 
             function formatPayRate(val) {
                 if (val === undefined || val === null) return '';
@@ -9383,126 +9581,6 @@
 
                 container.appendChild(card);
             });
-
-            const currentAdminUser = (localStorage.getItem('onb_user') || '').toLowerCase();
-            const isDenverAdmin = currentAdminUser.startsWith('denver');
-            let displayAdminContacts = (adminContacts && adminContacts.length > 0) ? [...adminContacts] : [];
-            if (isDenverAdmin && displayAdminContacts.length === 0) {
-                displayAdminContacts = [
-                    {
-                        category: "Leadership & Operations",
-                        name: "Steve Jones",
-                        title: "VP of Operations",
-                        phone: "(303) 204-4272",
-                        email: "steve@team-wow.com",
-                        notes: ""
-                    },
-                    {
-                        category: "Training & HR Support",
-                        name: "Janet Thomson",
-                        title: "Assistant to the Trainers",
-                        phone: "(303) 989-8390",
-                        email: "janet@team-wow.com",
-                        notes: "Cell: (303) 885-5840"
-                    },
-                    {
-                        category: "Training & HR Support",
-                        name: "Richard Keske",
-                        title: "Director of Human Resources & Training",
-                        phone: "(720) 989-3629",
-                        email: "richard@team-wow.com",
-                        notes: "Cell: (720) 703-8287"
-                    }
-                ];
-            }
-
-            if (displayAdminContacts.length > 0) {
-                const copySvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
-
-                const adminHeader = document.createElement('div');
-                adminHeader.style.cssText = `margin-top: 20px; font-family: 'Subhead1', sans-serif; font-size: 20px; color: var(--dark-blue); text-transform: uppercase; border-bottom: 2px solid var(--brand-blue); padding-bottom: 6px;`;
-                adminHeader.innerText = `🏢 Admin & Corporate Contacts`;
-                container.appendChild(adminHeader);
-
-                const adminCategoryGroups = {};
-                displayAdminContacts.forEach(ac => {
-                    const catKey = ac.category || 'General Support';
-                    if (!adminCategoryGroups[catKey]) adminCategoryGroups[catKey] = [];
-                    adminCategoryGroups[catKey].push(ac);
-                });
-
-                // Prioritize Leadership & Operations (Benjy and Steve) at the top
-                const getCategoryRank = (name) => {
-                    const l = (name || '').toLowerCase();
-                    if (l.includes('leader') || l.includes('exec') || l.includes('vp')) return 1;
-                    if (l.includes('admin') || l.includes('local')) return 2;
-                    if (l.includes('hr') || l.includes('train')) return 3;
-                    if (l.includes('it')) return 4;
-                    if (l.includes('distrib')) return 5;
-                    return 10;
-                };
-
-                const sortedCatNames = Object.keys(adminCategoryGroups).sort((a, b) => {
-                    const rankA = getCategoryRank(a);
-                    const rankB = getCategoryRank(b);
-                    if (rankA !== rankB) return rankA - rankB;
-                    return a.localeCompare(b);
-                });
-
-                sortedCatNames.forEach(catName => {
-                    const contactsInGroup = adminCategoryGroups[catName];
-                    // Pin Benjy and Steve to the top of their respective group
-                    contactsInGroup.sort((a, b) => {
-                        const nameA = (a.name || '').toLowerCase();
-                        const nameB = (b.name || '').toLowerCase();
-                        if (nameA.includes('benjy') || nameA.includes('steve')) return -1;
-                        if (nameB.includes('benjy') || nameB.includes('steve')) return 1;
-                        return 0;
-                    });
-
-                    const catCard = document.createElement('div');
-                    catCard.style.cssText = `
-                    background: var(--crust-base);
-                    border: 1.5px solid var(--crust-dark);
-                    border-left: 6px solid var(--brand-blue);
-                    border-radius: 8px;
-                    padding: 12px 14px;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-                    box-shadow: 0 2px 5px rgba(71,43,16,0.06);
-                    margin-bottom: 12px;
-                `;
-
-                    let itemsHtml = `<div style="font-family: 'Subhead2', sans-serif; font-size: 18px; color: var(--crust-burnt); border-bottom: 1px solid var(--crust-med); padding-bottom: 4px;">${catName}</div>`;
-
-                    adminCategoryGroups[catName].forEach(ac => {
-                        itemsHtml += `
-                        <div style="display: flex; flex-direction: column; gap: 4px; padding: 6px 0; border-bottom: 1px dashed var(--crust-med);">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <div>
-                                    <strong>${ac.name}</strong> ${ac.title ? `<span style="color: var(--text-light); font-size: 14px;">(${ac.title})</span>` : ''}
-                                </div>
-                            </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 15px;">
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <strong>Phone:</strong> ${ac.phone || 'N/A'}
-                                    ${ac.phone ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${ac.phone}', this)" title="Copy Phone">${copySvg}</button>` : ''}
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <strong>Email:</strong> ${ac.email || 'N/A'}
-                                    ${ac.email ? `<button type="button" class="btn-copy-icon" onclick="copyToClipboard('${escapeText(ac.email)}', this)" title="Copy Email">${copySvg}</button>` : ''}
-                                </div>
-                            </div>
-                            ${ac.notes ? `<div style="font-size: 13px; color: var(--dark-blue); background: #eef6fc; padding: 4px 8px; border-radius: 4px; margin-top: 2px; white-space: pre-wrap;">📌 ${ac.notes}</div>` : ''}
-                        </div>
-                    `;
-                    });
-
-                    catCard.innerHTML = itemsHtml;
-                    container.appendChild(catCard);
-                });
-            }
         }
 
         function openMapLink(address) {
