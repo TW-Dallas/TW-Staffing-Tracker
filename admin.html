@@ -1091,18 +1091,27 @@
                                     <input type="text" id="credStoreFilter" placeholder="All" oninput="renderCredentialsView()" style="padding: 7px 8px; font-size: 14px; border-radius: 6px; border: 1.5px solid var(--crust-dark); width: 100%; box-sizing: border-box; background: white; margin-top: 3px; font-family: 'Condensed', sans-serif;">
                                 </div>
 
-                                <!-- Role Filter -->
-                                <div style="flex: 1; min-width: 110px;">
-                                    <label style="font-family: 'Subhead2'; font-size: 12px; color: var(--crust-deep); text-transform: uppercase;">Role / scope</label>
+                                <!-- Position Filter -->
+                                <div style="flex: 1; min-width: 115px;">
+                                    <label style="font-family: 'Subhead2'; font-size: 12px; color: var(--crust-deep); text-transform: uppercase;">Position</label>
                                     <select id="credRoleFilter" onchange="onCredRoleFilterChange()" style="padding: 7px 6px; font-size: 14px; width: 100%; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white; margin-top: 3px; font-family: 'Condensed', sans-serif;">
-                                        <option value="ALL">All roles</option>
+                                        <option value="ALL">All positions</option>
                                         <option value="General Manager">General Manager</option>
                                         <option value="Assistant Manager">Assistant Manager</option>
-                                        <option value="Trainer">Trainer</option>
-                                        <option value="Director of Ops">Director of Ops</option>
-                                        <option value="Executive">Executive</option>
-                                        <option value="SCOPE_WW">Has WW Scope</option>
-                                        <option value="SCOPE_MIT">Has MIT Scope</option>
+                                        <option value="Manager in Training">Manager in Training</option>
+                                        <option value="Director of Ops">Director of Ops / DO</option>
+                                        <option value="Executive">Executive &amp; Admin</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+
+                                <!-- Scope / Certification Filter -->
+                                <div style="flex: 0.9; min-width: 110px;">
+                                    <label style="font-family: 'Subhead2'; font-size: 12px; color: var(--crust-deep); text-transform: uppercase;">Certification</label>
+                                    <select id="credScopeFilter" onchange="renderCredentialsView()" style="padding: 7px 6px; font-size: 14px; width: 100%; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white; margin-top: 3px; font-family: 'Condensed', sans-serif;">
+                                        <option value="ALL">All scopes</option>
+                                        <option value="WW">Wow Way Trainer (WW)</option>
+                                        <option value="MIT">MIT Trainer (MIT)</option>
                                     </select>
                                 </div>
 
@@ -11757,13 +11766,28 @@
                             </div>
                         </div>
 
-                        <!-- ROW 1: FULL NAME -->
-                        <div>
-                            <label style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Full Name *</label>
-                            <input type="text" id="regFullName" required placeholder="e.g. Jane Doe" style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 14.5px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                        <!-- ROW 1: FULL NAME & POSITION -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div>
+                                <label style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Full Name *</label>
+                                <input type="text" id="regFullName" required placeholder="e.g. Jane Doe" style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 14.5px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                            </div>
+                            <div>
+                                <label style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Position *</label>
+                                <select id="regPosition" required onchange="onRegPositionChanged()" style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 13.5px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                                    <option value="" disabled selected>Select Position...</option>
+                                    <option value="General Manager">General Manager (Automatic)</option>
+                                    <option value="Assistant Manager">Assistant Manager (Requires Authorization)</option>
+                                    <option value="Manager in Training">Manager in Training (Requires Authorization)</option>
+                                    <option value="Director of Ops">Director of Ops (DO) (Automatic)</option>
+                                    <option value="Admin">Admin (Automatic)</option>
+                                    <option value="Executive">Executive (Automatic)</option>
+                                    <option value="Other">Other (Requires Authorization)</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <!-- ROW 2: MARKET + ROLE / STORE # -->
+                        <!-- ROW 2: MARKET + STORE # -->
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                             <div>
                                 <label style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Market *</label>
@@ -11777,18 +11801,8 @@
                                 </select>
                             </div>
                             <div id="regStoreCol">
-                                <label style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Store # *</label>
+                                <label id="regStoreLabel" style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Store # *</label>
                                 <input type="text" id="regStoreNum" placeholder="e.g. 6386" inputmode="numeric" style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 14.5px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
-                            </div>
-                            <div id="regAboveRoleCol" class="hidden">
-                                <label style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Role *</label>
-                                <select id="regAboveRole" style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 13.5px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
-                                    <option value="" disabled selected>Select Role...</option>
-                                    <option value="Director of Ops">Director of Ops</option>
-                                    <option value="Training Director">Training Director</option>
-                                    <option value="Market Leader">Market Leader</option>
-                                    <option value="Executive">Executive</option>
-                                </select>
                             </div>
                         </div>
 
@@ -12189,20 +12203,25 @@
             }
 
             const total = credentialsList.length;
-            const execs = credentialsList.filter(c => c.is_exec || (c.role && c.role.toLowerCase().includes('exec'))).length;
+            const execs = credentialsList.filter(c => c.is_exec || (c.role && (c.role.toLowerCase().includes('exec') || c.role.toLowerCase().includes('admin')))).length;
             const dos = credentialsList.filter(c => c.is_do || (c.role && (c.role.toLowerCase().includes('director') || c.role.toLowerCase().includes('do') || c.role.toLowerCase().includes('super')))).length;
             const gms = credentialsList.filter(c => c.is_gm || (c.role && c.role.toLowerCase().includes('general manager'))).length;
             const ams = credentialsList.filter(c => c.role && c.role.toLowerCase().includes('assistant')).length;
-            const trainers = credentialsList.filter(c => c.role && c.role.toLowerCase().includes('trainer')).length;
+            const mits = credentialsList.filter(c => c.role && (c.role.toLowerCase().includes('training') || c.role.toLowerCase().includes('mit')) && !c.role.toLowerCase().includes('director')).length;
+            const others = credentialsList.filter(c => {
+                const r = (c.role || '').toLowerCase();
+                return !c.is_exec && !c.is_do && !c.is_gm && !r.includes('exec') && !r.includes('admin') && !r.includes('director') && !r.includes('do') && !r.includes('super') && !r.includes('general manager') && !r.includes('assistant') && !r.includes('training') && !r.includes('mit');
+            }).length;
             const pending = credentialsList.filter(isCredentialPending).length;
 
             const roles = [
                 { id: 'ALL', label: 'All Personnel', sub: 'All rostered team members & leadership', count: total, color: 'var(--brand-blue)' },
-                { id: 'Executive', label: 'Executives', sub: 'Above-Store executive leadership', count: execs, color: 'var(--dark-blue)' },
+                { id: 'Executive', label: 'Executives & Admin', sub: 'Above-Store executive leadership', count: execs, color: 'var(--dark-blue)' },
                 { id: 'Director of Ops', label: 'Directors of Ops', sub: 'DO oversight & regional operations', count: dos, color: 'var(--dark-blue)' },
                 { id: 'General Manager', label: 'General Managers', sub: 'Store general managers & unit leads', count: gms, color: 'var(--med-blue)' },
                 { id: 'Assistant Manager', label: 'Assistant Managers', sub: 'Assistant managers & keyholders', count: ams, color: 'var(--med-blue)' },
-                { id: 'Trainer', label: 'Trainers', sub: 'Certified Wow Way & MIT trainers', count: trainers, color: 'var(--crust-burnt)' },
+                { id: 'Manager in Training', label: 'Managers in Training', sub: 'MIT leadership trainees', count: mits, color: 'var(--crust-burnt)' },
+                { id: 'Other', label: 'Other Personnel', sub: 'Support & non-unit personnel', count: others, color: 'var(--crust-deep)' },
                 { id: 'PENDING_FILTER', label: 'Pending Approvals', sub: 'Awaiting authorization or PIN reset', count: pending, color: 'var(--brand-red)' }
             ];
 
@@ -12492,6 +12511,7 @@
             const doFilter = document.getElementById('credDoFilter')?.value || 'ALL';
             const storeFilter = (document.getElementById('credStoreFilter')?.value || '').replace(/\D/g, '').trim();
             const roleFilter = document.getElementById('credRoleFilter')?.value || 'ALL';
+            const scopeFilter = document.getElementById('credScopeFilter')?.value || 'ALL';
             const statusFilter = document.getElementById('credStatusFilter')?.value || 'ALL';
 
             const filtered = credentialsList.filter(item => {
@@ -12510,23 +12530,25 @@
                 if (doFilter !== 'ALL' && itemDo !== doFilter) return false;
                 if (storeFilter && itemStore !== storeFilter) return false;
 
+                if (scopeFilter !== 'ALL') {
+                    if (scopeFilter === 'WW' && !item.is_wow_way_trainer) return false;
+                    if (scopeFilter === 'MIT' && !item.is_mit_trainer) return false;
+                }
+
                 if (roleFilter !== 'ALL') {
                     if (roleFilter === 'Executive') {
-                        if (!item.is_exec && (!itemRole || !itemRole.toLowerCase().includes('exec'))) return false;
+                        if (!item.is_exec && (!itemRole || (!itemRole.toLowerCase().includes('exec') && !itemRole.toLowerCase().includes('admin')))) return false;
                     } else if (roleFilter === 'Director of Ops') {
                         if (!item.is_do && (!itemRole || (!itemRole.toLowerCase().includes('director') && !itemRole.toLowerCase().includes('do') && !itemRole.toLowerCase().includes('super')))) return false;
                     } else if (roleFilter === 'General Manager') {
                         if (!item.is_gm && (!itemRole || !itemRole.toLowerCase().includes('general manager'))) return false;
                     } else if (roleFilter === 'Assistant Manager') {
                         if (!itemRole || !itemRole.toLowerCase().includes('assistant')) return false;
-                    } else if (roleFilter === 'Trainer') {
-                        if (!itemRole || !itemRole.toLowerCase().includes('trainer')) return false;
-                    } else if (roleFilter === 'SCOPE_WW') {
-                        if (!item.is_wow_way_trainer) return false;
-                    } else if (roleFilter === 'SCOPE_MIT') {
-                        if (!item.is_mit_trainer) return false;
-                    } else if (roleFilter === 'Supervisor') {
-                        if (!itemRole || (!itemRole.toLowerCase().includes('super') && !itemRole.toLowerCase().includes('do'))) return false;
+                    } else if (roleFilter === 'Manager in Training') {
+                        if (!itemRole || (!itemRole.toLowerCase().includes('training') && !itemRole.toLowerCase().includes('mit')) || itemRole.toLowerCase().includes('director')) return false;
+                    } else if (roleFilter === 'Other') {
+                        const r = itemRole.toLowerCase();
+                        if (item.is_exec || item.is_do || item.is_gm || r.includes('exec') || r.includes('admin') || r.includes('director') || r.includes('do') || r.includes('super') || r.includes('general manager') || r.includes('assistant') || r.includes('training') || r.includes('mit')) return false;
                     } else {
                         if (!itemRole || !itemRole.toLowerCase().includes(roleFilter.toLowerCase())) return false;
                     }
@@ -13156,14 +13178,11 @@
             const storeBtn = document.getElementById('regTypeStoreBtn');
             const aboveBtn = document.getElementById('regTypeAboveBtn');
             const storeCol = document.getElementById('regStoreCol');
-            const aboveRoleCol = document.getElementById('regAboveRoleCol');
-            const roleInput = document.getElementById('regAboveRole');
+            const storeInput = document.getElementById('regStoreNum');
+            const posSelect = document.getElementById('regPosition');
             const emailLabel = document.getElementById('regEmailLabel');
             const emailInput = document.getElementById('regEmail');
-            const storeInput = document.getElementById('regStoreNum');
-            const pulseLabel = document.getElementById('regPulseLabel');
             const submitBtn = document.getElementById('regSubmitBtn');
-            const noticeEl = document.getElementById('regAboveNotice');
             const allOpt = document.getElementById('regMarketAllOpt');
             const marketSelect = document.getElementById('regMarket');
 
@@ -13172,44 +13191,47 @@
                 if (storeBtn) { storeBtn.style.background = 'transparent'; storeBtn.style.color = 'var(--crust-deep)'; storeBtn.style.boxShadow = 'none'; }
                 if (aboveBtn) { aboveBtn.style.background = 'var(--brand-blue)'; aboveBtn.style.color = 'var(--crust-base)'; aboveBtn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.12)'; }
                 if (storeCol) storeCol.classList.add('hidden');
-                if (aboveRoleCol) aboveRoleCol.classList.remove('hidden');
-                if (roleInput) {
-                    roleInput.required = true;
-                    roleInput.onchange = function () {
-                        if (this.value === 'Executive' && marketSelect) {
-                            marketSelect.value = 'All Markets';
-                        }
-                    };
-                }
+                if (storeInput) storeInput.required = false;
                 if (emailLabel) emailLabel.innerText = 'Company Email *';
                 if (emailInput) {
                     emailInput.placeholder = 'e.g. petezah@team-wow.com';
                     emailInput.required = true;
                 }
-                if (storeInput) storeInput.required = false;
-                if (pulseLabel) pulseLabel.innerText = '4-Digit User ID *';
-                if (noticeEl) noticeEl.classList.remove('hidden');
-                if (submitBtn) submitBtn.innerText = 'Register Above-Store PIN';
+                if (submitBtn) submitBtn.innerText = 'Register Leadership PIN';
+
+                if (posSelect && ['General Manager', 'Assistant Manager', 'Manager in Training'].includes(posSelect.value)) {
+                    posSelect.value = 'Director of Ops';
+                }
             } else {
                 if (allOpt) {
                     allOpt.classList.add('hidden');
-                    if (marketSelect && marketSelect.value === 'All Markets') marketSelect.value = '';
+                    if (marketSelect && marketSelect.value === 'All Markets') marketSelect.value = 'Dallas';
                 }
                 if (aboveBtn) { aboveBtn.style.background = 'transparent'; aboveBtn.style.color = 'var(--crust-deep)'; aboveBtn.style.boxShadow = 'none'; }
                 if (storeBtn) { storeBtn.style.background = 'var(--brand-blue)'; storeBtn.style.color = 'var(--crust-base)'; storeBtn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.12)'; }
                 if (storeCol) storeCol.classList.remove('hidden');
-                if (aboveRoleCol) aboveRoleCol.classList.add('hidden');
-                if (roleInput) roleInput.required = false;
+                if (storeInput) storeInput.required = true;
                 if (emailLabel) emailLabel.innerText = 'Email *';
                 if (emailInput) {
                     emailInput.placeholder = 'e.g. petezah@gmail.com';
                     emailInput.required = true;
                 }
-                if (storeInput) storeInput.required = true;
-                if (pulseLabel) pulseLabel.innerText = '4-Digit User ID *';
-                if (noticeEl) noticeEl.classList.add('hidden');
-                if (submitBtn) submitBtn.innerText = 'Register Trainer PIN';
+                if (submitBtn) submitBtn.innerText = 'Register Manager PIN';
+
+                if (posSelect && ['Director of Ops', 'Admin', 'Executive'].includes(posSelect.value)) {
+                    posSelect.value = 'General Manager';
+                }
             }
+        }
+
+        function onRegPositionChanged() {
+            const pos = document.getElementById('regPosition')?.value || '';
+            const isAbove = ['Director of Ops', 'Admin', 'Executive'].includes(pos);
+            const marketSelect = document.getElementById('regMarket');
+            if (pos === 'Executive' && marketSelect) {
+                marketSelect.value = 'All Markets';
+            }
+            setRegAccountType(isAbove ? 'above' : 'store');
         }
 
         function openPinRegistrationModal() {
@@ -13228,8 +13250,8 @@
             if (form) form.reset();
             const marketSelect = document.getElementById('regMarket');
             if (marketSelect) marketSelect.value = 'Dallas';
-            const roleSelect = document.getElementById('regAboveRole');
-            if (roleSelect) roleSelect.value = '';
+            const posSelect = document.getElementById('regPosition');
+            if (posSelect) posSelect.value = '';
             setRegAccountType('store');
 
             setTimeout(() => {
@@ -13255,16 +13277,24 @@
 
             const isAboveStore = (currentRegType === 'above');
             const name = (document.getElementById('regFullName')?.value || '').trim();
+            const position = (document.getElementById('regPosition')?.value || '').trim();
             const pulseId = (document.getElementById('regPulseId')?.value || '').trim();
             const email = (document.getElementById('regEmail')?.value || '').trim();
             const store = isAboveStore ? 'Above-Store' : (document.getElementById('regStoreNum')?.value || '').trim();
             const market = (document.getElementById('regMarket')?.value || '').trim();
-            const role = isAboveStore ? (document.getElementById('regAboveRole')?.value || '').trim() : 'Trainer';
             const pin = (document.getElementById('regPin')?.value || '').trim();
+
+            if (!position) {
+                if (errEl) {
+                    errEl.innerText = 'Please select a Position.';
+                    errEl.classList.remove('hidden');
+                }
+                return;
+            }
 
             if (!market) {
                 if (errEl) {
-                    errEl.innerText = 'Please select your Market.';
+                    errEl.innerText = 'Please select a Market.';
                     errEl.classList.remove('hidden');
                 }
                 return;
@@ -13279,13 +13309,6 @@
             }
 
             if (isAboveStore) {
-                if (!role) {
-                    if (errEl) {
-                        errEl.innerText = 'Please select a Leadership Role.';
-                        errEl.classList.remove('hidden');
-                    }
-                    return;
-                }
                 if (!name || (!pulseId && !email) || pin.length !== 4) {
                     if (errEl) {
                         errEl.innerText = 'Please complete all required fields. Company Email & 4-digit PIN are required.';
@@ -13296,7 +13319,7 @@
             } else {
                 if (!name || !pulseId || !store || pin.length !== 4) {
                     if (errEl) {
-                        errEl.innerText = 'Please complete all required fields. Email & 4-digit PIN are required.';
+                        errEl.innerText = 'Please complete all required fields. Store # and 4-digit PIN are required.';
                         errEl.classList.remove('hidden');
                     }
                     return;
@@ -13316,12 +13339,13 @@
                     body: JSON.stringify({
                         name,
                         pulseId: pulseId || (email ? email.split('@')[0] : ''),
-                        store,
+                        store: isAboveStore ? 'Above-Store' : store,
                         market,
                         pin,
                         isAboveStore,
                         email,
-                        role,
+                        position,
+                        role: position,
                         portal: 'Admin Hub'
                     })
                 });
@@ -13334,9 +13358,15 @@
                 if (formView) formView.classList.add('hidden');
                 if (successView) successView.classList.remove('hidden');
 
-                if (successTitle) successTitle.innerText = 'PIN Registered Successfully!';
-                if (successMsg) successMsg.innerHTML = `Profile for <strong>${escapeHtml(name)}</strong> has been registered in Cloudflare D1.`;
-                if (successSub) successSub.innerText = `PIN ${pin} is now active. Refreshing credentials directory...`;
+                if (data.isPending) {
+                    if (successTitle) successTitle.innerText = 'Authorization Pending';
+                    if (successMsg) successMsg.innerHTML = 'Registration submitted! Your account is awaiting authorization from the Wow Way development team.';
+                    if (successSub) successSub.innerText = 'You will be notified once your PIN credentials are authorized.';
+                } else {
+                    if (successTitle) successTitle.innerText = 'PIN Registered Successfully!';
+                    if (successMsg) successMsg.innerHTML = `Profile for <strong>${escapeHtml(name)}</strong> (${position}) has been registered in Cloudflare D1.`;
+                    if (successSub) successSub.innerText = `PIN ${pin} is now active. Refreshing credentials directory...`;
+                }
 
                 setTimeout(() => {
                     closePinRegistrationModal();
@@ -13351,7 +13381,7 @@
             } finally {
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.innerText = isAboveStore ? 'Register Above-Store PIN' : 'Register Trainer PIN';
+                    submitBtn.innerText = isAboveStore ? 'Register Leadership PIN' : 'Register Manager PIN';
                 }
             }
         }
@@ -13577,7 +13607,7 @@
         setTimeout(checkPendingCredentialsBadge, 2500);
     </script>
     <!-- MIT Leadership Class Tracker Module -->
-    <script src="mit_tracker.js?v=20261019_1255"></script>
+    <script src="mit_tracker.js?v=20261019_1322"></script>
 </body>
 
 </html>

@@ -281,13 +281,28 @@
                         </div>
                     </div>
 
-                    <!-- ROW 1: FULL NAME -->
-                    <div>
-                        <label style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Full Name *</label>
-                        <input type="text" id="regFullName" required placeholder="e.g. Jane Doe" style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 14.5px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                    <!-- ROW 1: FULL NAME & POSITION -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Full Name *</label>
+                            <input type="text" id="regFullName" required placeholder="e.g. Jane Doe" style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 14.5px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                        </div>
+                        <div>
+                            <label style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Position *</label>
+                            <select id="regPosition" required onchange="onRegPositionChanged()" style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 13.5px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                                <option value="" disabled selected>Select Position...</option>
+                                <option value="General Manager">General Manager (Automatic)</option>
+                                <option value="Assistant Manager">Assistant Manager (Requires Authorization)</option>
+                                <option value="Manager in Training">Manager in Training (Requires Authorization)</option>
+                                <option value="Director of Ops">Director of Ops (DO) (Automatic)</option>
+                                <option value="Admin">Admin (Automatic)</option>
+                                <option value="Executive">Executive (Automatic)</option>
+                                <option value="Other">Other (Requires Authorization)</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <!-- ROW 2: MARKET + ROLE / STORE # -->
+                    <!-- ROW 2: MARKET + STORE # -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div>
                             <label style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Market *</label>
@@ -300,18 +315,8 @@
                             </select>
                         </div>
                         <div id="regStoreCol">
-                            <label style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Store # *</label>
+                            <label id="regStoreLabel" style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Store # *</label>
                             <input type="text" id="regStoreNum" placeholder="e.g. 6386" inputmode="numeric" style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 14.5px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
-                        </div>
-                        <div id="regAboveRoleCol" class="hidden">
-                            <label style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Role *</label>
-                            <select id="regAboveRole" style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 13.5px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
-                                <option value="" disabled selected>Select Role...</option>
-                                <option value="Director of Ops">Director of Ops</option>
-                                <option value="Training Director">Training Director</option>
-                                <option value="Market Leader">Market Leader</option>
-                                <option value="Executive">Executive</option>
-                            </select>
                         </div>
                     </div>
 
@@ -790,46 +795,37 @@
         const storeBtn = document.getElementById('regTypeStoreBtn');
         const aboveBtn = document.getElementById('regTypeAboveBtn');
         const storeCol = document.getElementById('regStoreCol');
-        const aboveRoleCol = document.getElementById('regAboveRoleCol');
-        const roleInput = document.getElementById('regAboveRole');
-        const emailLabel = document.getElementById('regEmailLabel');
-        const emailInput = document.getElementById('regEmail');
         const storeInput = document.getElementById('regStoreNum');
-        const pulseLabel = document.getElementById('regPulseLabel');
+        const posSelect = document.getElementById('regPosition');
         const submitBtn = document.getElementById('regSubmitBtn');
-        const noticeEl = document.getElementById('regAboveNotice');
 
         if (type === 'above') {
             if (storeBtn) { storeBtn.style.background = 'transparent'; storeBtn.style.color = 'var(--crust-deep)'; storeBtn.style.boxShadow = 'none'; }
             if (aboveBtn) { aboveBtn.style.background = 'var(--brand-blue)'; aboveBtn.style.color = 'var(--crust-base)'; aboveBtn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.12)'; }
             if (storeCol) storeCol.classList.add('hidden');
-            if (aboveRoleCol) aboveRoleCol.classList.remove('hidden');
-            if (roleInput) roleInput.required = true;
-            if (emailLabel) emailLabel.innerText = 'Company Email *';
-            if (emailInput) {
-                emailInput.placeholder = 'e.g. petezah@team-wow.com';
-                emailInput.required = true;
-            }
             if (storeInput) storeInput.required = false;
-            if (pulseLabel) pulseLabel.innerText = 'Pulse / User ID *';
-            if (noticeEl) noticeEl.classList.remove('hidden');
-            if (submitBtn) submitBtn.innerText = 'Request Above-Store PIN';
+            if (submitBtn) submitBtn.innerText = 'Register Leadership PIN';
+
+            if (posSelect && ['General Manager', 'Assistant Manager', 'Manager in Training'].includes(posSelect.value)) {
+                posSelect.value = 'Director of Ops';
+            }
         } else {
             if (aboveBtn) { aboveBtn.style.background = 'transparent'; aboveBtn.style.color = 'var(--crust-deep)'; aboveBtn.style.boxShadow = 'none'; }
             if (storeBtn) { storeBtn.style.background = 'var(--brand-blue)'; storeBtn.style.color = 'var(--crust-base)'; storeBtn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.12)'; }
             if (storeCol) storeCol.classList.remove('hidden');
-            if (aboveRoleCol) aboveRoleCol.classList.add('hidden');
-            if (roleInput) roleInput.required = false;
-            if (emailLabel) emailLabel.innerText = 'Email *';
-            if (emailInput) {
-                emailInput.placeholder = 'e.g. petezah@gmail.com';
-                emailInput.required = true;
-            }
             if (storeInput) storeInput.required = true;
-            if (pulseLabel) pulseLabel.innerText = 'Pulse ID *';
-            if (noticeEl) noticeEl.classList.add('hidden');
-            if (submitBtn) submitBtn.innerText = 'Register Trainer PIN';
+            if (submitBtn) submitBtn.innerText = 'Register Manager PIN';
+
+            if (posSelect && ['Director of Ops', 'Admin', 'Executive'].includes(posSelect.value)) {
+                posSelect.value = 'General Manager';
+            }
         }
+    }
+
+    function onRegPositionChanged() {
+        const pos = document.getElementById('regPosition')?.value || '';
+        const isAbove = ['Director of Ops', 'Admin', 'Executive'].includes(pos);
+        setRegAccountType(isAbove ? 'above' : 'store');
     }
 
     function openPinRegistrationModal() {
@@ -876,12 +872,20 @@
 
         const isAboveStore = (currentRegType === 'above');
         const name = (document.getElementById('regFullName')?.value || '').trim();
+        const position = (document.getElementById('regPosition')?.value || '').trim();
         const pulseId = (document.getElementById('regPulseId')?.value || '').trim();
         const email = (document.getElementById('regEmail')?.value || '').trim();
         const store = isAboveStore ? 'Above-Store' : (document.getElementById('regStoreNum')?.value || '').trim();
         const market = (document.getElementById('regMarket')?.value || '').trim();
-        const role = isAboveStore ? (document.getElementById('regAboveRole')?.value || '').trim() : 'Trainer';
         const pin = (document.getElementById('regPin')?.value || '').trim();
+
+        if (!position) {
+            if (errEl) {
+                errEl.innerText = 'Please select your Position.';
+                errEl.classList.remove('hidden');
+            }
+            return;
+        }
 
         if (!market) {
             if (errEl) {
@@ -900,13 +904,6 @@
         }
 
         if (isAboveStore) {
-            if (!role) {
-                if (errEl) {
-                    errEl.innerText = 'Please select your Leadership Role.';
-                    errEl.classList.remove('hidden');
-                }
-                return;
-            }
             if (!name || (!pulseId && !email) || pin.length !== 4) {
                 if (errEl) {
                     errEl.innerText = 'Please complete all required fields. Company Email & 4-digit PIN are required.';
@@ -917,7 +914,7 @@
         } else {
             if (!name || !pulseId || !store || pin.length !== 4) {
                 if (errEl) {
-                    errEl.innerText = 'Please complete all required fields. Email & 4-digit PIN are required.';
+                    errEl.innerText = 'Please complete all required fields. Store # and 4-digit PIN are required.';
                     errEl.classList.remove('hidden');
                 }
                 return;
@@ -927,7 +924,7 @@
         if (errEl) errEl.classList.add('hidden');
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.innerText = isAboveStore ? 'Requesting Above-Store PIN...' : 'Registering PIN...';
+            submitBtn.innerText = 'Registering PIN...';
         }
 
         try {
@@ -941,12 +938,13 @@
                 body: JSON.stringify({
                     name,
                     pulseId: pulseId || (email ? email.split('@')[0] : ''),
-                    store,
+                    store: isAboveStore ? 'Above-Store' : store,
                     market,
                     pin,
                     isAboveStore,
                     email,
-                    role
+                    position,
+                    role: position
                 })
             });
 
@@ -955,12 +953,14 @@
                 throw new Error(data.error || 'Failed to register PIN.');
             }
 
-            const isAuthorizedRole = data.user && (data.user.is_gm || data.user.is_do || data.user.is_admin || data.user.is_exec);
-
             if (formView) formView.classList.add('hidden');
             if (successView) successView.classList.remove('hidden');
 
-            if (isAuthorizedRole) {
+            if (data.isPending) {
+                if (successTitle) successTitle.innerText = 'Authorization Pending';
+                if (successMsg) successMsg.innerHTML = 'Registration submitted! Your account is awaiting authorization from the Wow Way development team.';
+                if (successSub) successSub.innerText = 'You will be notified once your PIN credentials are authorized.';
+            } else {
                 if (successTitle) successTitle.innerText = isAboveStore ? 'Leadership Access Confirmed!' : 'Manager Access Confirmed!';
                 if (successMsg) successMsg.innerHTML = isAboveStore 
                     ? `Welcome <strong>${name}</strong>! Your executive credentials have been verified for ${market} Above-Store. Unlocking Staffing Command...`
@@ -975,22 +975,6 @@
                         submitPinAuth();
                     }
                 }, 1500);
-            } else if (data.isExistingTrainerRequest) {
-                if (successTitle) successTitle.innerText = 'Approval Request Sent to Mike Jacobs!';
-                if (successMsg) successMsg.innerHTML = isAboveStore
-                    ? `Your leadership profile (<strong>${name}</strong>) has been verified.`
-                    : `Your Wow Way profile (<strong>${name}</strong>) has been verified for Store #${store}.`;
-                if (successSub) successSub.innerHTML = isAboveStore
-                    ? `Mike Jacobs has been sent a 1-click mobile authorization link. Once approved, confirmation will be emailed strictly to <strong>${email || 'your company address'}</strong>. Store accounts will not be messaged.`
-                    : 'Mike Jacobs has been sent a 1-click mobile authorization link. Once approved, your PIN will unlock GM Staffing Command immediately.';
-            } else {
-                if (successTitle) successTitle.innerText = isAboveStore ? 'Above-Store Registration Submitted!' : 'PIN Registered Successfully!';
-                if (successMsg) successMsg.innerHTML = isAboveStore
-                    ? `Your 4-digit PIN (<strong>${pin}</strong>) is recorded for <strong>${name}</strong> (${role}).`
-                    : `Your 4-digit PIN (<strong>${pin}</strong>) is active for Wow Way Training for <strong>${name}</strong>.`;
-                if (successSub) successSub.innerHTML = isAboveStore
-                    ? `An authorization notice has been emailed to Mike Jacobs with 1-click mobile approval for Above-Store Staffing Tracker access. Credentials will be emailed strictly to <strong>${email || 'your company address'}</strong>. Store accounts are never contacted.`
-                    : 'An authorization notice has been emailed to Mike Jacobs with 1-click mobile approval for GM Staffing Tracker access. Once approved, your PIN will unlock this portal.';
             }
 
         } catch (err) {
@@ -1001,7 +985,7 @@
         } finally {
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.innerText = isAboveStore ? 'Request Above-Store PIN' : 'Register Trainer PIN';
+                submitBtn.innerText = isAboveStore ? 'Register Leadership PIN' : 'Register Manager PIN';
             }
         }
     }

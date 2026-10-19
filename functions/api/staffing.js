@@ -493,11 +493,17 @@ export async function onRequestGet(context) {
                                      trainer.store_num === 'DO' || 
                                      trainer.store_num === 'Exec';
 
-            if (isDoOrAboveStore) {
-                await db.prepare("UPDATE trainer_credentials SET is_do = 1, is_gm = 1, is_active = 1, role = CASE WHEN role = 'General Manager' THEN 'Director of Ops' ELSE COALESCE(role, 'Director of Ops') END, notes = TRIM(REPLACE(REPLACE(REPLACE(REPLACE(COALESCE(notes, ''), ' - Pending GM Access Approval', ''), ' - Pending Approval', ''), 'Pending Approval', ''), '[Pending GM Access Approval]', '')), updated_at = CURRENT_TIMESTAMP WHERE LOWER(trainer_id) = LOWER(?)").bind(trainer.trainer_id).run();
-            } else {
-                await db.prepare("UPDATE trainer_credentials SET is_gm = 1, is_active = 1, role = 'General Manager', notes = TRIM(REPLACE(REPLACE(REPLACE(REPLACE(COALESCE(notes, ''), ' - Pending GM Access Approval', ''), ' - Pending Approval', ''), 'Pending Approval', ''), '[Pending GM Access Approval]', '')), updated_at = CURRENT_TIMESTAMP WHERE LOWER(trainer_id) = LOWER(?)").bind(trainer.trainer_id).run();
-            }
+            const isGmRole = trainer.role === 'General Manager';
+            await db.prepare(`
+                UPDATE trainer_credentials SET
+                    is_active = 1,
+                    is_wow_way_trainer = 1,
+                    is_gm = CASE WHEN ? THEN 1 ELSE is_gm END,
+                    is_do = CASE WHEN ? THEN 1 ELSE is_do END,
+                    notes = TRIM(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(COALESCE(notes, ''), ' - Pending Authorization', ''), ' - Pending GM Access Approval', ''), ' - Pending Approval', ''), 'Pending Approval', ''), '[Pending GM Access Approval]', '')),
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE LOWER(trainer_id) = LOWER(?)
+            `).bind(isGmRole ? 1 : 0, isDoOrAboveStore ? 1 : 0, trainer.trainer_id).run();
 
             // Dispatch confirmation notice to the trainer (Strictly corporate email for above-store!)
             let candidateEmail = String(trainer.email || (trainer.trainer_id && trainer.trainer_id.includes('@') ? trainer.trainer_id : '')).trim();
@@ -513,7 +519,7 @@ export async function onRequestGet(context) {
                 market: trainer.market,
                 pin: trainer.trainer_pin,
                 email: candidateEmail,
-                role: isDoOrAboveStore ? (trainer.role === 'General Manager' ? 'Director of Ops' : (trainer.role || 'Director of Ops')) : 'General Manager',
+                role: trainer.role || (isDoOrAboveStore ? 'Director of Ops' : 'Team Member'),
                 isDo: isDoOrAboveStore,
                 isAboveStore: isDoOrAboveStore
             }, context);
@@ -1597,7 +1603,7 @@ export async function onRequestPost(context) {
             else if (rawMarket === "dallas") reqMarket = "Dallas";
             else if (payload.market) reqMarket = String(payload.market).trim();
 
-            const isAboveStore = !!payload.isAboveStore || payload.accountType === 'above' || rawStoreNum.toLowerCase() === 'above-store' || rawStoreNum.toLowerCase() === 'do';
+            let isAboveStore = !!payload.isAboveStore || payload.accountType === 'above' || rawStoreNum.toLowerCase() === 'above-store' || rawStoreNum.toLowerCase() === 'do';
             const email = String(payload.email || (pulseId.includes('@') ? pulseId : '')).trim();
             const requestedRole = String(payload.role || (isAboveStore ? 'Director of Ops' : 'Trainer')).trim();
 
@@ -1609,12 +1615,6 @@ export async function onRequestPost(context) {
             }
 
             if (isAboveStore) {
-                if (!payload.role || !String(payload.role).trim()) {
-                    return new Response(JSON.stringify({
-                        success: false,
-                        error: "Please select a Leadership Role."
-                    }), { status: 400, headers: corsHeaders() });
-                }
                 if (!trainerName || (!pulseId && !email) || !email || rawPin.length !== 4) {
                     return new Response(JSON.stringify({
                         success: false,
@@ -1622,8 +1622,8 @@ export async function onRequestPost(context) {
                     }), { status: 400, headers: corsHeaders() });
                 }
             } else {
-                const cleanStoreNum = rawStoreNum.replace(/\D/g, '').trim();
-                if (!trainerName || !pulseId || !cleanStoreNum || !email || rawPin.length !== 4) {
+                const storeCheck = rawStoreNum.replace(/\D/g, '').trim();
+                if (!trainerName || !pulseId || (!storeCheck && !payload.position?.includes('Director') && !payload.position?.includes('Exec') && !payload.position?.includes('Admin')) || !email || rawPin.length !== 4) {
                     return new Response(JSON.stringify({
                         success: false,
                         error: "All fields are required. Please enter your name, Pulse ID, 4-digit store number, email address, and a 4-digit PIN."
@@ -1632,7 +1632,7 @@ export async function onRequestPost(context) {
             }
 
             const cleanPin = rawPin.padStart(4, '0');
-            const cleanStoreNum = isAboveStore ? 'Above-Store' : rawStoreNum.replace(/\D/g, '').trim();
+            let cleanStoreNum = isAboveStore ? 'Above-Store' : rawStoreNum.replace(/\D/g, '').trim();
             const effectiveId = pulseId || email;
 
             // 1. FORBIDDEN PIN BLACKLIST
@@ -1784,17 +1784,29 @@ export async function onRequestPost(context) {
                 }), { status: 200, headers: corsHeaders() });
             }
 
-            // 4. ROLE DETECTION & VALIDATION
-            let detectedRole = isAboveStore ? (requestedRole || 'Director of Ops') : 'Trainer';
+            // 4. POSITION & ROLE DETERMINATION
+            let position = String(payload.position || payload.role || '').trim();
+            if (!position) {
+                position = isAboveStore ? 'Director of Ops' : 'Other';
+            }
 
-            if (isAboveStore) {
-                // Check if email or name matches a recognized DO in stores
-                const doMatch = await db.prepare("SELECT DISTINCT do_name, do_email, market FROM stores WHERE (LOWER(do_email) = LOWER(?) AND do_email != '') OR LOWER(do_name) = LOWER(?) LIMIT 1").bind(email, trainerName).first();
-                if (doMatch) {
-                    detectedRole = requestedRole || 'Director of Ops';
-                }
-            } else {
-                // Store-level validation
+            // Canonical normalization of Position
+            if (/general\s*manager/i.test(position)) position = 'General Manager';
+            else if (/assistant\s*manager/i.test(position)) position = 'Assistant Manager';
+            else if (/manager\s*in\s*training|mit/i.test(position)) position = 'Manager in Training';
+            else if (/director\s*of\s*ops|do/i.test(position)) position = 'Director of Ops';
+            else if (/admin/i.test(position)) position = 'Admin';
+            else if (/exec/i.test(position)) position = 'Executive';
+            else position = 'Other';
+
+            const isAboveStoreRole = position === 'Director of Ops' || position === 'Admin' || position === 'Executive';
+            if (isAboveStoreRole) {
+                isAboveStore = true;
+                cleanStoreNum = 'Above-Store';
+            }
+
+            // Store-level validation if not above-store
+            if (!isAboveStore && cleanStoreNum && cleanStoreNum !== 'Above-Store') {
                 const storeRow = await db.prepare("SELECT store_number, market, manager_name, do_name FROM stores WHERE store_number = ? LIMIT 1").bind(cleanStoreNum).first();
 
                 if (!storeRow) {
@@ -1810,25 +1822,16 @@ export async function onRequestPost(context) {
                         error: `Store #${cleanStoreNum} belongs to the ${storeRow.market} market and cannot be registered under the ${reqMarket} market.`
                     }), { status: 400, headers: corsHeaders() });
                 }
-
-                const gmName = (storeRow.manager_name || '').toLowerCase().trim();
-                const doName = (storeRow.do_name || '').toLowerCase().trim();
-                const inputName = trainerName.toLowerCase().trim();
-
-                if (gmName && (gmName.includes(inputName) || inputName.includes(gmName))) {
-                    detectedRole = 'General Manager';
-                } else if (doName && (doName.includes(inputName) || inputName.includes(doName))) {
-                    detectedRole = 'Director of Ops';
-                }
             }
 
-            // ADMIN HUB PROVISIONING (Mike Jacobs creating user directly in hub)
-            if (isAdminHub) {
-                const finalRole = isAboveStore ? (requestedRole || 'Director of Ops') : (requestedRole || (detectedRole === 'General Manager' ? 'General Manager' : 'Trainer'));
-                const isExecRole = finalRole === 'Executive';
-                const isGmRole = isAboveStore || finalRole === 'General Manager';
-                const isDoRole = isAboveStore || finalRole === 'Director of Ops';
-                const regNote = isAboveStore ? 'Provisioned via Admin Hub (Above-Store)' : 'Provisioned via Admin Hub';
+            // Automatic Approval: General Manager, Director of Ops, Admin, Executive (or Admin Hub provision)
+            const isAutoApprove = ['General Manager', 'Director of Ops', 'Admin', 'Executive'].includes(position) || isAdminHub;
+
+            if (isAutoApprove) {
+                const isGmRole = position === 'General Manager';
+                const isDoRole = position === 'Director of Ops';
+                const isExecRole = position === 'Executive' || position === 'Admin';
+                const regNote = isAdminHub ? 'Provisioned via Admin Hub' : `Self-Registered (${position}) - Auto-Approved`;
 
                 await db.prepare(`
                     INSERT OR REPLACE INTO trainer_credentials (
@@ -1837,10 +1840,9 @@ export async function onRequestPost(context) {
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, 1, 1, ?, ?, ?, ?, 1, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                 `).bind(
                     effectiveId, trainerName, cleanPin, cleanStoreNum, reqMarket,
-                    email, finalRole, isGmRole ? 1 : 0, isDoRole ? 1 : 0, isExecRole ? 1 : 0, isExecRole ? 1 : 0, regNote
+                    email, position, isGmRole ? 1 : 0, isDoRole ? 1 : 0, isExecRole ? 1 : 0, isExecRole ? 1 : 0, regNote
                 ).run();
 
-                // Send Credentials email directly to the recipient!
                 if (email) {
                     await callAppsScriptProxy({
                         action: "sendGmApprovalNoticeToTrainer",
@@ -1850,24 +1852,25 @@ export async function onRequestPost(context) {
                         market: reqMarket,
                         pin: cleanPin,
                         email: email,
-                        role: finalRole,
-                        isDo: isAboveStore,
-                        isAboveStore: isAboveStore,
+                        role: position,
+                        isDo: isAboveStoreRole,
+                        isAboveStore: isAboveStoreRole,
                         isProvisioned: true,
-                        portal: "Admin Hub"
+                        portal: isAdminHub ? "Admin Hub" : "Wow Way Training"
                     }, context);
                 }
 
                 return new Response(JSON.stringify({
                     success: true,
-                    message: `Profile registered! Credentials and login PIN have been emailed directly to ${trainerName} (${email || 'on file'}).`,
+                    isPending: false,
+                    message: "Registration approved! Your 4-digit PIN is active.",
                     user: {
                         trainer_id: effectiveId,
                         name: trainerName,
                         pin: cleanPin,
                         store: cleanStoreNum,
                         market: reqMarket,
-                        role: finalRole,
+                        role: position,
                         is_gm: isGmRole,
                         is_do: isDoRole,
                         is_admin: isExecRole,
@@ -1878,27 +1881,24 @@ export async function onRequestPost(context) {
                 }), { status: 200, headers: corsHeaders() });
             }
 
-            // PUBLIC SELF-REGISTRATION WORKFLOW (Requires Mike's explicit approval!)
-            const regNote = isMitPortal
-                ? (isAboveStore ? 'Self-Registered Above-Store (MIT) - Pending Approval' : 'Self-Registered (MIT Portal) - Pending Approval')
-                : (isAboveStore ? 'Self-Registered Above-Store - Pending Approval' : 'Self-Registered - Pending Approval');
+            // REQUIRES AUTHORIZATION (Assistant Manager, Manager in Training, Other)
+            const regNote = `Self-Registered (${position}) - Pending Authorization`;
 
             await db.prepare(`
                 INSERT OR REPLACE INTO trainer_credentials (
                     trainer_id, trainer_name, trainer_pin, store_num, market,
                     email, role, is_wow_way_trainer, is_mit_trainer, is_gm, is_do, is_admin, is_exec, is_active, notes, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, 0, 0, 0, 0, 1, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 0, 0, 0, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             `).bind(
                 effectiveId, trainerName, cleanPin, cleanStoreNum, reqMarket,
-                email, detectedRole, isAboveStore ? 1 : 0, regNote
+                email, position, regNote
             ).run();
 
-            // 5. EMAIL NOTIFICATION: Notify Mike Jacobs with 1-click mobile approval links
+            // Notify Mike Jacobs / Wow Way team with 1-click decision links
             const token = generateGmDecisionToken(effectiveId, cleanPin);
             const baseUrl = "https://tw-staffing.pages.dev/api/staffing";
-            const scopeParam = isMitPortal ? "&scope=mit" : "";
-            const approveUrl = `${baseUrl}?action=decideGmAccess&id=${encodeURIComponent(effectiveId)}&pin=${encodeURIComponent(cleanPin)}&token=${token}&decision=approve${scopeParam}`;
-            const denyUrl = `${baseUrl}?action=decideGmAccess&id=${encodeURIComponent(effectiveId)}&pin=${encodeURIComponent(cleanPin)}&token=${token}&decision=deny${scopeParam}`;
+            const approveUrl = `${baseUrl}?action=decideGmAccess&id=${encodeURIComponent(effectiveId)}&pin=${encodeURIComponent(cleanPin)}&token=${token}&decision=approve`;
+            const denyUrl = `${baseUrl}?action=decideGmAccess&id=${encodeURIComponent(effectiveId)}&pin=${encodeURIComponent(cleanPin)}&token=${token}&decision=deny`;
 
             await callAppsScriptProxy({
                 action: "sendTrainerPinRequestEmail",
@@ -1908,34 +1908,28 @@ export async function onRequestPost(context) {
                 market: reqMarket,
                 pin: cleanPin,
                 email: email,
-                role: detectedRole,
-                portal: isMitPortal ? "MIT Trainer Portal" : (isAboveStore ? "Above-Store Command" : "GM Staffing Command"),
-                isMitRequest: isMitPortal,
+                role: position,
+                portal: "Wow Way Training",
+                isMitRequest: false,
                 isGm: false,
-                isDo: isAboveStore || detectedRole === 'Supervisor' || detectedRole === 'Director of Ops',
-                isAboveStore: isAboveStore,
+                isDo: false,
+                isAboveStore: isAboveStoreRole,
                 isExistingTrainer: false,
                 approveUrl: approveUrl,
                 denyUrl: denyUrl
             }, context);
 
-            let successNotice = `PIN registered! An authorization request has been sent to Mike Jacobs for GM Staffing Command access.`;
-            if (isMitPortal) {
-                successNotice = `PIN registered! An authorization request has been sent to Mike Jacobs for MIT Trainer Portal access.`;
-            } else if (isAboveStore) {
-                successNotice = `PIN registered! An authorization request has been sent to Mike Jacobs for Above-Store Staffing Command access.`;
-            }
-
             return new Response(JSON.stringify({
                 success: true,
-                message: successNotice,
+                isPending: true,
+                message: "Registration submitted! Your account is awaiting authorization from the Wow Way development team.",
                 user: {
                     trainer_id: effectiveId,
                     name: trainerName,
                     pin: cleanPin,
                     store: cleanStoreNum,
                     market: reqMarket,
-                    role: detectedRole,
+                    role: position,
                     is_gm: false,
                     is_do: false,
                     is_mit_trainer: false
