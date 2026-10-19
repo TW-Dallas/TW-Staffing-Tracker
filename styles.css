@@ -640,12 +640,12 @@
         }
 
         .checkbox-grid { 
-            display: flex;
-            flex-direction: column;
-            gap: 10px; 
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px 20px; 
             margin-top: 8px; 
             background: var(--crust-light); 
-            padding: 10px 12px; 
+            padding: 12px 14px; 
             border-radius: 8px; 
         }
         .stage-collapsible-wrapper {
@@ -699,8 +699,8 @@
         .checkbox-subgrid.three-col {
             grid-template-columns: 1fr 1fr 1fr;
         }
-        .checkbox-item { display: flex; align-items: center; gap: 8px; font-family: 'Condensed', sans-serif; font-size: 17px; cursor: pointer; }
-        .checkbox-item input { width: 17px; height: 17px; cursor: pointer; flex-shrink: 0; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; font-family: 'Condensed', sans-serif; font-size: 17px; cursor: pointer; user-select: none; }
+        .checkbox-item input { width: 17px; height: 17px; cursor: pointer; flex-shrink: 0; accent-color: var(--brand-blue); margin: 0; }
 
         .section-header {
             font-family: 'ExtraBold', sans-serif;
@@ -983,6 +983,7 @@
             .form-actions button { width: 100%; }
 
             /* Checkbox & Flags Grids */
+            .checkbox-grid,
             .checkbox-subgrid { 
                 grid-template-columns: 1fr !important;
                 gap: 8px;
