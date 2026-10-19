@@ -12,7 +12,7 @@
     <title>Onboarder Portal</title>
     <link class="favicon" rel="icon" type="image/png" href="images/staffing_icon.png">
     <link rel="apple-touch-icon" href="images/staffing_icon.png">
-    <link rel="stylesheet" href="styles.css?v=20261019_0645">
+    <link rel="stylesheet" href="styles.css?v=20261019_0656">
 </head>
 
 <body>
@@ -3423,6 +3423,9 @@
                     staffing = cachedData.staffing || [];
                     contacts = cachedData.contacts || [];
                     paycards = processPayCards(cachedData);
+                    if (cachedData.ntoClasses && Array.isArray(cachedData.ntoClasses)) {
+                        window.ntoCalendarClassesCache = cachedData.ntoClasses;
+                    }
 
                     document.getElementById('authContainer').classList.add('hidden');
                     document.getElementById('appContainer').classList.remove('hidden');
@@ -3463,6 +3466,9 @@
                 contacts = data.contacts || [];
                 adminContacts = data.adminContacts || [];
                 paycards = processPayCards(data);
+                if (data.ntoClasses && Array.isArray(data.ntoClasses)) {
+                    window.ntoCalendarClassesCache = data.ntoClasses;
+                }
 
                 // Scratchpad Safeguard: Never let a blank server response clobber existing local notes
                 const localScratchText = localStorage.getItem(`scratchpad_text_${u}`) || '';
@@ -3541,6 +3547,9 @@
                 staffing = data.staffing || [];
                 contacts = data.contacts || [];
                 paycards = processPayCards(data);
+                if (data.ntoClasses && Array.isArray(data.ntoClasses)) {
+                    window.ntoCalendarClassesCache = data.ntoClasses;
+                }
                 renderList();
                 updateAuditMetrics();
                 if (currentView === 'nto') {
@@ -3566,6 +3575,9 @@
 
                 try {
                     const data = await apiCall('GET');
+                    if (data && data.ntoClasses && Array.isArray(data.ntoClasses)) {
+                        window.ntoCalendarClassesCache = data.ntoClasses;
+                    }
                     if (data && Array.isArray(data.onboarding)) {
                         // Check if any candidate's ntoAttendance, lastUpdated, or quizScore changed
                         let hasChanges = false;
@@ -3579,6 +3591,7 @@
                         if (hasChanges) {
                             candidates = data.onboarding;
                             renderNtoClassView();
+                            renderNtoSidebar();
                             renderList();
                             updateAuditMetrics();
                         }
@@ -8531,8 +8544,8 @@
                     cand.ntoScheduled = true;
                 }
 
-                // Invalidate calendar cache to force fresh reload
-                window.ntoCalendarClassesCache = null;
+                // Refresh calendar classes and roster counts
+                await fetchNtoCalendarClasses();
 
                 closeRescheduleNtoModal();
                 showLoader(false);
@@ -8541,6 +8554,7 @@
 
                 // Refresh views
                 renderNtoClassView();
+                renderNtoSidebar();
                 renderList();
             } catch (err) {
                 showLoader(false);
@@ -10101,6 +10115,9 @@
         // --- NTO CLASS CALENDAR MODAL FUNCTIONS ---
         function openClassCalendarModal() {
             document.getElementById('classCalendarModal').classList.remove('hidden');
+            const showPastCheck = document.getElementById('ntoModalShowPast');
+            if (showPastCheck) showPastCheck.checked = false;
+
             // Pre-fill date picker with tomorrow's date
             const tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
@@ -10113,6 +10130,11 @@
             document.getElementById('newClassStart').value = '';
             document.getElementById('newClassEnd').value = '';
 
+            // Render existing cached classes immediately so table isn't blank
+            if (window.ntoCalendarClassesCache && window.ntoCalendarClassesCache.length > 0) {
+                renderNtoCalendarManagerTable();
+            }
+
             fetchNtoCalendarClasses();
         }
 
@@ -10122,59 +10144,118 @@
 
         async function fetchNtoCalendarClasses() {
             const tbody = document.getElementById('classCalendarTableBody');
-            if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color:#888; font-size: 17px;">Loading scheduled classes...</td></tr>`;
+            if (tbody && (!window.ntoCalendarClassesCache || window.ntoCalendarClassesCache.length === 0)) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color:#888; font-size: 17px;">Loading scheduled classes...</td></tr>`;
+            }
 
             try {
                 const data = await apiCall('POST', { action: 'getNtoClasses' });
                 if (!data.success || !data.classes || data.classes.length === 0) {
                     window.ntoCalendarClassesCache = [];
                     if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color:#888; font-size: 17px;">No scheduled classes found.</td></tr>`;
+                    renderNtoSidebar();
+                    renderNtoClassView();
                     return;
                 }
 
                 window.ntoCalendarClassesCache = data.classes;
-
-                // Sort classes chronologically (upcoming / earliest class at TOP)
-                data.classes.sort((a, b) => {
-                    const dtA = parseCandidateDate(a.classDate);
-                    const dtB = parseCandidateDate(b.classDate);
-                    const timeA = dtA ? dtA.getTime() : 0;
-                    const timeB = dtB ? dtB.getTime() : 0;
-                    return timeA - timeB;
-                });
-
-                if (tbody) {
-                    tbody.innerHTML = '';
-                    data.classes.forEach(c => {
-                        const row = document.createElement('tr');
-                        row.style.borderBottom = '1px solid var(--crust-med)';
-                        const startDisp = formatTimeDisplayFrontEnd(c.startTime) || c.startTime;
-                        const endDisp = formatTimeDisplayFrontEnd(c.endTime) || c.endTime;
-                        row.innerHTML = `
-                        <td style="padding: 10px 12px; font-weight: bold; color: var(--dark-blue); font-size: 17px;">
-                            ${c.classDate} <br><span style="font-size: 13px; color: var(--brand-grey); font-weight: normal;">${c.classId || 'Auto ID'}</span>
-                        </td>
-                        <td style="padding: 10px 12px; text-align: center; font-size: 17px;">${startDisp} - ${endDisp}</td>
-                        <td style="padding: 10px 12px; text-align: center; font-size: 17px;">${c.trainerName}</td>
-                        <td style="padding: 10px 12px; text-align: center; font-weight: bold; font-size: 17px;">${c.capacity}</td>
-                        <td style="padding: 10px 12px; text-align: center; white-space: nowrap;">
-                            <button type="button" onclick="startNtoReschedule('${c.classId}', '${c.classDate}', '${c.startTime}', '${c.endTime}', '${c.trainerName}', '${c.capacity}')" style="background: var(--brand-blue); color: white; border: none; padding: 6px 12px; font-size: 14px; border-radius: 4px; cursor: pointer; font-family: 'Subhead2'; margin-right: 6px;" title="Reschedule Session">
-                                ✏️ Reschedule
-                            </button>
-                            <button type="button" onclick="deleteNtoClassSession('${c.classId}', '${c.classDate}', ${c.rowNum})" style="background: var(--brand-red); color: white; border: none; padding: 6px 12px; font-size: 14px; border-radius: 4px; cursor: pointer; font-family: 'Subhead2';" title="Cancel Session">
-                                🗑️ Cancel
-                            </button>
-                        </td>
-                    `;
-                        tbody.appendChild(row);
-                    });
-                }
-
-                // Populate Class Start Time & End Time placeholder on main action bar
+                renderNtoCalendarManagerTable();
+                renderNtoSidebar();
                 renderNtoClassView();
             } catch (err) {
-                if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color: var(--brand-red); font-size: 17px;">Error loading calendar.</td></tr>`;
+                if (tbody && (!window.ntoCalendarClassesCache || window.ntoCalendarClassesCache.length === 0)) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color: var(--brand-red); font-size: 17px;">Error loading calendar.</td></tr>`;
+                }
             }
+        }
+
+        function renderNtoCalendarManagerTable() {
+            const tbody = document.getElementById('classCalendarTableBody');
+            if (!tbody) return;
+
+            const classes = window.ntoCalendarClassesCache || [];
+            if (!Array.isArray(classes) || classes.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color:#888; font-size: 17px;">No scheduled classes found.</td></tr>`;
+                return;
+            }
+
+            const showPastCheckbox = document.getElementById('ntoModalShowPast');
+            const showPast = showPastCheckbox ? showPastCheckbox.checked : false;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Separate into upcoming and past
+            const upcoming = [];
+            const past = [];
+
+            classes.forEach(c => {
+                const dt = parseCandidateDate(c.classDate);
+                const time = dt ? dt.getTime() : 0;
+                if (dt && time >= today.getTime()) {
+                    upcoming.push({ ...c, _time: time, _isPast: false });
+                } else {
+                    past.push({ ...c, _time: time, _isPast: true });
+                }
+            });
+
+            // Soonest upcoming classes at TOP (ascending date: earliest future date first)
+            upcoming.sort((a, b) => a._time - b._time);
+
+            // Past classes (descending date: most recent past date first)
+            past.sort((a, b) => b._time - a._time);
+
+            let displayList = [];
+            if (showPast) {
+                displayList = [...upcoming, ...past];
+            } else {
+                displayList = upcoming;
+            }
+
+            if (displayList.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align:center; padding: 24px; color: var(--brand-grey); font-size: 16px;">
+                            No upcoming classes scheduled.<br>
+                            <span style="font-size: 13.5px; color: var(--crust-deep); margin-top: 4px; display: inline-block;">
+                                Use the form above to add an upcoming session, or check <strong>Show past sessions</strong>.
+                            </span>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            displayList.forEach(c => {
+                const row = document.createElement('tr');
+                row.style.borderBottom = '1px solid var(--crust-med)';
+                if (c._isPast) {
+                    row.style.background = '#f9f9f9';
+                    row.style.opacity = '0.78';
+                }
+                const startDisp = formatTimeDisplayFrontEnd(c.startTime) || c.startTime;
+                const endDisp = formatTimeDisplayFrontEnd(c.endTime) || c.endTime;
+                const pastBadge = c._isPast ? `<span style="font-size: 11px; background: #e0e0e0; color: #555; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: 6px; text-transform: uppercase;">Past</span>` : '';
+
+                row.innerHTML = `
+                    <td style="padding: 10px 12px; font-weight: bold; color: var(--dark-blue); font-size: 17px;">
+                        ${c.classDate} ${pastBadge}<br><span style="font-size: 13px; color: var(--brand-grey); font-weight: normal;">${c.classId || 'Auto ID'}</span>
+                    </td>
+                    <td style="padding: 10px 12px; text-align: center; font-size: 17px;">${startDisp} - ${endDisp}</td>
+                    <td style="padding: 10px 12px; text-align: center; font-size: 17px;">${c.trainerName || c.trainer || ''}</td>
+                    <td style="padding: 10px 12px; text-align: center; font-weight: bold; font-size: 17px;">${c.capacity || 15}</td>
+                    <td style="padding: 10px 12px; text-align: center; white-space: nowrap;">
+                        <button type="button" onclick="startNtoReschedule('${c.classId}', '${c.classDate}', '${c.startTime}', '${c.endTime}', '${c.trainerName || c.trainer || ''}', '${c.capacity || 15}')" style="background: var(--brand-blue); color: white; border: none; padding: 6px 12px; font-size: 14px; border-radius: 4px; cursor: pointer; font-family: 'Subhead2'; margin-right: 6px;" title="Reschedule Session">
+                            ✏️ Reschedule
+                        </button>
+                        <button type="button" onclick="deleteNtoClassSession('${c.classId}', '${c.classDate}', ${c.rowNum || 0})" style="background: var(--brand-red); color: white; border: none; padding: 6px 12px; font-size: 14px; border-radius: 4px; cursor: pointer; font-family: 'Subhead2';" title="Cancel Session">
+                            🗑️ Cancel
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
         }
 
         function startNtoReschedule(classId, classDate, startTime, endTime, trainerName, capacity) {
@@ -10283,8 +10364,22 @@
                     notifyAttendees: true
                 });
 
+                // Update local cache immediately
+                if (window.ntoCalendarClassesCache) {
+                    const cls = window.ntoCalendarClassesCache.find(c => c.classId === editClassId);
+                    if (cls) {
+                        cls.classDate = formattedDateStr;
+                        cls.startTime = startTime;
+                        cls.endTime = endTime;
+                        cls.trainerName = trainerName;
+                    }
+                }
+
                 showLoader(false);
                 cancelNtoReschedule();
+                renderNtoCalendarManagerTable();
+                renderNtoSidebar();
+                renderNtoClassView();
                 showBrandAlert(res.message || "Class successfully rescheduled!", "Session Updated");
                 fetchNtoCalendarClasses();
             } catch (err) {
@@ -10317,7 +10412,7 @@
             showLoader(true, "Adding new NTO class session...");
 
             try {
-                await apiCall('POST', {
+                const res = await apiCall('POST', {
                     action: 'addNtoClass',
                     classDate: formattedDateStr,
                     startTime: startTime,
@@ -10326,8 +10421,30 @@
                     capacity: capacity
                 });
 
+                // Immediately update local cache so it appears everywhere with zero delay
+                if (!window.ntoCalendarClassesCache) window.ntoCalendarClassesCache = [];
+                const u = localStorage.getItem('onb_user') || '';
+                const isDenver = u.toLowerCase().startsWith('denver');
+                const trainerCode = isDenver ? "Ric" : "Mik";
+                const autoId = res.id || `${year}${month}${day}-00-${trainerCode}`;
+                window.ntoCalendarClassesCache.push({
+                    id: autoId,
+                    classId: autoId,
+                    classDate: formattedDateStr,
+                    startTime: startTime || '6:00 PM',
+                    endTime: endTime || '7:15 PM',
+                    trainerName: trainerName || (isDenver ? 'Richard' : 'Mike'),
+                    capacity: parseInt(capacity || 15, 10),
+                    spotsTaken: 0,
+                    attendees: []
+                });
+
                 document.getElementById('newClassStart').value = '';
                 document.getElementById('newClassEnd').value = '';
+
+                renderNtoCalendarManagerTable();
+                renderNtoSidebar();
+                renderNtoClassView();
 
                 showLoader(false);
                 showBrandAlert("New NTO class session added successfully!", "Class Added");
@@ -10351,6 +10468,13 @@
                     classDate: classDate,
                     rowNum: rowNum
                 });
+
+                if (window.ntoCalendarClassesCache) {
+                    window.ntoCalendarClassesCache = window.ntoCalendarClassesCache.filter(c => c.classId !== classId && c.classDate !== classDate);
+                    renderNtoCalendarManagerTable();
+                    renderNtoSidebar();
+                    renderNtoClassView();
+                }
 
                 showLoader(false);
                 showBrandAlert("Class session canceled and removed.", "Class Canceled");
@@ -11150,9 +11274,15 @@
                 </div>
 
                 <!-- Table: Currently Scheduled Classes -->
-                <div
-                    style="font-family: 'ExtraBold'; font-size: 18px; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 10px;">
-                    Scheduled NTO Sessions</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="font-family: 'ExtraBold'; font-size: 18px; color: var(--dark-blue); text-transform: uppercase;">
+                        Scheduled NTO Sessions
+                    </div>
+                    <label style="display: inline-flex; align-items: center; gap: 6px; font-family: 'Subhead2', sans-serif; font-size: 14px; color: var(--crust-burnt); cursor: pointer; user-select: none;">
+                        <input type="checkbox" id="ntoModalShowPast" onchange="renderNtoCalendarManagerTable()" style="accent-color: var(--brand-blue); cursor: pointer;">
+                        Show past sessions
+                    </label>
+                </div>
                 <div
                     style="max-height: 320px; overflow-y: auto; border: 1.5px solid var(--crust-dark); border-radius: 8px;">
                     <table
