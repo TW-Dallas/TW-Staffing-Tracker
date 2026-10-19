@@ -1094,13 +1094,15 @@
                                 <!-- Role Filter -->
                                 <div style="flex: 1; min-width: 110px;">
                                     <label style="font-family: 'Subhead2'; font-size: 12px; color: var(--crust-deep); text-transform: uppercase;">Role / scope</label>
-                                    <select id="credRoleFilter" onchange="renderCredentialsView()" style="padding: 7px 6px; font-size: 14px; width: 100%; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white; margin-top: 3px; font-family: 'Condensed', sans-serif;">
+                                    <select id="credRoleFilter" onchange="onCredRoleFilterChange()" style="padding: 7px 6px; font-size: 14px; width: 100%; border-radius: 6px; border: 1.5px solid var(--crust-dark); background: white; margin-top: 3px; font-family: 'Condensed', sans-serif;">
                                         <option value="ALL">All roles</option>
                                         <option value="General Manager">General Manager</option>
                                         <option value="Assistant Manager">Assistant Manager</option>
                                         <option value="Trainer">Trainer</option>
                                         <option value="Director of Ops">Director of Ops</option>
                                         <option value="Executive">Executive</option>
+                                        <option value="SCOPE_WW">Has WW Scope</option>
+                                        <option value="SCOPE_MIT">Has MIT Scope</option>
                                     </select>
                                 </div>
 
@@ -3610,11 +3612,19 @@
                 if (data.ntoClasses && Array.isArray(data.ntoClasses)) {
                     window.ntoCalendarClassesCache = data.ntoClasses;
                 }
-                renderList();
-                updateAuditMetrics();
-                if (currentView === 'nto') {
+                if (currentView === 'credentials') {
+                    renderCredentialsSidebar();
+                    renderCredentialsView();
+                } else if (currentView === 'mit' || currentView === 'mitScheduler') {
+                    if (typeof renderMitSidebar === 'function') renderMitSidebar();
+                } else if (currentView === 'nto') {
                     renderNtoSidebar();
                     renderNtoClassView();
+                } else if (currentView === 'contacts') {
+                    if (typeof renderContactsSidebar === 'function') renderContactsSidebar();
+                } else {
+                    renderList();
+                    updateAuditMetrics();
                 }
             } catch (err) {
                 console.warn("Silent sync skipped:", err.message);
@@ -4479,6 +4489,9 @@
         }
 
         function renderList() {
+            if (currentView === 'credentials' || currentView === 'contacts' || currentView === 'nto' || currentView === 'mit' || currentView === 'mitScheduler') {
+                return;
+            }
             const listContainer = document.getElementById('candidateList');
             listContainer.innerHTML = '';
 
@@ -12177,10 +12190,10 @@
 
             const total = credentialsList.length;
             const execs = credentialsList.filter(c => c.is_exec || (c.role && c.role.toLowerCase().includes('exec'))).length;
-            const dos = credentialsList.filter(c => c.is_do || (c.role && (c.role.toLowerCase().includes('director') || c.role.toLowerCase().includes('do')))).length;
+            const dos = credentialsList.filter(c => c.is_do || (c.role && (c.role.toLowerCase().includes('director') || c.role.toLowerCase().includes('do') || c.role.toLowerCase().includes('super')))).length;
             const gms = credentialsList.filter(c => c.is_gm || (c.role && c.role.toLowerCase().includes('general manager'))).length;
             const ams = credentialsList.filter(c => c.role && c.role.toLowerCase().includes('assistant')).length;
-            const trainers = credentialsList.filter(c => c.is_wow_way_trainer || c.is_mit_trainer || (c.role && c.role.toLowerCase().includes('trainer'))).length;
+            const trainers = credentialsList.filter(c => c.role && c.role.toLowerCase().includes('trainer')).length;
             const pending = credentialsList.filter(isCredentialPending).length;
 
             const roles = [
@@ -12226,6 +12239,15 @@
             html += '</div>';
 
             listContainer.innerHTML = html;
+        }
+
+        function onCredRoleFilterChange() {
+            const roleSelect = document.getElementById('credRoleFilter');
+            if (roleSelect) {
+                activeCredentialRoleFilter = roleSelect.value;
+                renderCredentialsSidebar();
+            }
+            renderCredentialsView();
         }
 
         function selectCredentialRoleFilter(roleId) {
@@ -12489,8 +12511,25 @@
                 if (storeFilter && itemStore !== storeFilter) return false;
 
                 if (roleFilter !== 'ALL') {
-                    if (roleFilter === 'Supervisor' && !itemRole.toLowerCase().includes('super') && !itemRole.toLowerCase().includes('do')) return false;
-                    else if (roleFilter !== 'Supervisor' && !itemRole.toLowerCase().includes(roleFilter.toLowerCase())) return false;
+                    if (roleFilter === 'Executive') {
+                        if (!item.is_exec && (!itemRole || !itemRole.toLowerCase().includes('exec'))) return false;
+                    } else if (roleFilter === 'Director of Ops') {
+                        if (!item.is_do && (!itemRole || (!itemRole.toLowerCase().includes('director') && !itemRole.toLowerCase().includes('do') && !itemRole.toLowerCase().includes('super')))) return false;
+                    } else if (roleFilter === 'General Manager') {
+                        if (!item.is_gm && (!itemRole || !itemRole.toLowerCase().includes('general manager'))) return false;
+                    } else if (roleFilter === 'Assistant Manager') {
+                        if (!itemRole || !itemRole.toLowerCase().includes('assistant')) return false;
+                    } else if (roleFilter === 'Trainer') {
+                        if (!itemRole || !itemRole.toLowerCase().includes('trainer')) return false;
+                    } else if (roleFilter === 'SCOPE_WW') {
+                        if (!item.is_wow_way_trainer) return false;
+                    } else if (roleFilter === 'SCOPE_MIT') {
+                        if (!item.is_mit_trainer) return false;
+                    } else if (roleFilter === 'Supervisor') {
+                        if (!itemRole || (!itemRole.toLowerCase().includes('super') && !itemRole.toLowerCase().includes('do'))) return false;
+                    } else {
+                        if (!itemRole || !itemRole.toLowerCase().includes(roleFilter.toLowerCase())) return false;
+                    }
                 }
 
                 if (searchQuery) {
@@ -13538,7 +13577,7 @@
         setTimeout(checkPendingCredentialsBadge, 2500);
     </script>
     <!-- MIT Leadership Class Tracker Module -->
-    <script src="mit_tracker.js?v=20261019_1241"></script>
+    <script src="mit_tracker.js?v=20261019_1255"></script>
 </body>
 
 </html>
