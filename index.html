@@ -7,7 +7,8 @@
         }
     </script>
     <meta charset="UTF-8">
-    <link class="favicon" rel="icon" type="image/png" href="/images/tile_blue.png">
+    <link class="favicon" rel="icon" type="image/png" href="/images/staffing_icon.png">
+    <link rel="apple-touch-icon" href="/images/staffing_icon.png">
     <title>Dallas Staffing Command Center</title>
     <meta name="theme-color" content="#005c91">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -15,7 +16,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="/manifest.json">
     <!-- GLOBAL BRAND MASTER (Fonts, Tokens, Shell) -->
-    <link rel="stylesheet" href="https://teamwow-assets.pages.dev/brand_master.css">
+    <link rel="stylesheet" href="/brand_master.css">
     <!-- SHARED GM TRACKER STYLES -->
     <link rel="stylesheet" href="/gm_tracker.css">
     <!-- OneSignal Web Push SDK -->
@@ -107,23 +108,23 @@
     <div class="brand-modal-card">
         <div class="brand-modal-brand-stripe"></div>
         <div class="brand-modal-content" style="padding: 24px;">
-            <h3 style="margin-top: 0; margin-bottom: 12px; color: var(--dark-blue); font-family: 'Subhead1', sans-serif; font-size: 22px; text-transform: uppercase; letter-spacing: 0.5px;">🔔 Enable Hiring Push Alerts</h3>
-            <p style="font-size: 19px; line-height: 1.45; color: var(--crust-burnt); margin-top: 0; margin-bottom: 16px; font-family: 'Condensed';">Select your Store # or District to receive instant notifications (Interview Bookings, Onboarding Progress, NTO Signups, Hires, and more!):</p>
+            <h3 style="margin-top: 0; margin-bottom: 12px; color: var(--dark-blue); font-family: 'Subhead1', sans-serif; font-size: 22px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: normal;">🔔 Enable Hiring Push Alerts</h3>
+            <p style="font-size: 19px; line-height: 1.45; color: var(--crust-burnt); margin-top: 0; margin-bottom: 16px; font-family: 'Condensed', sans-serif; font-weight: normal;">Select your Store # or District to receive instant notifications (Interview Bookings, Onboarding Progress, NTO Signups, Hires, and more!):</p>
             
             <div style="display: flex; flex-direction: column; gap: 14px; margin: 20px 0;">
                 <div>
-                    <label style="font-family: 'Subhead2'; font-size: 17px; color: var(--crust-deep);">Select Your Store #:</label>
-                    <select id="pushStoreSelect" style="width: 100%; margin-top: 6px; padding: 10px; border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 16px;"><option value="ALL">All Stores</option></select>
+                    <label style="font-family: 'Subhead2', sans-serif; font-size: 17px; color: var(--crust-deep); font-weight: normal;">Select Your Store #:</label>
+                    <select id="pushStoreSelect" style="width: 100%; margin-top: 6px; padding: 10px; border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 16px; font-weight: normal;"><option value="ALL">All Stores</option></select>
                 </div>
                 <div>
-                    <label style="font-family: 'Subhead2'; font-size: 17px; color: var(--crust-deep);">Or Select Your District (DO):</label>
-                    <select id="pushDoSelect" style="width: 100%; margin-top: 6px; padding: 10px; border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 16px;"><option value="ALL">All DOs</option></select>
+                    <label style="font-family: 'Subhead2', sans-serif; font-size: 17px; color: var(--crust-deep); font-weight: normal;">Or Select Your District (DO):</label>
+                    <select id="pushDoSelect" style="width: 100%; margin-top: 6px; padding: 10px; border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 16px; font-weight: normal;"><option value="ALL">All DOs</option></select>
                 </div>
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; border-top: 1.5px solid var(--crust-med); padding-top: 14px;">
-                <button type="button" onclick="closePushSetupModal()" style="background: var(--crust-med); color: var(--crust-burnt); border: none; padding: 10px 18px; border-radius: 6px; font-family: 'Subhead2'; font-size: 16px; cursor: pointer;">Skip</button>
-                <button type="button" onclick="savePushSubscriptionTags()" style="background: var(--brand-blue); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-family: 'Subhead2'; font-size: 16px; text-transform: uppercase; cursor: pointer;">Enable Push Alerts</button>
+                <button type="button" onclick="closePushSetupModal()" style="background: var(--crust-med); color: var(--crust-burnt); border: none; padding: 10px 18px; border-radius: 6px; font-family: 'Subhead2', sans-serif; font-size: 16px; font-weight: normal; cursor: pointer;">Skip</button>
+                <button type="button" onclick="savePushSubscriptionTags()" style="background: var(--brand-blue); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-family: 'Subhead2', sans-serif; font-size: 16px; font-weight: normal; text-transform: uppercase; cursor: pointer;">Enable Push Alerts</button>
             </div>
         </div>
     </div>
@@ -248,18 +249,18 @@
 
 <!-- Manager & Trainer PIN Registration Modal -->
 <div id="pinRegistrationModal" class="brand-modal-overlay hidden" style="z-index: 100005;">
-    <div class="brand-modal-card" style="max-width: 440px;">
+    <div class="brand-modal-card" style="max-width: 580px; width: 94%;">
         <div class="brand-modal-brand-stripe"></div>
-        <div class="brand-modal-content" style="padding: 24px;">
-            <div style="display: flex; justify-content: flex-end; margin-bottom: -10px;">
+        <div class="brand-modal-content" style="padding: 18px 26px; max-height: 94vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: flex-end; margin-bottom: -16px;">
                 <button type="button" onclick="closePinRegistrationModal()" style="background: none; border: none; font-size: 24px; color: var(--crust-deep); cursor: pointer; line-height: 1;">&times;</button>
             </div>
             
-            <div style="text-align: center; margin-bottom: 16px;">
-                <img src="https://teamwow-assets.pages.dev/image/custom-emojis/manager_lock.png" alt="Manager Security" style="width: 58px; height: 58px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); margin-bottom: 6px;">
-                <h3 style="margin: 0 0 6px 0; color: var(--dark-blue); font-family: 'ExtraBold', 'Subhead1', sans-serif; font-size: 22px; text-transform: uppercase; letter-spacing: 0.5px;">Manager &amp; Trainer PIN Registration</h3>
-                <p style="font-size: 14px; line-height: 1.4; color: var(--crust-burnt); margin: 0; font-family: 'Condensed', sans-serif;">
-                    Register your individual 4-digit PIN for training &amp; management systems. Employee ID must match Pulse ID.
+            <div style="text-align: center; margin-bottom: 10px;">
+                <img src="https://teamwow-assets.pages.dev/image/custom-emojis/manager_lock.png" alt="Manager Security" style="width: 40px; height: 40px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); margin-bottom: 2px;">
+                <h3 style="margin: 0 0 2px 0; color: var(--dark-blue); font-family: 'ExtraBold', 'Subhead1', sans-serif; font-size: 20px; text-transform: uppercase; letter-spacing: 0.5px;">Manager &amp; Trainer PIN Registration</h3>
+                <p style="font-size: 13px; line-height: 1.3; color: var(--crust-burnt); margin: 0; font-family: 'Condensed', sans-serif;">
+                    Register your individual 4-digit PIN for training &amp; management systems.
                 </p>
             </div>
 
@@ -267,37 +268,78 @@
 
             <!-- REGISTRATION FORM VIEW -->
             <div id="pinRegFormView">
-                <form id="pinRegForm" onsubmit="submitTrainerPinRegistration(event)" style="display: flex; flex-direction: column; gap: 14px;">
+                <form id="pinRegForm" onsubmit="submitTrainerPinRegistration(event)" style="display: flex; flex-direction: column; gap: 11px;">
+                    <!-- ACCOUNT TYPE SELECTOR -->
                     <div>
-                        <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 4px;">Full Name *</label>
-                        <input type="text" id="regFullName" required placeholder="e.g. Jane Doe" style="width: 100%; padding: 10px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 15px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                        <div style="display: flex; gap: 6px; background: var(--crust-light, #faf2e9); padding: 4px; border-radius: 12px; border: 1.5px solid var(--crust-med);">
+                            <button type="button" id="regTypeStoreBtn" onclick="setRegAccountType('store')" style="flex: 1; padding: 7px 10px; border: none; border-radius: 8px; font-family: 'Subhead1', sans-serif; font-size: 13px; text-transform: uppercase; cursor: pointer; background: var(--brand-blue); color: var(--crust-base); box-shadow: 0 2px 4px rgba(0,0,0,0.12); transition: all 0.2s ease;">
+                                Store Team
+                            </button>
+                            <button type="button" id="regTypeAboveBtn" onclick="setRegAccountType('above')" style="flex: 1; padding: 7px 10px; border: none; border-radius: 8px; font-family: 'Subhead1', sans-serif; font-size: 13px; text-transform: uppercase; cursor: pointer; background: transparent; color: var(--crust-deep); transition: all 0.2s ease;">
+                                Above-Store / DO
+                            </button>
+                        </div>
                     </div>
 
+                    <!-- ROW 1: FULL NAME -->
+                    <div>
+                        <label style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Full Name *</label>
+                        <input type="text" id="regFullName" required placeholder="e.g. Jane Doe" style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 14.5px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                    </div>
+
+                    <!-- ROW 2: MARKET + ROLE / STORE # -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div>
-                            <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 4px;">Pulse ID *</label>
-                            <input type="text" id="regPulseId" required placeholder="e.g. jdoe24" style="width: 100%; padding: 10px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 15px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                            <label style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Market *</label>
+                            <select id="regMarket" required style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 14px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                                <option value="" disabled selected>Select Market...</option>
+                                <option value="Dallas">Dallas</option>
+                                <option value="Denver">Denver</option>
+                                <option value="El Paso">El Paso</option>
+                                <option value="LA">LA</option>
+                            </select>
+                        </div>
+                        <div id="regStoreCol">
+                            <label style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Store # *</label>
+                            <input type="text" id="regStoreNum" placeholder="e.g. 6824" inputmode="numeric" style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 14.5px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                        </div>
+                        <div id="regAboveRoleCol" class="hidden">
+                            <label style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Role *</label>
+                            <select id="regAboveRole" style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 13.5px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                                <option value="" disabled selected>Select Role...</option>
+                                <option value="Director of Ops">Director of Ops</option>
+                                <option value="Training Director">Training Director</option>
+                                <option value="Market Leader">Market Leader</option>
+                                <option value="Executive">Executive</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- ROW 3: EMAIL (Visible for Both Store and Above-Store) -->
+                    <div id="regEmailRow">
+                        <label id="regEmailLabel" style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Email *</label>
+                        <input type="email" id="regEmail" required placeholder="e.g. petezah@gmail.com" style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 14.5px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                    </div>
+
+                    <!-- ROW 4: USER ID / PULSE ID + PIN -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div id="regPulseCol">
+                            <label id="regPulseLabel" style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">Pulse ID *</label>
+                            <input type="text" id="regPulseId" required placeholder="e.g. jdoe24" style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 14.5px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
                         </div>
                         <div>
-                            <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 4px;">Store # *</label>
-                            <input type="text" id="regStoreNum" required placeholder="e.g. 6824" inputmode="numeric" style="width: 100%; padding: 10px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 15px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                            <label style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px;">4-Digit PIN *</label>
+                            <input type="password" id="regPin" required maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="••••" style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'ExtraBold', monospace, sans-serif; font-size: 18px; letter-spacing: 5px; text-align: center; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
                         </div>
                     </div>
 
-                    <div>
-                        <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 4px;">Market *</label>
-                        <select id="regMarket" style="width: 100%; padding: 10px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 15px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
-                            <option value="Dallas" selected>Dallas / Fort Worth Market</option>
-                        </select>
+                    <!-- ABOVE-STORE SECURITY NOTICE -->
+                    <div id="regAboveNotice" class="hidden" style="background: rgba(0, 92, 145, 0.08); border-left: 3.5px solid var(--brand-blue); border-radius: 6px; padding: 7px 11px; font-size: 12px; color: var(--dark-blue); line-height: 1.35; font-family: 'Condensed', sans-serif;">
+                        🔒 <strong>Above-Store Security:</strong> Credentials routed strictly to your company email. Store accounts are never messaged.
                     </div>
 
-                    <div>
-                        <label style="font-family: 'Subhead2', sans-serif; font-size: 13px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 4px;">New 4-Digit PIN *</label>
-                        <input type="password" id="regPin" required maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="••••" style="width: 100%; padding: 10px 12px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'ExtraBold', monospace, sans-serif; font-size: 20px; letter-spacing: 6px; text-align: center; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
-                    </div>
-
-                    <div style="margin-top: 8px;">
-                        <button type="submit" id="regSubmitBtn" style="width: 100%; padding: 12px; background: var(--brand-blue); color: var(--crust-base); border: none; border-radius: 25px; font-family: 'Subhead1', sans-serif; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 92, 145, 0.25);">
+                    <div style="margin-top: 4px;">
+                        <button type="submit" id="regSubmitBtn" style="width: 100%; padding: 11px; background: var(--brand-blue); color: var(--crust-base); border: none; border-radius: 25px; font-family: 'Subhead1', sans-serif; font-size: 14.5px; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; box-shadow: 0 3px 8px rgba(0, 92, 145, 0.25);">
                             Register Trainer PIN
                         </button>
                     </div>
@@ -316,6 +358,43 @@
                 </div>
                 <button type="button" onclick="closePinRegistrationModal()" class="auth-unlock-btn" style="background: var(--brand-blue); color: var(--crust-base);">
                     Done &amp; Return
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- One-Time Pulse ID Upgrade Modal (Self-Service Profile Setup) -->
+<div id="pulseIdUpgradeModal" class="brand-modal-overlay hidden" style="z-index: 100006;">
+    <div class="brand-modal-card" style="max-width: 480px; width: 92%;">
+        <div class="brand-modal-brand-stripe"></div>
+        <div class="brand-modal-content" style="padding: 24px 28px; text-align: center;">
+            <div style="font-size: 38px; margin-bottom: 6px;">🆔</div>
+            <h3 style="margin: 0 0 6px 0; color: var(--dark-blue); font-family: 'ExtraBold', 'Subhead1', sans-serif; font-size: 20px; text-transform: uppercase; letter-spacing: 0.5px;">
+                Set Your Pulse ID
+            </h3>
+            <p id="pulseUpgradeIntro" style="font-size: 14px; line-height: 1.45; color: var(--crust-burnt); margin: 0 0 16px 0; font-family: 'Subhead2', sans-serif;">
+                Welcome! Your account currently uses your email as your ID. Enter your 4-digit Pulse ID or store username below to complete your profile.
+            </p>
+
+            <div id="pulseUpgradeError" class="auth-error-banner hidden" style="margin-bottom: 12px; font-size: 13px; text-align: left;"></div>
+
+            <div style="text-align: left; margin-bottom: 16px;">
+                <label style="font-family: 'Subhead2', sans-serif; font-size: 12px; color: var(--crust-deep); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 4px;">
+                    Pulse ID / User ID *
+                </label>
+                <input type="text" id="pulseUpgradeInput" maxlength="15" placeholder="e.g. 2304 or jdoe24" style="width: 100%; padding: 10px 14px; border: 1.5px solid var(--crust-med); border-radius: 8px; font-family: 'Subhead2', sans-serif; font-size: 15px; box-sizing: border-box; outline: none; background: var(--crust-light, #fbf2e9); color: var(--dark-blue);">
+                <span style="font-size: 11.5px; color: #7a5c43; display: block; margin-top: 4px; font-family: 'Condensed', sans-serif;">
+                    This will be your short ID for Wow Way Training and GM tools.
+                </span>
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button type="button" onclick="closePulseUpgradeModal()" style="flex: 1; padding: 11px; background: transparent; border: 1.5px solid var(--crust-dark); color: var(--crust-burnt); border-radius: 25px; font-family: 'Subhead1', sans-serif; font-size: 13.5px; cursor: pointer;">
+                    Remind Me Later
+                </button>
+                <button type="button" id="pulseUpgradeSaveBtn" onclick="submitPulseIdUpgrade()" style="flex: 1.2; padding: 11px; background: var(--brand-blue); color: var(--crust-base); border: none; border-radius: 25px; font-family: 'Subhead1', sans-serif; font-size: 14px; text-transform: uppercase; cursor: pointer; box-shadow: 0 3px 8px rgba(0, 92, 145, 0.25);">
+                    Save &amp; Continue
                 </button>
             </div>
         </div>
@@ -397,7 +476,16 @@
 
         if (nameEl) nameEl.innerText = currentAuthUser.name || 'Trainer';
         if (badgeEl) {
-            const roleStr = currentAuthUser.is_admin ? 'Admin' : (currentAuthUser.is_exec ? 'Exec' : (currentAuthUser.is_do ? 'Supervisor' : (currentAuthUser.is_gm ? 'GM' : (currentAuthUser.role || 'Trainer'))));
+            let roleStr = currentAuthUser.role || '';
+            if (currentAuthUser.is_admin) {
+                roleStr = 'Admin';
+            } else if (currentAuthUser.is_exec) {
+                roleStr = 'Exec';
+            } else if (currentAuthUser.is_do) {
+                roleStr = 'Supervisor';
+            } else if (!roleStr || roleStr.toLowerCase() === 'general manager' || roleStr.toLowerCase() === 'gm') {
+                roleStr = currentAuthUser.is_gm ? 'GM' : 'Trainer';
+            }
             const storeStr = currentAuthUser.store ? ` #${currentAuthUser.store}` : '';
             badgeEl.innerText = `${roleStr}${storeStr}`;
         }
@@ -486,6 +574,11 @@
             fetchData(true);
             checkPushSetupStatus();
 
+            // Check if user has legacy email as trainer_id
+            if (data.user.trainer_id && data.user.trainer_id.includes('@')) {
+                openPulseUpgradeModal(data.user, rawPin);
+            }
+
         } catch (err) {
             if (errEl) {
                 errEl.innerText = err.message || 'Verification failed. Please try again.';
@@ -566,6 +659,11 @@
                 currentAuthUser = data.user;
                 saveStoredAuth(data.user);
                 renderUserBadge();
+
+                // Check if user has legacy email as trainer_id
+                if (data.user.trainer_id && data.user.trainer_id.includes('@')) {
+                    openPulseUpgradeModal(data.user, pin);
+                }
             }
         } catch(e) {
             // Keep current session on temporary network issue
@@ -573,8 +671,167 @@
     }
 
     // =========================================================================
+    // ONE-TIME PULSE ID UPGRADE MODAL CONTROLLERS
+    // =========================================================================
+    let pendingUpgradeUser = null;
+    let pendingUpgradePin = null;
+
+    function openPulseUpgradeModal(user, pin) {
+        pendingUpgradeUser = user;
+        pendingUpgradePin = pin || (user ? user.pin : '');
+        const modal = document.getElementById('pulseIdUpgradeModal');
+        const introEl = document.getElementById('pulseUpgradeIntro');
+        const inputEl = document.getElementById('pulseUpgradeInput');
+        const errEl = document.getElementById('pulseUpgradeError');
+        const btn = document.getElementById('pulseUpgradeSaveBtn');
+
+        if (introEl) {
+            introEl.innerHTML = `Welcome, <strong>${user.name || 'Manager'}</strong>! Your account currently uses your email as your ID. Enter your 4-digit Pulse ID or store username below to complete your profile.`;
+        }
+        if (inputEl) {
+            inputEl.value = '';
+            setTimeout(() => inputEl.focus(), 150);
+        }
+        if (errEl) errEl.classList.add('hidden');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerText = 'Save & Continue';
+        }
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closePulseUpgradeModal() {
+        const modal = document.getElementById('pulseIdUpgradeModal');
+        if (modal) modal.classList.add('hidden');
+        pendingUpgradeUser = null;
+        pendingUpgradePin = null;
+    }
+
+    async function submitPulseIdUpgrade() {
+        const inputEl = document.getElementById('pulseUpgradeInput');
+        const errEl = document.getElementById('pulseUpgradeError');
+        const btn = document.getElementById('pulseUpgradeSaveBtn');
+        if (!inputEl) return;
+
+        const newId = inputEl.value.trim();
+        if (!newId) {
+            if (errEl) {
+                errEl.innerText = 'Please enter your Pulse ID.';
+                errEl.classList.remove('hidden');
+            }
+            inputEl.focus();
+            return;
+        }
+
+        if (newId.includes('@')) {
+            if (errEl) {
+                errEl.innerText = 'Pulse ID cannot be an email address.';
+                errEl.classList.remove('hidden');
+            }
+            inputEl.focus();
+            return;
+        }
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+        }
+        if (errEl) errEl.classList.add('hidden');
+
+        try {
+            const apiBase = (window.location.origin.includes('pages.dev') || window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1'))
+                ? '/api/staffing'
+                : 'https://tw-staffing.pages.dev/api/staffing';
+
+            const activePin = pendingUpgradePin || (currentAuthUser ? currentAuthUser.pin : '');
+            const origId = pendingUpgradeUser ? pendingUpgradeUser.trainer_id : (currentAuthUser ? currentAuthUser.trainer_id : '');
+
+            const res = await fetch(`${apiBase}?action=updatePulseId`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    pin: activePin,
+                    originalTrainerId: origId,
+                    newPulseId: newId
+                })
+            });
+
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Failed to update Pulse ID.');
+            }
+
+            // Update local user auth
+            if (currentAuthUser) {
+                currentAuthUser.trainer_id = data.trainer_id || newId;
+                saveStoredAuth(currentAuthUser);
+            }
+
+            closePulseUpgradeModal();
+        } catch (err) {
+            if (errEl) {
+                errEl.innerText = err.message || 'Error updating Pulse ID.';
+                errEl.classList.remove('hidden');
+            }
+            if (btn) {
+                btn.disabled = false;
+                btn.innerText = 'Save & Continue';
+            }
+        }
+    }
+
+    // =========================================================================
     // MANAGER & TRAINER PIN REGISTRATION MODAL CONTROLLERS
     // =========================================================================
+    let currentRegType = 'store';
+
+    function setRegAccountType(type) {
+        currentRegType = type;
+        const storeBtn = document.getElementById('regTypeStoreBtn');
+        const aboveBtn = document.getElementById('regTypeAboveBtn');
+        const storeCol = document.getElementById('regStoreCol');
+        const aboveRoleCol = document.getElementById('regAboveRoleCol');
+        const roleInput = document.getElementById('regAboveRole');
+        const emailLabel = document.getElementById('regEmailLabel');
+        const emailInput = document.getElementById('regEmail');
+        const storeInput = document.getElementById('regStoreNum');
+        const pulseLabel = document.getElementById('regPulseLabel');
+        const submitBtn = document.getElementById('regSubmitBtn');
+        const noticeEl = document.getElementById('regAboveNotice');
+
+        if (type === 'above') {
+            if (storeBtn) { storeBtn.style.background = 'transparent'; storeBtn.style.color = 'var(--crust-deep)'; storeBtn.style.boxShadow = 'none'; }
+            if (aboveBtn) { aboveBtn.style.background = 'var(--brand-blue)'; aboveBtn.style.color = 'var(--crust-base)'; aboveBtn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.12)'; }
+            if (storeCol) storeCol.classList.add('hidden');
+            if (aboveRoleCol) aboveRoleCol.classList.remove('hidden');
+            if (roleInput) roleInput.required = true;
+            if (emailLabel) emailLabel.innerText = 'Company Email *';
+            if (emailInput) {
+                emailInput.placeholder = 'e.g. petezah@team-wow.com';
+                emailInput.required = true;
+            }
+            if (storeInput) storeInput.required = false;
+            if (pulseLabel) pulseLabel.innerText = 'Pulse / User ID *';
+            if (noticeEl) noticeEl.classList.remove('hidden');
+            if (submitBtn) submitBtn.innerText = 'Request Above-Store PIN';
+        } else {
+            if (aboveBtn) { aboveBtn.style.background = 'transparent'; aboveBtn.style.color = 'var(--crust-deep)'; aboveBtn.style.boxShadow = 'none'; }
+            if (storeBtn) { storeBtn.style.background = 'var(--brand-blue)'; storeBtn.style.color = 'var(--crust-base)'; storeBtn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.12)'; }
+            if (storeCol) storeCol.classList.remove('hidden');
+            if (aboveRoleCol) aboveRoleCol.classList.add('hidden');
+            if (roleInput) roleInput.required = false;
+            if (emailLabel) emailLabel.innerText = 'Email *';
+            if (emailInput) {
+                emailInput.placeholder = 'e.g. petezah@gmail.com';
+                emailInput.required = true;
+            }
+            if (storeInput) storeInput.required = true;
+            if (pulseLabel) pulseLabel.innerText = 'Pulse ID *';
+            if (noticeEl) noticeEl.classList.add('hidden');
+            if (submitBtn) submitBtn.innerText = 'Register Trainer PIN';
+        }
+    }
+
     function openPinRegistrationModal() {
         // Keep authBarrierModal active behind this registration modal (never remove page blocker)
         const modal = document.getElementById('pinRegistrationModal');
@@ -590,6 +847,12 @@
 
         const form = document.getElementById('pinRegForm');
         if (form) form.reset();
+        const marketSelect = document.getElementById('regMarket');
+        if (marketSelect) marketSelect.value = '';
+        const roleSelect = document.getElementById('regAboveRole');
+        if (roleSelect) roleSelect.value = '';
+        setRegAccountType('store');
+
         setTimeout(() => {
             const nameInp = document.getElementById('regFullName');
             if (nameInp) nameInp.focus();
@@ -611,24 +874,60 @@
         const successMsg = document.getElementById('regSuccessMessage');
         const successSub = document.getElementById('regSuccessSubtext');
 
+        const isAboveStore = (currentRegType === 'above');
         const name = (document.getElementById('regFullName')?.value || '').trim();
         const pulseId = (document.getElementById('regPulseId')?.value || '').trim();
-        const store = (document.getElementById('regStoreNum')?.value || '').trim();
-        const market = (document.getElementById('regMarket')?.value || 'Dallas').trim();
+        const email = (document.getElementById('regEmail')?.value || '').trim();
+        const store = isAboveStore ? 'Above-Store' : (document.getElementById('regStoreNum')?.value || '').trim();
+        const market = (document.getElementById('regMarket')?.value || '').trim();
+        const role = isAboveStore ? (document.getElementById('regAboveRole')?.value || '').trim() : 'Trainer';
         const pin = (document.getElementById('regPin')?.value || '').trim();
 
-        if (!name || !pulseId || !store || pin.length !== 4) {
+        if (!market) {
             if (errEl) {
-                errEl.innerText = 'Please complete all required fields. PIN must be 4 digits.';
+                errEl.innerText = 'Please select your Market.';
                 errEl.classList.remove('hidden');
             }
             return;
         }
 
+        if (!email) {
+            if (errEl) {
+                errEl.innerText = isAboveStore ? 'Please enter your Company Email.' : 'Please enter your Email address.';
+                errEl.classList.remove('hidden');
+            }
+            return;
+        }
+
+        if (isAboveStore) {
+            if (!role) {
+                if (errEl) {
+                    errEl.innerText = 'Please select your Leadership Role.';
+                    errEl.classList.remove('hidden');
+                }
+                return;
+            }
+            if (!name || (!pulseId && !email) || pin.length !== 4) {
+                if (errEl) {
+                    errEl.innerText = 'Please complete all required fields. Company Email & 4-digit PIN are required.';
+                    errEl.classList.remove('hidden');
+                }
+                return;
+            }
+        } else {
+            if (!name || !pulseId || !store || pin.length !== 4) {
+                if (errEl) {
+                    errEl.innerText = 'Please complete all required fields. Email & 4-digit PIN are required.';
+                    errEl.classList.remove('hidden');
+                }
+                return;
+            }
+        }
+
         if (errEl) errEl.classList.add('hidden');
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.innerText = 'Registering PIN...';
+            submitBtn.innerText = isAboveStore ? 'Requesting Above-Store PIN...' : 'Registering PIN...';
         }
 
         try {
@@ -641,10 +940,13 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name,
-                    pulseId,
+                    pulseId: pulseId || (email ? email.split('@')[0] : ''),
                     store,
                     market,
-                    pin
+                    pin,
+                    isAboveStore,
+                    email,
+                    role
                 })
             });
 
@@ -659,9 +961,11 @@
             if (successView) successView.classList.remove('hidden');
 
             if (isAuthorizedRole) {
-                if (successTitle) successTitle.innerText = 'Manager Access Confirmed!';
-                if (successMsg) successMsg.innerHTML = `Welcome <strong>${name}</strong>! Your credentials have been verified for Store #${store}. Unlocking Staffing Command...`;
-                if (successSub) successSub.innerText = 'Store hiring pipeline access active. Opening portal...';
+                if (successTitle) successTitle.innerText = isAboveStore ? 'Leadership Access Confirmed!' : 'Manager Access Confirmed!';
+                if (successMsg) successMsg.innerHTML = isAboveStore 
+                    ? `Welcome <strong>${name}</strong>! Your executive credentials have been verified for ${market} Above-Store. Unlocking Staffing Command...`
+                    : `Welcome <strong>${name}</strong>! Your credentials have been verified for Store #${store}. Unlocking Staffing Command...`;
+                if (successSub) successSub.innerText = isAboveStore ? 'Multi-store oversight active. Opening portal...' : 'Store hiring pipeline access active. Opening portal...';
 
                 setTimeout(() => {
                     closePinRegistrationModal();
@@ -673,12 +977,20 @@
                 }, 1500);
             } else if (data.isExistingTrainerRequest) {
                 if (successTitle) successTitle.innerText = 'Approval Request Sent to Mike Jacobs!';
-                if (successMsg) successMsg.innerHTML = `Your Wow Way profile (<strong>${name}</strong>) has been verified for Store #${store}.`;
-                if (successSub) successSub.innerHTML = 'Mike Jacobs has been sent a 1-click mobile authorization link. Once approved, your PIN will unlock GM Staffing Command immediately.';
+                if (successMsg) successMsg.innerHTML = isAboveStore
+                    ? `Your leadership profile (<strong>${name}</strong>) has been verified.`
+                    : `Your Wow Way profile (<strong>${name}</strong>) has been verified for Store #${store}.`;
+                if (successSub) successSub.innerHTML = isAboveStore
+                    ? `Mike Jacobs has been sent a 1-click mobile authorization link. Once approved, confirmation will be emailed strictly to <strong>${email || 'your company address'}</strong>. Store accounts will not be messaged.`
+                    : 'Mike Jacobs has been sent a 1-click mobile authorization link. Once approved, your PIN will unlock GM Staffing Command immediately.';
             } else {
-                if (successTitle) successTitle.innerText = 'PIN Registered Successfully!';
-                if (successMsg) successMsg.innerHTML = `Your 4-digit PIN (<strong>${pin}</strong>) is active for Wow Way Training for <strong>${name}</strong>.`;
-                if (successSub) successSub.innerHTML = 'An authorization notice has been emailed to Mike Jacobs with 1-click mobile approval for GM Staffing Tracker access. Once approved, your PIN will unlock this portal.';
+                if (successTitle) successTitle.innerText = isAboveStore ? 'Above-Store Registration Submitted!' : 'PIN Registered Successfully!';
+                if (successMsg) successMsg.innerHTML = isAboveStore
+                    ? `Your 4-digit PIN (<strong>${pin}</strong>) is recorded for <strong>${name}</strong> (${role}).`
+                    : `Your 4-digit PIN (<strong>${pin}</strong>) is active for Wow Way Training for <strong>${name}</strong>.`;
+                if (successSub) successSub.innerHTML = isAboveStore
+                    ? `An authorization notice has been emailed to Mike Jacobs with 1-click mobile approval for Above-Store Staffing Tracker access. Credentials will be emailed strictly to <strong>${email || 'your company address'}</strong>. Store accounts are never contacted.`
+                    : 'An authorization notice has been emailed to Mike Jacobs with 1-click mobile approval for GM Staffing Tracker access. Once approved, your PIN will unlock this portal.';
             }
 
         } catch (err) {
@@ -689,7 +1001,7 @@
         } finally {
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.innerText = 'Register Trainer PIN';
+                submitBtn.innerText = isAboveStore ? 'Request Above-Store PIN' : 'Register Trainer PIN';
             }
         }
     }
@@ -1538,12 +1850,12 @@ function populateFilters() {
             }
             if (payCardVal) {
                 if (item.ddEntered) {
-                    chipsHtml += `<span class="chip" style="background: #e6f4ea; color: #137333; border: 1px solid #ceead6; font-weight: bold;">💳 Pay Card: Complete ✔</span>`;
+                    chipsHtml += `<span class="chip" style="background: #e6f4ea; color: #137333; border: 1px solid #ceead6;">💳 Pay Card: Complete ✔</span>`;
                 } else {
                     chipsHtml += `<span class="chip">💳 Pay Card Required</span>`;
                 }
             }
-            if (ntoDateVal) chipsHtml += `<span class="chip chip-nto">📅 NTO: ${formatDisplayDate(ntoDateVal)}</span>`;
+            if (ntoDateVal) chipsHtml += `<span class="chip chip-nto"><img src="image/custom-emojis/points_calendar.png" style="width: 14px; height: 14px; object-fit: contain; vertical-align: -2px; margin-right: 3px;" alt="📅">NTO: ${formatDisplayDate(ntoDateVal)}</span>`;
 
             let checklistHtml = '';
             if (!item.inactive && !item.ineligible && !item.withdrawn && !item.hired) {

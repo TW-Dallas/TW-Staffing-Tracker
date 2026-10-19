@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <link class="favicon" rel="icon" type="image/png" href="/images/tile_blue.png">
+    <link class="favicon" rel="icon" type="image/png" href="/images/staffing_icon.png">
+    <link rel="apple-touch-icon" href="/images/staffing_icon.png">
     <title>Denver Staffing Command Center</title>
     <meta name="theme-color" content="#005c91">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -11,7 +12,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="/manifest.json">
     <!-- GLOBAL BRAND MASTER (Fonts, Tokens, Shell) -->
-    <link rel="stylesheet" href="https://teamwow-assets.pages.dev/brand_master.css">
+    <link rel="stylesheet" href="/brand_master.css">
     <!-- SHARED GM TRACKER STYLES -->
     <link rel="stylesheet" href="/gm_tracker.css">
     <!-- OneSignal Web Push SDK -->
@@ -786,7 +787,7 @@
                 if (item.hatStyle && (item.hatStyle.toLowerCase() === 'cap' || item.hatStyle.toLowerCase() === 'visor')) {
                     chipsHtml += `<span class="chip">🧢 ${item.hatStyle}</span>`;
                 }
-                if (item.ntoDate) chipsHtml += `<span class="chip chip-nto">📅 NTO: ${item.ntoDate}</span>`;
+                if (item.ntoDate) chipsHtml += `<span class="chip chip-nto"><img src="image/custom-emojis/points_calendar.png" style="width: 14px; height: 14px; object-fit: contain; vertical-align: -2px; margin-right: 3px;" alt="📅">NTO: ${item.ntoDate}</span>`;
 
                 let checklistHtml = '';
                 if (!item.inactive && !item.ineligible && !item.withdrawn && !item.hired) {

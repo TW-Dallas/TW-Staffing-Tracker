@@ -915,8 +915,8 @@
                             <!-- Top Dedicated NTO Action Button Row (All 4 in 1 Row) -->
                             <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-shrink: 0;">
                                 <button type="button" onclick="openClassCalendarModal()"
-                                    style="flex: 1; background: var(--dark-blue); color: white; padding: 9px 6px; font-size: 14.5px; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; border: none; white-space: nowrap; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px;" title="Manage scheduled orientation class dates">
-                                    📅 Schedule
+                                    style="flex: 1; background: var(--dark-blue); color: white; padding: 9px 6px; font-size: 14.5px; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; border: none; white-space: nowrap; text-align: center; display: flex; align-items: center; justify-content: center; gap: 5px;" title="Manage scheduled orientation class dates">
+                                    <img src="image/custom-emojis/points_calendar.png" style="width: 17px; height: 17px; object-fit: contain;"> Schedule
                                 </button>
                                 <button type="button" onclick="saveNtoAttendanceOnly()"
                                     style="flex: 1.1; background: var(--brand-blue); color: white; padding: 9px 6px; font-size: 14.5px; border-radius: 6px; font-family: 'Subhead1', sans-serif; cursor: pointer; border: none; white-space: nowrap; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px;" title="Save current class attendance marks">
@@ -1596,8 +1596,8 @@
                     <div
                         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                         <label for="srBookingUrlInput"
-                            style="font-family: 'Subhead2', sans-serif; font-size: 12.5px; font-weight: bold; color: var(--dark-blue); text-transform: uppercase;">
-                            📅 Google Appointment Booking Link:
+                            style="font-family: 'Subhead2', sans-serif; font-size: 12.5px; font-weight: bold; color: var(--dark-blue); text-transform: uppercase; display: flex; align-items: center; gap: 4px;">
+                            <img src="image/custom-emojis/points_calendar.png" style="width: 15px; height: 15px; object-fit: contain;"> Google Appointment Booking Link:
                         </label>
                         <span id="srLinkSavedStatus"
                             style="font-size: 11.5px; color: var(--success-green); font-weight: bold; font-family: 'Compact', sans-serif;">✓
@@ -4042,7 +4042,7 @@
             const hasNtoDate = dateStr && !dateStr.toUpperCase().includes("MISSING") && dateStr.toUpperCase() !== "FALSE";
 
             if (item.ntoScheduled || hasNtoDate) {
-                return hasNtoDate ? `📅 NTO: ${item.ntoDate}` : "📅 NTO Scheduled";
+                return hasNtoDate ? `<img src="image/custom-emojis/points_calendar.png" class="cal-emoji-icon" alt="📅">NTO: ${item.ntoDate}` : `<img src="image/custom-emojis/points_calendar.png" class="cal-emoji-icon" alt="📅">NTO Scheduled`;
             }
             if (item.ntoSignupLinkSent) return "📨 Link Sent";
 
@@ -4340,7 +4340,7 @@
 
             let parts = [];
             if (dayStr || dateFormatted) {
-                parts.push(`📅 ${dayStr}${dateFormatted}`.trim());
+                parts.push(`<img src="image/custom-emojis/points_calendar.png" class="cal-emoji-icon" alt="📅">${dayStr}${dateFormatted}`.trim());
             }
             if (timeFormatted) {
                 parts.push(`⏰ ${timeFormatted}`);
@@ -4777,14 +4777,14 @@
                     } else if (item.ntoScheduled) {
                         card.classList.add('status-blue');
                         ntoStatusColor = 'var(--dark-blue)';
-                        ntoLabel = '📅 NTO Scheduled';
+                        ntoLabel = '<img src="image/custom-emojis/points_calendar.png" class="cal-emoji-icon" alt="📅">NTO Scheduled';
                     } else if (item.ntoSignupLinkSent) {
                         card.classList.add('status-blue');
                         ntoStatusColor = 'var(--dark-blue)';
                         ntoLabel = '📨 Link Sent';
                     } else {
                         card.classList.add('status-blue');
-                        ntoLabel = '📅 NTO Scheduled';
+                        ntoLabel = '<img src="image/custom-emojis/points_calendar.png" class="cal-emoji-icon" alt="📅">NTO Scheduled';
                     }
 
                     const dayStr = item.ntoDate ? getDayOfWeekFromDateString(item.ntoDate) : '';
@@ -4795,7 +4795,7 @@
                         <span>Store #${item.store} (${item.position || 'CSR'})</span>
                         <span style="font-family: 'Subhead2', sans-serif; font-weight: bold; color: ${ntoStatusColor};">${ntoLabel}</span>
                     </div>
-                    ${item.ntoDate ? `<div class="card-sub" style="margin-top: 3px; color: var(--dark-blue); font-weight: 600; font-size: 13px;"><span>📅 ${dayStr ? dayStr + ' ' : ''}${item.ntoDate}</span></div>` : ''}
+                    ${item.ntoDate ? `<div class="card-sub" style="margin-top: 3px; color: var(--dark-blue); font-weight: 600; font-size: 13px;"><span><img src="image/custom-emojis/points_calendar.png" class="cal-emoji-icon" alt="📅">${dayStr ? dayStr + ' ' : ''}${item.ntoDate}</span></div>` : ''}
                     ${item.lastUpdated ? `<div class="card-sub" style="font-size: 11.5px; color: var(--text-light); margin-top: 2px;"><span>🕒 Updated: ${formatDisplayDateTime(item.lastUpdated)}</span></div>` : ''}
                 `;
                     card.onclick = () => selectCandidate(item);
@@ -8028,8 +8028,8 @@
                 const ssnLast4Val = item.ssnLast4 || item.ssn_last_4 || item['SSN (Last 4)'] || '';
 
                 const changeDateBtn = `
-                    <button type="button" onclick="openRescheduleNtoModal('${escapeText(candId)}', '${escapeText(item.name || '')}', '${escapeText(item.email || '')}', '${escapeText(ntoDateVal || '')}')" style="background: var(--dark-blue); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 15px; font-family: 'Subhead2', sans-serif; cursor: pointer; white-space: nowrap;" title="Change orientation class date for this trainee">
-                        📅 Change Date
+                    <button type="button" onclick="openRescheduleNtoModal('${escapeText(candId)}', '${escapeText(item.name || '')}', '${escapeText(item.email || '')}', '${escapeText(ntoDateVal || '')}')" style="background: var(--dark-blue); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 15px; font-family: 'Subhead2', sans-serif; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;" title="Change orientation class date for this trainee">
+                        <img src="image/custom-emojis/points_calendar.png" style="width: 16px; height: 16px; object-fit: contain;"> Change Date
                     </button>
                 `;
 
@@ -10609,8 +10609,8 @@
             <div class="brand-modal-brand-stripe"></div>
             <div class="brand-modal-content" style="padding: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--crust-med); padding-bottom: 10px; margin-bottom: 16px;">
-                    <h3 style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 22px; text-transform: uppercase;">
-                        📅 Reschedule NTO Class
+                    <h3 style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 22px; text-transform: uppercase; display: flex; align-items: center; gap: 8px;">
+                        <img src="image/custom-emojis/points_calendar.png" style="width: 24px; height: 24px; object-fit: contain;"> Reschedule NTO Class
                     </h3>
                     <button type="button" onclick="closeRescheduleNtoModal()" style="background: var(--brand-grey); font-size: 15px; padding: 6px 14px; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Subhead2';">
                         ✕ Close
@@ -10721,8 +10721,8 @@
                 <div
                     style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--crust-med); padding-bottom: 10px; margin-bottom: 16px;">
                     <h3
-                        style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 22px; text-transform: uppercase;">
-                        📅 NTO Class Calendar Manager</h3>
+                        style="margin: 0; font-family: 'ExtraBold', sans-serif; color: var(--dark-blue); font-size: 22px; text-transform: uppercase; display: flex; align-items: center; gap: 8px;">
+                        <img src="image/custom-emojis/points_calendar.png" style="width: 24px; height: 24px; object-fit: contain;"> NTO Class Calendar Manager</h3>
                     <button type="button" onclick="closeClassCalendarModal()"
                         style="background: var(--brand-grey); font-size: 15px; padding: 6px 14px; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Subhead2';">✕
                         Close</button>
