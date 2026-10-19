@@ -12144,6 +12144,17 @@
         let currentRegType = 'store';
         let activeCredentialRoleFilter = 'ALL';
 
+        function isCredentialPending(item) {
+            if (!item) return false;
+            const isActive = (item.is_active !== 0 && item.is_active !== '0');
+            const notesLower = String(item.notes || '').toLowerCase();
+            const isExplicitlyRevoked = !isActive && (notesLower.includes('revoked') || notesLower.includes('terminated') || notesLower.includes('duplicate'));
+            const isApproved = notesLower.includes('approved') && !notesLower.includes('pending');
+            const hasPendingReset = pendingResetsList.some(r => (r.trainer_id && r.trainer_id.toLowerCase() === (item.trainer_id || '').toLowerCase()) || (item.email && r.email && r.email.toLowerCase() === (item.email || '').toLowerCase()));
+            const isUnapprovedAboveStore = notesLower.includes('pending') && (!item.is_do && !item.is_exec && !item.is_admin);
+            return !isExplicitlyRevoked && !isApproved && (notesLower.includes('pending') || notesLower.includes('awaiting') || hasPendingReset || isUnapprovedAboveStore);
+        }
+
         function renderCredentialsSidebar() {
             const listContainer = document.getElementById('candidateList');
             if (!listContainer) return;
@@ -12170,12 +12181,7 @@
             const gms = credentialsList.filter(c => c.is_gm || (c.role && c.role.toLowerCase().includes('general manager'))).length;
             const ams = credentialsList.filter(c => c.role && c.role.toLowerCase().includes('assistant')).length;
             const trainers = credentialsList.filter(c => c.is_wow_way_trainer || c.is_mit_trainer || (c.role && c.role.toLowerCase().includes('trainer'))).length;
-            const pending = credentialsList.filter(c => {
-                const notes = (c.notes || '').toLowerCase();
-                const isActive = (c.is_active !== 0 && c.is_active !== '0');
-                const isExplicitlyRevoked = !isActive && (notes.includes('revoked') || notes.includes('terminated'));
-                return !isExplicitlyRevoked && (!isActive || notes.includes('pending') || notes.includes('awaiting'));
-            }).length;
+            const pending = credentialsList.filter(isCredentialPending).length;
 
             const roles = [
                 { id: 'ALL', label: 'All Personnel', sub: 'All rostered team members & leadership', count: total, color: 'var(--brand-blue)' },
@@ -12472,12 +12478,7 @@
                 const itemStore = String(item.store_num || '').replace(/\D/g, '').trim();
                 const itemRole = String(item.role || '');
                 const isActive = (item.is_active !== 0 && item.is_active !== '0');
-                const notesLower = String(item.notes || '').toLowerCase();
-                const isExplicitlyRevoked = !isActive && (notesLower.includes('revoked') || notesLower.includes('terminated') || notesLower.includes('duplicate'));
-                const isApproved = notesLower.includes('approved') && !notesLower.includes('pending');
-                const hasPendingReset = pendingResetsList.some(r => r.trainer_id.toLowerCase() === item.trainer_id.toLowerCase() || (item.email && r.email && r.email.toLowerCase() === item.email.toLowerCase()));
-                const isUnapprovedAboveStore = notesLower.includes('pending') && (!item.is_do && !item.is_exec && !item.is_admin);
-                const isPending = !isExplicitlyRevoked && !isApproved && (!isActive || notesLower.includes('pending') || notesLower.includes('awaiting') || hasPendingReset || isUnapprovedAboveStore);
+                const isPending = isCredentialPending(item);
 
                 if (statusFilter === 'active' && !isActive) return false;
                 if (statusFilter === 'inactive' && isActive) return false;
