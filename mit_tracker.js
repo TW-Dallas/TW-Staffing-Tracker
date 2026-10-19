@@ -271,13 +271,13 @@ async function renderMitClassView(classId = null) {
     if (heroStatus) {
         const dateText = dateInfo.formattedDate || cls.classDate || '';
         if (dateInfo.isToday) {
-            heroStatus.innerText = dateText ? `${dateText} · Today` : "Today";
+            heroStatus.innerText = dateText ? `${dateText} · TODAY` : "TODAY";
             heroStatus.style.background = "var(--dark-blue, #005c91)";
         } else if (dateInfo.isPast) {
-            heroStatus.innerText = dateText ? `${dateText} · Past` : "Past";
+            heroStatus.innerText = dateText || "PAST";
             heroStatus.style.background = "var(--crust-dark, #c0a588)";
         } else {
-            heroStatus.innerText = dateText ? `${dateText} · Upcoming` : "Upcoming";
+            heroStatus.innerText = dateText || "UPCOMING";
             heroStatus.style.background = "var(--brand-blue, #0077bd)";
         }
     }
