@@ -11885,6 +11885,36 @@
                 </div>
 
                 <div>
+                    <label style="font-family: 'Subhead2'; font-size: 12.5px; color: var(--crust-burnt); display: block; margin-bottom: 5px;">Authorized Access Scopes:</label>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: white; padding: 10px 12px; border: 1.5px solid var(--crust-dark); border-radius: 8px;">
+                        <label style="display: flex; align-items: center; gap: 6px; font-family: 'Subhead1', sans-serif; font-size: 12px; color: var(--crust-burnt); cursor: pointer;">
+                            <input type="checkbox" id="editCred_is_wow_way_trainer" style="accent-color: var(--crust-burnt); width: 16px; height: 16px;">
+                            <span>WW (Training)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; font-family: 'Subhead1', sans-serif; font-size: 12px; color: var(--crust-burnt); cursor: pointer;">
+                            <input type="checkbox" id="editCred_is_mit_trainer" style="accent-color: var(--crust-burnt); width: 16px; height: 16px;">
+                            <span>MIT (Classes)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; font-family: 'Subhead1', sans-serif; font-size: 12px; color: var(--med-blue); cursor: pointer;">
+                            <input type="checkbox" id="editCred_is_gm" style="accent-color: var(--med-blue); width: 16px; height: 16px;">
+                            <span>GM (Tracker)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; font-family: 'Subhead1', sans-serif; font-size: 12px; color: var(--med-blue); cursor: pointer;">
+                            <input type="checkbox" id="editCred_is_do" style="accent-color: var(--med-blue); width: 16px; height: 16px;">
+                            <span>DO (Oversight)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; font-family: 'Subhead1', sans-serif; font-size: 12px; color: var(--dark-blue); cursor: pointer;">
+                            <input type="checkbox" id="editCred_is_admin" style="accent-color: var(--dark-blue); width: 16px; height: 16px;">
+                            <span>ADM (Admin)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; font-family: 'Subhead1', sans-serif; font-size: 12px; color: var(--dark-blue); cursor: pointer;">
+                            <input type="checkbox" id="editCred_is_exec" style="accent-color: var(--dark-blue); width: 16px; height: 16px;">
+                            <span>EX (Executive)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
                     <label style="font-family: 'Subhead2'; font-size: 12.5px; color: var(--crust-burnt); display: block; margin-bottom: 3px;">Status:</label>
                     <select id="editCredStatus" style="width: 100%; padding: 7px 8px; font-size: 14px; border: 1.5px solid var(--crust-dark); border-radius: 6px; background: white; font-family: 'Condensed', sans-serif;">
                         <option value="1">Active</option>
@@ -12100,8 +12130,8 @@
         let openCredentialId = null;
         let pendingRevokeTrainerId = null;
 
-        function renderMiniBadge(code, isGranted, tier) {
-            let style = 'width: 40px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; font-family: \'Subhead1\', sans-serif; font-size: 11.5px; text-transform: uppercase; box-sizing: border-box; transition: all 0.15s ease;';
+        function renderMiniBadge(code, isGranted, tier, trainerId, field) {
+            let style = 'width: 40px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; font-family: \'Subhead1\', sans-serif; font-size: 11.5px; text-transform: uppercase; box-sizing: border-box; transition: all 0.15s ease; cursor: pointer; user-select: none;';
             if (isGranted) {
                 if (tier === 1) {
                     // Tier 1: Training (WW, MIT) - Solid high-contrast Crust Burned pill with light border
@@ -12117,7 +12147,11 @@
                 // Not granted (any tier) - Faint dashed outline, muted opacity, clearly deactivated
                 style += ' background: transparent; border: 1.5px dashed var(--crust-dark); color: #b59b80; opacity: 0.6;';
             }
-            return `<span style="${style}" title="${code}: ${isGranted ? 'Authorized / Granted' : 'Not Granted'}">${code}</span>`;
+            const actionText = isGranted ? `Revoke ${code}` : `Grant ${code}`;
+            const clickHandler = (trainerId && field)
+                ? `onclick="event.stopPropagation(); toggleCredentialPermission('${escapeHtml(trainerId)}', '${field}', ${isGranted ? 1 : 0})"`
+                : `onclick="event.stopPropagation()"`;
+            return `<button type="button" ${clickHandler} style="${style}" title="${code}: ${isGranted ? 'Authorized / Granted' : 'Not Granted'} (${actionText})" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">${code}</button>`;
         }
 
         function toggleCredentialAccordion(trainerId) {
@@ -12336,7 +12370,7 @@
                                         ${escapeHtml(t.role || 'TRAINER')}
                                     </span>
                                     ${!isActive ? '<span style="background: var(--dark-red); color: white; font-family: \'Subhead2\'; font-size: 10px; padding: 2px 6px; border-radius: 4px; flex-shrink: 0;">REVOKED</span>' : ''}
-                                    ${isPendingApproval ? '<span style="background: var(--brand-red); color: white; font-family: \'Subhead2\'; font-size: 10px; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; letter-spacing: 0.5px;">PENDING</span>' : ''}
+                                    ${isPendingApproval ? `<span style="background: var(--brand-red); color: white; font-family: 'Subhead2'; font-size: 10px; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; letter-spacing: 0.5px;" title="Pending Access Authorization for ${escapeHtml(t.role || 'Personnel')}">PENDING: ${escapeHtml(t.role || 'ACCESS')}</span>` : ''}
                                     ${pendingReset ? '<span style="background: var(--brand-red); color: white; font-family: \'Subhead2\'; font-size: 10px; padding: 2px 6px; border-radius: 4px; flex-shrink: 0;">RESET</span>' : ''}
                                 </div>
                                 <div style="font-family: 'Condensed', sans-serif; font-size: 13.5px; color: var(--crust-deep); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
@@ -12347,20 +12381,20 @@
                             <!-- Col 2: 6 Mini Badges with Tier Gaps -->
                             <div style="display: flex; align-items: center; gap: 4px; justify-content: flex-end; flex-shrink: 0;" onclick="event.stopPropagation()">
                                 <!-- Tier 1: Training (WW, MIT) -->
-                                ${renderMiniBadge('WW', !!t.is_wow_way_trainer, 1)}
-                                ${renderMiniBadge('MIT', !!t.is_mit_trainer, 1)}
+                                ${renderMiniBadge('WW', !!t.is_wow_way_trainer, 1, t.trainer_id, 'is_wow_way_trainer')}
+                                ${renderMiniBadge('MIT', !!t.is_mit_trainer, 1, t.trainer_id, 'is_mit_trainer')}
 
                                 <span style="display: inline-block; width: 8px;"></span>
 
                                 <!-- Tier 2: Oversight (GM, DO) -->
-                                ${renderMiniBadge('GM', !!t.is_gm, 2)}
-                                ${renderMiniBadge('DO', !!t.is_do, 2)}
+                                ${renderMiniBadge('GM', !!t.is_gm, 2, t.trainer_id, 'is_gm')}
+                                ${renderMiniBadge('DO', !!t.is_do, 2, t.trainer_id, 'is_do')}
 
                                 <span style="display: inline-block; width: 8px;"></span>
 
                                 <!-- Tier 3: System (ADM, EX) -->
-                                ${renderMiniBadge('ADM', !!t.is_admin, 3)}
-                                ${renderMiniBadge('EX', !!t.is_exec, 3)}
+                                ${renderMiniBadge('ADM', !!t.is_admin, 3, t.trainer_id, 'is_admin')}
+                                ${renderMiniBadge('EX', !!t.is_exec, 3, t.trainer_id, 'is_exec')}
                             </div>
 
                             <!-- Col 3: Rotating Chevron -->
@@ -12407,6 +12441,15 @@
                                         <div style="color: var(--crust-deep); font-size: 13px; font-style: italic;">Loading telemetry from Cloudflare D1...</div>
                                     </div>
                                 </div>
+
+                                ${isPendingApproval ? `
+                                    <!-- Pending Reason Alert Banner -->
+                                    <div style="background: #fff8f8; border: 1.5px solid var(--brand-red); border-radius: 10px; padding: 10px 14px; font-family: 'Condensed', sans-serif; font-size: 13.5px; color: var(--dark-red); display: flex; align-items: center; justify-content: space-between; gap: 12px; box-sizing: border-box;">
+                                        <div>
+                                            <strong>⚠️ Access Approval Pending:</strong> Assigned as <strong>${escapeHtml(t.role || 'Leadership')}</strong> without authorized portal scopes. Click any level badge above to toggle permissions, or click <strong>Authorize Access</strong> below.
+                                        </div>
+                                    </div>
+                                ` : ''}
 
                                 <!-- 3. Action Bar -->
                                 <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
@@ -12683,6 +12726,18 @@
 
             const newVal = currentVal ? 0 : 1;
             target[field] = newVal;
+
+            // If granting a leadership scope, auto-clear pending note locally
+            if (newVal === 1 && (field === 'is_exec' || field === 'is_do' || field === 'is_admin' || field === 'is_gm')) {
+                if (target.notes) {
+                    target.notes = target.notes.replace(/ - Pending GM Access Approval/gi, '')
+                                               .replace(/ - Pending Approval/gi, '')
+                                               .replace(/\[Pending GM Access Approval\]/gi, '')
+                                               .replace(/Pending Approval/gi, '')
+                                               .trim();
+                }
+            }
+
             renderCredentialsView();
 
             try {
@@ -12699,6 +12754,8 @@
                 if (!data || !data.success) {
                     throw new Error(data.error || 'Failed to update access permission.');
                 }
+                // Sync badge counters and fresh state
+                fetchCredentialsList();
             } catch (err) {
                 target[field] = currentVal;
                 renderCredentialsView();
@@ -13087,6 +13144,38 @@
             document.getElementById('editCredPhone').value = target.phone || '';
             document.getElementById('editCredStatus').value = (target.is_active !== 0 && target.is_active !== '0') ? '1' : '0';
             document.getElementById('editCredNotes').value = target.notes || '';
+
+            // Populate Access Scopes checkboxes
+            const cbWw = document.getElementById('editCred_is_wow_way_trainer');
+            const cbMit = document.getElementById('editCred_is_mit_trainer');
+            const cbGm = document.getElementById('editCred_is_gm');
+            const cbDo = document.getElementById('editCred_is_do');
+            const cbAdm = document.getElementById('editCred_is_admin');
+            const cbEx = document.getElementById('editCred_is_exec');
+
+            if (cbWw) cbWw.checked = !!target.is_wow_way_trainer;
+            if (cbMit) cbMit.checked = !!target.is_mit_trainer;
+            if (cbGm) cbGm.checked = !!target.is_gm;
+            if (cbDo) cbDo.checked = !!target.is_do;
+            if (cbAdm) cbAdm.checked = !!target.is_admin;
+            if (cbEx) cbEx.checked = !!target.is_exec;
+
+            // Auto-suggest scopes when role selection changes
+            if (roleSelect) {
+                roleSelect.onchange = function () {
+                    const val = (this.value || '').toLowerCase();
+                    if (val.includes('exec')) {
+                        if (cbEx) cbEx.checked = true;
+                        if (cbDo) cbDo.checked = true;
+                        if (cbGm) cbGm.checked = true;
+                    } else if (val.includes('director') || val.includes('do') || val.includes('super')) {
+                        if (cbDo) cbDo.checked = true;
+                        if (cbGm) cbGm.checked = true;
+                    } else if (val.includes('general manager') || val === 'gm') {
+                        if (cbGm) cbGm.checked = true;
+                    }
+                };
+            }
         }
 
         function closeEditCredentialModal() {
@@ -13109,6 +13198,13 @@
             const phone = (document.getElementById('editCredPhone')?.value || '').trim();
             const status = parseInt(document.getElementById('editCredStatus')?.value || '1', 10);
             const notes = (document.getElementById('editCredNotes')?.value || '').trim();
+
+            const isWw = document.getElementById('editCred_is_wow_way_trainer')?.checked ? 1 : 0;
+            const isMit = document.getElementById('editCred_is_mit_trainer')?.checked ? 1 : 0;
+            const isGm = document.getElementById('editCred_is_gm')?.checked ? 1 : 0;
+            const isDo = document.getElementById('editCred_is_do')?.checked ? 1 : 0;
+            const isAdmin = document.getElementById('editCred_is_admin')?.checked ? 1 : 0;
+            const isExec = document.getElementById('editCred_is_exec')?.checked ? 1 : 0;
 
             if (!trainerId) {
                 if (errEl) {
@@ -13146,6 +13242,12 @@
                         trainer_pin: pin,
                         email: email,
                         phone: phone,
+                        is_wow_way_trainer: isWw,
+                        is_mit_trainer: isMit,
+                        is_gm: isGm,
+                        is_do: isDo,
+                        is_admin: isAdmin,
+                        is_exec: isExec,
                         is_active: status,
                         notes: notes
                     })
@@ -13176,7 +13278,7 @@
         setTimeout(checkPendingCredentialsBadge, 2500);
     </script>
     <!-- MIT Leadership Class Tracker Module -->
-    <script src="mit_tracker.js?v=20261019_1130"></script>
+    <script src="mit_tracker.js?v=20261019_1205"></script>
 </body>
 
 </html>

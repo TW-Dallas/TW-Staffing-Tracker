@@ -4571,6 +4571,15 @@ export async function onRequestPost(context) {
                 }
             }
 
+            // If leadership permissions are being granted, also auto-clear any "Pending" status notes and ensure active
+            const isGrantingScope = (payload.is_exec == 1 || payload.is_do == 1 || payload.is_admin == 1 || payload.is_gm == 1);
+            if (isGrantingScope && payload.notes === undefined) {
+                updates.push("notes = TRIM(REPLACE(REPLACE(REPLACE(REPLACE(COALESCE(notes, ''), ' - Pending GM Access Approval', ''), ' - Pending Approval', ''), 'Pending Approval', ''), '[Pending GM Access Approval]', ''))");
+                if (payload.is_active === undefined) {
+                    updates.push("is_active = 1");
+                }
+            }
+
             if (updates.length === 0) {
                 return new Response(JSON.stringify({ success: false, error: "No fields to update" }), { status: 400, headers: corsHeaders() });
             }
@@ -4717,31 +4726,35 @@ export async function onRequestPost(context) {
             }
 
             if (decision === "approve") {
-                const isDoOrAboveStore = !!trainer.is_do || 
+                const isExecRole = trainer.role === 'Executive' || trainer.store_num === 'Exec' || !!trainer.is_exec;
+                const isDoOrAboveStore = isExecRole ||
+                                         !!trainer.is_do || 
                                          trainer.role === 'Supervisor' || 
                                          trainer.role === 'Director of Operations' || 
                                          trainer.role === 'Director of Ops' || 
                                          trainer.role === 'Training Director' || 
                                          trainer.role === 'Market Leader' || 
-                                         trainer.role === 'Executive' || 
                                          trainer.store_num === 'Above-Store' || 
-                                         trainer.store_num === 'DO' || 
-                                         trainer.store_num === 'Exec';
+                                         trainer.store_num === 'DO';
 
-                const newRole = isDoOrAboveStore 
-                    ? (trainer.role === 'General Manager' ? 'Director of Ops' : (trainer.role || 'Director of Ops')) 
-                    : 'General Manager';
+                let newRole = trainer.role;
+                if (!newRole || newRole === 'General Manager' || newRole === 'Trainer') {
+                    if (isExecRole) newRole = 'Executive';
+                    else if (isDoOrAboveStore) newRole = 'Director of Ops';
+                    else newRole = 'General Manager';
+                }
 
                 await db.prepare(`
                     UPDATE trainer_credentials 
                     SET is_gm = 1,
                         is_do = ?,
+                        is_exec = ?,
                         is_active = 1,
                         role = ?,
                         notes = TRIM(REPLACE(REPLACE(REPLACE(REPLACE(COALESCE(notes, ''), ' - Pending GM Access Approval', ''), ' - Pending Approval', ''), 'Pending Approval', ''), '[Pending GM Access Approval]', '')),
                         updated_at = CURRENT_TIMESTAMP
                     WHERE LOWER(trainer_id) = LOWER(?)
-                `).bind(isDoOrAboveStore ? 1 : 0, newRole, trainer.trainer_id).run();
+                `).bind(isDoOrAboveStore ? 1 : 0, isExecRole ? 1 : 0, newRole, trainer.trainer_id).run();
 
                 // Dispatch confirmation notice to the trainer
                 let candidateEmail = String(trainer.email || (trainer.trainer_id && trainer.trainer_id.includes('@') ? trainer.trainer_id : '')).trim();
