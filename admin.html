@@ -153,7 +153,7 @@
 
                 <!-- Quick Search Input -->
                 <div class="search-container">
-                    <input type="text" id="searchControl" placeholder="Search candidates..." oninput="renderList()">
+                    <input type="text" id="searchControl" placeholder="Search candidates..." oninput="handleGlobalSearch()">
                 </div>
 
                 <!-- MIT Class Sidebar Filters -->
@@ -3832,6 +3832,25 @@
             }
         }
 
+        function handleGlobalSearch() {
+            if (currentView === 'credentials') {
+                const credSearch = document.getElementById('credSearchInput');
+                if (credSearch) credSearch.value = document.getElementById('searchControl')?.value || '';
+                renderCredentialsView();
+            } else if (currentView === 'nto') {
+                renderNtoSidebar();
+                renderNtoClassView();
+            } else if (currentView === 'mit' || currentView === 'mitScheduler') {
+                if (typeof renderMitSidebar === 'function') renderMitSidebar();
+                if (typeof renderMitClassView === 'function') renderMitClassView();
+            } else if (currentView === 'contacts') {
+                renderContactsSidebar();
+                renderContactsView();
+            } else {
+                renderList();
+            }
+        }
+
         function switchView(view) {
             const btnOnb = document.getElementById('toggleOnb');
             const btnInt = document.getElementById('toggleInt');
@@ -3882,6 +3901,7 @@
             document.getElementById('searchControl').value = '';
             const searchInput = document.getElementById('searchControl');
             if (searchInput) {
+                searchInput.oninput = handleGlobalSearch;
                 if (view === 'onboarding') searchInput.placeholder = "Search candidates...";
                 else if (view === 'interviews') searchInput.placeholder = "Search interviews...";
                 else if (view === 'staffing') searchInput.placeholder = "Search employee files...";
@@ -4138,7 +4158,7 @@
                 const searchControl = document.getElementById('searchControl');
                 if (searchControl) {
                     searchControl.placeholder = 'Search candidate, phone, email...';
-                    searchControl.oninput = null;
+                    searchControl.oninput = handleGlobalSearch;
                 }
 
                 btnOnb.style.background = 'var(--dark-blue)';
@@ -12260,11 +12280,7 @@
             const searchControl = document.getElementById('searchControl');
             if (searchControl) {
                 searchControl.placeholder = 'Search name, Pulse ID, email...';
-                searchControl.oninput = function () {
-                    const credSearch = document.getElementById('credSearchInput');
-                    if (credSearch) credSearch.value = this.value;
-                    renderCredentialsView();
-                };
+                searchControl.oninput = handleGlobalSearch;
             }
 
             const total = credentialsList.length;
